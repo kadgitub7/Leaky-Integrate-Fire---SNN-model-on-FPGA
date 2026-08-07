@@ -6,6 +6,5 @@ This .md file is for people that want to understand what process as well as stug
 ## 1. Learning stage
 Read through the following post (https://medium.com/@himasharandil/from-neurons-to-mathematics-the-leaky-integrate-and-fire-model-in-computational-neuroscience-594dfac6e8b4) to learn more about Leaky Integrate and Fire model and to solve the differential equations revolving around how to simulate it.
 
-![LIT_Learning_1 Image](image_Assets/LIT_Learning_1.jpg)
-![LIT_Learning_2 Image](image_Assets/LIT_Learning_2.jpg)
-![LIT_Learning_3 Image](image_Assets/LIT_Learning_3.jpg)
+<img src="image_Assets/LIT_Learning_1.jpg" width="33%"> <img src="image_Assets/LIT_Learning_2.jpg" width="33%"><img src="image_Assets/LIT_Learning_3.jpg" width="33%">
+
