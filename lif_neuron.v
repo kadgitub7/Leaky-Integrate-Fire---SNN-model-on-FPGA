@@ -47,6 +47,7 @@ module lif_neuron (
                     if (Current_Potential >= THRESHOLD) begin
                         next_state <= SPIKE;
                     end else begin
+                        spike_out_signal <= 1'b0;
                         next_state <= INTEGRATE;
                     end
                 end
