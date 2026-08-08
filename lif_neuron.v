@@ -18,7 +18,7 @@ module lif_neuron (
 
     localparam THRESHOLD = 8'd100;
 
-    // alpha = e^(-t/τ) where τ is the time constant (R * C) of the neuron
+    // alpha is the number of right shift elements and is meant to simulate the decay factor in the differential equation (e^(-t/τ)) where τ is the time constant (R * C) of the neuron
 
     reg [7:0] Current_Potential = 8'd0;
     reg spike_out_signal;
@@ -31,44 +31,48 @@ module lif_neuron (
                     RESET = 3'b011,
                     REFRACTORY = 3'b100;
 
-    reg [2:0] state, next_state;
+    reg [2:0] state;
     
     assign spike_out = spike_out_signal;
+    
+    wire [7:0] new_potential = (Current_Potential - (Current_Potential >> alpha)) + (spike_in_1 * spike_1_weight) + (spike_in_2 * spike_2_weight) + (spike_in_3 * spike_3_weight);
 
     always @(posedge clk or posedge reset) begin
-        state <= next_state;
         if (reset) begin
             Current_Potential <= 8'd0;
             state <= INTEGRATE;
+            spike_out_signal <= 1'b0;
+            refactory_counter <= 8'd0;
         end else begin
             case(state)
                 INTEGRATE: begin
-                    Current_Potential <= (Current_Potential - (Current_Potential >> alpha)) + (spike_in_1 * spike_1_weight) + (spike_in_2 * spike_2_weight) + (spike_in_3 * spike_3_weight);
-                    if (Current_Potential >= THRESHOLD) begin
-                        next_state <= SPIKE;
+                    Current_Potential <= new_potential;
+                    if (new_potential >= THRESHOLD) begin
+                        state <= SPIKE;
                     end else begin
                         spike_out_signal <= 1'b0;
-                        next_state <= INTEGRATE;
+                        state <= INTEGRATE;
                     end
                 end
 
                 SPIKE: begin
                     spike_out_signal <= 1'b1;
-                    next_state <= RESET;
+                    state <= RESET;
                 end
 
                 RESET: begin
                     spike_out_signal <= 1'b0;
-                    next_state <= REFRACTORY;
+                    Current_Potential <= 8'd0;
+                    state <= REFRACTORY;
                 end
 
                 REFRACTORY: begin
                     if (refactory_counter < REFRACTORY_PERIOD) begin
                         refactory_counter <= refactory_counter + 1;
-                        next_state <= REFRACTORY;
+                        state <= REFRACTORY;
                     end else begin
                         refactory_counter <= 8'd0;
-                        next_state <= INTEGRATE;
+                        state <= INTEGRATE;
                     end
                 end
             endcase
