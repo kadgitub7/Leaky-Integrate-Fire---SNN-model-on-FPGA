@@ -6,24 +6,14 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import snntorch.spikeplot as splt
 from IPython.display import HTML
-import time
-import random
-
-def plot_mem(mem, title=False):
-  if title:
-    plt.title(title)
-  plt.plot(mem)
-  plt.xlabel("Time step")
-  plt.ylabel("Membrane Potential")
-  plt.xlim([0, 50])
-  plt.ylim([0, 1])
-  plt.show()
+import numpy as np
 
 # training parameters
 batch_size = 128 #number of sample per chunk
 num_class = 10 # output classes (0-9)
 dtype = torch.float # data type for the tensors
 data_path='/tmp/data/mnist'
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
 
 # Add transformation to dataset, resize to 28x28, grayscale, convert to tensors, and normalize RGB to 0-1
 transform = transforms.Compose([
@@ -31,77 +21,83 @@ transform = transforms.Compose([
             transforms.Grayscale(),
             transforms.ToTensor(),
             transforms.Normalize((0,), (1,))])
-'''
-train_dataset = datasets.MNIST(root=data_path, train=True, download=True, transform=transform)
 
-# subset of the dataset for initial testing
-subset_size = 10 # dividing factor for the dataset size, e.g. 10 means 1/10th of the dataset will be used
-train_dataset = utils.data_subset(train_dataset, subset_size)
-print("training size =", len(train_dataset))
-train_dataset_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True) # DataLoader serves the whole data into chunks of batch_size, and shuffles the data for each epoch
+class LeakySurrogate(torch.nn.Module):
+    def __init__(self, beta, threshold = 1.0):
+      super(LeakySurrogate, self).__init__()
+      # Initializing parameters, mostly the same
+      self.beta = beta
+      self.threshold = threshold
+      self.spike_gradient = self.ATan.apply
 
-# Rate Encoding Example
-raw_vector = torch.ones(100)*0.5 # vector of 10 elements each with value 0.5
-rate_encoded_vector = torch.bernoulli(raw_vector) # bernoulli takes the values in each element of the vector and that is the probability. It then uses that probability to generate 1 or 0
-print('raw_vector =', raw_vector)
-print('rate_encoded_vector =', rate_encoded_vector)
-print(f'spiking rate: {rate_encoded_vector.sum()/len(rate_encoded_vector)*100:.2f} % of the time')
+    def forward(self, input_, mem):
+      spk = self.spike_gradient((mem-self.threshold))
+      reset = (self.beta * spk * self.threshold).detach()
+      mem = self.beta * mem + input_ - reset
+      return spk, mem
 
-# Rate Encoding from snntorch
-data = iter(train_dataset_loader)
-data_it, target_it = next(data)
+    @staticmethod
+    class ATan(torch.autograd.Function):
+       @staticmethod
+       def forward(ctx, mem):
+          spk = (mem > 0).float()
+          ctx.save_for_backward(spk)
+          return spk
 
-spike_gen = spikegen.rate(data_it, num_steps=100)
-print(spike_gen.size())
+       @staticmethod
+       def backward(ctx, grad_output):
+          (mem,) = ctx.saved_tensors
+          grad = 1/(1+  (np.pi * mem).pow_(2)) * grad_output
+          return grad
+   
+class Net(torch.nn.Module):
+    def __init__(self):
+       super().__init__()
+       self.fc1 = torch.nn.Linear(input_layer, hidden_layer)
+       self.lif1 = snn.Leaky(beta=beta)
+       self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
+       self.lif2 = snn.Leaky(beta=beta)
 
-# Leaky Integrate and Fire Neuron snntorch
-print('Leaky Integrate and Fire')
-time_step = 1e-3
-R = 5
-C = 1e-3
+    def forward(self, x):
+       mem1 = self.lif1.init_leaky()
+       mem2 = self.lif2.init_leaky()
 
-lif1 = snn.Lapicque(R=R, C=C, time_step=time_step)
+       mem2_rec = []
+       spk2_rec = []
+       for step in range(num_steps):
+          cur1 = self.fc1(x) # post-synaptic current <-- spk_in x weight
+          spk1, mem1 = self.lif1(cur1, mem1) # mem[t+1] <--post-syn current + decayed membrane
+          cur2 = self.fc2(spk1)
+          spk2, mem2 = self.lif2(cur2, mem2)
 
-mem = torch.ones(1) * 0.9  # U=0.9 at t=0
-cur_in = torch.zeros(100, 1)  # I=0 for all t
-spk_out = torch.zeros(1)  # initialize output spikes
+          mem2_rec.append(mem2)
+          spk2_rec.append(spk2)
 
-mem_record = [mem]
+       return torch.stack(spk2_rec, dim=0), torch.stack(mem2_rec, dim=0)
 
-for step in range(100):
-  spk_out, mem = lif1(cur_in[step], mem)
+def print_batch_accuracy(data, targets, train=False):
+    output, _ = net(data.view(data.size(0), -1))
+    _, idx = output.sum(dim=0).max(1)
+    acc = np.mean((targets == idx).detach().cpu().numpy())
 
-  # Store recordings of membrane potential
-  mem_record.append(mem)
+    if train:
+        print(f"Train set accuracy for a single minibatch: {acc*100:.2f}%")
+    else:
+        print(f"Test set accuracy for a single minibatch: {acc*100:.2f}%")
 
-# convert the list of tensors into one tensor
-mem_record = torch.stack(mem_record)
+def train_printer():
+    print(f"Epoch {epoch}, Iteration {iter_counter}")
+    print(f"Train Set Loss: {loss_hist[counter]:.2f}")
+    print(f"Test Set Loss: {test_loss_hist[counter]:.2f}")
+    print_batch_accuracy(data, targets, train=True)
+    print_batch_accuracy(test_data, test_targets, train=False)
+    print("\n")
+   
+mnist_train = datasets.MNIST(data_path, train=True, download=True, transform=transform)
+mnist_test = datasets.MNIST(data_path, train=False, download=True, transform=transform)
 
-# pre-defined plotting function
-plot_mem(mem_record, "Lapicque's Neuron Model Without Stimulus")
-
-'''
-
-'''
-### SNN single neuron
-print('snn network')
-
-lif = snn.Leaky(beta=0.9)
-cur_in = torch.ones(1,1)*0.5
-mem = torch.zeros(1,1)
-mem_rec = []
-spk_rec = []
-
-for i in range(10):
-    spk,mem = lif(cur_in, mem)
-    mem_rec.append(mem)
-    spk_rec.append(spk)
-    random_int = random.randint(1,4)
-    time.sleep(random_int)
-
-print(mem_rec)
-print(spk_rec)
-'''
+train_loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True, drop_last=False)
+test_loader = DataLoader(mnist_test, batch_size=batch_size, shuffle=True, drop_last=False)
 
 # network of SNN
 beta = 0.8
@@ -109,36 +105,108 @@ input_layer = 784
 hidden_layer = 1000
 output_layer = 10
 
-fc1 = torch.nn.Linear(input_layer, hidden_layer)
-lif1 = snn.Leaky(beta=beta)
-fc2 = torch.nn.Linear(hidden_layer, output_layer)
-lif2 = snn.Leaky(beta=beta)
+num_steps = 25
 
-mem1 = lif1.init_leaky()
-mem2 = lif2.init_leaky()
-
-# record outputs
-mem2_rec = []
-spk1_rec = []
-spk2_rec = []
-
-spk_in = spikegen.rate_conv(torch.rand(200,784)).unsqueeze(1)
-print(spk_in.size())
-
-for step in range(200):
-    cur1 = fc1(spk_in[step]) # post-synaptic current <-- spk_in x weight
-    spk1, mem1 = lif1(cur1, mem1) # mem[t+1] <--post-syn current + decayed membrane
-    cur2 = fc2(spk1)
-    spk2, mem2 = lif2(cur2, mem2)
-
-    mem2_rec.append(mem2)
-    spk1_rec.append(spk1)
-    spk2_rec.append(spk2)
-
-# convert lists to tensors
-mem2_rec = torch.stack(mem2_rec)
-spk1_rec = torch.stack(spk1_rec)
-spk2_rec = torch.stack(spk2_rec)
+net = Net().to(device)
 
 
+loss = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9,0.999))
 
+data, targets = next(iter(train_loader))
+
+data = data.to(device)
+targets = targets.to(device)
+
+spk_rec, mem_rec = net(data.view(batch_size, -1))
+
+loss_val = torch.zeros((1), dtype=dtype, device=device)
+
+for step in range(num_steps):
+   loss_val += loss(mem_rec[step], targets)
+
+print(f"Training loss: {loss_val.item():.3f}")
+
+num_epochs = 1
+loss_hist = []
+test_loss_hist = []
+counter = 0
+
+# Outer training loop
+for epoch in range(num_epochs):
+    iter_counter = 0
+    train_batch = iter(train_loader)
+
+    # Minibatch training loop
+    for data, targets in train_batch:
+        data = data.to(device)
+        targets = targets.to(device)
+
+        # forward pass
+        net.train()
+        spk_rec, mem_rec = net(data.view(data.size(0), -1))
+
+        # initialize the loss & sum over time
+        loss_val = torch.zeros((1), dtype=dtype, device=device)
+        for step in range(num_steps):
+            loss_val += loss(mem_rec[step], targets)
+
+        # Gradient calculation + weight update
+        optimizer.zero_grad()
+        loss_val.backward()
+        optimizer.step()
+
+        # Store loss history for future plotting
+        loss_hist.append(loss_val.item())
+
+        # Test set
+        with torch.no_grad():
+            net.eval()
+            test_data, test_targets = next(iter(test_loader))
+            test_data = test_data.to(device)
+            test_targets = test_targets.to(device)
+
+            # Test set forward pass
+            test_spk, test_mem = net(test_data.view(test_data.size(0), -1))
+
+            # Test set loss
+            test_loss = torch.zeros((1), dtype=dtype, device=device)
+            for step in range(num_steps):
+                test_loss += loss(test_mem[step], test_targets)
+            test_loss_hist.append(test_loss.item())
+
+            # Print train/test loss/accuracy
+            if counter % 50 == 0:
+                train_printer()
+            counter += 1
+            iter_counter +=1
+
+fig = plt.figure(facecolor="w", figsize=(10, 5))
+plt.plot(loss_hist)
+plt.plot(test_loss_hist)
+plt.title("Loss Curves")
+plt.legend(["Train Loss", "Test Loss"])
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.show()
+
+
+total = 0
+correct = 0
+
+with torch.no_grad():
+  net.eval()
+  for data, targets in test_loader:
+    data = data.to(device)
+    targets = targets.to(device)
+
+    # forward pass
+    test_spk, _ = net(data.view(data.size(0), -1))
+
+    # calculate total accuracy
+    _, predicted = test_spk.sum(dim=0).max(1)
+    total += targets.size(0)
+    correct += (predicted == targets).sum().item()
+
+print(f"Number correct = {correct}/{total}")
+print(f"Percentage correct = {(correct/total * 100):.2f}")
