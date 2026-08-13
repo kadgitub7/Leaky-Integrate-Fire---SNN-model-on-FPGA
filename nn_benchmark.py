@@ -1,7 +1,9 @@
 import math
-import numpy as np
+import numpy
 import matplotlib.pyplot as plt
 import random
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
 
 class Value():
     def __init__(self, data, _children=(), _op = '', label=''):
@@ -110,31 +112,63 @@ class MLP:
         return [p for layer in self.layers for p in layer.parameters()]
 
 
-x = [3.0,4.0,5.0]
-net = MLP(3, [4,4,1])
-net(x)
+transform = transforms.Compose([
+            transforms.Resize((28,28)),
+            transforms.Grayscale(),
+            transforms.ToTensor(),
+            transforms.Normalize((0,), (1,))])
 
-xs = [
-    [2.0, 3.0, -1.0],
-    [3.0, -1.0, 0.5],
-    [0.5, 1.0, 1.0],
-    [1.0, 1.0, -1.0]
-]
-ys = [1.0, -1.0, -1.0, 1.0]
+batch_size = 128
 
-ypred = [net(x) for x in xs]
-print(ypred)
+data_path='/tmp/data/mnist'
 
-epochs = 10
-for i in range(epochs):
-    ypred = [net(x) for x in xs]
-    print(ypred)
+mnist_train = datasets.MNIST(data_path, train=True, download=True, transform=transform)
+mnist_test = datasets.MNIST(data_path, train=False, download=True, transform=transform)
 
-    loss = sum((yp - yg)**2 for yp, yg in zip(ypred, ys))
-    print(f'loss @ step({i}) = {loss}')
+train_loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True, drop_last=False)
+test_loader = DataLoader(mnist_test, batch_size=batch_size, shuffle=True, drop_last=False)
+
+net = MLP(784, [20, 20, 10])
+
+for batch_idx, (images, labels) in enumerate(train_loader):
+    batch_loss = Value(0.0)
+    for i in range(images.size(0)):
+        xs = images[i].numpy().flatten()
+        neuron_inputs = [Value(float(px)) for px in xs]
+        true_class = int(labels[i].item())
+        pred_class = net(neuron_inputs)
+
+        targets = [-1.0] * 10
+        targets[true_class] = 1.0
+
+        loss = sum((yp - yg)**2 for yp, yg in zip(pred_class, targets))
+        batch_loss += loss
+
+    print(f"batch_loss{batch_idx} = {batch_loss.data}")
+
     for p in net.parameters():
         p.grad = 0.0
-    loss.backward()
-
+    batch_loss.backward()
+    
     for p in net.parameters():
         p.data -= 0.01 * p.grad
+
+total = 0
+correct = 0
+
+net.eval()
+for batch_idx, (images, labels) in enumerate(test_loader):
+    for i in range(images.size(0)):
+        xs = images[i].numpy().flatten()
+        neuron_inputs = [Value(float(px)) for px in xs]
+        true_class = int(labels[i].item())
+        pred_class = net(neuron_inputs)
+
+        prediction = pred_class.index(max(pred_class, key=lambda v: v.data))
+
+        if prediction == true_class:
+            correct += 1
+        total += 1
+
+print(f"Number correct = {correct}/{total}")
+print(f"Percentage correct = {(correct/total * 100):.2f}")
