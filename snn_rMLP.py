@@ -1,7 +1,7 @@
 import snntorch as snn
 import torch
 from snntorch import spikegen
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 import numpy as np
 import wfdb
 
@@ -103,8 +103,15 @@ test_numeric_labels = [aami_map[l] for l in test_raw_labels]
 train_dataset = MITBIHDataset(train_beats, train_numeric_labels)
 test_dataset = MITBIHDataset(test_beats, test_numeric_labels)
 
-# Directly create your DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+# Soft oversampling: boost minority classes without fully equalizing
+# power=0.25 means sampling weight ~ 1/count^0.25 (gentle boost)
+# Compared to 1/count (full equalization) this preserves the prior that N is dominant
+train_label_counts = np.bincount(train_numeric_labels, minlength=num_class)
+class_sample_weights = 1.0 / (train_label_counts ** 0.25)
+sample_weights = [class_sample_weights[l] for l in train_numeric_labels]
+sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
+
+train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
 
 # Determine number of leads and classes from our actual patient arrays
@@ -118,36 +125,31 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mp
 class RecurrentNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = torch.nn.Linear(input_layer, hidden_layer_1)
-        self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer_1, learn_beta=True, learn_threshold=True)
-        self.fc2 = torch.nn.Linear(hidden_layer_1, hidden_layer_2)
-        self.rlif2 = snn.RLeaky(beta=beta, linear_features=hidden_layer_2, learn_beta=True, learn_threshold=True)
-        self.fc3 = torch.nn.Linear(hidden_layer_2, output_layer)
-        self.lif3 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
+        self.fc1 = torch.nn.Linear(input_layer, hidden_layer)
+        self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer, learn_beta=True, learn_threshold=True)
+        self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
+        self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
 
     def forward(self, x):
         spk1, mem1 = self.rlif1.init_rleaky()
-        spk2, mem2 = self.rlif2.init_rleaky()
-        mem3 = self.lif3.init_leaky()
+        mem2 = self.lif2.init_leaky()
 
-        mem3_rec = []
-        spk3_rec = []
+        mem2_rec = []
+        spk2_rec = []
 
         for step in range(num_steps):
             cur1 = self.fc1(x[step])
             spk1, mem1 = self.rlif1(cur1, spk1, mem1)
             cur2 = self.fc2(spk1)
-            spk2, mem2 = self.rlif2(cur2, spk2, mem2)
-            cur3 = self.fc3(spk2)
-            spk3, mem3 = self.lif3(cur3, mem3)
+            spk2, mem2 = self.lif2(cur2, mem2)
 
-            mem3_rec.append(mem3)
-            spk3_rec.append(spk3)
+            mem2_rec.append(mem2)
+            spk2_rec.append(spk2)
 
-        return torch.stack(spk3_rec, dim=0), torch.stack(mem3_rec, dim=0)
+        return torch.stack(spk2_rec, dim=0), torch.stack(mem2_rec, dim=0)
 
 def print_batch_accuracy(data, targets, train=False):
-    spike_data = spikegen.rate(data, num_steps = num_steps, gain = 1.0)
+    spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
     # spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
 
     
@@ -171,16 +173,14 @@ def train_printer():
 # Network hyperparameters updated for multi-lead input size
 beta = 0.9
 input_layer = 198 * num_leads
-hidden_layer_1 = 256
-hidden_layer_2 = 128
+hidden_layer = 256
 output_layer = num_class
 
 num_steps = 50          
 
 net = RecurrentNet().to(device)
 
-class_weights = torch.tensor([0.5, 4.0, 2.0, 3.0, 3.0], dtype=torch.float).to(device)
-loss = torch.nn.CrossEntropyLoss(weight=class_weights)
+loss = torch.nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9,0.999))          
 
@@ -200,7 +200,7 @@ for epoch in range(num_epochs):
         data = data.to(device)
         targets = targets.to(device)
 
-        spike_data = spikegen.rate(data, num_steps = num_steps, gain = 1.0)
+        spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
         # spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
 
         net.train()
@@ -229,7 +229,7 @@ for epoch in range(num_epochs):
             test_data = test_data.to(device)
             test_targets = test_targets.to(device)
 
-            test_spike_data = spikegen.rate(test_data, num_steps = num_steps, gain = 1.0)
+            test_spike_data = spikegen.rate(test_data, num_steps = num_steps, gain = 0.7)
             # test_spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
         
             test_spk, test_mem = net(test_spike_data)
@@ -256,7 +256,7 @@ with torch.no_grad():
     data = data.to(device)
     targets = targets.to(device)
 
-    test_spike_data = spikegen.rate(data, num_steps = num_steps, gain = 1.0)
+    test_spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
     # test_spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
 
     test_spk, _ = net(test_spike_data)
