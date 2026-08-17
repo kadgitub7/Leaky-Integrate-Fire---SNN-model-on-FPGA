@@ -1,39 +1,83 @@
 import snntorch as snn
 import torch
-from snntorch import spikegen
 from torch.utils.data import DataLoader, WeightedRandomSampler
 import numpy as np
 import wfdb
 import os
 import copy
 import math
+from scipy.signal import lfilter
+from sklearn.model_selection import train_test_split
+import time
 
 batch_size = 128
 dtype = torch.float
 
-class MITBIHDataset(torch.utils.data.Dataset):
-    def __init__(self, data, labels):
-        num_beats = data.shape[0]
-        flattened_data = data.reshape(num_beats, -1)
-        self.data = torch.tensor(flattened_data, dtype=torch.float32)
-        mins = self.data.min(dim=1, keepdim=True).values
-        maxs = self.data.max(dim=1, keepdim=True).values
-        self.data = (self.data - mins) / (maxs - mins + 1e-8)
-        self.targets = torch.tensor(labels, dtype=torch.long)
+# ================================================================
+# ANALOG FEATURE EXTRACTION (same as snn_rMLP.py, vectorized)
+# ================================================================
 
-    def __len__(self):
-        return len(self.data)
+def rc_lowpass_batch(signals, alpha):
+    b = [alpha]
+    a = [1, -(1 - alpha)]
+    return lfilter(b, a, signals, axis=1)
 
-    def __getitem__(self, idx):
-        return self.data[idx], self.targets[idx]
+def rc_highpass_batch(signals, alpha):
+    return signals - rc_lowpass_batch(signals, alpha)
 
-train_record_names = [
-    '101', '106', '108', '109', '112', '114', '115', '116', '118', '119',
-    '122', '124', '201', '203', '205', '207', '208', '209', '215', '220', '223', '230'
-]
-test_record_names = [
-    '100', '103', '105', '111', '113', '117', '121', '202', '210', '212',
-    '213', '214', '219', '221', '222', '228', '231', '232', '233', '234'
+def compute_analog_features(beats, num_leads):
+    num_beats, length, _ = beats.shape
+    downsample = 8
+    all_features = []
+
+    for lead in range(num_leads):
+        signals = beats[:, :, lead]
+        all_features.append(signals[:, ::downsample])
+
+        fast_hp = rc_highpass_batch(signals, 0.8)
+        all_features.append(fast_hp[:, ::downsample])
+
+        slow_hp = rc_highpass_batch(signals, 0.15)
+        all_features.append(slow_hp[:, ::downsample])
+
+        smooth_fast = rc_lowpass_batch(signals, 0.5)
+        all_features.append(smooth_fast[:, ::downsample])
+
+        smooth_slow = rc_lowpass_batch(signals, 0.08)
+        all_features.append(smooth_slow[:, ::downsample])
+
+        bandpass = smooth_fast - smooth_slow
+        all_features.append(bandpass[:, ::downsample])
+
+        all_features.append(np.abs(fast_hp[:, ::downsample]))
+
+        second_deriv = rc_highpass_batch(rc_highpass_batch(signals, 0.7), 0.7)
+        all_features.append(second_deriv[:, ::downsample])
+
+        abs_signals = np.abs(signals)
+        all_features.append(np.sum(abs_signals[:, 80:120], axis=1, keepdims=True))
+        all_features.append(np.sum(abs_signals[:, 40:80], axis=1, keepdims=True))
+        all_features.append(np.sum(abs_signals[:, 120:170], axis=1, keepdims=True))
+
+        qrs_max = np.max(signals[:, 80:120], axis=1, keepdims=True)
+        qrs_min = np.min(signals[:, 80:120], axis=1, keepdims=True)
+        all_features.append(qrs_max)
+        all_features.append(qrs_min)
+        all_features.append(qrs_max - qrs_min)
+
+    return np.hstack(all_features)
+
+
+# ================================================================
+# Data loading
+# ================================================================
+
+all_record_names = [
+    '100', '101', '103', '105', '106', '108', '109', '111', '112', '113',
+    '114', '115', '116', '117', '118', '119', '121', '122', '124',
+    '200', '201', '202', '203', '205', '207', '208', '209', '210', '212',
+    '213', '214', '215', '219', '220', '221', '222', '223', '228', '230',
+    '231', '232', '233', '234'
 ]
 
 N = ['N', 'L', 'R', 'e', 'j']
@@ -69,46 +113,78 @@ def extract_beats_from_records(rec_list):
             print(f"Skipping {rec_id}: {e}")
     return np.array(beats), labels
 
-print("Extracting Training Patients...")
-train_beats, train_raw_labels = extract_beats_from_records(train_record_names)
-print("Extracting Testing Patients...")
-test_beats, test_raw_labels = extract_beats_from_records(test_record_names)
+t0 = time.time()
+print("Extracting all patients (intra-patient split)...")
+all_beats, all_raw_labels = extract_beats_from_records(all_record_names)
+print(f"  {len(all_beats)} beats ({time.time()-t0:.1f}s)")
+
+num_leads = all_beats.shape[2]
+
+t1 = time.time()
+print("Computing analog features...")
+all_features = compute_analog_features(all_beats, num_leads)
+print(f"  Done ({time.time()-t1:.1f}s)")
+
+num_features = all_features.shape[1]
+print(f"Feature bank: {num_features} features, {num_leads} leads")
 
 num_class = 5
-train_numeric_labels = [aami_map[l] for l in train_raw_labels]
-test_numeric_labels = [aami_map[l] for l in test_raw_labels]
+all_numeric_labels = np.array([aami_map[l] for l in all_raw_labels])
 
-train_dataset = MITBIHDataset(train_beats, train_numeric_labels)
-test_dataset = MITBIHDataset(test_beats, test_numeric_labels)
+train_idx, test_idx = train_test_split(
+    np.arange(len(all_features)), test_size=0.2, random_state=42, stratify=all_numeric_labels
+)
+
+train_features = all_features[train_idx]
+test_features = all_features[test_idx]
+train_numeric_labels = all_numeric_labels[train_idx].tolist()
+test_numeric_labels = all_numeric_labels[test_idx].tolist()
+
+print(f"  Train: {len(train_features)}, Test: {len(test_features)} (80/20 stratified random split)")
+
+train_mean = train_features.mean(axis=0)
+train_std = train_features.std(axis=0)
+train_features = (train_features - train_mean) / (train_std + 1e-8)
+test_features = (test_features - train_mean) / (train_std + 1e-8)
+
+class FeatureDataset(torch.utils.data.Dataset):
+    def __init__(self, features, labels):
+        self.data = torch.tensor(features, dtype=torch.float32)
+        self.targets = torch.tensor(labels, dtype=torch.long)
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):
+        return self.data[idx], self.targets[idx]
+
+train_dataset = FeatureDataset(train_features, train_numeric_labels)
+test_dataset = FeatureDataset(test_features, test_numeric_labels)
 
 train_label_counts = np.bincount(train_numeric_labels, minlength=num_class)
-class_sample_weights = 1.0 / train_label_counts
+class_sample_weights = 1.0 / (train_label_counts ** 0.5)
 sample_weights = [class_sample_weights[l] for l in train_numeric_labels]
 sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
-
-num_leads = train_beats.shape[2]
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+print(f"Device: {device}")
 
 beta = 0.9
-input_layer = 198 * num_leads
 hidden_layer = 256
 output_layer = num_class
-num_steps = 50
-gain = 0.7
+num_steps = 25
 
 
 # ================================================================
-# MODEL 1: Baseline RecurrentNet (same as snn_rMLP.py)
+# MODEL 1: Recurrent SNN (analog crossbar)
 # ================================================================
 
 class RecurrentNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = torch.nn.Linear(input_layer, hidden_layer)
+        self.fc1 = torch.nn.Linear(num_features, hidden_layer)
+        self.drop1 = torch.nn.Dropout(0.3)
         self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer, learn_beta=True, learn_threshold=True)
         self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
         self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
@@ -118,9 +194,9 @@ class RecurrentNet(torch.nn.Module):
         mem2 = self.lif2.init_leaky()
         mem2_rec = []
         spk2_rec = []
+        fc1_out = self.drop1(self.fc1(x))
         for step in range(num_steps):
-            cur1 = self.fc1(x[step])
-            spk1, mem1 = self.rlif1(cur1, spk1, mem1)
+            spk1, mem1 = self.rlif1(fc1_out, spk1, mem1)
             cur2 = self.fc2(spk1)
             spk2, mem2 = self.lif2(cur2, mem2)
             mem2_rec.append(mem2)
@@ -129,21 +205,8 @@ class RecurrentNet(torch.nn.Module):
 
 
 # ================================================================
-# MODEL 2: Brain-Like Network (overproduction + pruning)
+# MODEL 2: Brain-Like Network (all-to-all + pruning)
 # ================================================================
-# Architecture: every neuron can connect to every non-input neuron.
-# This means we have connections:
-#   input  -> hidden  (feedforward)
-#   input  -> output  (skip connection)
-#   hidden -> hidden  (recurrent / lateral)
-#   hidden -> output  (feedforward)
-#   output -> hidden  (feedback)
-#   output -> output  (recurrent / lateral)
-#
-# Each connection has a learnable soft mask (sigmoid of a logit).
-# During training, L1 penalty pressures unused connections toward 0.
-# On a schedule, the weakest connections are hard-pruned (set to 0).
-# This mimics: overproduction -> activity testing -> pruning -> optimization.
 
 class SurrogateSpike(torch.autograd.Function):
     @staticmethod
@@ -164,20 +227,16 @@ spike_fn = SurrogateSpike.apply
 class BrainLikeNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.n_in = input_layer
         self.n_hid = hidden_layer
         self.n_out = output_layer
-        n_sources = self.n_in + self.n_hid + self.n_out   # 657: all neurons can send
-        n_targets = self.n_hid + self.n_out                # 261: hidden + output receive
+        n_spiking = self.n_hid + self.n_out
+        self.fc_in = torch.nn.Linear(num_features, n_spiking)
+        self.drop_in = torch.nn.Dropout(0.3)
 
-        # All-to-all weight matrix with fan-in scaled initialization
-        self.W = torch.nn.Parameter(torch.empty(n_sources, n_targets))
-        torch.nn.init.normal_(self.W, 0, 1.0 / math.sqrt(n_sources))
+        self.W = torch.nn.Parameter(torch.empty(n_spiking, n_spiking))
+        torch.nn.init.normal_(self.W, 0, 1.0 / math.sqrt(n_spiking))
+        self.mask_logits = torch.nn.Parameter(torch.full((n_spiking, n_spiking), 3.0))
 
-        # Soft mask logits: start at +3.0 so sigmoid ~ 0.95 (nearly all connections on)
-        self.mask_logits = torch.nn.Parameter(torch.full((n_sources, n_targets), 3.0))
-
-        # Separate learnable LIF parameters for hidden vs output populations
         self.beta_h = torch.nn.Parameter(torch.tensor(0.9))
         self.beta_o = torch.nn.Parameter(torch.tensor(0.9))
         self.thr_h = torch.nn.Parameter(torch.tensor(1.0))
@@ -187,7 +246,8 @@ class BrainLikeNet(torch.nn.Module):
         return torch.sigmoid(self.mask_logits)
 
     def forward(self, x):
-        batch = x.shape[1]
+        input_current = self.drop_in(self.fc_in(x))
+        batch = x.size(0)
         dev = x.device
 
         mem_h = torch.zeros(batch, self.n_hid, device=dev)
@@ -202,22 +262,15 @@ class BrainLikeNet(torch.nn.Module):
         mem_o_rec = []
 
         for step in range(num_steps):
-            # Concatenate ALL spike sources: input spikes + hidden spikes + output spikes
-            all_spk = torch.cat([x[step], spk_h, spk_o], dim=1)
+            all_spk = torch.cat([spk_h, spk_o], dim=1)
+            recurrent = torch.mm(all_spk, W_eff)
+            cur_h = input_current[:, :self.n_hid] + recurrent[:, :self.n_hid]
+            cur_o = input_current[:, self.n_hid:] + recurrent[:, self.n_hid:]
 
-            # Single matmul: every source -> every target
-            current = torch.mm(all_spk, W_eff)
-
-            # Split current into hidden and output portions
-            cur_h = current[:, :self.n_hid]
-            cur_o = current[:, self.n_hid:]
-
-            # LIF dynamics for hidden neurons
             mem_h = self.beta_h * mem_h + cur_h
             spk_h = spike_fn(mem_h - self.thr_h)
             mem_h = mem_h * (1 - spk_h.detach())
 
-            # LIF dynamics for output neurons
             mem_o = self.beta_o * mem_o + cur_o
             spk_o = spike_fn(mem_o - self.thr_o)
             mem_o = mem_o * (1 - spk_o.detach())
@@ -230,16 +283,12 @@ class BrainLikeNet(torch.nn.Module):
     def connection_report(self):
         mask = self.get_mask().detach().cpu()
         alive = (mask > 0.01)
-
         regions = {
-            'input->hidden':  alive[:self.n_in, :self.n_hid],
-            'input->output':  alive[:self.n_in, self.n_hid:],
-            'hidden->hidden': alive[self.n_in:self.n_in+self.n_hid, :self.n_hid],
-            'hidden->output': alive[self.n_in:self.n_in+self.n_hid, self.n_hid:],
-            'output->hidden': alive[self.n_in+self.n_hid:, :self.n_hid],
-            'output->output': alive[self.n_in+self.n_hid:, self.n_hid:],
+            'hidden->hidden': alive[:self.n_hid, :self.n_hid],
+            'hidden->output': alive[:self.n_hid, self.n_hid:],
+            'output->hidden': alive[self.n_hid:, :self.n_hid],
+            'output->output': alive[self.n_hid:, self.n_hid:],
         }
-
         print("\n  Connection survival after pruning:")
         total_alive = 0
         total_possible = 0
@@ -254,54 +303,63 @@ class BrainLikeNet(torch.nn.Module):
 
 # ---- Training functions ----
 
-def train_baseline(net, num_epochs=30):
+def train_baseline(net, num_epochs=50):
     loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999))
+    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
     for epoch in range(num_epochs):
+        epoch_start = time.time()
         net.train()
+        epoch_loss = 0.0
+        batches = 0
         for data, targets in train_loader:
             data = data.to(device)
             targets = targets.to(device)
-            spike_data = spikegen.rate(data, num_steps=num_steps, gain=gain)
-            spk_rec, mem_rec = net(spike_data)
+            spk_rec, mem_rec = net(data)
             loss_val = torch.zeros(1, dtype=dtype, device=device)
             for step in range(num_steps):
                 loss_val += loss_fn(mem_rec[step], targets)
             optimizer.zero_grad()
             loss_val.backward()
+            torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
             optimizer.step()
-        if (epoch + 1) % 10 == 0:
-            print(f"  Epoch {epoch+1}/{num_epochs} complete")
+            epoch_loss += loss_val.item()
+            batches += 1
+        scheduler.step()
+        if (epoch + 1) % 5 == 0 or epoch == 0:
+            print(f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s")
     return net
 
 
-def train_brain_like(net, num_epochs=40, l1_lambda=1e-5, prune_start=15, prune_every=5, prune_frac=0.2):
+def train_brain_like(net, num_epochs=50, l1_lambda=1e-5, prune_start=20, prune_every=5, prune_frac=0.2):
     loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999))
+    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
     for epoch in range(num_epochs):
+        epoch_start = time.time()
         net.train()
+        epoch_loss = 0.0
+        batches = 0
         for data, targets in train_loader:
             data = data.to(device)
             targets = targets.to(device)
-            spike_data = spikegen.rate(data, num_steps=num_steps, gain=gain)
-            spk_rec, mem_rec = net(spike_data)
-
-            # Classification loss
+            spk_rec, mem_rec = net(data)
             loss_val = torch.zeros(1, dtype=dtype, device=device)
             for step in range(num_steps):
                 loss_val += loss_fn(mem_rec[step], targets)
-
-            # L1 sparsity penalty on effective weights (encourages unused connections to die)
             mask = net.get_mask()
             l1_penalty = l1_lambda * (net.W.abs() * mask).sum()
             total_loss = loss_val + l1_penalty
-
             optimizer.zero_grad()
             total_loss.backward()
+            torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
             optimizer.step()
+            epoch_loss += loss_val.item()
+            batches += 1
+        scheduler.step()
 
-        # Pruning schedule: after prune_start epochs, prune every prune_every epochs
+        pruned_this_epoch = False
         if epoch >= prune_start and (epoch - prune_start) % prune_every == 0:
             with torch.no_grad():
                 mask = net.get_mask()
@@ -312,13 +370,15 @@ def train_brain_like(net, num_epochs=40, l1_lambda=1e-5, prune_start=15, prune_e
                     cutoff = active_vals.flatten().kthvalue(k).values.item()
                     to_prune = (mask <= cutoff) & active
                     net.mask_logits.data[to_prune] = -10.0
-
             n_alive = (net.get_mask() > 0.01).sum().item()
             n_total = net.mask_logits.numel()
-            print(f"  Epoch {epoch+1}: pruned -> {int(n_alive)}/{n_total} connections alive ({n_alive/n_total*100:.1f}%)")
+            pruned_this_epoch = True
 
-        if (epoch + 1) % 10 == 0:
-            print(f"  Epoch {epoch+1}/{num_epochs} complete")
+        if (epoch + 1) % 5 == 0 or epoch == 0 or pruned_this_epoch:
+            msg = f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s"
+            if pruned_this_epoch:
+                msg += f" | PRUNED -> {int(n_alive)}/{n_total} ({n_alive/n_total*100:.0f}%)"
+            print(msg)
 
     return net
 
@@ -335,8 +395,7 @@ def evaluate_model(net):
         for data, targets in test_loader:
             data = data.to(device)
             targets = targets.to(device)
-            test_spike_data = spikegen.rate(data, num_steps=num_steps, gain=gain)
-            test_spk, _ = net(test_spike_data)
+            test_spk, _ = net(data)
             _, predicted = test_spk.sum(dim=0).max(1)
             total += targets.size(0)
             correct += (predicted == targets).sum().item()
@@ -379,45 +438,43 @@ def quantize_and_evaluate(net, num_bits):
 
 
 # ================================================================
-# PHASE 1: Train baseline RecurrentNet
+# PHASE 1: Train Recurrent SNN baseline
 # ================================================================
-print("=" * 60)
-print("PHASE 1: Training baseline RecurrentNet")
+print("\n" + "=" * 60)
+print("PHASE 1: Training Recurrent SNN (analog crossbar)")
 print("=" * 60)
 
+phase1_start = time.time()
 baseline_net = RecurrentNet().to(device)
-baseline_net = train_baseline(baseline_net, num_epochs=30)
+baseline_net = train_baseline(baseline_net, num_epochs=50)
 baseline_acc, baseline_preds, baseline_targets = evaluate_model(baseline_net)
-print(f"\nBaseline accuracy: {baseline_acc:.2f}%")
+print(f"\nBaseline accuracy: {baseline_acc:.2f}% ({time.time()-phase1_start:.0f}s)")
 
 from sklearn.metrics import classification_report
 print(classification_report(baseline_targets, baseline_preds, target_names=['N','S','V','F','Q']))
 
 
 # ================================================================
-# PHASE 2: Train Brain-Like Network (overproduction + pruning)
+# PHASE 2: Train Brain-Like Network
 # ================================================================
 print("=" * 60)
 print("PHASE 2: Training Brain-Like Network")
-print("  Starting with ALL possible connections (overproduction)")
-print("  Pruning weakest 20% of active connections every 5 epochs after epoch 15")
 print("=" * 60)
 
+phase2_start = time.time()
 brain_net = BrainLikeNet().to(device)
-
 n_total_conn = brain_net.mask_logits.numel()
-print(f"  Total possible connections: {n_total_conn}")
+print(f"  Total spiking connections: {n_total_conn}")
 
-brain_net = train_brain_like(brain_net, num_epochs=40, l1_lambda=1e-5, prune_start=15, prune_every=5, prune_frac=0.2)
+brain_net = train_brain_like(brain_net, num_epochs=50)
 brain_acc, brain_preds, brain_targets = evaluate_model(brain_net)
-print(f"\nBrain-Like accuracy: {brain_acc:.2f}%")
+print(f"\nBrain-Like accuracy: {brain_acc:.2f}% ({time.time()-phase2_start:.0f}s)")
 print(classification_report(brain_targets, brain_preds, target_names=['N','S','V','F','Q']))
-
 brain_net.connection_report()
 
 
 # ================================================================
-# PHASE 3: Noise injection sweep on BOTH models
+# PHASE 3: Noise injection sweep
 # ================================================================
 print("\n" + "=" * 60)
 print("PHASE 3: Post-training noise injection sweep")
@@ -425,7 +482,7 @@ print("=" * 60)
 
 noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 
-print("\n  --- Baseline RecurrentNet ---")
+print("\n  --- Recurrent SNN ---")
 baseline_noise_results = []
 for sigma in noise_levels:
     mean_acc, std_acc = inject_noise_and_evaluate(baseline_net, sigma)
@@ -441,7 +498,7 @@ for sigma in noise_levels:
 
 
 # ================================================================
-# PHASE 4: Quantization sweep on BOTH models
+# PHASE 4: Quantization sweep
 # ================================================================
 print("\n" + "=" * 60)
 print("PHASE 4: Post-training quantization sweep")
@@ -449,7 +506,7 @@ print("=" * 60)
 
 bit_widths = [8, 6, 5, 4, 3, 2]
 
-print("\n  --- Baseline RecurrentNet ---")
+print("\n  --- Recurrent SNN ---")
 baseline_quant_results = []
 for bits in bit_widths:
     acc = quantize_and_evaluate(baseline_net, bits)
@@ -468,23 +525,26 @@ for bits in bit_widths:
 # SUMMARY
 # ================================================================
 print("\n" + "=" * 60)
-print("SUMMARY: Baseline vs Brain-Like")
+print("SUMMARY: Recurrent SNN vs Brain-Like (both fully analog)")
 print("=" * 60)
 
 print(f"\nClean accuracy:")
-print(f"  Baseline RecurrentNet: {baseline_acc:.2f}%")
-print(f"  Brain-Like Network:    {brain_acc:.2f}%")
+print(f"  Recurrent SNN:      {baseline_acc:.2f}%")
+print(f"  Brain-Like Network: {brain_acc:.2f}%")
 
-print(f"\nNoise robustness (accuracy at each sigma):")
-print(f"  {'sigma':>8s}  {'Baseline':>12s}  {'Brain-Like':>12s}")
+print(f"\nNoise robustness:")
+print(f"  {'sigma':>8s}  {'Recurrent':>12s}  {'Brain-Like':>12s}")
 for i, sigma in enumerate(noise_levels):
     b_acc = baseline_noise_results[i][1]
     r_acc = brain_noise_results[i][1]
     print(f"  {sigma:8.3f}  {b_acc:11.2f}%  {r_acc:11.2f}%")
 
 print(f"\nQuantization robustness:")
-print(f"  {'bits':>5s}  {'Baseline':>12s}  {'Brain-Like':>12s}")
+print(f"  {'bits':>5s}  {'Recurrent':>12s}  {'Brain-Like':>12s}")
 for i, bits in enumerate(bit_widths):
     b_acc = baseline_quant_results[i][1]
     r_acc = brain_quant_results[i][1]
     print(f"  {bits:5d}  {b_acc:11.2f}%  {r_acc:11.2f}%")
+
+total_time = time.time() - t0
+print(f"\nTotal runtime: {total_time:.0f}s ({total_time/60:.1f}min)")

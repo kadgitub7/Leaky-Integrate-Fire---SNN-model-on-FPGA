@@ -1,0 +1,4 @@
+1) All software code for SNN algorithm should be transferable to CMOS analog hardware
+2) The algorithm should be lean(simple and effective) no unneccessary complications
+3) should be accurate(clost to 98-99% accracy) to meet the benchmark
+4) Since we are using SNN this should not be a problem by very power efficient

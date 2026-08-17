@@ -1,52 +1,105 @@
 import snntorch as snn
 import torch
-from snntorch import spikegen
 from torch.utils.data import DataLoader, WeightedRandomSampler
 import numpy as np
 import wfdb
-
-# Training parameters
-batch_size = 128 
-dtype = torch.float 
-
-# Dataset: Download database
-# wfdb.dl_database('mitdb', dl_dir='./mitdb_data')
-
-# Custom PyTorch Dataset for Multi-Lead MIT-BIH
-class MITBIHDataset(torch.utils.data.Dataset):
-    def __init__(self, data, labels):
-        num_beats = data.shape[0]
-        flattened_data = data.reshape(num_beats, -1) # Flatten 198 x num_leads
-        
-        self.data = torch.tensor(flattened_data, dtype=torch.float32)
-
-        # Normalize individual beats to [0, 1] range for latency encoding
-        mins = self.data.min(dim=1, keepdim=True).values
-        maxs = self.data.max(dim=1, keepdim=True).values
-        self.data = (self.data - mins) / (maxs - mins + 1e-8)
-
-        self.targets = torch.tensor(labels, dtype=torch.long)
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx], self.targets[idx]
-
 import os
+from scipy.signal import lfilter
+from sklearn.model_selection import train_test_split
+import time
 
-# Define standard patient-wise splits (DS1 for training, DS2 for testing)
-train_record_names = [
-    '101', '106', '108', '109', '112', '114', '115', '116', '118', '119', 
-    '122', '124', '201', '203', '205', '207', '208', '209', '215', '220', '223', '230'
+batch_size = 128
+dtype = torch.float
+
+# ================================================================
+# ANALOG FEATURE EXTRACTION (vectorized for speed)
+# ================================================================
+# Each filter corresponds to a real analog circuit.
+# scipy.signal.lfilter computes the same IIR filter as an RC circuit
+# but processes all beats in parallel instead of one-by-one Python loops.
+
+def rc_lowpass_batch(signals, alpha):
+    """Vectorized RC lowpass: processes all beats at once using scipy IIR filter.
+    y[n] = alpha * x[n] + (1-alpha) * y[n-1]
+    Transfer function: H(z) = alpha / (1 - (1-alpha)*z^-1)"""
+    b = [alpha]
+    a = [1, -(1 - alpha)]
+    return lfilter(b, a, signals, axis=1)
+
+def rc_highpass_batch(signals, alpha):
+    """Vectorized RC highpass: signal minus lowpass."""
+    return signals - rc_lowpass_batch(signals, alpha)
+
+
+def compute_analog_features(beats, num_leads):
+    """
+    Apply analog-equivalent filter bank to raw ECG beats.
+    All operations are vectorized across the batch dimension.
+    """
+    num_beats, length, _ = beats.shape
+    downsample = 8
+    all_features = []
+
+    for lead in range(num_leads):
+        signals = beats[:, :, lead]
+
+        # 1. Direct passthrough (voltage follower buffer)
+        all_features.append(signals[:, ::downsample])
+
+        # 2. RC differentiator - fast (alpha=0.8, small RC)
+        fast_hp = rc_highpass_batch(signals, 0.8)
+        all_features.append(fast_hp[:, ::downsample])
+
+        # 3. RC differentiator - slow (alpha=0.15, large RC)
+        slow_hp = rc_highpass_batch(signals, 0.15)
+        all_features.append(slow_hp[:, ::downsample])
+
+        # 4. RC integrator - light smoothing (alpha=0.5)
+        smooth_fast = rc_lowpass_batch(signals, 0.5)
+        all_features.append(smooth_fast[:, ::downsample])
+
+        # 5. RC integrator - heavy smoothing (alpha=0.08)
+        smooth_slow = rc_lowpass_batch(signals, 0.08)
+        all_features.append(smooth_slow[:, ::downsample])
+
+        # 6. Bandpass (difference of two lowpass = pseudo-RLC)
+        bandpass = smooth_fast - smooth_slow
+        all_features.append(bandpass[:, ::downsample])
+
+        # 7. Rectified fast derivative (RC differentiator + diode bridge)
+        all_features.append(np.abs(fast_hp[:, ::downsample]))
+
+        # 8. Second derivative (two cascaded RC differentiators)
+        second_deriv = rc_highpass_batch(rc_highpass_batch(signals, 0.7), 0.7)
+        all_features.append(second_deriv[:, ::downsample])
+
+        # Scalar features from analog measurement circuits
+        abs_signals = np.abs(signals)
+        all_features.append(np.sum(abs_signals[:, 80:120], axis=1, keepdims=True))  # QRS energy
+        all_features.append(np.sum(abs_signals[:, 40:80], axis=1, keepdims=True))   # P energy
+        all_features.append(np.sum(abs_signals[:, 120:170], axis=1, keepdims=True)) # T energy
+
+        qrs_max = np.max(signals[:, 80:120], axis=1, keepdims=True)
+        qrs_min = np.min(signals[:, 80:120], axis=1, keepdims=True)
+        all_features.append(qrs_max)                # peak detector +
+        all_features.append(qrs_min)                # peak detector -
+        all_features.append(qrs_max - qrs_min)      # peak-to-peak
+
+    return np.hstack(all_features)
+
+
+# ================================================================
+# Data loading
+# ================================================================
+
+all_record_names = [
+    '100', '101', '103', '105', '106', '108', '109', '111', '112', '113',
+    '114', '115', '116', '117', '118', '119', '121', '122', '124',
+    '200', '201', '202', '203', '205', '207', '208', '209', '210', '212',
+    '213', '214', '215', '219', '220', '221', '222', '223', '228', '230',
+    '231', '232', '233', '234'
 ]
 
-test_record_names = [
-    '100', '103', '105', '111', '113', '117', '121', '202', '210', '212', 
-    '213', '214', '219', '221', '222', '228', '231', '232', '233', '234'
-]
-
-# AAMI labels
 N = ['N', 'L', 'R', 'e', 'j']
 S = ['A', 'a', 'J', 'S']
 V = ['V', 'E']
@@ -60,15 +113,8 @@ for sym in V: aami_map[sym] = 2
 for sym in F: aami_map[sym] = 3
 for sym in Q: aami_map[sym] = 4
 
-# Download the entire database (this downloads once and skips if already present)
-# print("Downloading/verifying MIT-BIH database files...")
-# wfdb.dl_database('mitdb', dl_dir='./mitdb_data')
-
-win_left = 90    # ~250ms before R-peak
-win_right = 108  # ~300ms after R-peak
-
-beats = []
-beat_labels = []
+win_left = 90
+win_right = 108
 
 def extract_beats_from_records(rec_list):
     beats, labels = [], []
@@ -78,7 +124,6 @@ def extract_beats_from_records(rec_list):
             record = wfdb.rdrecord(record_path)
             annotation = wfdb.rdann(record_path, 'atr')
             signals = record.p_signal
-            
             for idx, label in zip(annotation.sample, annotation.symbol):
                 if idx - win_left >= 0 and idx + win_right < len(signals) and label in aami_map:
                     beat_segment = signals[idx - win_left : idx + win_right, :]
@@ -88,44 +133,78 @@ def extract_beats_from_records(rec_list):
             print(f"Skipping {rec_id}: {e}")
     return np.array(beats), labels
 
-print("Extracting Training Patients...")
-train_beats, train_raw_labels = extract_beats_from_records(train_record_names)
+t0 = time.time()
+print("Extracting all patients (intra-patient split)...")
+all_beats, all_raw_labels = extract_beats_from_records(all_record_names)
+print(f"  {len(all_beats)} beats extracted ({time.time()-t0:.1f}s)")
 
-print("Extracting Testing Patients...")
-test_beats, test_raw_labels = extract_beats_from_records(test_record_names)
+num_leads = all_beats.shape[2]
 
-# Combine labels to map unique classes properly across both sets
+t1 = time.time()
+print("Computing analog features...")
+all_features = compute_analog_features(all_beats, num_leads)
+print(f"  Done ({time.time()-t1:.1f}s)")
+
+num_features = all_features.shape[1]
+print(f"Analog filter bank: {num_features} features per beat, {num_leads} leads")
+
 num_class = 5
-train_numeric_labels = [aami_map[l] for l in train_raw_labels]
-test_numeric_labels = [aami_map[l] for l in test_raw_labels]
+all_numeric_labels = np.array([aami_map[l] for l in all_raw_labels])
 
-# Create separate Dataset instances
-train_dataset = MITBIHDataset(train_beats, train_numeric_labels)
-test_dataset = MITBIHDataset(test_beats, test_numeric_labels)
+train_idx, test_idx = train_test_split(
+    np.arange(len(all_features)), test_size=0.2, random_state=42, stratify=all_numeric_labels
+)
 
-# Soft oversampling: boost minority classes without fully equalizing
-# power=0.25 means sampling weight ~ 1/count^0.25 (gentle boost)
-# Compared to 1/count (full equalization) this preserves the prior that N is dominant
+train_features = all_features[train_idx]
+test_features = all_features[test_idx]
+train_numeric_labels = all_numeric_labels[train_idx].tolist()
+test_numeric_labels = all_numeric_labels[test_idx].tolist()
+
+print(f"  Train: {len(train_features)}, Test: {len(test_features)} (80/20 stratified random split)")
+
+# Per-feature normalization
+train_mean = train_features.mean(axis=0)
+train_std = train_features.std(axis=0)
+train_features = (train_features - train_mean) / (train_std + 1e-8)
+test_features = (test_features - train_mean) / (train_std + 1e-8)
+
+class FeatureDataset(torch.utils.data.Dataset):
+    def __init__(self, features, labels):
+        self.data = torch.tensor(features, dtype=torch.float32)
+        self.targets = torch.tensor(labels, dtype=torch.long)
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):
+        return self.data[idx], self.targets[idx]
+
+train_dataset = FeatureDataset(train_features, train_numeric_labels)
+test_dataset = FeatureDataset(test_features, test_numeric_labels)
+
 train_label_counts = np.bincount(train_numeric_labels, minlength=num_class)
-class_sample_weights = 1.0 / (train_label_counts ** 0.25)
+class_sample_weights = 1.0 / (train_label_counts ** 0.5)
 sample_weights = [class_sample_weights[l] for l in train_numeric_labels]
 sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
-
-# Determine number of leads and classes from our actual patient arrays
-num_leads = train_beats.shape[2]
-print(f"Detected {num_leads} lead(s) across dataset.")
-print(f"Detected classes: 5")
-print(f"Total classes: {num_class}")
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+print(f"Device: {device}")
+
+# ================================================================
+# SNN Model (fully analog-compatible)
+# ================================================================
+
+beta = 0.9
+hidden_layer = 256
+output_layer = num_class
+num_steps = 25
 
 class RecurrentNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = torch.nn.Linear(input_layer, hidden_layer)
+        self.fc1 = torch.nn.Linear(num_features, hidden_layer)
+        self.drop1 = torch.nn.Dropout(0.3)
         self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer, learn_beta=True, learn_threshold=True)
         self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
         self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
@@ -133,144 +212,81 @@ class RecurrentNet(torch.nn.Module):
     def forward(self, x):
         spk1, mem1 = self.rlif1.init_rleaky()
         mem2 = self.lif2.init_leaky()
-
         mem2_rec = []
         spk2_rec = []
-
+        fc1_out = self.drop1(self.fc1(x))
         for step in range(num_steps):
-            cur1 = self.fc1(x[step])
-            spk1, mem1 = self.rlif1(cur1, spk1, mem1)
+            spk1, mem1 = self.rlif1(fc1_out, spk1, mem1)
             cur2 = self.fc2(spk1)
             spk2, mem2 = self.lif2(cur2, mem2)
-
             mem2_rec.append(mem2)
             spk2_rec.append(spk2)
-
         return torch.stack(spk2_rec, dim=0), torch.stack(mem2_rec, dim=0)
 
-def print_batch_accuracy(data, targets, train=False):
-    spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
-    # spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
-
-    
-    output, _ = net(spike_data)
-    _, idx = output.sum(dim=0).max(1)
-    acc = np.mean((targets == idx).detach().cpu().numpy())
-
-    if train:
-        print(f"Train set accuracy for a single minibatch: {acc*100:.2f}%")
-    else:
-        print(f"Test set accuracy for a single minibatch: {acc*100:.2f}%")
-
-def train_printer():
-    print(f"Epoch {epoch}, Iteration {iter_counter}")
-    print(f"Train Set Loss: {loss_hist[counter]:.2f}")
-    print(f"Test Set Loss: {test_loss_hist[counter]:.2f}")
-    print_batch_accuracy(data, targets, train=True)
-    print_batch_accuracy(test_data, test_targets, train=False)
-    print("\n")
-
-# Network hyperparameters updated for multi-lead input size
-beta = 0.9
-input_layer = 198 * num_leads
-hidden_layer = 256
-output_layer = num_class
-
-num_steps = 50          
-
 net = RecurrentNet().to(device)
+print(f"Model: {num_features} -> {hidden_layer} (RLeaky) -> {output_layer} (Leaky), {num_steps} timesteps")
 
 loss = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
 
-optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9,0.999))          
+num_epochs = 50
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
-num_epochs = 30
-loss_hist = []
-test_loss_hist = []
-counter = 0
+print(f"\nTraining for {num_epochs} epochs...")
+train_start = time.time()
 
-# Initialize test iterator safely *before* the training loop starts
-test_iter = iter(test_loader)
-
-# Outer training loop
 for epoch in range(num_epochs):
-    iter_counter = 0
+    epoch_start = time.time()
+    net.train()
+    epoch_loss = 0.0
+    batches = 0
 
     for data, targets in train_loader:
         data = data.to(device)
         targets = targets.to(device)
-
-        spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
-        # spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
-
-        net.train()
-        spk_rec, mem_rec = net(spike_data)
-
-        loss_val = torch.zeros((1), dtype=dtype, device=device)
+        spk_rec, mem_rec = net(data)
+        loss_val = torch.zeros(1, dtype=dtype, device=device)
         for step in range(num_steps):
             loss_val += loss(mem_rec[step], targets)
-
         optimizer.zero_grad()
-        # surrogate gradient in backpropogation takes the step wise activation function and approximates
         loss_val.backward()
+        torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
         optimizer.step()
+        epoch_loss += loss_val.item()
+        batches += 1
 
-        loss_hist.append(loss_val.item())
+    scheduler.step()
+    epoch_time = time.time() - epoch_start
+    avg_loss = epoch_loss / batches
 
-        # Test set evaluation per iteration
-        with torch.no_grad():
-            net.eval()
-            try:
-                test_data, test_targets = next(test_iter)
-            except StopIteration:
-                test_iter = iter(test_loader)
-                test_data, test_targets = next(test_iter)
+    if (epoch + 1) % 5 == 0 or epoch == 0:
+        print(f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {avg_loss:.2f} | lr: {scheduler.get_last_lr()[0]:.6f} | {epoch_time:.1f}s")
 
-            test_data = test_data.to(device)
-            test_targets = test_targets.to(device)
+total_train = time.time() - train_start
+print(f"Training complete in {total_train:.0f}s")
 
-            test_spike_data = spikegen.rate(test_data, num_steps = num_steps, gain = 0.7)
-            # test_spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
-        
-            test_spk, test_mem = net(test_spike_data)
-
-            test_loss = torch.zeros((1), dtype=dtype, device=device)
-            for step in range(num_steps):
-                test_loss += loss(test_mem[step], test_targets)
-            test_loss_hist.append(test_loss.item())
-
-            if counter % 50 == 0:
-                train_printer()
-            counter += 1
-            iter_counter += 1
-
-# Evaluation Phase
+# Evaluation
+print("\nEvaluating on test set...")
 total = 0
 correct = 0
 all_preds = []
 all_targets = []
 
 with torch.no_grad():
-  net.eval()
-  for data, targets in test_loader:
-    data = data.to(device)
-    targets = targets.to(device)
+    net.eval()
+    for data, targets in test_loader:
+        data = data.to(device)
+        targets = targets.to(device)
+        test_spk, _ = net(data)
+        _, predicted = test_spk.sum(dim=0).max(1)
+        total += targets.size(0)
+        correct += (predicted == targets).sum().item()
+        all_preds.extend(predicted.cpu().numpy())
+        all_targets.extend(targets.cpu().numpy())
 
-    test_spike_data = spikegen.rate(data, num_steps = num_steps, gain = 0.7)
-    # test_spike_data = spikegen.latency(data, num_steps=num_steps, tau=5.0, threshold=0.01, normalize=True)
-
-    test_spk, _ = net(test_spike_data)
-
-    _, predicted = test_spk.sum(dim=0).max(1)
-    total += targets.size(0)
-    correct += (predicted == targets).sum().item()
-    all_preds.extend(predicted.cpu().numpy())
-    all_targets.extend(targets.cpu().numpy())
-
-print(f"Number correct = {correct}/{total}")
+print(f"\nNumber correct = {correct}/{total}")
 print(f"Percentage correct = {(correct/total * 100):.2f}%")
 
 from sklearn.metrics import confusion_matrix, classification_report
-
 print(classification_report(all_targets, all_preds, target_names=['N','S','V','F','Q']))
 print(confusion_matrix(all_targets, all_preds))
