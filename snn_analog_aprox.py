@@ -170,6 +170,11 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, dro
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
 print(f"Device: {device}")
 
+class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.5)
+class_weights = class_weights / class_weights.sum() * num_class
+class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
+print(f"Class loss weights: {[f'{w:.2f}' for w in class_weights]}")
+
 beta = 0.9
 hidden_layer = 256
 output_layer = num_class
@@ -303,9 +308,9 @@ class BrainLikeNet(torch.nn.Module):
 
 # ---- Training functions ----
 
-def train_baseline(net, num_epochs=50):
-    loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
+def train_baseline(net, num_epochs=100):
+    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
     for epoch in range(num_epochs):
         epoch_start = time.time()
@@ -326,14 +331,14 @@ def train_baseline(net, num_epochs=50):
             epoch_loss += loss_val.item()
             batches += 1
         scheduler.step()
-        if (epoch + 1) % 5 == 0 or epoch == 0:
+        if (epoch + 1) % 10 == 0 or epoch == 0:
             print(f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s")
     return net
 
 
-def train_brain_like(net, num_epochs=50, l1_lambda=1e-5, prune_start=20, prune_every=5, prune_frac=0.2):
-    loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
+def train_brain_like(net, num_epochs=100, l1_lambda=1e-5, prune_start=40, prune_every=5, prune_frac=0.2):
+    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
     for epoch in range(num_epochs):
@@ -374,7 +379,7 @@ def train_brain_like(net, num_epochs=50, l1_lambda=1e-5, prune_start=20, prune_e
             n_total = net.mask_logits.numel()
             pruned_this_epoch = True
 
-        if (epoch + 1) % 5 == 0 or epoch == 0 or pruned_this_epoch:
+        if (epoch + 1) % 10 == 0 or epoch == 0 or pruned_this_epoch:
             msg = f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s"
             if pruned_this_epoch:
                 msg += f" | PRUNED -> {int(n_alive)}/{n_total} ({n_alive/n_total*100:.0f}%)"
@@ -446,7 +451,7 @@ print("=" * 60)
 
 phase1_start = time.time()
 baseline_net = RecurrentNet().to(device)
-baseline_net = train_baseline(baseline_net, num_epochs=50)
+baseline_net = train_baseline(baseline_net, num_epochs=100)
 baseline_acc, baseline_preds, baseline_targets = evaluate_model(baseline_net)
 print(f"\nBaseline accuracy: {baseline_acc:.2f}% ({time.time()-phase1_start:.0f}s)")
 
@@ -466,7 +471,7 @@ brain_net = BrainLikeNet().to(device)
 n_total_conn = brain_net.mask_logits.numel()
 print(f"  Total spiking connections: {n_total_conn}")
 
-brain_net = train_brain_like(brain_net, num_epochs=50)
+brain_net = train_brain_like(brain_net, num_epochs=100)
 brain_acc, brain_preds, brain_targets = evaluate_model(brain_net)
 print(f"\nBrain-Like accuracy: {brain_acc:.2f}% ({time.time()-phase2_start:.0f}s)")
 print(classification_report(brain_targets, brain_preds, target_names=['N','S','V','F','Q']))

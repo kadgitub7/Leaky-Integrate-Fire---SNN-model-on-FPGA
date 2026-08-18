@@ -226,10 +226,15 @@ class RecurrentNet(torch.nn.Module):
 net = RecurrentNet().to(device)
 print(f"Model: {num_features} -> {hidden_layer} (RLeaky) -> {output_layer} (Leaky), {num_steps} timesteps")
 
-loss = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, betas=(0.9, 0.999), weight_decay=1e-4)
+class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.5)
+class_weights = class_weights / class_weights.sum() * num_class
+class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
+print(f"Class loss weights: {[f'{w:.2f}' for w in class_weights]}")
 
-num_epochs = 50
+loss = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
+optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
+
+num_epochs = 100
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
 
 print(f"\nTraining for {num_epochs} epochs...")
@@ -259,7 +264,7 @@ for epoch in range(num_epochs):
     epoch_time = time.time() - epoch_start
     avg_loss = epoch_loss / batches
 
-    if (epoch + 1) % 5 == 0 or epoch == 0:
+    if (epoch + 1) % 10 == 0 or epoch == 0:
         print(f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {avg_loss:.2f} | lr: {scheduler.get_last_lr()[0]:.6f} | {epoch_time:.1f}s")
 
 total_train = time.time() - train_start
