@@ -181,7 +181,7 @@ train_dataset = FeatureDataset(train_features, train_numeric_labels)
 test_dataset = FeatureDataset(test_features, test_numeric_labels)
 
 train_label_counts = np.bincount(train_numeric_labels, minlength=num_class)
-class_sample_weights = 1.0 / (train_label_counts ** 0.5)
+class_sample_weights = 1.0 / (train_label_counts ** 0.65)
 sample_weights = [class_sample_weights[l] for l in train_numeric_labels]
 sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
 
@@ -198,13 +198,13 @@ print(f"Device: {device}")
 beta = 0.9
 hidden_layer = 256
 output_layer = num_class
-num_steps = 25
+num_steps = 40
 
 class RecurrentNet(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = torch.nn.Linear(num_features, hidden_layer)
-        self.drop1 = torch.nn.Dropout(0.3)
+        self.drop1 = torch.nn.Dropout(0.2)
         self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer, learn_beta=True, learn_threshold=True)
         self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
         self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
@@ -226,7 +226,7 @@ class RecurrentNet(torch.nn.Module):
 net = RecurrentNet().to(device)
 print(f"Model: {num_features} -> {hidden_layer} (RLeaky) -> {output_layer} (Leaky), {num_steps} timesteps")
 
-class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.5)
+class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.65)
 class_weights = class_weights / class_weights.sum() * num_class
 class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
 print(f"Class loss weights: {[f'{w:.2f}' for w in class_weights]}")
