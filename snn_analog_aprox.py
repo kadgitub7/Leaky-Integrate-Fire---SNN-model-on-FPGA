@@ -5,7 +5,6 @@ import numpy as np
 import wfdb
 import os
 import copy
-import math
 from scipy.signal import lfilter
 from sklearn.model_selection import train_test_split
 import time
@@ -14,7 +13,7 @@ batch_size = 128
 dtype = torch.float
 
 # ================================================================
-# ANALOG FEATURE EXTRACTION (same as snn_rMLP.py, vectorized)
+# ANALOG FEATURE EXTRACTION (vectorized)
 # ================================================================
 
 def rc_lowpass_batch(signals, alpha):
@@ -182,7 +181,7 @@ num_steps = 40
 
 
 # ================================================================
-# MODEL 1: Recurrent SNN (analog crossbar)
+# Recurrent SNN (analog crossbar)
 # ================================================================
 
 class RecurrentNet(torch.nn.Module):
@@ -210,105 +209,10 @@ class RecurrentNet(torch.nn.Module):
 
 
 # ================================================================
-# MODEL 2: Brain-Like Network (all-to-all + pruning)
+# Training
 # ================================================================
 
-class SurrogateSpike(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, mem_minus_thr):
-        spk = (mem_minus_thr > 0).float()
-        ctx.save_for_backward(mem_minus_thr)
-        return spk
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        mem_minus_thr, = ctx.saved_tensors
-        grad = 1.0 / (1.0 + (math.pi * mem_minus_thr).pow(2))
-        return grad_output * grad
-
-spike_fn = SurrogateSpike.apply
-
-
-class BrainLikeNet(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.n_hid = hidden_layer
-        self.n_out = output_layer
-        n_spiking = self.n_hid + self.n_out
-        self.fc_in = torch.nn.Linear(num_features, n_spiking)
-        self.drop_in = torch.nn.Dropout(0.2)
-
-        self.W = torch.nn.Parameter(torch.empty(n_spiking, n_spiking))
-        torch.nn.init.normal_(self.W, 0, 1.0 / math.sqrt(n_spiking))
-        self.mask_logits = torch.nn.Parameter(torch.full((n_spiking, n_spiking), 3.0))
-
-        self.beta_h = torch.nn.Parameter(torch.tensor(0.9))
-        self.beta_o = torch.nn.Parameter(torch.tensor(0.9))
-        self.thr_h = torch.nn.Parameter(torch.tensor(1.0))
-        self.thr_o = torch.nn.Parameter(torch.tensor(1.0))
-
-    def get_mask(self):
-        return torch.sigmoid(self.mask_logits)
-
-    def forward(self, x):
-        input_current = self.drop_in(self.fc_in(x))
-        batch = x.size(0)
-        dev = x.device
-
-        mem_h = torch.zeros(batch, self.n_hid, device=dev)
-        mem_o = torch.zeros(batch, self.n_out, device=dev)
-        spk_h = torch.zeros(batch, self.n_hid, device=dev)
-        spk_o = torch.zeros(batch, self.n_out, device=dev)
-
-        mask = self.get_mask()
-        W_eff = self.W * mask
-
-        spk_o_rec = []
-        mem_o_rec = []
-
-        for step in range(num_steps):
-            all_spk = torch.cat([spk_h, spk_o], dim=1)
-            recurrent = torch.mm(all_spk, W_eff)
-            cur_h = input_current[:, :self.n_hid] + recurrent[:, :self.n_hid]
-            cur_o = input_current[:, self.n_hid:] + recurrent[:, self.n_hid:]
-
-            mem_h = self.beta_h * mem_h + cur_h
-            spk_h = spike_fn(mem_h - self.thr_h)
-            mem_h = mem_h * (1 - spk_h.detach())
-
-            mem_o = self.beta_o * mem_o + cur_o
-            spk_o = spike_fn(mem_o - self.thr_o)
-            mem_o = mem_o * (1 - spk_o.detach())
-
-            spk_o_rec.append(spk_o)
-            mem_o_rec.append(mem_o)
-
-        return torch.stack(spk_o_rec, dim=0), torch.stack(mem_o_rec, dim=0)
-
-    def connection_report(self):
-        mask = self.get_mask().detach().cpu()
-        alive = (mask > 0.01)
-        regions = {
-            'hidden->hidden': alive[:self.n_hid, :self.n_hid],
-            'hidden->output': alive[:self.n_hid, self.n_hid:],
-            'output->hidden': alive[self.n_hid:, :self.n_hid],
-            'output->output': alive[self.n_hid:, self.n_hid:],
-        }
-        print("\n  Connection survival after pruning:")
-        total_alive = 0
-        total_possible = 0
-        for name, region in regions.items():
-            a = region.sum().item()
-            t = region.numel()
-            total_alive += a
-            total_possible += t
-            print(f"    {name:20s}: {int(a):>6d} / {t:>6d} alive ({a/t*100:5.1f}%)")
-        print(f"    {'TOTAL':20s}: {int(total_alive):>6d} / {total_possible:>6d} alive ({total_alive/total_possible*100:5.1f}%)")
-
-
-# ---- Training functions ----
-
-def train_baseline(net, num_epochs=100):
+def train_model(net, num_epochs=100):
     loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
@@ -336,60 +240,6 @@ def train_baseline(net, num_epochs=100):
     return net
 
 
-def train_brain_like(net, num_epochs=100, l1_lambda=1e-5, prune_start=40, prune_every=5, prune_frac=0.2):
-    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
-
-    for epoch in range(num_epochs):
-        epoch_start = time.time()
-        net.train()
-        epoch_loss = 0.0
-        batches = 0
-        for data, targets in train_loader:
-            data = data.to(device)
-            targets = targets.to(device)
-            spk_rec, mem_rec = net(data)
-            loss_val = torch.zeros(1, dtype=dtype, device=device)
-            for step in range(num_steps):
-                loss_val += loss_fn(mem_rec[step], targets)
-            mask = net.get_mask()
-            l1_penalty = l1_lambda * (net.W.abs() * mask).sum()
-            total_loss = loss_val + l1_penalty
-            optimizer.zero_grad()
-            total_loss.backward()
-            torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
-            optimizer.step()
-            epoch_loss += loss_val.item()
-            batches += 1
-        scheduler.step()
-
-        pruned_this_epoch = False
-        if epoch >= prune_start and (epoch - prune_start) % prune_every == 0:
-            with torch.no_grad():
-                mask = net.get_mask()
-                active = mask > 0.01
-                active_vals = mask[active]
-                if len(active_vals) > 0:
-                    k = max(1, int(prune_frac * len(active_vals)))
-                    cutoff = active_vals.flatten().kthvalue(k).values.item()
-                    to_prune = (mask <= cutoff) & active
-                    net.mask_logits.data[to_prune] = -10.0
-            n_alive = (net.get_mask() > 0.01).sum().item()
-            n_total = net.mask_logits.numel()
-            pruned_this_epoch = True
-
-        if (epoch + 1) % 10 == 0 or epoch == 0 or pruned_this_epoch:
-            msg = f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s"
-            if pruned_this_epoch:
-                msg += f" | PRUNED -> {int(n_alive)}/{n_total} ({n_alive/n_total*100:.0f}%)"
-            print(msg)
-
-    return net
-
-
-# ---- Evaluation ----
-
 def evaluate_model(net):
     total = 0
     correct = 0
@@ -410,7 +260,9 @@ def evaluate_model(net):
     return acc, all_preds, all_targets
 
 
-# ---- Analog hardware simulation helpers ----
+# ================================================================
+# Analog hardware simulation helpers
+# ================================================================
 
 def inject_noise_and_evaluate(net, sigma, num_trials=10):
     accs = []
@@ -443,113 +295,104 @@ def quantize_and_evaluate(net, num_bits):
 
 
 # ================================================================
-# PHASE 1: Train Recurrent SNN baseline
+# PHASE 1: Train Recurrent SNN
 # ================================================================
 print("\n" + "=" * 60)
 print("PHASE 1: Training Recurrent SNN (analog crossbar)")
 print("=" * 60)
 
 phase1_start = time.time()
-baseline_net = RecurrentNet().to(device)
-baseline_net = train_baseline(baseline_net, num_epochs=100)
-baseline_acc, baseline_preds, baseline_targets = evaluate_model(baseline_net)
-print(f"\nBaseline accuracy: {baseline_acc:.2f}% ({time.time()-phase1_start:.0f}s)")
+net = RecurrentNet().to(device)
+n_params = sum(p.numel() for p in net.parameters())
+print(f"  Parameters: {n_params:,}")
+net = train_model(net, num_epochs=100)
+acc, preds, targets = evaluate_model(net)
+print(f"\nAccuracy: {acc:.2f}% ({time.time()-phase1_start:.0f}s)")
 
-from sklearn.metrics import classification_report
-print(classification_report(baseline_targets, baseline_preds, target_names=['N','S','V','F','Q']))
-
-
-# ================================================================
-# PHASE 2: Train Brain-Like Network
-# ================================================================
-print("=" * 60)
-print("PHASE 2: Training Brain-Like Network")
-print("=" * 60)
-
-phase2_start = time.time()
-brain_net = BrainLikeNet().to(device)
-n_total_conn = brain_net.mask_logits.numel()
-print(f"  Total spiking connections: {n_total_conn}")
-
-brain_net = train_brain_like(brain_net, num_epochs=100)
-brain_acc, brain_preds, brain_targets = evaluate_model(brain_net)
-print(f"\nBrain-Like accuracy: {brain_acc:.2f}% ({time.time()-phase2_start:.0f}s)")
-print(classification_report(brain_targets, brain_preds, target_names=['N','S','V','F','Q']))
-brain_net.connection_report()
+from sklearn.metrics import classification_report, confusion_matrix
+print(classification_report(targets, preds, target_names=['N','S','V','F','Q']))
+print(confusion_matrix(targets, preds))
 
 
 # ================================================================
-# PHASE 3: Noise injection sweep
+# PHASE 2: Noise injection sweep
 # ================================================================
 print("\n" + "=" * 60)
-print("PHASE 3: Post-training noise injection sweep")
+print("PHASE 2: Post-training noise injection sweep")
 print("=" * 60)
 
 noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 
-print("\n  --- Recurrent SNN ---")
-baseline_noise_results = []
+noise_results = []
 for sigma in noise_levels:
-    mean_acc, std_acc = inject_noise_and_evaluate(baseline_net, sigma)
-    baseline_noise_results.append((sigma, mean_acc, std_acc))
-    print(f"  sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
-
-print("\n  --- Brain-Like Network ---")
-brain_noise_results = []
-for sigma in noise_levels:
-    mean_acc, std_acc = inject_noise_and_evaluate(brain_net, sigma)
-    brain_noise_results.append((sigma, mean_acc, std_acc))
+    mean_acc, std_acc = inject_noise_and_evaluate(net, sigma)
+    noise_results.append((sigma, mean_acc, std_acc))
     print(f"  sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
 
 
 # ================================================================
-# PHASE 4: Quantization sweep
+# PHASE 3: Quantization sweep
 # ================================================================
 print("\n" + "=" * 60)
-print("PHASE 4: Post-training quantization sweep")
+print("PHASE 3: Post-training quantization sweep")
 print("=" * 60)
 
 bit_widths = [8, 6, 5, 4, 3, 2]
 
-print("\n  --- Recurrent SNN ---")
-baseline_quant_results = []
+quant_results = []
 for bits in bit_widths:
-    acc = quantize_and_evaluate(baseline_net, bits)
-    baseline_quant_results.append((bits, acc))
-    print(f"  {bits}-bit: {acc:.2f}%")
+    q_acc = quantize_and_evaluate(net, bits)
+    quant_results.append((bits, q_acc))
+    print(f"  {bits}-bit: {q_acc:.2f}%")
 
-print("\n  --- Brain-Like Network ---")
-brain_quant_results = []
-for bits in bit_widths:
-    acc = quantize_and_evaluate(brain_net, bits)
-    brain_quant_results.append((bits, acc))
-    print(f"  {bits}-bit: {acc:.2f}%")
+
+# ================================================================
+# PHASE 4: Combined 4-bit quantization + noise sweep
+# ================================================================
+print("\n" + "=" * 60)
+print("PHASE 4: 4-bit quantized + noise injection (realistic hardware)")
+print("=" * 60)
+
+combined_noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+
+combined_results = []
+for sigma in combined_noise_levels:
+    accs = []
+    for _ in range(10):
+        q_noisy_net = copy.deepcopy(net)
+        with torch.no_grad():
+            for param in q_noisy_net.parameters():
+                param.copy_(quantize_tensor(param, 4))
+                param.add_(torch.randn_like(param) * sigma)
+        q_acc, _, _ = evaluate_model(q_noisy_net)
+        accs.append(q_acc)
+    mean_acc = np.mean(accs)
+    std_acc = np.std(accs)
+    combined_results.append((sigma, mean_acc, std_acc))
+    print(f"  4-bit + sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
 
 
 # ================================================================
 # SUMMARY
 # ================================================================
 print("\n" + "=" * 60)
-print("SUMMARY: Recurrent SNN vs Brain-Like (both fully analog)")
+print("SUMMARY: Recurrent SNN (fully analog-compatible)")
 print("=" * 60)
 
-print(f"\nClean accuracy:")
-print(f"  Recurrent SNN:      {baseline_acc:.2f}%")
-print(f"  Brain-Like Network: {brain_acc:.2f}%")
+print(f"\nClean accuracy: {acc:.2f}%")
+print(f"Parameters: {n_params:,}")
 
-print(f"\nNoise robustness:")
-print(f"  {'sigma':>8s}  {'Recurrent':>12s}  {'Brain-Like':>12s}")
-for i, sigma in enumerate(noise_levels):
-    b_acc = baseline_noise_results[i][1]
-    r_acc = brain_noise_results[i][1]
-    print(f"  {sigma:8.3f}  {b_acc:11.2f}%  {r_acc:11.2f}%")
+print(f"\nNoise robustness (full precision):")
+for sigma, mean_acc, std_acc in noise_results:
+    print(f"  sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
 
-print(f"\nQuantization robustness:")
-print(f"  {'bits':>5s}  {'Recurrent':>12s}  {'Brain-Like':>12s}")
-for i, bits in enumerate(bit_widths):
-    b_acc = baseline_quant_results[i][1]
-    r_acc = brain_quant_results[i][1]
-    print(f"  {bits:5d}  {b_acc:11.2f}%  {r_acc:11.2f}%")
+print(f"\nQuantization robustness (no noise):")
+for bits, q_acc in quant_results:
+    print(f"  {bits}-bit: {q_acc:.2f}%")
+
+print(f"\nRealistic hardware (4-bit quantized + noise):")
+for sigma, mean_acc, std_acc in combined_results:
+    print(f"  4-bit + sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
 
 total_time = time.time() - t0
 print(f"\nTotal runtime: {total_time:.0f}s ({total_time/60:.1f}min)")
