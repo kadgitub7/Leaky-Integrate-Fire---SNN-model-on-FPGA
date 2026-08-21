@@ -1,3 +1,5 @@
+import sys
+import argparse
 import snntorch as snn
 import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
@@ -9,17 +11,23 @@ from scipy.signal import lfilter
 from sklearn.model_selection import train_test_split
 import time
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--hidden', type=int, default=None)
+parser.add_argument('--lam', type=float, default=None)
+args = parser.parse_args()
+
+torch.set_num_threads(2)
+
 batch_size = 128
 dtype = torch.float
 
 # ================================================================
-# MINIMAL ANALOG FRONT-END (temporal, not scalar)
+# ANALOG FEATURE EXTRACTION (proven 412-feature bank)
 # ================================================================
-# Instead of 412 scalar features fed as constant current,
-# use 4 simple RC filters per lead and feed the ECG sample-by-sample.
-# The SNN extracts features temporally through its recurrent dynamics.
-# Hardware: 4 passive RC circuits + 2 rectifiers per lead = ~10 op-amps total
-# vs. the old design's 412 PGA stages.
+# Keep the full filter bank that achieves 97%+ accuracy.
+# The power optimization happens in the PROCESSOR (smaller hidden,
+# sparsity penalty) not the front-end. Benchmarks like Chu et al.
+# report processor-only energy, so we compare apples to apples.
 
 def rc_lowpass_batch(signals, alpha):
     b = [alpha]
@@ -29,25 +37,47 @@ def rc_lowpass_batch(signals, alpha):
 def rc_highpass_batch(signals, alpha):
     return signals - rc_lowpass_batch(signals, alpha)
 
-def compute_temporal_features(beats, num_leads, downsample=4):
+def compute_analog_features(beats, num_leads):
     num_beats, length, _ = beats.shape
-    all_channels = []
+    downsample = 8
+    all_features = []
 
     for lead in range(num_leads):
         signals = beats[:, :, lead]
-
-        all_channels.append(signals[:, ::downsample])
+        all_features.append(signals[:, ::downsample])
 
         fast_hp = rc_highpass_batch(signals, 0.8)
-        all_channels.append(fast_hp[:, ::downsample])
+        all_features.append(fast_hp[:, ::downsample])
 
-        smooth = rc_lowpass_batch(signals, 0.1)
-        all_channels.append(smooth[:, ::downsample])
+        slow_hp = rc_highpass_batch(signals, 0.15)
+        all_features.append(slow_hp[:, ::downsample])
 
-        all_channels.append(np.abs(fast_hp[:, ::downsample]))
+        smooth_fast = rc_lowpass_batch(signals, 0.5)
+        all_features.append(smooth_fast[:, ::downsample])
 
-    features = np.stack(all_channels, axis=2)
-    return features
+        smooth_slow = rc_lowpass_batch(signals, 0.08)
+        all_features.append(smooth_slow[:, ::downsample])
+
+        bandpass = smooth_fast - smooth_slow
+        all_features.append(bandpass[:, ::downsample])
+
+        all_features.append(np.abs(fast_hp[:, ::downsample]))
+
+        second_deriv = rc_highpass_batch(rc_highpass_batch(signals, 0.7), 0.7)
+        all_features.append(second_deriv[:, ::downsample])
+
+        abs_signals = np.abs(signals)
+        all_features.append(np.sum(abs_signals[:, 80:120], axis=1, keepdims=True))
+        all_features.append(np.sum(abs_signals[:, 40:80], axis=1, keepdims=True))
+        all_features.append(np.sum(abs_signals[:, 120:170], axis=1, keepdims=True))
+
+        qrs_max = np.max(signals[:, 80:120], axis=1, keepdims=True)
+        qrs_min = np.min(signals[:, 80:120], axis=1, keepdims=True)
+        all_features.append(qrs_max)
+        all_features.append(qrs_min)
+        all_features.append(qrs_max - qrs_min)
+
+    return np.hstack(all_features)
 
 
 # ================================================================
@@ -101,65 +131,49 @@ all_beats, all_raw_labels = extract_beats_from_records(all_record_names)
 print(f"  {len(all_beats)} beats ({time.time()-t0:.1f}s)")
 
 num_leads = all_beats.shape[2]
+
+t1 = time.time()
+print("Computing analog features...")
+all_features = compute_analog_features(all_beats, num_leads)
+print(f"  Done ({time.time()-t1:.1f}s)")
+
+num_features = all_features.shape[1]
+print(f"Feature bank: {num_features} features, {num_leads} leads")
+
 num_class = 5
 all_numeric_labels = np.array([aami_map[l] for l in all_raw_labels])
 
-# ================================================================
-# Temporal feature extraction
-# ================================================================
-
-temporal_downsample = 4
-
-t1 = time.time()
-print(f"Computing temporal features (downsample={temporal_downsample}x)...")
-all_temporal = compute_temporal_features(all_beats, num_leads, downsample=temporal_downsample)
-print(f"  Shape: {all_temporal.shape} (beats, timesteps, channels) ({time.time()-t1:.1f}s)")
-
-num_timesteps = all_temporal.shape[1]
-num_channels = all_temporal.shape[2]
-
-# ================================================================
-# Train/test split
-# ================================================================
-
 train_idx, test_idx = train_test_split(
-    np.arange(len(all_temporal)), test_size=0.2, random_state=42, stratify=all_numeric_labels
+    np.arange(len(all_features)), test_size=0.2, random_state=42, stratify=all_numeric_labels
 )
 
-train_data = all_temporal[train_idx]
-test_data = all_temporal[test_idx]
-train_labels = all_numeric_labels[train_idx].tolist()
-test_labels = all_numeric_labels[test_idx].tolist()
+train_features = all_features[train_idx]
+test_features = all_features[test_idx]
+train_numeric_labels = all_numeric_labels[train_idx].tolist()
+test_numeric_labels = all_numeric_labels[test_idx].tolist()
 
-print(f"  Train: {len(train_data)}, Test: {len(test_data)}")
+print(f"  Train: {len(train_features)}, Test: {len(test_features)} (80/20 stratified random split)")
 
-# Per-channel normalization (each channel = one analog PGA stage)
-train_mean = train_data.mean(axis=(0, 1))
-train_std = train_data.std(axis=(0, 1))
-train_data = (train_data - train_mean) / (train_std + 1e-8)
-test_data = (test_data - train_mean) / (train_std + 1e-8)
+train_mean = train_features.mean(axis=0)
+train_std = train_features.std(axis=0)
+train_features = (train_features - train_mean) / (train_std + 1e-8)
+test_features = (test_features - train_mean) / (train_std + 1e-8)
 
-print(f"  Normalization: {num_channels} PGA stages (vs 412 in old design)")
-
-# ================================================================
-# Dataset
-# ================================================================
-
-class TemporalDataset(torch.utils.data.Dataset):
-    def __init__(self, data, labels):
-        self.data = torch.tensor(data, dtype=torch.float32)
+class FeatureDataset(torch.utils.data.Dataset):
+    def __init__(self, features, labels):
+        self.data = torch.tensor(features, dtype=torch.float32)
         self.targets = torch.tensor(labels, dtype=torch.long)
     def __len__(self):
         return len(self.data)
     def __getitem__(self, idx):
         return self.data[idx], self.targets[idx]
 
-train_dataset = TemporalDataset(train_data, train_labels)
-test_dataset = TemporalDataset(test_data, test_labels)
+train_dataset = FeatureDataset(train_features, train_numeric_labels)
+test_dataset = FeatureDataset(test_features, test_numeric_labels)
 
-train_label_counts = np.bincount(train_labels, minlength=num_class)
+train_label_counts = np.bincount(train_numeric_labels, minlength=num_class)
 class_sample_weights = 1.0 / (train_label_counts ** 0.65)
-sample_weights = [class_sample_weights[l] for l in train_labels]
+sample_weights = [class_sample_weights[l] for l in train_numeric_labels]
 sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
@@ -173,43 +187,36 @@ class_weights = class_weights / class_weights.sum() * num_class
 class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
 
 beta = 0.9
+num_steps = 40
 
 
 # ================================================================
-# Temporal Recurrent SNN
+# Recurrent SNN with sparsity-aware training
 # ================================================================
-# Key difference: input changes every timestep (temporal encoding)
-# instead of constant input repeated 40 times.
-# The SNN sees the beat unfold in time and extracts features
-# through its recurrent dynamics.
 
-class TemporalRecurrentNet(torch.nn.Module):
-    def __init__(self, n_channels, hidden, n_classes, dropout=0.2):
+class RecurrentNet(torch.nn.Module):
+    def __init__(self, n_features, hidden, n_classes, dropout=0.2):
         super().__init__()
-        self.fc1 = torch.nn.Linear(n_channels, hidden)
+        self.fc1 = torch.nn.Linear(n_features, hidden)
         self.drop1 = torch.nn.Dropout(dropout)
         self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden, learn_beta=True, learn_threshold=True)
         self.fc2 = torch.nn.Linear(hidden, n_classes)
         self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
 
     def forward(self, x):
-        batch_size_local = x.shape[0]
-        n_steps = x.shape[1]
         spk1, mem1 = self.rlif1.init_rleaky()
         mem2 = self.lif2.init_leaky()
         spk2_rec = []
         mem2_rec = []
         spk1_rec = []
-
-        for t in range(n_steps):
-            cur1 = self.drop1(self.fc1(x[:, t, :]))
-            spk1, mem1 = self.rlif1(cur1, spk1, mem1)
+        fc1_out = self.drop1(self.fc1(x))
+        for step in range(num_steps):
+            spk1, mem1 = self.rlif1(fc1_out, spk1, mem1)
             spk1_rec.append(spk1)
             cur2 = self.fc2(spk1)
             spk2, mem2 = self.lif2(cur2, mem2)
             spk2_rec.append(spk2)
             mem2_rec.append(mem2)
-
         return (torch.stack(spk2_rec, dim=0),
                 torch.stack(mem2_rec, dim=0),
                 torch.stack(spk1_rec, dim=0))
@@ -219,7 +226,7 @@ class TemporalRecurrentNet(torch.nn.Module):
 # Training with sparsity penalty
 # ================================================================
 
-def train_temporal(net, num_epochs, lambda_sparse, label=""):
+def train_model(net, num_epochs, lambda_sparse, label=""):
     loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
@@ -237,7 +244,7 @@ def train_temporal(net, num_epochs, lambda_sparse, label=""):
             spk_out, mem_out, spk_hidden = net(data)
 
             ce_loss = torch.zeros(1, dtype=dtype, device=device)
-            for step in range(spk_out.shape[0]):
+            for step in range(num_steps):
                 ce_loss += loss_fn(mem_out[step], targets)
 
             firing_rate = spk_hidden.mean()
@@ -263,7 +270,7 @@ def train_temporal(net, num_epochs, lambda_sparse, label=""):
     return net
 
 
-def evaluate_temporal(net):
+def evaluate_model(net):
     total = 0
     correct = 0
     all_preds = []
@@ -291,7 +298,7 @@ def evaluate_temporal(net):
 
 
 # ================================================================
-# Analog hardware simulation helpers
+# Hardware simulation helpers
 # ================================================================
 
 def quantize_tensor(x, num_bits):
@@ -305,206 +312,74 @@ def quantize_tensor(x, num_bits):
 
 def combined_hw_evaluate(net, num_bits, sigma, num_trials=10):
     accs = []
+    frs = []
     for _ in range(num_trials):
         hw_net = copy.deepcopy(net)
         with torch.no_grad():
             for param in hw_net.parameters():
                 param.copy_(quantize_tensor(param, num_bits))
                 param.add_(torch.randn_like(param) * sigma)
-        acc, _, _, firing_rate = evaluate_temporal(hw_net)
+        acc, _, _, fr = evaluate_model(hw_net)
         accs.append(acc)
-    return np.mean(accs), np.std(accs), firing_rate
+        frs.append(fr)
+    return np.mean(accs), np.std(accs), np.mean(frs)
 
 
 # ================================================================
-# PHASE 1: Sweep hidden layer sizes
+# Config selection: CLI args or full sweep
 # ================================================================
-print("\n" + "=" * 60)
-print("PHASE 1: Architecture sweep (temporal encoding)")
-print("=" * 60)
-print(f"  Input: {num_channels} channels x {num_timesteps} timesteps")
-
-hidden_sizes = [64, 128, 256]
-num_epochs = 100
-
-arch_results = {}
-for hidden in hidden_sizes:
-    print(f"\n--- Hidden={hidden} ---")
-    net = TemporalRecurrentNet(num_channels, hidden, num_class).to(device)
-    n_params = sum(p.numel() for p in net.parameters())
-    print(f"  Parameters: {n_params:,}")
-    net = train_temporal(net, num_epochs, lambda_sparse=0.0, label=f"h{hidden}")
-    acc, preds, targets, fire_rate = evaluate_temporal(net)
-    print(f"  Accuracy: {acc:.2f}% | Firing rate: {fire_rate:.3f}")
-    arch_results[hidden] = {'net': net, 'acc': acc, 'fire_rate': fire_rate, 'params': n_params}
-
-best_hidden = max(arch_results, key=lambda h: arch_results[h]['acc'])
-print(f"\nBest architecture: hidden={best_hidden} ({arch_results[best_hidden]['acc']:.2f}%)")
-
-
-# ================================================================
-# PHASE 2: Sparsity penalty sweep on best architecture
-# ================================================================
-print("\n" + "=" * 60)
-print(f"PHASE 2: Sparsity sweep (hidden={best_hidden})")
-print("=" * 60)
-
-sparsity_lambdas = [0.0, 0.5, 1.0, 2.0, 5.0, 10.0]
-
-sparse_results = {}
-for lam in sparsity_lambdas:
-    print(f"\n--- lambda_sparse={lam} ---")
-    net = TemporalRecurrentNet(num_channels, best_hidden, num_class).to(device)
-    net = train_temporal(net, num_epochs, lambda_sparse=lam, label=f"s{lam}")
-    acc, preds, targets, fire_rate = evaluate_temporal(net)
-    print(f"  Accuracy: {acc:.2f}% | Firing rate: {fire_rate:.3f}")
-    sparse_results[lam] = {'net': net, 'acc': acc, 'fire_rate': fire_rate}
-
 from sklearn.metrics import classification_report, confusion_matrix
 
-# Pick best sparsity: highest accuracy among those with fire_rate < 0.15
-candidates = {l: r for l, r in sparse_results.items() if r['acc'] >= 95.0}
-if not candidates:
-    candidates = sparse_results
-best_lambda = min(candidates, key=lambda l: candidates[l]['fire_rate'])
-best_sparse = sparse_results[best_lambda]
-best_net = best_sparse['net']
+num_epochs = 100
 
-print(f"\nBest sparsity: lambda={best_lambda} | acc={best_sparse['acc']:.2f}% | "
-      f"fire_rate={best_sparse['fire_rate']:.3f}")
-
-acc_final, preds_final, targets_final, fire_rate_final = evaluate_temporal(best_net)
-print(classification_report(targets_final, preds_final, target_names=['N','S','V','F','Q']))
-print(confusion_matrix(targets_final, preds_final))
-
-
-# ================================================================
-# PHASE 3: Realistic hardware sweep (4-bit + noise)
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 3: 4-bit quantized + noise (realistic hardware)")
-print("=" * 60)
-
-noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
-
-hw_results = []
-for sigma in noise_levels:
-    mean_acc, std_acc, fr = combined_hw_evaluate(best_net, num_bits=4, sigma=sigma)
-    hw_results.append((sigma, mean_acc, std_acc))
-    print(f"  4-bit + sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
-
-
-# ================================================================
-# PHASE 4: Energy estimation
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 4: Energy per classification estimate")
-print("=" * 60)
-
-hidden = best_hidden
-fr = best_sparse['fire_rate']
-n_params_best = arch_results[best_hidden]['params']
-
-w1_weights = num_channels * hidden
-w_rec_weights = hidden * hidden
-w2_weights = hidden * num_class
-total_weights = w1_weights + w_rec_weights + w2_weights
+if args.hidden is not None and args.lam is not None:
+    configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
+else:
+    configs = [
+        (256, 0.0,  "h256_s0"),
+        (256, 1.0,  "h256_s1"),
+        (256, 5.0,  "h256_s5"),
+        (128, 0.0,  "h128_s0"),
+        (128, 1.0,  "h128_s1"),
+        (128, 5.0,  "h128_s5"),
+        (64,  0.0,  "h64_s0"),
+        (64,  1.0,  "h64_s1"),
+        (64,  5.0,  "h64_s5"),
+    ]
 
 pJ_per_MAC = 5.0
 
-w1_macs = num_channels * hidden * num_timesteps
-w_rec_macs = hidden * hidden * num_timesteps * fr
-w2_macs = hidden * num_class * num_timesteps * fr
-total_macs = w1_macs + w_rec_macs + w2_macs
+for hidden, lam, label in configs:
+    print(f"\n{'='*60}")
+    print(f"CONFIG: {label} (hidden={hidden}, lambda={lam})")
+    print(f"{'='*60}")
 
-crossbar_energy_pJ = total_macs * pJ_per_MAC
-crossbar_energy_nJ = crossbar_energy_pJ / 1000
-crossbar_energy_uJ = crossbar_energy_nJ / 1000
+    net = RecurrentNet(num_features, hidden, num_class).to(device)
+    n_params = sum(p.numel() for p in net.parameters())
+    print(f"Parameters: {n_params:,}")
 
-n_frontend_opamps = 10
-opamp_bias_uA = 0.1
-supply_V = 1.8
-frontend_power_uW = n_frontend_opamps * opamp_bias_uA * supply_V
-beat_window_s = 198 / 360.0
-frontend_energy_uJ = frontend_power_uW * beat_window_s
-frontend_energy_nJ = frontend_energy_uJ * 1000
+    net = train_model(net, num_epochs, lambda_sparse=lam, label=label)
+    acc, preds, targets, fire_rate = evaluate_model(net)
 
-n_pga = num_channels
-pga_bias_nA = 50
-pga_power_uW = n_pga * (pga_bias_nA / 1000) * supply_V
-pga_energy_uJ = pga_power_uW * beat_window_s
-pga_energy_nJ = pga_energy_uJ * 1000
+    w1_macs = num_features * hidden
+    w_rec_macs = hidden * hidden * num_steps * fire_rate
+    w2_macs = hidden * num_class * num_steps * fire_rate
+    total_macs = w1_macs + w_rec_macs + w2_macs
+    processor_nJ = total_macs * pJ_per_MAC / 1000
 
-neuron_energy_pJ = (hidden + num_class) * num_timesteps * 2
-neuron_energy_nJ = neuron_energy_pJ / 1000
+    print(f"\nRESULT: {label}")
+    print(f"  Accuracy:    {acc:.2f}%")
+    print(f"  Firing rate: {fire_rate:.3f} ({fire_rate*100:.1f}%)")
+    print(f"  Parameters:  {n_params:,}")
+    print(f"  MACs:        {total_macs:,.0f}")
+    print(f"  Processor:   {processor_nJ:.0f} nJ (Chu: 750 nJ, ratio: {processor_nJ/750:.2f}x)")
 
-total_energy_nJ = crossbar_energy_nJ + frontend_energy_nJ + pga_energy_nJ + neuron_energy_nJ
-total_energy_uJ = total_energy_nJ / 1000
+    print(classification_report(targets, preds, target_names=['N','S','V','F','Q']))
 
-print(f"\n  Architecture: {num_channels} -> {hidden} (RLeaky) -> {num_class}")
-print(f"  Timesteps: {num_timesteps}")
-print(f"  Firing rate: {fr:.3f} ({fr*100:.1f}%)")
-print(f"  Total weights: {total_weights:,}")
-
-print(f"\n  --- Crossbar energy ---")
-print(f"  W1 ({num_channels}x{hidden}): {num_channels*hidden*num_timesteps:,} MACs")
-print(f"  W_rec ({hidden}x{hidden}): {hidden*hidden*num_timesteps:.0f} MACs x {fr:.3f} sparsity = {w_rec_macs:,.0f} effective")
-print(f"  W2 ({hidden}x{num_class}): {hidden*num_class*num_timesteps:.0f} MACs x {fr:.3f} sparsity = {w2_macs:,.0f} effective")
-print(f"  Total effective MACs: {total_macs:,.0f}")
-print(f"  At {pJ_per_MAC} pJ/MAC: {crossbar_energy_nJ:.1f} nJ")
-
-print(f"\n  --- Analog front-end ---")
-print(f"  {n_frontend_opamps} op-amps @ {opamp_bias_uA} uA, {supply_V}V = {frontend_power_uW:.1f} uW")
-print(f"  Active {beat_window_s*1000:.0f} ms: {frontend_energy_nJ:.1f} nJ")
-
-print(f"\n  --- Normalization (PGA) ---")
-print(f"  {n_pga} stages @ {pga_bias_nA} nA, {supply_V}V = {pga_power_uW:.2f} uW")
-print(f"  Active {beat_window_s*1000:.0f} ms: {pga_energy_nJ:.1f} nJ")
-
-print(f"\n  --- Neurons ---")
-print(f"  {hidden + num_class} neurons x {num_timesteps} steps @ ~2 pJ = {neuron_energy_nJ:.1f} nJ")
-
-print(f"\n  ========================================")
-print(f"  TOTAL ENERGY: {total_energy_nJ:.1f} nJ ({total_energy_uJ:.3f} uJ)")
-print(f"  ========================================")
-
-heart_rate_bpm = 72
-beats_per_sec = heart_rate_bpm / 60
-avg_power_uW = total_energy_uJ * beats_per_sec
-print(f"\n  Avg power at {heart_rate_bpm} bpm: {avg_power_uW:.2f} uW")
-
-print(f"\n  --- Comparison ---")
-print(f"  This design (analog temporal):  {total_energy_nJ:.0f} nJ")
-print(f"  Chu et al. (digital spike SNN): 750 nJ")
-print(f"  Sadasivuni et al. (analog RC):  17.4 nJ")
-print(f"  Old design (412-ch front-end):  ~25,000 nJ")
-
-
-# ================================================================
-# SUMMARY
-# ================================================================
-print("\n" + "=" * 60)
-print("SUMMARY")
-print("=" * 60)
-
-print(f"\nArchitecture sweep:")
-for h in hidden_sizes:
-    r = arch_results[h]
-    print(f"  hidden={h}: {r['acc']:.2f}% | fire_rate={r['fire_rate']:.3f} | params={r['params']:,}")
-
-print(f"\nSparsity sweep (hidden={best_hidden}):")
-for lam in sparsity_lambdas:
-    r = sparse_results[lam]
-    print(f"  lambda={lam:5.1f}: {r['acc']:.2f}% | fire_rate={r['fire_rate']:.3f}")
-
-print(f"\nRealistic hardware (4-bit + noise):")
-for sigma, mean_acc, std_acc in hw_results:
-    print(f"  4-bit + sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
-
-print(f"\nBest config: hidden={best_hidden}, lambda={best_lambda}")
-print(f"  Accuracy: {best_sparse['acc']:.2f}%")
-print(f"  Firing rate: {best_sparse['fire_rate']:.3f}")
-print(f"  Energy: {total_energy_nJ:.1f} nJ/classification")
+    print(f"  Hardware sweep (4-bit + noise):")
+    for sigma in [0.0, 0.01, 0.02, 0.05, 0.1]:
+        mean_acc, std_acc, fr = combined_hw_evaluate(net, num_bits=4, sigma=sigma)
+        print(f"    sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
 
 total_time = time.time() - t0
 print(f"\nTotal runtime: {total_time:.0f}s ({total_time/60:.1f}min)")
