@@ -195,7 +195,7 @@ num_steps = 40
 # ================================================================
 
 class RecurrentNet(torch.nn.Module):
-    def __init__(self, n_features, hidden, n_classes, dropout=0.2):
+    def __init__(self, n_features, hidden, n_classes, dropout=0.1):
         super().__init__()
         self.fc1 = torch.nn.Linear(n_features, hidden)
         self.drop1 = torch.nn.Dropout(dropout)
@@ -229,10 +229,17 @@ class RecurrentNet(torch.nn.Module):
 def train_model(net, num_epochs, lambda_sparse, label=""):
     loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
+    warmup_epochs = 5
+    cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
 
     for epoch in range(num_epochs):
         epoch_start = time.time()
+
+        if epoch < warmup_epochs:
+            warmup_lr = 1e-3 * (epoch + 1) / warmup_epochs
+            for pg in optimizer.param_groups:
+                pg['lr'] = warmup_lr
+
         net.train()
         epoch_loss = 0.0
         epoch_sparsity = 0.0
@@ -260,7 +267,9 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
             epoch_sparsity += firing_rate.item()
             batches += 1
 
-        scheduler.step()
+        if epoch >= warmup_epochs:
+            cosine_scheduler.step()
+
         avg_rate = epoch_sparsity / batches
 
         if (epoch + 1) % 10 == 0 or epoch == 0:
@@ -330,21 +339,14 @@ def combined_hw_evaluate(net, num_bits, sigma, num_trials=10):
 # ================================================================
 from sklearn.metrics import classification_report, confusion_matrix
 
-num_epochs = 100
+num_epochs = 150
 
 if args.hidden is not None and args.lam is not None:
     configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
 else:
     configs = [
-        (256, 0.0,  "h256_s0"),
-        (256, 1.0,  "h256_s1"),
-        (256, 5.0,  "h256_s5"),
-        (128, 0.0,  "h128_s0"),
-        (128, 1.0,  "h128_s1"),
-        (128, 5.0,  "h128_s5"),
-        (64,  0.0,  "h64_s0"),
-        (64,  1.0,  "h64_s1"),
-        (64,  5.0,  "h64_s5"),
+        (64, 0.0,  "h64_s0"),
+        (64, 2.0,  "h64_s2"),
     ]
 
 pJ_per_MAC = 5.0

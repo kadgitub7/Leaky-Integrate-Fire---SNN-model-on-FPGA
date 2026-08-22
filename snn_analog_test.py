@@ -1,3 +1,5 @@
+import sys
+import argparse
 import snntorch as snn
 import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
@@ -9,12 +11,23 @@ from scipy.signal import lfilter
 from sklearn.model_selection import train_test_split
 import time
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--hidden', type=int, default=None)
+parser.add_argument('--lam', type=float, default=None)
+args = parser.parse_args()
+
+torch.set_num_threads(2)
+
 batch_size = 128
 dtype = torch.float
 
 # ================================================================
-# ANALOG FEATURE EXTRACTION (vectorized)
+# ANALOG FEATURE EXTRACTION (proven 412-feature bank)
 # ================================================================
+# Keep the full filter bank that achieves 97%+ accuracy.
+# The power optimization happens in the PROCESSOR (smaller hidden,
+# sparsity penalty) not the front-end. Benchmarks like Chu et al.
+# report processor-only energy, so we compare apples to apples.
 
 def rc_lowpass_batch(signals, alpha):
     b = [alpha]
@@ -172,71 +185,97 @@ print(f"Device: {device}")
 class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.65)
 class_weights = class_weights / class_weights.sum() * num_class
 class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
-print(f"Class loss weights: {[f'{w:.2f}' for w in class_weights]}")
 
 beta = 0.9
-hidden_layer = 256
-output_layer = num_class
 num_steps = 40
 
 
 # ================================================================
-# Recurrent SNN (analog crossbar)
+# Recurrent SNN with sparsity-aware training
 # ================================================================
 
 class RecurrentNet(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, n_features, hidden, n_classes, dropout=0.1):
         super().__init__()
-        self.fc1 = torch.nn.Linear(num_features, hidden_layer)
-        self.drop1 = torch.nn.Dropout(0.2)
-        self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden_layer, learn_beta=True, learn_threshold=True)
-        self.fc2 = torch.nn.Linear(hidden_layer, output_layer)
+        self.fc1 = torch.nn.Linear(n_features, hidden)
+        self.drop1 = torch.nn.Dropout(dropout)
+        self.rlif1 = snn.RLeaky(beta=beta, linear_features=hidden, learn_beta=True, learn_threshold=True)
+        self.fc2 = torch.nn.Linear(hidden, n_classes)
         self.lif2 = snn.Leaky(beta=beta, learn_beta=True, learn_threshold=True)
 
     def forward(self, x):
         spk1, mem1 = self.rlif1.init_rleaky()
         mem2 = self.lif2.init_leaky()
-        mem2_rec = []
         spk2_rec = []
+        mem2_rec = []
+        spk1_rec = []
         fc1_out = self.drop1(self.fc1(x))
         for step in range(num_steps):
             spk1, mem1 = self.rlif1(fc1_out, spk1, mem1)
+            spk1_rec.append(spk1)
             cur2 = self.fc2(spk1)
             spk2, mem2 = self.lif2(cur2, mem2)
-            mem2_rec.append(mem2)
             spk2_rec.append(spk2)
-        return torch.stack(spk2_rec, dim=0), torch.stack(mem2_rec, dim=0)
+            mem2_rec.append(mem2)
+        return (torch.stack(spk2_rec, dim=0),
+                torch.stack(mem2_rec, dim=0),
+                torch.stack(spk1_rec, dim=0))
 
 
 # ================================================================
-# Training
+# Training with sparsity penalty
 # ================================================================
 
-def train_model(net, num_epochs=100):
-    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
+def train_model(net, num_epochs, lambda_sparse, label=""):
+    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor, label_smoothing=0.1)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
+    warmup_epochs = 5
+    cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
+
     for epoch in range(num_epochs):
         epoch_start = time.time()
+
+        if epoch < warmup_epochs:
+            warmup_lr = 1e-3 * (epoch + 1) / warmup_epochs
+            for pg in optimizer.param_groups:
+                pg['lr'] = warmup_lr
+
         net.train()
         epoch_loss = 0.0
+        epoch_sparsity = 0.0
         batches = 0
+
         for data, targets in train_loader:
             data = data.to(device)
             targets = targets.to(device)
-            spk_rec, mem_rec = net(data)
-            loss_val = torch.zeros(1, dtype=dtype, device=device)
+            spk_out, mem_out, spk_hidden = net(data)
+
+            ce_loss = torch.zeros(1, dtype=dtype, device=device)
             for step in range(num_steps):
-                loss_val += loss_fn(mem_rec[step], targets)
+                ce_loss += loss_fn(mem_out[step], targets)
+
+            firing_rate = spk_hidden.mean()
+            sparsity_loss = lambda_sparse * firing_rate
+            total_loss = ce_loss + sparsity_loss
+
             optimizer.zero_grad()
-            loss_val.backward()
+            total_loss.backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
             optimizer.step()
-            epoch_loss += loss_val.item()
+
+            epoch_loss += ce_loss.item()
+            epoch_sparsity += firing_rate.item()
             batches += 1
-        scheduler.step()
+
+        if epoch >= warmup_epochs:
+            cosine_scheduler.step()
+
+        avg_rate = epoch_sparsity / batches
+
         if (epoch + 1) % 10 == 0 or epoch == 0:
-            print(f"  Epoch {epoch+1:3d}/{num_epochs} | loss: {epoch_loss/batches:.2f} | {time.time()-epoch_start:.1f}s")
+            print(f"  [{label}] Epoch {epoch+1:3d}/{num_epochs} | CE: {epoch_loss/batches:.2f} | "
+                  f"fire_rate: {avg_rate:.3f} | {time.time()-epoch_start:.1f}s")
+
     return net
 
 
@@ -245,36 +284,31 @@ def evaluate_model(net):
     correct = 0
     all_preds = []
     all_targets = []
+    total_spikes = 0
+    total_possible = 0
+
     with torch.no_grad():
         net.eval()
         for data, targets in test_loader:
             data = data.to(device)
             targets = targets.to(device)
-            test_spk, _ = net(data)
-            _, predicted = test_spk.sum(dim=0).max(1)
+            spk_out, _, spk_hidden = net(data)
+            _, predicted = spk_out.sum(dim=0).max(1)
             total += targets.size(0)
             correct += (predicted == targets).sum().item()
             all_preds.extend(predicted.cpu().numpy())
             all_targets.extend(targets.cpu().numpy())
+            total_spikes += spk_hidden.sum().item()
+            total_possible += spk_hidden.numel()
+
     acc = correct / total * 100
-    return acc, all_preds, all_targets
+    avg_firing_rate = total_spikes / total_possible
+    return acc, all_preds, all_targets, avg_firing_rate
 
 
 # ================================================================
-# Analog hardware simulation helpers
+# Hardware simulation helpers
 # ================================================================
-
-def inject_noise_and_evaluate(net, sigma, num_trials=10):
-    accs = []
-    for _ in range(num_trials):
-        noisy_net = copy.deepcopy(net)
-        with torch.no_grad():
-            for param in noisy_net.parameters():
-                param.add_(torch.randn_like(param) * sigma)
-        acc, _, _ = evaluate_model(noisy_net)
-        accs.append(acc)
-    return np.mean(accs), np.std(accs)
-
 
 def quantize_tensor(x, num_bits):
     qmin = -(2 ** (num_bits - 1))
@@ -285,114 +319,69 @@ def quantize_tensor(x, num_bits):
     return x_q
 
 
-def quantize_and_evaluate(net, num_bits):
-    q_net = copy.deepcopy(net)
-    with torch.no_grad():
-        for param in q_net.parameters():
-            param.copy_(quantize_tensor(param, num_bits))
-    acc, _, _ = evaluate_model(q_net)
-    return acc
-
-
-# ================================================================
-# PHASE 1: Train Recurrent SNN
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 1: Training Recurrent SNN (analog crossbar)")
-print("=" * 60)
-
-phase1_start = time.time()
-net = RecurrentNet().to(device)
-n_params = sum(p.numel() for p in net.parameters())
-print(f"  Parameters: {n_params:,}")
-net = train_model(net, num_epochs=100)
-acc, preds, targets = evaluate_model(net)
-print(f"\nAccuracy: {acc:.2f}% ({time.time()-phase1_start:.0f}s)")
-
-from sklearn.metrics import classification_report, confusion_matrix
-print(classification_report(targets, preds, target_names=['N','S','V','F','Q']))
-print(confusion_matrix(targets, preds))
-
-
-# ================================================================
-# PHASE 2: Noise injection sweep
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 2: Post-training noise injection sweep")
-print("=" * 60)
-
-noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
-
-noise_results = []
-for sigma in noise_levels:
-    mean_acc, std_acc = inject_noise_and_evaluate(net, sigma)
-    noise_results.append((sigma, mean_acc, std_acc))
-    print(f"  sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
-
-
-# ================================================================
-# PHASE 3: Quantization sweep
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 3: Post-training quantization sweep")
-print("=" * 60)
-
-bit_widths = [8, 6, 5, 4, 3, 2]
-
-quant_results = []
-for bits in bit_widths:
-    q_acc = quantize_and_evaluate(net, bits)
-    quant_results.append((bits, q_acc))
-    print(f"  {bits}-bit: {q_acc:.2f}%")
-
-
-# ================================================================
-# PHASE 4: Combined 4-bit quantization + noise sweep
-# ================================================================
-print("\n" + "=" * 60)
-print("PHASE 4: 4-bit quantized + noise injection (realistic hardware)")
-print("=" * 60)
-
-combined_noise_levels = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
-
-combined_results = []
-for sigma in combined_noise_levels:
+def combined_hw_evaluate(net, num_bits, sigma, num_trials=10):
     accs = []
-    for _ in range(10):
-        q_noisy_net = copy.deepcopy(net)
+    frs = []
+    for _ in range(num_trials):
+        hw_net = copy.deepcopy(net)
         with torch.no_grad():
-            for param in q_noisy_net.parameters():
-                param.copy_(quantize_tensor(param, 4))
+            for param in hw_net.parameters():
+                param.copy_(quantize_tensor(param, num_bits))
                 param.add_(torch.randn_like(param) * sigma)
-        q_acc, _, _ = evaluate_model(q_noisy_net)
-        accs.append(q_acc)
-    mean_acc = np.mean(accs)
-    std_acc = np.std(accs)
-    combined_results.append((sigma, mean_acc, std_acc))
-    print(f"  4-bit + sigma={sigma:.3f}  accuracy={mean_acc:.2f}% +/- {std_acc:.2f}%")
+        acc, _, _, fr = evaluate_model(hw_net)
+        accs.append(acc)
+        frs.append(fr)
+    return np.mean(accs), np.std(accs), np.mean(frs)
 
 
 # ================================================================
-# SUMMARY
+# Config selection: CLI args or full sweep
 # ================================================================
-print("\n" + "=" * 60)
-print("SUMMARY: Recurrent SNN (fully analog-compatible)")
-print("=" * 60)
+from sklearn.metrics import classification_report, confusion_matrix
 
-print(f"\nClean accuracy: {acc:.2f}%")
-print(f"Parameters: {n_params:,}")
+num_epochs = 250
 
-print(f"\nNoise robustness (full precision):")
-for sigma, mean_acc, std_acc in noise_results:
-    print(f"  sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
+if args.hidden is not None and args.lam is not None:
+    configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
+else:
+    configs = [
+        (64, 0.0,  "h64_s0"),
+        (64, 1.0,  "h64_s1"),
+    ]
 
-print(f"\nQuantization robustness (no noise):")
-for bits, q_acc in quant_results:
-    print(f"  {bits}-bit: {q_acc:.2f}%")
+pJ_per_MAC = 5.0
 
-print(f"\nRealistic hardware (4-bit quantized + noise):")
-for sigma, mean_acc, std_acc in combined_results:
-    print(f"  4-bit + sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
+for hidden, lam, label in configs:
+    print(f"\n{'='*60}")
+    print(f"CONFIG: {label} (hidden={hidden}, lambda={lam})")
+    print(f"{'='*60}")
+
+    net = RecurrentNet(num_features, hidden, num_class).to(device)
+    n_params = sum(p.numel() for p in net.parameters())
+    print(f"Parameters: {n_params:,}")
+
+    net = train_model(net, num_epochs, lambda_sparse=lam, label=label)
+    acc, preds, targets, fire_rate = evaluate_model(net)
+
+    w1_macs = num_features * hidden
+    w_rec_macs = hidden * hidden * num_steps * fire_rate
+    w2_macs = hidden * num_class * num_steps * fire_rate
+    total_macs = w1_macs + w_rec_macs + w2_macs
+    processor_nJ = total_macs * pJ_per_MAC / 1000
+
+    print(f"\nRESULT: {label}")
+    print(f"  Accuracy:    {acc:.2f}%")
+    print(f"  Firing rate: {fire_rate:.3f} ({fire_rate*100:.1f}%)")
+    print(f"  Parameters:  {n_params:,}")
+    print(f"  MACs:        {total_macs:,.0f}")
+    print(f"  Processor:   {processor_nJ:.0f} nJ (Chu: 750 nJ, ratio: {processor_nJ/750:.2f}x)")
+
+    print(classification_report(targets, preds, target_names=['N','S','V','F','Q']))
+
+    print(f"  Hardware sweep (4-bit + noise):")
+    for sigma in [0.0, 0.01, 0.02, 0.05, 0.1]:
+        mean_acc, std_acc, fr = combined_hw_evaluate(net, num_bits=4, sigma=sigma)
+        print(f"    sigma={sigma:.3f}  {mean_acc:.2f}% +/- {std_acc:.2f}%")
 
 total_time = time.time() - t0
 print(f"\nTotal runtime: {total_time:.0f}s ({total_time/60:.1f}min)")
