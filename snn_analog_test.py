@@ -187,7 +187,7 @@ class_weights = class_weights / class_weights.sum() * num_class
 class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
 
 beta = 0.9
-num_steps = 40
+num_steps = 50
 
 
 # ================================================================
@@ -227,7 +227,7 @@ class RecurrentNet(torch.nn.Module):
 # ================================================================
 
 def train_model(net, num_epochs, lambda_sparse, label=""):
-    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor, label_smoothing=0.1)
+    loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, betas=(0.9, 0.999), weight_decay=1e-4)
     warmup_epochs = 5
     cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
@@ -346,7 +346,7 @@ if args.hidden is not None and args.lam is not None:
 else:
     configs = [
         (64, 0.0,  "h64_s0"),
-        (64, 1.0,  "h64_s1"),
+        (64, 1.5,  "h64_s1.5"),
     ]
 
 pJ_per_MAC = 5.0
