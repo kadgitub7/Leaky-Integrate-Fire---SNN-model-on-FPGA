@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 torch.set_num_threads(2)
 
-batch_size = 128
+batch_size = 64
 dtype = torch.float
 
 # ================================================================
@@ -339,7 +339,7 @@ def combined_hw_evaluate(net, num_bits, sigma, num_trials=10):
 # ================================================================
 from sklearn.metrics import classification_report, confusion_matrix
 
-num_epochs = 250
+num_epochs = 300
 
 if args.hidden is not None and args.lam is not None:
     configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
@@ -347,6 +347,7 @@ else:
     configs = [
         (64, 0.0,  "h64_s0"),
         (64, 1.5,  "h64_s1.5"),
+        (64, 2.0, "h64_s2.0")
     ]
 
 pJ_per_MAC = 5.0

@@ -339,7 +339,7 @@ def combined_hw_evaluate(net, num_bits, sigma, num_trials=10):
 # ================================================================
 from sklearn.metrics import classification_report, confusion_matrix
 
-num_epochs = 150
+num_epochs = 200
 
 if args.hidden is not None and args.lam is not None:
     configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
