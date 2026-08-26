@@ -248,6 +248,7 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
         for data, targets in train_loader:
             data = data.to(device)
             targets = targets.to(device)
+
             spk_out, mem_out, spk_hidden = net(data)
 
             ce_loss = torch.zeros(1, dtype=dtype, device=device)
@@ -345,8 +346,7 @@ if args.hidden is not None and args.lam is not None:
     configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
 else:
     configs = [
-        (64, 0.0,  "h64_s0"),
-        (64, 2.0,  "h64_s2"),
+        (80, 2.0,  "h80_s2"),
     ]
 
 pJ_per_MAC = 5.0
