@@ -346,7 +346,7 @@ if args.hidden is not None and args.lam is not None:
     configs = [(args.hidden, args.lam, f"h{args.hidden}_s{args.lam}")]
 else:
     configs = [
-        (80, 2.0,  "h80_s2"),
+        (80, 1.0,  "h80_s1"),
     ]
 
 pJ_per_MAC = 5.0

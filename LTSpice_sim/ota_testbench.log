@@ -1,6 +1,6 @@
 LTspice 26.0.2 for Windows
 Circuit: C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\LTSpice_sim\ota_testbench.net
-Start Time: Tue Aug 25 14:42:04 2026
+Start Time: Wed Aug 26 13:30:42 2026
 solver = Normal
 Maximum thread count: 8
 tnom = 27
@@ -14,7 +14,7 @@ Instance "x1:M5": Length shorter than recommended for a level 1 MOSFET.
 Instance "x1:M5": Width narrower than recommended for a level 1 MOSFET.
 Instance "x1:M3": Length shorter than recommended for a level 1 MOSFET.
 Instance "x1:M4": Length shorter than recommended for a level 1 MOSFET.
-Total elapsed time: 0.381 seconds.
+Total elapsed time: 0.580 seconds.
 
 Files loaded:
 C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\LTSpice_sim\ota_testbench.net
