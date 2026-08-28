@@ -232,6 +232,9 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
     warmup_epochs = 5
     cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
 
+    best_ce = float('inf')
+    best_state = None
+
     for epoch in range(num_epochs):
         epoch_start = time.time()
 
@@ -271,11 +274,20 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
         if epoch >= warmup_epochs:
             cosine_scheduler.step()
 
+        avg_ce = epoch_loss / batches
         avg_rate = epoch_sparsity / batches
 
+        if avg_ce < best_ce:
+            best_ce = avg_ce
+            best_state = copy.deepcopy(net.state_dict())
+
         if (epoch + 1) % 10 == 0 or epoch == 0:
-            print(f"  [{label}] Epoch {epoch+1:3d}/{num_epochs} | CE: {epoch_loss/batches:.2f} | "
+            print(f"  [{label}] Epoch {epoch+1:3d}/{num_epochs} | CE: {avg_ce:.2f} | "
                   f"fire_rate: {avg_rate:.3f} | {time.time()-epoch_start:.1f}s")
+
+    if best_state is not None:
+        net.load_state_dict(best_state)
+        print(f"  [{label}] Restored best model (CE={best_ce:.3f})")
 
     return net
 
