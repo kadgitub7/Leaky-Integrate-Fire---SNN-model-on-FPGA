@@ -252,6 +252,12 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
             data = data.to(device)
             targets = targets.to(device)
 
+            saved_weights = []
+            with torch.no_grad():
+                for param in net.parameters():
+                    saved_weights.append(param.data.clone())
+                    param.data.copy_(quantize_tensor(param.data, 4))
+
             spk_out, mem_out, spk_hidden = net(data)
 
             ce_loss = torch.zeros(1, dtype=dtype, device=device)
@@ -259,11 +265,17 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
                 ce_loss += loss_fn(mem_out[step], targets)
 
             firing_rate = spk_hidden.mean()
-            sparsity_loss = lambda_sparse * firing_rate
+            target_rate = 0.15
+            sparsity_loss = lambda_sparse * torch.clamp(firing_rate - target_rate, min=0.0)
             total_loss = ce_loss + sparsity_loss
 
             optimizer.zero_grad()
             total_loss.backward()
+
+            with torch.no_grad():
+                for param, saved in zip(net.parameters(), saved_weights):
+                    param.data.copy_(saved)
+
             torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
             optimizer.step()
 
@@ -287,7 +299,10 @@ def train_model(net, num_epochs, lambda_sparse, label=""):
 
     if best_state is not None:
         net.load_state_dict(best_state)
-        print(f"  [{label}] Restored best model (CE={best_ce:.3f})")
+        with torch.no_grad():
+            for param in net.parameters():
+                param.data.copy_(quantize_tensor(param.data, 4))
+        print(f"  [{label}] Restored best model (CE={best_ce:.3f}), weights quantized to 4-bit")
 
     return net
 
