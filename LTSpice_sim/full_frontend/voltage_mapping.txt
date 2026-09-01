@@ -1,0 +1,6 @@
+# Fixed voltage mapping: V_circuit = Vref + (V_mV - center) * scale
+Vref = 0.9
+center_mV = -0.002500
+scale = 0.136786
+global_min_mV = -5.120000
+global_max_mV = 5.115000
