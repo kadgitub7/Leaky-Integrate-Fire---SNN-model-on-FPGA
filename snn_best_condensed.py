@@ -1,20 +1,26 @@
 """
-CONDENSED BEST MODEL v2: Parameterized for A/B comparison
-==========================================================
-Run conservative vs aggressive to find the accuracy sweet spot:
+CONDENSED BEST MODEL v3: Fix overfitting, revert harmful changes
+================================================================
+Reverts to proven Exp B configuration (91.45% inter) and adds principled fixes:
 
-  CONSERVATIVE (safe, ~45 nJ):
-    python snn_best_condensed.py --split inter --hidden 48 --gamma 2.0 --cls_power 0.65 --label_smooth 0.0
+  REVERTED (v2 mistakes):
+    - Dropped post_rr_ratio (redundant, derivable from rr_ratio + compensatory_ratio)
+    - Back to SMOTE 0.33 (0.5 was worse — too many synthetic minority samples)
+    - Back to 16 features from ~11 circuits
 
-  AGGRESSIVE (push minority classes, ~68 nJ):
-    python snn_best_condensed.py --split inter --hidden 64 --gamma 3.0 --cls_power 0.5 --label_smooth 0.05
+  NEW (principled fixes):
+    - Validation-based early stopping (10% train holdout for checkpoint selection)
+    - Longer RR baseline window (20 beats instead of 10) for more stable local_rr
+    - Patience-based stopping (stop after 30 epochs of no validation improvement)
+    - Multi-seed ensemble option (majority vote, no new hardware)
 
-  Both use: 17 features, 400 epochs, SMOTE 0.5, QAT-4bit, focal loss, gated EWMA
+  Architecture: 16 -> BN -> 48 RLeaky -> 24 RLeaky -> 5 Leaky
+  Training: Focal(g=2) + SMOTE(0.33) + QAT-4bit + val-based checkpointing
 
-  17 features from ~11 circuits (~130 nW):
-    Timing (7):  pre_rr, post_rr, rr_ratio, post_rr_ratio, rr_asymmetry,
-                 compensatory_ratio, rr_std_10
-    Morph (10):  qrs_width x2, qrs_area x2, max_slope x2, rel_area x2, templ_corr x2
+Usage:
+  python snn_best_condensed.py --split inter
+  python snn_best_condensed.py --split intra
+  python snn_best_condensed.py --split inter --ensemble 3    # 3-model majority vote
 """
 
 import argparse
@@ -25,21 +31,21 @@ import numpy as np
 import wfdb
 import os
 import copy
+from collections import Counter
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 import time
 
-parser = argparse.ArgumentParser(description='Best condensed SNN model')
+parser = argparse.ArgumentParser(description='Best condensed SNN model v3')
 parser.add_argument('--hidden', type=int, default=48)
 parser.add_argument('--steps', type=int, default=20)
-parser.add_argument('--epochs', type=int, default=400)
+parser.add_argument('--epochs', type=int, default=300)
+parser.add_argument('--patience', type=int, default=40, help='Early stopping patience on val accuracy')
 parser.add_argument('--lam', type=float, default=1.0)
 parser.add_argument('--split', choices=['intra', 'inter', 'both'], default='inter')
-parser.add_argument('--smote_ratio', type=float, default=0.5)
-parser.add_argument('--gamma', type=float, default=2.0, help='Focal loss gamma')
-parser.add_argument('--cls_power', type=float, default=0.65, help='Class weight power (lower=more aggressive)')
-parser.add_argument('--label_smooth', type=float, default=0.0, help='Label smoothing factor')
-parser.add_argument('--runs', type=int, default=1)
+parser.add_argument('--smote_ratio', type=float, default=0.33)
+parser.add_argument('--rr_window', type=int, default=20, help='RR baseline averaging window')
+parser.add_argument('--ensemble', type=int, default=1, help='Number of models for majority vote')
 args = parser.parse_args()
 
 torch.set_num_threads(2)
@@ -48,7 +54,7 @@ num_class = 5
 t0 = time.time()
 
 FEATURE_NAMES = [
-    'pre_rr', 'post_rr', 'rr_ratio', 'post_rr_ratio', 'rr_asymmetry', 'compensatory_ratio', 'rr_std_10',
+    'pre_rr', 'post_rr', 'rr_ratio', 'rr_asymmetry', 'compensatory_ratio', 'rr_std_10',
     'qrs_width_L0', 'qrs_width_L1',
     'qrs_area_L0', 'qrs_area_L1',
     'max_slope_L0', 'max_slope_L1',
@@ -94,6 +100,7 @@ def extract_beats_and_features(rec_list):
     all_labels = []
     all_features = []
     n_feat = len(FEATURE_NAMES)
+    rr_win = args.rr_window
 
     for rec_id in rec_list:
         record_path = os.path.join('./mitdb_data', rec_id)
@@ -125,17 +132,16 @@ def extract_beats_and_features(rec_list):
                 post_rr = (valid[i+1][0] - idx) / fs if i < len(valid) - 1 else 0.833
 
                 local_rrs = []
-                for j in range(max(1, i - 10), i + 1):
+                for j in range(max(1, i - rr_win), i + 1):
                     local_rrs.append((valid[j][0] - valid[j-1][0]) / fs)
                 local_rr = np.mean(local_rrs) if local_rrs else 0.833
                 rr_ratio = pre_rr / (local_rr + 1e-8)
 
-                post_rr_ratio = post_rr / (local_rr + 1e-8)
                 rr_asymmetry = pre_rr / (post_rr + 1e-8)
                 compensatory_ratio = (pre_rr + post_rr) / (2 * local_rr + 1e-8)
 
                 rr_history.append(pre_rr)
-                if len(rr_history) > 10:
+                if len(rr_history) > rr_win:
                     rr_history.pop(0)
                 rr_std_10 = np.std(rr_history) if len(rr_history) >= 2 else 0.0
 
@@ -143,10 +149,9 @@ def extract_beats_and_features(rec_list):
                 feat[0] = pre_rr
                 feat[1] = post_rr
                 feat[2] = rr_ratio
-                feat[3] = post_rr_ratio
-                feat[4] = rr_asymmetry
-                feat[5] = compensatory_ratio
-                feat[6] = rr_std_10
+                feat[3] = rr_asymmetry
+                feat[4] = compensatory_ratio
+                feat[5] = rr_std_10
 
                 for lead in range(num_leads):
                     qrs = beat[QRS_START:QRS_END, lead]
@@ -169,9 +174,9 @@ def extract_beats_and_features(rec_list):
                     tmpl_idx = np.linspace(0, len(qrs) - 1, N_TEMPLATE).astype(int)
                     qrs_ds = qrs[tmpl_idx]
 
-                    feat[7 + lead] = width
-                    feat[9 + lead] = area
-                    feat[11 + lead] = max_slope
+                    feat[6 + lead] = width
+                    feat[8 + lead] = area
+                    feat[10 + lead] = max_slope
 
                     if i < EWMA_INIT_BEATS:
                         init_areas[lead].append(max(area, 1e-6))
@@ -185,7 +190,7 @@ def extract_beats_and_features(rec_list):
                             ewma_area[lead] = max(area, 1e-6)
                             ewma_template[lead] = qrs_ds.copy()
 
-                    feat[13 + lead] = area / (ewma_area[lead] + 1e-8)
+                    feat[12 + lead] = area / (ewma_area[lead] + 1e-8)
 
                     norm_curr = np.linalg.norm(qrs_ds)
                     norm_tmpl = np.linalg.norm(ewma_template[lead])
@@ -193,7 +198,7 @@ def extract_beats_and_features(rec_list):
                         templ_corr = np.dot(qrs_ds, ewma_template[lead]) / (norm_curr * norm_tmpl)
                     else:
                         templ_corr = 1.0
-                    feat[15 + lead] = templ_corr
+                    feat[14 + lead] = templ_corr
 
                     if templ_corr > EWMA_GATE_THRESH:
                         a = EWMA_ALPHA_MORPH
@@ -208,8 +213,7 @@ def extract_beats_and_features(rec_list):
     return np.array(all_labels), np.array(all_features)
 
 
-def smote_oversample(features, labels, target_ratio=0.5):
-    from collections import Counter
+def smote_oversample(features, labels, target_ratio=0.33):
     counts = Counter(labels)
     max_count = max(counts.values())
     target_count = int(max_count * target_ratio)
@@ -240,15 +244,12 @@ def smote_oversample(features, labels, target_ratio=0.5):
 
 
 class FocalLoss(torch.nn.Module):
-    def __init__(self, weight=None, gamma=2.0, label_smoothing=0.0):
+    def __init__(self, weight=None, gamma=2.0):
         super().__init__()
         self.gamma = gamma
         self.weight = weight
-        self.label_smoothing = label_smoothing
     def forward(self, input, target):
-        ce = torch.nn.functional.cross_entropy(
-            input, target, weight=self.weight, reduction='none',
-            label_smoothing=self.label_smoothing)
+        ce = torch.nn.functional.cross_entropy(input, target, weight=self.weight, reduction='none')
         pt = torch.exp(-ce)
         return (((1 - pt) ** self.gamma) * ce).mean()
 
@@ -298,13 +299,33 @@ def quantize_tensor(x, num_bits):
     return torch.clamp(torch.round(x / scale), qmin, qmax) * scale
 
 
-def train_model(net, train_loader, class_weights_tensor, num_epochs, num_steps, lambda_sparse, device, label=""):
-    loss_fn = FocalLoss(weight=class_weights_tensor, gamma=args.gamma, label_smoothing=args.label_smooth)
+def evaluate(net, loader, num_steps, device):
+    total = correct = 0
+    all_preds, all_targets = [], []
+    total_spikes = total_possible = 0
+    with torch.no_grad():
+        net.eval()
+        for data, targets in loader:
+            data, targets = data.to(device), targets.to(device)
+            spk_out, _, spk_hidden = net(data, num_steps)
+            _, pred = spk_out.sum(dim=0).max(1)
+            total += targets.size(0)
+            correct += (pred == targets).sum().item()
+            all_preds.extend(pred.cpu().numpy())
+            all_targets.extend(targets.cpu().numpy())
+            total_spikes += spk_hidden.sum().item()
+            total_possible += spk_hidden.numel()
+    return correct / total * 100, all_preds, all_targets, total_spikes / total_possible
+
+
+def train_model(net, train_loader, val_loader, class_weights_tensor, num_epochs, num_steps, lambda_sparse, device, label=""):
+    loss_fn = FocalLoss(weight=class_weights_tensor, gamma=2.0)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, weight_decay=1e-4)
     warmup_epochs = 5
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
-    best_ce = float('inf')
+    best_val_acc = 0.0
     best_state = None
+    patience_counter = 0
 
     for epoch in range(num_epochs):
         if epoch < warmup_epochs:
@@ -336,37 +357,30 @@ def train_model(net, train_loader, class_weights_tensor, num_epochs, num_steps, 
             batches += 1
         if epoch >= warmup_epochs:
             scheduler.step()
+
         avg_ce = epoch_loss / batches
-        if avg_ce < best_ce:
-            best_ce = avg_ce
+        val_acc, _, _, _ = evaluate(net, val_loader, num_steps, device)
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
             best_state = copy.deepcopy(net.state_dict())
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
         if (epoch + 1) % 20 == 0 or epoch == 0:
-            print(f"  [{label}] Epoch {epoch+1:3d}/{num_epochs} | CE: {avg_ce:.2f} | fire: {epoch_rate/batches:.3f} | {time.time()-t0:.0f}s")
+            print(f"  [{label}] Epoch {epoch+1:3d}/{num_epochs} | CE: {avg_ce:.2f} | fire: {epoch_rate/batches:.3f} | val: {val_acc:.2f}% (best: {best_val_acc:.2f}%) | {time.time()-t0:.0f}s")
+
+        if patience_counter >= args.patience and epoch >= 50:
+            print(f"  [{label}] Early stopping at epoch {epoch+1} (patience={args.patience}, best val={best_val_acc:.2f}%)")
+            break
+
     if best_state:
         net.load_state_dict(best_state)
         with torch.no_grad():
             for p in net.parameters():
                 p.data.copy_(quantize_tensor(p.data, 4))
     return net
-
-
-def evaluate(net, loader, num_steps, device):
-    total = correct = 0
-    all_preds, all_targets = [], []
-    total_spikes = total_possible = 0
-    with torch.no_grad():
-        net.eval()
-        for data, targets in loader:
-            data, targets = data.to(device), targets.to(device)
-            spk_out, _, spk_hidden = net(data, num_steps)
-            _, pred = spk_out.sum(dim=0).max(1)
-            total += targets.size(0)
-            correct += (pred == targets).sum().item()
-            all_preds.extend(pred.cpu().numpy())
-            all_targets.extend(targets.cpu().numpy())
-            total_spikes += spk_hidden.sum().item()
-            total_possible += spk_hidden.numel()
-    return correct / total * 100, all_preds, all_targets, total_spikes / total_possible
 
 
 def compute_energy(num_features, h1, h2, num_steps, fire_rate):
@@ -398,27 +412,67 @@ def hardware_robustness_sweep(net, test_loader, num_steps, device):
         print(f"    sigma={sigma:.2f}: {np.mean(accs):.2f}% (+/- {np.std(accs):.2f}%)")
 
 
-def print_results(acc, preds, targets, fire_rate, n_params, num_features, h1, h2, num_steps, split_name):
-    print(f"\n{'='*65}")
-    print(f"RESULTS: {acc:.2f}% ({split_name}-patient)")
-    print(f"  Parameters: {n_params:,} | Firing rate: {fire_rate:.3f}")
-    print(classification_report(targets, preds, target_names=['N', 'S', 'V', 'F', 'Q']))
-    cm = confusion_matrix(targets, preds)
-    print(f"Confusion matrix:")
-    print(f"  {'':>5} {'N':>6} {'S':>6} {'V':>6} {'F':>6} {'Q':>6}")
-    for i, lbl in enumerate(['N', 'S', 'V', 'F', 'Q']):
-        print(f"  {lbl:>5} {' '.join(f'{v:>6}' for v in cm[i])}")
-
-    total_macs, cls_nJ, frontend_nJ, total_nJ = compute_energy(num_features, h1, h2, num_steps, fire_rate)
-    print(f"\n  Energy: {total_macs:,.0f} MACs, classifier={cls_nJ:.1f}nJ @2pJ/MAC, frontend={frontend_nJ:.1f}nJ, total={total_nJ:.1f}nJ")
-
-
-def run_split(split_name, seed=42):
+def run_single_model(train_features, train_labels, test_features, test_labels, seed, split_name):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+    num_features = train_features.shape[1]
+
+    tr_feat_smote, tr_lbl_smote = smote_oversample(train_features, train_labels, target_ratio=args.smote_ratio)
+    print(f"  After SMOTE (ratio={args.smote_ratio}): {np.bincount(tr_lbl_smote, minlength=5)}")
+
+    tr_mean = tr_feat_smote.mean(axis=0)
+    tr_std = tr_feat_smote.std(axis=0)
+    tr_feat_norm = (tr_feat_smote - tr_mean) / (tr_std + 1e-8)
+    te_feat_norm = (test_features - tr_mean) / (tr_std + 1e-8)
+
+    # Split 10% of training for validation-based checkpointing
+    tr_idx, val_idx = train_test_split(
+        np.arange(len(tr_lbl_smote)), test_size=0.1, random_state=seed, stratify=tr_lbl_smote)
+
+    class FeatureDataset(torch.utils.data.Dataset):
+        def __init__(self, features, labels):
+            self.data = torch.tensor(features, dtype=torch.float32)
+            self.targets = torch.tensor(labels, dtype=torch.long)
+        def __len__(self): return len(self.data)
+        def __getitem__(self, idx): return self.data[idx], self.targets[idx]
+
+    train_dataset = FeatureDataset(tr_feat_norm[tr_idx], tr_lbl_smote[tr_idx])
+    val_dataset = FeatureDataset(tr_feat_norm[val_idx], tr_lbl_smote[val_idx])
+    test_dataset = FeatureDataset(te_feat_norm, test_labels)
+
+    train_label_counts = np.bincount(tr_lbl_smote[tr_idx], minlength=num_class)
+    class_sample_weights = 1.0 / (train_label_counts ** 0.65)
+    sample_weights = [class_sample_weights[l] for l in tr_lbl_smote[tr_idx]]
+    sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+
+    device = (torch.device("cuda") if torch.cuda.is_available()
+              else torch.device("mps") if torch.backends.mps.is_available()
+              else torch.device("cpu"))
+
+    class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.65)
+    class_weights = class_weights / class_weights.sum() * num_class
+    class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
+
+    hidden = args.hidden
+    num_steps = args.steps
+    net = MinimalSNN(num_features, hidden, num_class).to(device)
+    h1, h2 = net.h1, net.h2
+    n_params = sum(p.numel() for p in net.parameters())
+
+    label = f"{split_name}_seed{seed}"
+    net = train_model(net, train_loader, val_loader, class_weights_tensor, args.epochs, num_steps, args.lam, device, label=label)
+
+    return net, test_loader, device, n_params, h1, h2, num_features
+
+
+def run_split(split_name):
     print(f"\n{'#'*65}")
-    print(f"# {split_name.upper()}-PATIENT EVALUATION (seed={seed})")
+    print(f"# {split_name.upper()}-PATIENT EVALUATION")
     print(f"{'#'*65}")
 
     print("Loading data and extracting features...")
@@ -430,63 +484,87 @@ def run_split(split_name, seed=42):
     else:
         all_labels, all_features = extract_beats_and_features(all_record_names)
         train_idx, test_idx = train_test_split(
-            np.arange(len(all_labels)), test_size=0.2, random_state=seed, stratify=all_labels)
+            np.arange(len(all_labels)), test_size=0.2, random_state=42, stratify=all_labels)
         train_features, test_features = all_features[train_idx], all_features[test_idx]
         train_labels, test_labels = all_labels[train_idx], all_labels[test_idx]
 
-    num_features = train_features.shape[1]
-
     print(f"  Before SMOTE: {np.bincount(train_labels, minlength=5)}")
-    train_features, train_labels = smote_oversample(train_features, train_labels, target_ratio=args.smote_ratio)
-    print(f"  After SMOTE (ratio={args.smote_ratio}): {np.bincount(train_labels, minlength=5)}")
+    print(f"  RR baseline window: {args.rr_window} beats")
 
-    train_mean = train_features.mean(axis=0)
-    train_std = train_features.std(axis=0)
-    train_features = (train_features - train_mean) / (train_std + 1e-8)
-    test_features = (test_features - train_mean) / (train_std + 1e-8)
+    n_models = args.ensemble
+    if n_models == 1:
+        net, test_loader, device, n_params, h1, h2, num_features = run_single_model(
+            train_features, train_labels, test_features, test_labels, seed=42, split_name=split_name)
 
-    class FeatureDataset(torch.utils.data.Dataset):
-        def __init__(self, features, labels):
-            self.data = torch.tensor(features, dtype=torch.float32)
-            self.targets = torch.tensor(labels, dtype=torch.long)
-        def __len__(self): return len(self.data)
-        def __getitem__(self, idx): return self.data[idx], self.targets[idx]
+        print(f"\n  Architecture: {num_features} -> BN -> {h1} RLeaky -> {h2} RLeaky -> 5 Leaky")
+        print(f"  Parameters:   {n_params:,}")
 
-    train_dataset = FeatureDataset(train_features, train_labels)
-    test_dataset = FeatureDataset(test_features, test_labels)
-    train_label_counts = np.bincount(train_labels, minlength=num_class)
-    class_sample_weights = 1.0 / (train_label_counts ** args.cls_power)
-    sample_weights = [class_sample_weights[l] for l in train_labels]
-    sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+        acc, preds, targets, fire_rate = evaluate(net, test_loader, args.steps, device)
 
-    device = (torch.device("cuda") if torch.cuda.is_available()
-              else torch.device("mps") if torch.backends.mps.is_available()
-              else torch.device("cpu"))
+        print(f"\n{'='*65}")
+        print(f"RESULTS: {acc:.2f}% ({split_name}-patient)")
+        print(f"  Parameters: {n_params:,} | Firing rate: {fire_rate:.3f}")
+        print(classification_report(targets, preds, target_names=['N', 'S', 'V', 'F', 'Q']))
+        cm = confusion_matrix(targets, preds)
+        print(f"Confusion matrix:")
+        print(f"  {'':>5} {'N':>6} {'S':>6} {'V':>6} {'F':>6} {'Q':>6}")
+        for i, lbl in enumerate(['N', 'S', 'V', 'F', 'Q']):
+            print(f"  {lbl:>5} {' '.join(f'{v:>6}' for v in cm[i])}")
 
-    class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** args.cls_power)
-    class_weights = class_weights / class_weights.sum() * num_class
-    class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
+        total_macs, cls_nJ, frontend_nJ, total_nJ = compute_energy(num_features, h1, h2, args.steps, fire_rate)
+        print(f"\n  Energy: {total_macs:,.0f} MACs, classifier={cls_nJ:.1f}nJ @2pJ/MAC, frontend={frontend_nJ:.1f}nJ, total={total_nJ:.1f}nJ")
 
-    hidden = args.hidden
-    num_steps = args.steps
-    net = MinimalSNN(num_features, hidden, num_class).to(device)
-    h1, h2 = net.h1, net.h2
-    n_params = sum(p.numel() for p in net.parameters())
+        hardware_robustness_sweep(net, test_loader, args.steps, device)
+        return acc, n_params, total_nJ
 
-    print(f"\n  Architecture: {num_features} -> BN -> {h1} RLeaky -> {h2} RLeaky -> 5 Leaky")
-    print(f"  Parameters:   {n_params:,}")
-    print(f"  Hyperparams:  gamma={args.gamma}, cls_power={args.cls_power}, label_smooth={args.label_smooth}")
+    else:
+        print(f"\n  ENSEMBLE: Training {n_models} models for majority vote...")
+        models = []
+        for i in range(n_models):
+            seed = 42 + i * 13
+            print(f"\n  --- Model {i+1}/{n_models} (seed={seed}) ---")
+            net, test_loader, device, n_params, h1, h2, num_features = run_single_model(
+                train_features, train_labels, test_features, test_labels, seed=seed, split_name=split_name)
+            models.append(net)
 
-    label = f"{split_name}_h{hidden}_g{args.gamma}"
-    net = train_model(net, train_loader, class_weights_tensor, args.epochs, num_steps, args.lam, device, label=label)
-    acc, preds, targets, fire_rate = evaluate(net, test_loader, num_steps, device)
-    print_results(acc, preds, targets, fire_rate, n_params, num_features, h1, h2, num_steps, split_name)
-    hardware_robustness_sweep(net, test_loader, num_steps, device)
+        # Majority vote
+        all_model_preds = []
+        all_targets = []
+        total_fire = 0.0
+        for net in models:
+            _, preds, targets, fire_rate = evaluate(net, test_loader, args.steps, device)
+            all_model_preds.append(preds)
+            total_fire += fire_rate
+            if not all_targets:
+                all_targets = targets
+        avg_fire = total_fire / n_models
 
-    _, _, _, total_nJ = compute_energy(num_features, h1, h2, num_steps, fire_rate)
-    return acc, n_params, fire_rate, total_nJ
+        ensemble_preds = []
+        for j in range(len(all_targets)):
+            votes = [all_model_preds[m][j] for m in range(n_models)]
+            ensemble_preds.append(max(set(votes), key=votes.count))
+
+        acc = sum(p == t for p, t in zip(ensemble_preds, all_targets)) / len(all_targets) * 100
+
+        # Individual model accuracies
+        for i in range(n_models):
+            ind_acc = sum(p == t for p, t in zip(all_model_preds[i], all_targets)) / len(all_targets) * 100
+            print(f"  Model {i+1} individual: {ind_acc:.2f}%")
+
+        print(f"\n{'='*65}")
+        print(f"ENSEMBLE RESULTS: {acc:.2f}% ({split_name}-patient, {n_models}-model majority vote)")
+        print(f"  Parameters per model: {n_params:,} | Avg firing rate: {avg_fire:.3f}")
+        print(classification_report(all_targets, ensemble_preds, target_names=['N', 'S', 'V', 'F', 'Q']))
+        cm = confusion_matrix(all_targets, ensemble_preds)
+        print(f"Confusion matrix:")
+        print(f"  {'':>5} {'N':>6} {'S':>6} {'V':>6} {'F':>6} {'Q':>6}")
+        for i, lbl in enumerate(['N', 'S', 'V', 'F', 'Q']):
+            print(f"  {lbl:>5} {' '.join(f'{v:>6}' for v in cm[i])}")
+
+        total_macs, cls_nJ, frontend_nJ, total_nJ = compute_energy(num_features, h1, h2, args.steps, avg_fire)
+        print(f"\n  Energy (per model): {total_macs:,.0f} MACs, classifier={cls_nJ:.1f}nJ, frontend={frontend_nJ:.1f}nJ, total={total_nJ:.1f}nJ")
+
+        return acc, n_params, total_nJ
 
 
 # ================================================================
@@ -494,12 +572,13 @@ def run_split(split_name, seed=42):
 # ================================================================
 
 print(f"{'='*65}")
-print(f"CONDENSED BEST MODEL v2")
-print(f"  Features:     17 from ~11 circuits")
-print(f"  Architecture: 17 -> BN -> {args.hidden} RLeaky -> {args.hidden//2} RLeaky -> 5")
-print(f"  Training:     Focal(g={args.gamma}) + SMOTE(r={args.smote_ratio}) + QAT-4bit")
-print(f"  Class weight: power={args.cls_power} | Label smooth: {args.label_smooth}")
-print(f"  Epochs:       {args.epochs}")
+print(f"CONDENSED BEST MODEL v3")
+print(f"  Features:     16 from ~11 circuits")
+print(f"  Architecture: 16 -> BN -> {args.hidden} RLeaky -> {args.hidden//2} RLeaky -> 5")
+print(f"  Training:     Focal(g=2) + SMOTE(r={args.smote_ratio}) + QAT-4bit")
+print(f"  Checkpoint:   Validation-based (10% holdout) + patience={args.patience}")
+print(f"  RR window:    {args.rr_window} beats")
+print(f"  Ensemble:     {args.ensemble} model(s)")
 print(f"{'='*65}")
 
 splits_to_run = ['inter', 'intra'] if args.split == 'both' else [args.split]
@@ -507,21 +586,9 @@ results = {}
 energy_nJ = 0.0
 
 for split in splits_to_run:
-    if args.runs > 1:
-        accs = []
-        for run in range(args.runs):
-            seed = 42 + run * 7
-            acc, n_params, fire_rate, total_nJ = run_split(split, seed=seed)
-            accs.append(acc)
-        print(f"\n{'='*65}")
-        print(f"  {split.upper()}-PATIENT: {np.mean(accs):.2f}% +/- {np.std(accs):.2f}% over {args.runs} runs")
-        print(f"  Best: {max(accs):.2f}% | Worst: {min(accs):.2f}%")
-        results[split] = np.mean(accs)
-        energy_nJ = total_nJ
-    else:
-        acc, n_params, fire_rate, total_nJ = run_split(split)
-        results[split] = acc
-        energy_nJ = total_nJ
+    acc, n_params, total_nJ = run_split(split)
+    results[split] = acc
+    energy_nJ = total_nJ
 
 print(f"\n{'='*65}")
 print(f"FINAL SUMMARY")
@@ -529,8 +596,10 @@ print(f"{'='*65}")
 for split, acc in results.items():
     print(f"  {split:>5}-patient: {acc:.2f}%")
 print(f"  Parameters:   {n_params:,}")
-print(f"  Features:     17 from ~11 analog circuits")
+print(f"  Features:     16 from ~11 analog circuits")
 print(f"  Energy:       {energy_nJ:.1f} nJ total per classification")
-print(f"  Config:       hidden={args.hidden}, gamma={args.gamma}, cls_power={args.cls_power}, label_smooth={args.label_smooth}")
+print(f"  RR window:    {args.rr_window} beats")
+print(f"  SMOTE ratio:  {args.smote_ratio}")
+print(f"  Ensemble:     {args.ensemble} model(s)")
 print(f"  Total time:   {time.time()-t0:.0f}s")
 print(f"{'='*65}")
