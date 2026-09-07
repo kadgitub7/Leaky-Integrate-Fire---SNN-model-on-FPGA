@@ -1,48 +1,20 @@
 """
-CONDENSED BEST MODEL: Lean 16-Feature SNN with Optimized Training
-==================================================================
-Combines ALL winning strategies from experiments A-E:
+CONDENSED BEST MODEL v2: Parameterized for A/B comparison
+==========================================================
+Run conservative vs aggressive to find the accuracy sweet spot:
 
-  FROM EXP B (BEST @ 91.45% inter):
-    - Lean 16 features from ~11 circuits (~100 nW)
-    - Drops redundant: peak_amp, polarity, rel_peak, rel_width (8 removed)
-    - Adds high-value: rr_asymmetry, compensatory_ratio, max_slope, rr_std_10
+  CONSERVATIVE (safe, ~45 nJ):
+    python snn_best_condensed.py --split inter --hidden 48 --gamma 2.0 --cls_power 0.65 --label_smooth 0.0
 
-  FROM EXP A (training improvements):
-    - Focal loss (gamma=2.0) - proven 10-15% F1 boost on minority classes
-    - SMOTE oversampling (target_ratio tunable, default 0.5 for aggressive minority boost)
-    - Gated EWMA (thresh=0.85) - only update template on normal beats
-    - Median initialization from first 10 beats
-    - Weighted sampler (class_weight^0.65)
-    - Cosine annealing with warmup
+  AGGRESSIVE (push minority classes, ~68 nJ):
+    python snn_best_condensed.py --split inter --hidden 64 --gamma 3.0 --cls_power 0.5 --label_smooth 0.05
 
-  FROM EXP D (S-class insight):
-    - Aggressive SMOTE for S/F classes (ratio 0.5 vs 0.33)
-    - S-class F1 jumped from 0.03 to 0.53 with more timing features
+  Both use: 17 features, 400 epochs, SMOTE 0.5, QAT-4bit, focal loss, gated EWMA
 
-  REJECTED (proven losers):
-    - NO knowledge distillation (teacher too weak at 85.3%)
-    - NO AdaBN (hurt by 1-5%)
-    - NO membrane noise (destroyed quantization robustness)
-
-  v2 CHANGES (from v1 @ 91.12% inter, 93.44% intra):
-    - Hidden 48->64 (wider first layer for S vs N separation)
-    - Focal gamma 2.0->3.0 (harder focus on minority misclassifications)
-    - Class weight power 0.65->0.5 (more aggressive minority weighting)
-    - Label smoothing 0.05 (reduce N-class overconfidence)
-    - Added post_rr_ratio feature (reuses existing divider circuit)
-    - Default epochs 200->400 (was not converged)
-    - 17 features from ~11 circuits
-
-  Architecture: 17 -> BN -> 64 RLeaky -> 32 RLeaky -> 5 Leaky
-  QAT: 4-bit quantization-aware training throughout
-
-Usage:
-  python snn_best_condensed.py --split both          # Run inter AND intra (default)
-  python snn_best_condensed.py --split inter          # Inter-patient only
-  python snn_best_condensed.py --split intra          # Intra-patient only
-  python snn_best_condensed.py --smote_ratio 0.5      # Aggressive minority oversampling
-  python snn_best_condensed.py --runs 3               # Average over multiple runs
+  17 features from ~11 circuits (~130 nW):
+    Timing (7):  pre_rr, post_rr, rr_ratio, post_rr_ratio, rr_asymmetry,
+                 compensatory_ratio, rr_std_10
+    Morph (10):  qrs_width x2, qrs_area x2, max_slope x2, rel_area x2, templ_corr x2
 """
 
 import argparse
@@ -58,45 +30,22 @@ from sklearn.metrics import classification_report, confusion_matrix
 import time
 
 parser = argparse.ArgumentParser(description='Best condensed SNN model')
-parser.add_argument('--hidden', type=int, default=64)
+parser.add_argument('--hidden', type=int, default=48)
 parser.add_argument('--steps', type=int, default=20)
 parser.add_argument('--epochs', type=int, default=400)
-parser.add_argument('--lam', type=float, default=1.0, help='Sparsity penalty weight')
-parser.add_argument('--split', choices=['intra', 'inter', 'both'], default='both')
-parser.add_argument('--smote_ratio', type=float, default=0.5, help='SMOTE target ratio for minority classes')
-parser.add_argument('--runs', type=int, default=1, help='Number of runs to average')
+parser.add_argument('--lam', type=float, default=1.0)
+parser.add_argument('--split', choices=['intra', 'inter', 'both'], default='inter')
+parser.add_argument('--smote_ratio', type=float, default=0.5)
+parser.add_argument('--gamma', type=float, default=2.0, help='Focal loss gamma')
+parser.add_argument('--cls_power', type=float, default=0.65, help='Class weight power (lower=more aggressive)')
+parser.add_argument('--label_smooth', type=float, default=0.0, help='Label smoothing factor')
+parser.add_argument('--runs', type=int, default=1)
 args = parser.parse_args()
 
 torch.set_num_threads(2)
 batch_size = 128
 num_class = 5
 t0 = time.time()
-
-# ================================================================
-# ANALOG FRONT-END: 11 circuits -> 16 features
-# ================================================================
-#
-# +--------------------+------------------------+--------+---------------------------+
-# | Feature            | Analog circuit         | Power  | What it captures          |
-# +--------------------+------------------------+--------+---------------------------+
-# | pre_rr             | Timer (counter)        | ~5 nW  | Interval to prev QRS      |
-# | post_rr            | Timer (counter)        |  same  | Interval to next QRS      |
-# | rr_ratio           | Capacitor ratio        | ~10 nW | pre_rr / local avg        |
-# | rr_asymmetry       | Analog divider         | ~5 nW  | pre_rr / post_rr          |
-# | compensatory_ratio | Summing + divider      | ~5 nW  | (pre+post) / (2*avg)      |
-# | rr_std_10          | Variance circuit       | ~10 nW | std of last 10 RR         |
-# | qrs_width x2       | Comparator+timer x2    | ~20 nW | QRS duration per lead     |
-# | qrs_area x2        | Gated integrator x2    | ~30 nW | integral |V| during QRS   |
-# | max_slope x2       | Differentiator+pk x2   | ~15 nW | max |dV/dt| per lead      |
-# | rel_area x2        | Divider + EWMA RC x2   | ~15 nW | area / baseline_area      |
-# | templ_corr x2      | Analog correlator x2   | ~15 nW | cosine sim to template    |
-# +--------------------+------------------------+--------+---------------------------+
-# Total: ~11 distinct circuits, ~130 nW analog frontend
-#
-# Energy budget: frontend ~130 nW * 0.833s = ~108 nJ per beat (amortized)
-#   But most circuits share bias/reference: realistic ~100 nW -> ~83 nJ
-#   Classifier: ~5,000 params * ~20 steps * 2pJ/MAC -> ~30-40 nJ
-#   TOTAL: ~40-50 nJ per classification
 
 FEATURE_NAMES = [
     'pre_rr', 'post_rr', 'rr_ratio', 'post_rr_ratio', 'rr_asymmetry', 'compensatory_ratio', 'rr_std_10',
@@ -111,7 +60,6 @@ EWMA_ALPHA_MORPH = 0.015
 N_TEMPLATE = 6
 EWMA_GATE_THRESH = 0.85
 EWMA_INIT_BEATS = 10
-
 QRS_START = 70
 QRS_END = 130
 win_left = 90
@@ -141,10 +89,6 @@ DS2_records = [
     '212', '213', '214', '219', '221', '222', '228', '231', '232', '233', '234'
 ]
 
-
-# ================================================================
-# FEATURE EXTRACTION
-# ================================================================
 
 def extract_beats_and_features(rec_list):
     all_labels = []
@@ -219,7 +163,6 @@ def extract_beats_and_features(rec_list):
                             width = (last - first) * 1000.0 / fs
 
                     area = np.sum(abs_qrs) / fs
-
                     dqrs = np.diff(qrs) * fs
                     max_slope = np.max(np.abs(dqrs)) if len(dqrs) > 0 else 0.0
 
@@ -230,7 +173,6 @@ def extract_beats_and_features(rec_list):
                     feat[9 + lead] = area
                     feat[11 + lead] = max_slope
 
-                    # EWMA init from median of first 10 beats
                     if i < EWMA_INIT_BEATS:
                         init_areas[lead].append(max(area, 1e-6))
                         init_templates[lead].append(qrs_ds.copy())
@@ -243,7 +185,7 @@ def extract_beats_and_features(rec_list):
                             ewma_area[lead] = max(area, 1e-6)
                             ewma_template[lead] = qrs_ds.copy()
 
-                    feat[12 + lead] = area / (ewma_area[lead] + 1e-8)
+                    feat[13 + lead] = area / (ewma_area[lead] + 1e-8)
 
                     norm_curr = np.linalg.norm(qrs_ds)
                     norm_tmpl = np.linalg.norm(ewma_template[lead])
@@ -251,9 +193,8 @@ def extract_beats_and_features(rec_list):
                         templ_corr = np.dot(qrs_ds, ewma_template[lead]) / (norm_curr * norm_tmpl)
                     else:
                         templ_corr = 1.0
-                    feat[14 + lead] = templ_corr
+                    feat[15 + lead] = templ_corr
 
-                    # Gated EWMA: only update on normal-looking beats
                     if templ_corr > EWMA_GATE_THRESH:
                         a = EWMA_ALPHA_MORPH
                         ewma_area[lead] = a * max(area, 1e-6) + (1 - a) * ewma_area[lead]
@@ -266,10 +207,6 @@ def extract_beats_and_features(rec_list):
 
     return np.array(all_labels), np.array(all_features)
 
-
-# ================================================================
-# SMOTE OVERSAMPLING
-# ================================================================
 
 def smote_oversample(features, labels, target_ratio=0.5):
     from collections import Counter
@@ -302,24 +239,19 @@ def smote_oversample(features, labels, target_ratio=0.5):
     return np.array(new_features), np.array(new_labels)
 
 
-# ================================================================
-# FOCAL LOSS
-# ================================================================
-
 class FocalLoss(torch.nn.Module):
-    def __init__(self, weight=None, gamma=2.0):
+    def __init__(self, weight=None, gamma=2.0, label_smoothing=0.0):
         super().__init__()
         self.gamma = gamma
         self.weight = weight
+        self.label_smoothing = label_smoothing
     def forward(self, input, target):
-        ce = torch.nn.functional.cross_entropy(input, target, weight=self.weight, reduction='none')
+        ce = torch.nn.functional.cross_entropy(
+            input, target, weight=self.weight, reduction='none',
+            label_smoothing=self.label_smoothing)
         pt = torch.exp(-ce)
         return (((1 - pt) ** self.gamma) * ce).mean()
 
-
-# ================================================================
-# SNN MODEL
-# ================================================================
 
 class MinimalSNN(torch.nn.Module):
     def __init__(self, n_features, hidden, n_classes, beta=0.9, dropout=0.1):
@@ -358,10 +290,6 @@ class MinimalSNN(torch.nn.Module):
                 torch.stack(spk1_rec, dim=0))
 
 
-# ================================================================
-# QUANTIZATION
-# ================================================================
-
 def quantize_tensor(x, num_bits):
     qmin = -(2 ** (num_bits - 1))
     qmax = 2 ** (num_bits - 1) - 1
@@ -370,12 +298,8 @@ def quantize_tensor(x, num_bits):
     return torch.clamp(torch.round(x / scale), qmin, qmax) * scale
 
 
-# ================================================================
-# TRAINING
-# ================================================================
-
 def train_model(net, train_loader, class_weights_tensor, num_epochs, num_steps, lambda_sparse, device, label=""):
-    loss_fn = FocalLoss(weight=class_weights_tensor, gamma=2.0)
+    loss_fn = FocalLoss(weight=class_weights_tensor, gamma=args.gamma, label_smoothing=args.label_smooth)
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-3, weight_decay=1e-4)
     warmup_epochs = 5
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs - warmup_epochs)
@@ -426,10 +350,6 @@ def train_model(net, train_loader, class_weights_tensor, num_epochs, num_steps, 
     return net
 
 
-# ================================================================
-# EVALUATION
-# ================================================================
-
 def evaluate(net, loader, num_steps, device):
     total = correct = 0
     all_preds, all_targets = [], []
@@ -447,6 +367,19 @@ def evaluate(net, loader, num_steps, device):
             total_spikes += spk_hidden.sum().item()
             total_possible += spk_hidden.numel()
     return correct / total * 100, all_preds, all_targets, total_spikes / total_possible
+
+
+def compute_energy(num_features, h1, h2, num_steps, fire_rate):
+    fc1_macs = num_features * h1
+    rec1_macs = h1 * h1 * num_steps * fire_rate
+    mid_macs = h1 * h2 * num_steps * fire_rate
+    rec2_macs = h2 * h2 * num_steps * fire_rate
+    fc2_macs = h2 * num_class * num_steps * fire_rate
+    total_macs = fc1_macs + rec1_macs + mid_macs + rec2_macs + fc2_macs
+    frontend_nJ = 5 * 0.833 + 95 * 0.100
+    cls_nJ = total_macs * 2.0 / 1000
+    total_nJ = cls_nJ + frontend_nJ
+    return total_macs, cls_nJ, frontend_nJ, total_nJ
 
 
 def hardware_robustness_sweep(net, test_loader, num_steps, device):
@@ -476,20 +409,9 @@ def print_results(acc, preds, targets, fire_rate, n_params, num_features, h1, h2
     for i, lbl in enumerate(['N', 'S', 'V', 'F', 'Q']):
         print(f"  {lbl:>5} {' '.join(f'{v:>6}' for v in cm[i])}")
 
-    fc1_macs = num_features * h1
-    rec1_macs = h1 * h1 * num_steps * fire_rate
-    mid_macs = h1 * h2 * num_steps * fire_rate
-    rec2_macs = h2 * h2 * num_steps * fire_rate
-    fc2_macs = h2 * num_class * num_steps * fire_rate
-    total_macs = fc1_macs + rec1_macs + mid_macs + rec2_macs + fc2_macs
-    frontend_nJ = 5 * 0.833 + 95 * 0.100
-    cls_nJ = total_macs * 2.0 / 1000
-    print(f"\n  Energy: {total_macs:,.0f} MACs, classifier={cls_nJ:.1f}nJ @2pJ/MAC, frontend={frontend_nJ:.1f}nJ, total={cls_nJ+frontend_nJ:.1f}nJ")
+    total_macs, cls_nJ, frontend_nJ, total_nJ = compute_energy(num_features, h1, h2, num_steps, fire_rate)
+    print(f"\n  Energy: {total_macs:,.0f} MACs, classifier={cls_nJ:.1f}nJ @2pJ/MAC, frontend={frontend_nJ:.1f}nJ, total={total_nJ:.1f}nJ")
 
-
-# ================================================================
-# RUN ONE SPLIT
-# ================================================================
 
 def run_split(split_name, seed=42):
     np.random.seed(seed)
@@ -533,7 +455,7 @@ def run_split(split_name, seed=42):
     train_dataset = FeatureDataset(train_features, train_labels)
     test_dataset = FeatureDataset(test_features, test_labels)
     train_label_counts = np.bincount(train_labels, minlength=num_class)
-    class_sample_weights = 1.0 / (train_label_counts ** 0.65)
+    class_sample_weights = 1.0 / (train_label_counts ** args.cls_power)
     sample_weights = [class_sample_weights[l] for l in train_labels]
     sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler, drop_last=True)
@@ -543,7 +465,7 @@ def run_split(split_name, seed=42):
               else torch.device("mps") if torch.backends.mps.is_available()
               else torch.device("cpu"))
 
-    class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** 0.65)
+    class_weights = 1.0 / (np.array(train_label_counts, dtype=np.float64) ** args.cls_power)
     class_weights = class_weights / class_weights.sum() * num_class
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
 
@@ -555,15 +477,16 @@ def run_split(split_name, seed=42):
 
     print(f"\n  Architecture: {num_features} -> BN -> {h1} RLeaky -> {h2} RLeaky -> 5 Leaky")
     print(f"  Parameters:   {n_params:,}")
-    print(f"  Circuits:     ~11 (~100-130 nW)")
+    print(f"  Hyperparams:  gamma={args.gamma}, cls_power={args.cls_power}, label_smooth={args.label_smooth}")
 
-    label = f"{split_name}_h{hidden}_s{num_steps}"
+    label = f"{split_name}_h{hidden}_g{args.gamma}"
     net = train_model(net, train_loader, class_weights_tensor, args.epochs, num_steps, args.lam, device, label=label)
     acc, preds, targets, fire_rate = evaluate(net, test_loader, num_steps, device)
     print_results(acc, preds, targets, fire_rate, n_params, num_features, h1, h2, num_steps, split_name)
     hardware_robustness_sweep(net, test_loader, num_steps, device)
 
-    return acc, n_params, fire_rate
+    _, _, _, total_nJ = compute_energy(num_features, h1, h2, num_steps, fire_rate)
+    return acc, n_params, fire_rate, total_nJ
 
 
 # ================================================================
@@ -571,30 +494,34 @@ def run_split(split_name, seed=42):
 # ================================================================
 
 print(f"{'='*65}")
-print(f"CONDENSED BEST MODEL")
-print(f"  Features:     16 lean features from ~11 circuits")
-print(f"  Training:     Focal loss (g=2) + SMOTE (r={args.smote_ratio}) + QAT-4bit")
-print(f"  Architecture: 16 -> BN -> {args.hidden} RLeaky -> {args.hidden//2} RLeaky -> 5")
-print(f"  Rejected:     KD, AdaBN, membrane noise")
+print(f"CONDENSED BEST MODEL v2")
+print(f"  Features:     17 from ~11 circuits")
+print(f"  Architecture: 17 -> BN -> {args.hidden} RLeaky -> {args.hidden//2} RLeaky -> 5")
+print(f"  Training:     Focal(g={args.gamma}) + SMOTE(r={args.smote_ratio}) + QAT-4bit")
+print(f"  Class weight: power={args.cls_power} | Label smooth: {args.label_smooth}")
+print(f"  Epochs:       {args.epochs}")
 print(f"{'='*65}")
 
 splits_to_run = ['inter', 'intra'] if args.split == 'both' else [args.split]
 results = {}
+energy_nJ = 0.0
 
 for split in splits_to_run:
     if args.runs > 1:
         accs = []
         for run in range(args.runs):
             seed = 42 + run * 7
-            acc, n_params, fire_rate = run_split(split, seed=seed)
+            acc, n_params, fire_rate, total_nJ = run_split(split, seed=seed)
             accs.append(acc)
         print(f"\n{'='*65}")
         print(f"  {split.upper()}-PATIENT: {np.mean(accs):.2f}% +/- {np.std(accs):.2f}% over {args.runs} runs")
         print(f"  Best: {max(accs):.2f}% | Worst: {min(accs):.2f}%")
         results[split] = np.mean(accs)
+        energy_nJ = total_nJ
     else:
-        acc, n_params, fire_rate = run_split(split)
+        acc, n_params, fire_rate, total_nJ = run_split(split)
         results[split] = acc
+        energy_nJ = total_nJ
 
 print(f"\n{'='*65}")
 print(f"FINAL SUMMARY")
@@ -602,7 +529,8 @@ print(f"{'='*65}")
 for split, acc in results.items():
     print(f"  {split:>5}-patient: {acc:.2f}%")
 print(f"  Parameters:   {n_params:,}")
-print(f"  Features:     16 from ~11 analog circuits")
-print(f"  SMOTE ratio:  {args.smote_ratio}")
+print(f"  Features:     17 from ~11 analog circuits")
+print(f"  Energy:       {energy_nJ:.1f} nJ total per classification")
+print(f"  Config:       hidden={args.hidden}, gamma={args.gamma}, cls_power={args.cls_power}, label_smooth={args.label_smooth}")
 print(f"  Total time:   {time.time()-t0:.0f}s")
 print(f"{'='*65}")
