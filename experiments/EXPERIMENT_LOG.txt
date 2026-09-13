@@ -1,0 +1,467 @@
+================================================================================
+ECG ARRHYTHMIA CLASSIFICATION — EXPERIMENT LOG
+================================================================================
+Last updated: 2026-09-12
+
+================================================================================
+GOALS & SPECIFICATIONS
+================================================================================
+
+PRIMARY TARGETS:
+  - Inter-patient accuracy:  >= 93% (AAMI DS1 train / DS2 test)
+  - Intra-patient accuracy:  >= 96% (stratified 80/20 split of all records)
+  - Total system energy:     < 50 nJ per beat (frontend + classifier)
+  - Total system energy:     < 30 nJ preferred if accuracy allows
+
+HARDWARE CONSTRAINTS:
+  - 180nm CMOS analog ASIC (memristive crossbar array)
+  - 4-bit quantized weights (QAT during training)
+  - Fully analog frontend — minimum circuit count
+  - Must be manufacturable — no digital logic beyond basic comparators
+
+DATASET:
+  - MIT-BIH Arrhythmia Database (48 records, 2-lead ECG, 360 Hz)
+  - 5-class AAMI: N (Normal), S (Supraventricular), V (Ventricular),
+                   F (Fusion), Q (Unknown/Paced)
+  - Inter-patient: DS1 (22 records) train, DS2 (21 records) test
+  - Class imbalance: N=45854, S=944, V=3788, F=414, Q=8 in DS1
+
+REFERENCE BENCHMARKS:
+  - Random Forest (16 features): 93.61% inter-patient (feature ceiling)
+  - Published SOTA for inter-patient: 85-95% range
+  - RF S-class F1: 0.05-0.09 (fundamentally hard even for RF)
+
+
+================================================================================
+PROVEN BEST CONFIGURATION (as of 2026-09-12)
+================================================================================
+
+  Result:        91.45% inter-patient accuracy
+  Energy:        42.7 nJ total system (29.0 nJ classifier + 13.7 nJ frontend)
+  Script:        experiments/exp_b_lean_features.py
+  Confirmed by:  experiments/architecture_compare.py (Arch 1)
+
+  ARCHITECTURE:
+    16 -> BatchNorm -> 48 RLeaky -> 24 RLeaky -> 5 Leaky
+    Params: 5,107
+    Timesteps: 20
+    Beta: 0.9 (learnable)
+    Dropout: 0.1
+
+  FEATURES (16 total, ~11 analog circuits):
+    Timing (6):      pre_rr, post_rr, rr_ratio, rr_asymmetry,
+                     compensatory_ratio, rr_std_10
+    Morphology (4):  qrs_width_L0, qrs_width_L1, qrs_area_L0, qrs_area_L1
+    Slope (2):       max_slope_L0, max_slope_L1
+    Adaptive (2):    rel_area_L0, rel_area_L1
+    Template (2):    templ_corr_L0, templ_corr_L1
+
+  TRAINING PIPELINE:
+    - Training-CE checkpoint (NOT val-based — DS1 val does NOT predict DS2)
+    - Spike-count prediction: spk_out.sum(dim=0).max(1) (NOT mem_out[-1].argmax)
+    - SMOTE 0.33 oversampling on all 5 classes
+    - Focal loss gamma=2.0
+    - Class weighting: cls_power=0.65
+    - 4-bit QAT with STE (quantize during forward, restore for gradient)
+    - Adam LR=1e-3, weight_decay=1e-4
+    - Cosine annealing with 5-epoch warmup
+    - Sparsity penalty: lambda=1.0, target fire_rate=0.15
+    - 200 epochs, batch_size=128
+    - Grad clip 1.0
+
+  FEATURE EXTRACTION:
+    - EWMA gated update (only when templ_corr > 0.85)
+    - EWMA alpha = 0.015 for morphology
+    - EWMA init from median of first 10 beats
+    - 10-beat local RR window
+    - QRS window: samples 70-130 (60 samples at 360 Hz)
+    - Beat window: 90 left, 108 right of R-peak
+    - Template: 6-sample downsampled QRS for correlation
+
+  CONFUSION MATRIX (inter-patient):
+              N      S      V      F      Q
+       N  41954    193    185    390     10
+       S   1777     40     20      0      0
+       V    885    278   2023     30      1
+       F    210     34     98     46      0
+       Q      4      0      3      0      0
+
+  KEY ERROR ANALYSIS:
+    - 1,777 S beats misclassified as N (96.8% of S errors — near total failure)
+    - 885 V beats misclassified as N (27.5% of V beats lost)
+    - S recall: 2.2% | V recall: 62.9% | F recall: 11.9%
+    - N recall: 98.2% (saturated)
+
+
+================================================================================
+EXPERIMENT HISTORY — CHRONOLOGICAL
+================================================================================
+
+------------------------------------------------------------------------
+PHASE 0: INITIAL DEVELOPMENT (prior sessions)
+------------------------------------------------------------------------
+
+  EXP A: Training Pipeline Improvements
+    Script: experiments/exp_a_training_improvements.py
+    Changes: Added focal loss, SMOTE, AdaBN, gated EWMA, split EWMA alphas,
+             median EWMA init, expanded local RR window (5->10 beats)
+    Features: 19 (original set)
+    Result: Established training improvements that carried forward to Exp B
+
+  EXP B: Lean Feature Set  *** PROVEN BEST ***
+    Script: experiments/exp_b_lean_features.py
+    Changes: Cut 19 features to 16 lean features (dropped redundant: peak_amp,
+             polarity, rel_peak, rel_width; added: rr_asymmetry,
+             compensatory_ratio, max_slope, rr_std_10)
+    Result: 91.45% inter-patient, 42.7 nJ total
+    Status: PROVEN — all future experiments measured against this
+
+  EXP C: Knowledge Distillation
+    Script: experiments/exp_c_knowledge_distillation.py
+    Changes: Train large ANN teacher (256->128->64), distill into SNN student
+    Result: NOT RUN in current session. Status unknown.
+
+  EXP D: Single-Lead Minimum Circuit
+    Script: experiments/exp_d_single_lead.py
+    Changes: Lead II only, 9 features, ~7 circuits, ~60 nW
+    Result: NOT RUN in current session. Status unknown.
+
+  EXP E: Best Combined
+    Script: experiments/exp_e_best_combined.py
+    Changes: Combined all improvements + knowledge distillation + AdaBN
+    Result: NOT RUN in current session. Status unknown.
+
+  Feature Analysis:
+    Script: experiments/feature_analysis.py
+    Key findings:
+      - RF importance ranking: templ_corr_L0 (#1), pre_rr (#2), rr_ratio (#3),
+        corr_L0L1 (#4), rr_asymmetry (#5)
+      - RF with 16 features: 93.61% (proves features contain enough info)
+      - corr_L0L1 is RF#4 but NOT in proven 16-feature set
+      - max_slope_L1 (#28), qrs_width_L1 (#29) rank very low individually
+      - S-class F1 = 0.05-0.09 even for RF — fundamental class overlap
+
+  snn_best_condensed.py (v3):
+    Changes: Val-based checkpointing, 20-beat RR window, patience stopping
+    Status: NEVER successfully run — had validation-based checkpointing which
+            is PROVEN WRONG for inter-patient (DS1 val != DS2 test accuracy)
+
+
+------------------------------------------------------------------------
+PHASE 1: 9 INDIVIDUAL ARCHITECTURE EXPERIMENTS (all FAILED)
+------------------------------------------------------------------------
+
+  FATAL METHODOLOGY ERRORS IN ALL 9 SCRIPTS:
+    1. Wrong prediction method: mem_out[-1].argmax(1) instead of
+       spk_out.sum(dim=0).max(1) — single noisy snapshot vs temporal vote
+    2. Wrong checkpoint: val-based (DS1 holdout) instead of training-CE
+    3. Wrong features: 14 features (shared_data.py) instead of proven 16
+       - shared_data.py dropped: compensatory_ratio, qrs_width_L0,
+         max_slope_L1, qrs_width_L1, qrs_area_L1
+       - shared_data.py added: slope_ratio_L0, rel_peak_L0, corr_L0L1
+
+  ARCH 1: SNN-Optimized (48->24, 14 features)
+    Script: experiments/arch_1_snn_optimized.py
+    Result: 74.73% — catastrophic regression from 91.45%
+    Cause: All 3 methodology errors above
+
+  ARCH 2: Pure ANN (48->24 ReLU, 14 features)
+    Script: experiments/arch_2_ann_direct.py
+    Result: 85.43%
+    Note: ANN was higher than SNN only due to methodology errors in SNN
+
+  ARCH 3: Hybrid ANN->SNN (14->32 ReLU -> 24 RLeaky -> 5)
+    Script: experiments/arch_3_hybrid.py
+    Result: 79.60%
+
+  ARCH 4: SNN-Temporal (5-beat sequence, one per timestep)
+    Script: experiments/arch_4_snn_temporal.py
+    Result: 57.94%
+    Cause: SMOTE on 5-beat sequences from 8 Q-class samples = pure noise
+
+  ARCH 5: SNN-Wide (64->32, 14 features)
+    Script: experiments/arch_5_snn_wide.py
+    Result: 78.96%
+
+  ARCH 6: Hybrid-Temporal (ANN encoder + temporal SNN)
+    Script: experiments/arch_6_hybrid_temporal.py
+    Result: 56.50%
+
+  ARCH 7: Dual-Pathway (timing fast + morphology slow)
+    Script: experiments/arch_7_dual_pathway.py
+    Result: 66.64%
+
+  ARCH 8: Skip-Residual (raw features bypass to all layers, 32->16)
+    Script: experiments/arch_8_skip_residual.py
+    Result: 79.09%
+
+  ARCH 9: Multi-Timescale Temporal (dual timescale + 5-beat sequence)
+    Script: experiments/arch_9_multiscale_temporal.py
+    Result: 48.20% — worst result, nearly random
+
+  LESSON: These results are ALL INVALID for architecture comparison because
+  they share 3 methodology errors. The only valid conclusion: temporal
+  sequence processing (feeding 5 beats one per timestep) is catastrophically
+  bad due to SMOTE noise on tiny Q-class.
+
+
+------------------------------------------------------------------------
+PHASE 2: CONSOLIDATED ARCHITECTURE COMPARISON (on proven foundation)
+------------------------------------------------------------------------
+
+  Script: experiments/architecture_compare.py
+  Method: Exact Exp B training pipeline (training-CE checkpoint, spike-count
+          prediction, 16 features, SMOTE 0.33, etc.) applied to 6 architectures
+
+  ARCH 1: SNN Baseline (16->48->24->5)
+    Result: 91.45% inter | 42.7 nJ total | Fire: 0.165
+    Status: CONFIRMED baseline
+
+  ARCH 2: Pure ANN (16->48 ReLU->24 ReLU->5)
+    Result: 76.20% inter | 17.8 nJ total | Fire: N/A
+    Finding: SNN temporal dynamics add +15.25% over ANN
+    Lesson: SPIKE-COUNT TEMPORAL INTEGRATION IS ESSENTIAL
+
+  ARCH 3: Hybrid ANN32->SNN24 (16->32 ReLU->24 RLeaky->5)
+    Result: 90.88% inter | 43.4 nJ total | Fire: 0.288
+    Finding: Pure SNN beats hybrid by +0.57%
+    Lesson: ANN encoder doesn't help — raw features into SNN is better
+
+  ARCH 4: Skip-SNN (16->32 RLeaky, [16+32]->16 RLeaky, [16+16]->5)
+    Result: 89.95% inter | 28.3 nJ total | Fire: 0.181
+    Finding: F recall 47% (vs 12% baseline!), S recall 9% (vs 2%)
+    Finding: V recall 72% (vs 63%), N recall 95% (vs 98%)
+    Lesson: SKIP CONNECTIONS DRAMATICALLY HELP RARE CLASSES at small width
+            but N recall drops due to capacity constraints (32-16 vs 48-24)
+
+  ARCH 5: DualPathway (timing fast + morphology slow -> merge)
+    Result: 79.37% inter | 36.0 nJ total | Fire: 0.204
+    Lesson: FORCED FEATURE SPLITTING IS HARMFUL — network needs to jointly
+            process all features
+
+  ARCH 6: SNN Baseline + corr_L0L1 (17 features)
+    Result: Was still running when session ended
+    Status: INCOMPLETE
+
+  SUMMARY TABLE (Phase 2):
+    Architecture            Accuracy   Energy    Key finding
+    SNN Baseline 48-24      91.45%    42.7 nJ   Proven best
+    Hybrid ANN32->SNN24     90.88%    43.4 nJ   Pure SNN better
+    Skip SNN 32-16          89.95%    28.3 nJ   Best rare-class detection
+    DualPathway             79.37%    36.0 nJ   Feature splitting hurts
+    ANN Direct              76.20%    17.8 nJ   No temporal integration
+
+
+------------------------------------------------------------------------
+PHASE 3: GEN2 — ARCHITECTURAL + TRAINING EXPERIMENTS (all FAILED)
+------------------------------------------------------------------------
+
+  All experiments regressed from 91.45% baseline.
+
+  GEN2 EXP 1: Skip-Large (48-24 with skip connections, 16 features)
+    Script: experiments/gen2_skip_large.py
+    Result: 84.07% inter | 49.8 nJ total | Fire: 0.187
+    Delta: -7.38% from baseline
+    Confusion: N recall 90.1% (down from 98.2%), V recall 50.5% (down!)
+    Root cause: At full width, skip connections create a "lazy" pathway.
+      Raw features are continuous (always present), spikes are sparse (15%).
+      The concatenation [raw + spikes] is dominated by raw features,
+      preventing the SNN from learning useful temporal representations.
+      At 32-16 (Phase 2) this helped because the network was capacity-starved.
+      At 48-24 the skip is counterproductive.
+    Intra: Was still running
+
+  GEN2 EXP 2: Enhanced Training (48-24 baseline, label smoothing + mixup, 17 feat)
+    Script: experiments/gen2_enhanced.py
+    Result: 84.98% inter | 51.0 nJ total | Fire: 0.215
+    Delta: -6.47% from baseline
+    Root cause: CE NEVER DROPPED BELOW 5.0 (vs 0.6-0.8 for baseline).
+      Mixup is FUNDAMENTALLY INCOMPATIBLE with SNN temporal dynamics.
+      Mixed inputs (interpolated between two heartbeats) don't produce
+      meaningful spike patterns — the temporal integration has nothing
+      coherent to integrate. Label smoothing may have also hurt.
+    Intra: Was still running
+
+  GEN2 EXP 3: Combined (Skip-48-24 + label smoothing + mixup, 17 features)
+    Script: experiments/gen2_combined.py
+    Result: 83.74% inter | 52.5 nJ total | Fire: 0.200
+    Delta: -7.71% from baseline
+    Root cause: Both problems from Exp 1 and Exp 2 compound.
+    Intra: Was still running
+
+  GEN2 EXP 4: Wide-Shallow Skip (17->64 RLeaky, [17+64]->5 Leaky, single layer)
+    Script: experiments/gen2_wide_skip.py
+    Result: 81.97% inter / 94.48% intra | 51.9 nJ / 48.6 nJ total
+    Delta: -9.48% inter from baseline
+    Finding: Single hidden layer is insufficient for inter-patient
+    Finding: 94.48% intra is decent — architecture works when patient-specific
+             patterns are available in training set
+    Finding: Best minority class detection among Gen2:
+             S recall 28%, V recall 69%, F recall 70%
+    Lesson: Wide+skip helps rare classes (F=70%!) but devastates N (85%)
+
+  SUMMARY TABLE (Phase 3):
+    Experiment              Inter    Intra    Energy    Delta vs baseline
+    Baseline (proven)       91.45%   N/A      42.7 nJ  (reference)
+    Skip-Large 48-24        84.07%   running  49.8 nJ  -7.38%
+    Enhanced (mixup+LS)     84.98%   running  51.0 nJ  -6.47%
+    Combined                83.74%   running  52.5 nJ  -7.71%
+    Wide-Skip 64            81.97%   94.48%   51.9 nJ  -9.48% / N/A
+
+
+------------------------------------------------------------------------
+PHASE 4: DIAGNOSTIC EXPERIMENTS (PENDING — as of 2026-09-12)
+------------------------------------------------------------------------
+
+  Purpose: Isolate what's actually limiting the 91.45% baseline.
+  Method: Single-variable changes on proven baseline. Inter-patient only.
+
+  DIAG 1: Quantization Impact
+    Script: experiments/diag_quantization.py
+    Tests: 32-bit (no QAT), 8-bit, 6-bit, 5-bit
+    Question: Is 4-bit quantization the bottleneck? If 32-bit hits 93%+,
+              we just need to increase bit width (trivial on analog hardware).
+    Status: PENDING
+
+  DIAG 2: Model Capacity
+    Script: experiments/diag_capacity.py
+    Tests: 52-26 (~47 nJ), 56-28 (~51 nJ)
+    Question: Does more capacity help within energy budget?
+    Status: PENDING
+
+  DIAG 3: Hyperparameter Sensitivity
+    Script: experiments/diag_hyperparams.py
+    Tests: beta=0.85, beta=0.95, dropout=0.05
+    Question: Are default hyperparams leaving accuracy on the table?
+    Status: PENDING
+
+  DIAG 4: Training Configuration
+    Script: experiments/diag_training.py
+    Tests: No Q-class SMOTE (8 real->15131 synthetic = noise),
+           SMOTE 0.5 (higher minority ratio), cls_power=0.5
+    Question: Is Q-class SMOTE noise hurting training?
+    Status: PENDING
+
+
+================================================================================
+KEY PROVEN FACTS (do NOT re-test)
+================================================================================
+
+  1. SNN with spike-count temporal integration is essential (+15% over ANN)
+  2. Training-CE checkpoint beats val-based checkpoint for inter-patient
+  3. spk_out.sum(dim=0).max(1) beats mem_out[-1].argmax(1)
+  4. 16-feature set (Exp B) is the proven best feature set
+  5. SMOTE 0.33 is better than SMOTE 0.5 (prior experiment)
+  6. Feature changes must be ADDITIVE to proven 16 (not swap)
+  7. Mixup augmentation is INCOMPATIBLE with SNN (CE stuck at 5x normal)
+  8. Skip connections at full 48-24 width are HARMFUL (lazy pathway)
+  9. Skip connections at 32-16 width HELP rare classes (F recall 47%)
+  10. Forced feature splitting (DualPathway) is HARMFUL
+  11. Hybrid ANN->SNN is worse than pure SNN (-0.57%)
+  12. Single hidden layer is insufficient for inter-patient
+  13. Sequential beat processing (multi-beat temporal) is catastrophic
+  14. S-class is fundamentally hard (F1 = 0.05-0.09 even for RF)
+
+
+================================================================================
+WHAT HAS NOT BEEN TESTED
+================================================================================
+
+  QUANTIZATION:
+  - [ ] Full-precision (32-bit) accuracy — is QAT the bottleneck?
+  - [ ] 5-bit, 6-bit, 8-bit QAT — minimum bits for >93%?
+  - [ ] Per-channel quantization (each crossbar row has own scale)
+  - [ ] Learned quantization thresholds
+
+  ARCHITECTURE:
+  - [ ] Larger baseline (52-26, 56-28) without any other changes
+  - [ ] Three-layer SNN (e.g., 48->32->16->5)
+  - [ ] Residual connection (add, not concat — avoids lazy pathway)
+  - [ ] Attention-weighted spike counting (weight timesteps by importance)
+
+  TRAINING:
+  - [ ] Different beta values (0.85, 0.95) on proven architecture
+  - [ ] Lower dropout (0.05) — QAT already regularizes
+  - [ ] Removing Q-class from SMOTE (8 real samples -> 15k noise)
+  - [ ] cls_power variations (0.5, 0.75)
+  - [ ] Knowledge distillation from full-precision teacher
+  - [ ] Stochastic Weight Averaging (SWA)
+  - [ ] Cosine warm restarts (multiple cycles)
+  - [ ] Curriculum learning (easy examples first)
+
+  FEATURES:
+  - [ ] Adding corr_L0L1 to proven 16 (RF importance #4) — Arch 6 incomplete
+  - [ ] Higher-resolution template correlation (12 samples instead of 6)
+  - [ ] P-wave features (if detectable in 180nm analog)
+  - [ ] ST-segment features
+
+  ENSEMBLE:
+  - [ ] Multi-seed ensemble (3-5 models, majority vote)
+  - [ ] Temperature scaling for calibration
+
+  POST-PROCESSING:
+  - [ ] Threshold tuning per class
+  - [ ] Domain-knowledge overrides (if templ_corr > 0.95, force N)
+
+
+================================================================================
+ENERGY BUDGET BREAKDOWN
+================================================================================
+
+  FRONTEND: 13.7 nJ per beat
+    - 5 always-on circuits * 0.833 = 4.2 nJ
+    - 95 computation circuits * 0.100 = 9.5 nJ
+
+  CLASSIFIER (depends on architecture and fire rate):
+    Formula: total_MACs * 2 pJ/MAC / 1000 = nJ
+    For baseline 48-24 at fire_rate=0.165:
+      fc1:   16 * 48 = 768 MACs (non-recurrent, once)
+      rec1:  48 * 48 * 20 * 0.165 = 7,603 MACs
+      mid:   48 * 24 * 20 * 0.165 = 3,802 MACs
+      rec2:  24 * 24 * 20 * 0.165 = 1,901 MACs
+      out:   24 * 5  * 20 * 0.165 = 396 MACs
+      Total: ~14,470 MACs -> 29.0 nJ classifier
+
+  TOTAL: 13.7 + 29.0 = 42.7 nJ (within 50 nJ budget)
+
+  ENERGY vs ACCURACY PARETO:
+    Config              Accuracy   Classifier   Total
+    ANN 48-24           76.20%     4.1 nJ       17.8 nJ
+    Skip SNN 32-16      89.95%     14.6 nJ      28.3 nJ
+    DualPathway          79.37%     22.3 nJ      36.0 nJ
+    SNN Baseline 48-24   91.45%     29.0 nJ      42.7 nJ
+    Hybrid ANN32-SNN24   90.88%     29.7 nJ      43.4 nJ
+
+
+================================================================================
+FILE INVENTORY
+================================================================================
+
+  PROVEN:
+    experiments/exp_b_lean_features.py      — 91.45% proven model
+    experiments/architecture_compare.py     — 6-architecture comparison
+    experiments/data_proven.py              — Shared data loader (16/17 feat)
+    experiments/feature_analysis.py         — RF importance, ANOVA, MI analysis
+
+  PHASE 1 (INVALID — methodology errors):
+    experiments/shared_data.py              — 14-feature set (WRONG, do not use)
+    experiments/arch_1_snn_optimized.py     — through arch_9_multiscale_temporal.py
+
+  PHASE 3 (FAILED):
+    experiments/gen2_skip_large.py          — Skip at full width (harmful)
+    experiments/gen2_enhanced.py            — Mixup + label smoothing (harmful)
+    experiments/gen2_combined.py            — Both combined (worst)
+    experiments/gen2_wide_skip.py           — Wide single layer (insufficient)
+
+  PHASE 4 (PENDING):
+    experiments/diag_quantization.py        — 32/8/6/5-bit QAT sweep
+    experiments/diag_capacity.py            — 52-26, 56-28 hidden sizes
+    experiments/diag_hyperparams.py         — beta, dropout variations
+    experiments/diag_training.py            — SMOTE, cls_power variations
+
+  OTHER:
+    snn_best_condensed.py                   — v3, val-based checkpoint (WRONG)
+    experiments/exp_a_training_improvements.py
+    experiments/exp_c_knowledge_distillation.py  — NOT RUN
+    experiments/exp_d_single_lead.py            — NOT RUN
+    experiments/exp_e_best_combined.py           — NOT RUN

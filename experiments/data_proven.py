@@ -124,12 +124,15 @@ def extract_features(rec_list, include_cross_lead=False):
     return np.array(all_labels), np.array(all_features)
 
 
-def smote_oversample(features, labels, target_ratio=0.33):
+def smote_oversample(features, labels, target_ratio=0.33, exclude_classes=None):
     counts = Counter(labels)
     max_count = max(counts.values())
     target_count = int(max_count * target_ratio)
+    exclude = set(exclude_classes) if exclude_classes else set()
     new_f, new_l = list(features), list(labels)
     for cls in range(NUM_CLASSES):
+        if cls in exclude:
+            continue
         idx = np.where(labels == cls)[0]
         if len(idx) >= target_count:
             continue
@@ -145,7 +148,8 @@ def smote_oversample(features, labels, target_ratio=0.33):
     return np.array(new_f), np.array(new_l)
 
 
-def load_split(split='inter', include_cross_lead=False, smote_ratio=0.33):
+def load_split(split='inter', include_cross_lead=False, smote_ratio=0.33,
+               smote_exclude_classes=None, cls_power=0.65):
     n_feat_label = 17 if include_cross_lead else 16
     print(f"\n{'='*60}")
     print(f"Loading {split}-patient data ({n_feat_label} features, SMOTE {smote_ratio})")
@@ -166,7 +170,8 @@ def load_split(split='inter', include_cross_lead=False, smote_ratio=0.33):
     n_features = train_features.shape[1]
     print(f"  Class dist: {dict(Counter(train_labels))}")
 
-    train_features, train_labels = smote_oversample(train_features, train_labels, smote_ratio)
+    train_features, train_labels = smote_oversample(
+        train_features, train_labels, smote_ratio, exclude_classes=smote_exclude_classes)
     print(f"  After SMOTE: {dict(Counter(train_labels))}")
 
     mu, sd = train_features.mean(0), train_features.std(0)
@@ -181,7 +186,7 @@ def load_split(split='inter', include_cross_lead=False, smote_ratio=0.33):
         def __getitem__(self, i): return self.data[i], self.targets[i]
 
     tr_counts = np.bincount(train_labels, minlength=NUM_CLASSES)
-    sw = 1.0 / (tr_counts ** 0.65)
+    sw = 1.0 / (tr_counts ** cls_power)
     sample_w = [sw[l] for l in train_labels]
     sampler = torch.utils.data.WeightedRandomSampler(sample_w, len(sample_w), replacement=True)
 
@@ -191,7 +196,7 @@ def load_split(split='inter', include_cross_lead=False, smote_ratio=0.33):
         DS(test_features, test_labels), batch_size=BATCH_SIZE, shuffle=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    cw = 1.0 / (tr_counts.astype(np.float64) ** 0.65)
+    cw = 1.0 / (tr_counts.astype(np.float64) ** cls_power)
     cw = cw / cw.sum() * NUM_CLASSES
     cw_tensor = torch.tensor(cw, dtype=torch.float32).to(device)
 
