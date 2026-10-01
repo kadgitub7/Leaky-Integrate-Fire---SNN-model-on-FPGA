@@ -1,0 +1,158 @@
+* ============================================================
+* FULL TEST: Log timers + Corrected Gilbert cell + OTA gain
+*
+* End-to-end QRS symmetry circuit:
+* 1. Rise log timer charges during T_rise (onset to peak)
+* 2. Width log timer charges during T_width (full QRS width)
+* 3. Corrected Gilbert cell (with diode fix) computes ratio
+* 4. OTA amplifies the tiny output to usable range
+*
+* Test 3 representative beats:
+*   Beat A: rec100, sym=0.356, T_rise=58.3ms, T_width=163.9ms
+*   Beat B: rec103, sym=0.500, T_rise=11.1ms, T_width=22.2ms
+*   Beat C: rec200, sym=0.208, T_rise=13.9ms, T_width=66.7ms
+*
+* Sequential: each beat at different time offset
+* ============================================================
+
+.title test_log_sym_full
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ================================================================
+* BEAT A: sym=0.356, T_rise=58.3ms, T_width=163.9ms
+* Start at t=0.1s
+* ================================================================
+
+* Rise timer: enabled at t=0.1s, disabled at t=0.1583s (58.3ms)
+Vga_rise rise_gate_a 0 PWL(0 0 0.099 0 0.1 0.9 0.1583 0.9 0.1584 0 1.0 0)
+
+* Width timer: enabled at t=0.1s, disabled at t=0.2639s (163.9ms)
+Vga_width width_gate_a 0 PWL(0 0 0.099 0 0.1 0.9 0.2639 0.9 0.2640 0 1.0 0)
+
+* Rise log timer
+XMlr_a nswr_a vbias rise_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMswr_a vdd rise_gate_a nswr_a vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCr_a rise_a vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vra_rst rst_ra 0 PWL(0 0 0.079 0 0.08 0.9 0.085 0.9 0.086 0 1.0 0)
+XMrstr_a rise_a rst_ra vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Width log timer
+XMlw_a nsww_a vbias width_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsww_a vdd width_gate_a nsww_a vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCw_a width_a vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vwa_rst rst_wa 0 PWL(0 0 0.079 0 0.08 0.9 0.085 0.9 0.086 0 1.0 0)
+XMrstw_a width_a rst_wa vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Corrected Gilbert cell for Beat A
+XMn1a net_n1a rise_a vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2a sym_a vwidth_log_a vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMp1a net_n1a net_n1a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2a sym_a net_n1a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Wire width_a to the Gilbert cell (direct connection)
+Vwire_a vwidth_log_a width_a 0
+
+* ================================================================
+* BEAT B: sym=0.500, T_rise=11.1ms, T_width=22.2ms
+* Start at t=0.4s
+* ================================================================
+
+Vgb_rise rise_gate_b 0 PWL(0 0 0.399 0 0.4 0.9 0.4111 0.9 0.4112 0 1.0 0)
+Vgb_width width_gate_b 0 PWL(0 0 0.399 0 0.4 0.9 0.4222 0.9 0.4223 0 1.0 0)
+
+XMlr_b nswr_b vbias rise_b vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMswr_b vdd rise_gate_b nswr_b vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCr_b rise_b vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vrb_rst rst_rb 0 PWL(0 0 0.379 0 0.38 0.9 0.385 0.9 0.386 0 1.0 0)
+XMrstr_b rise_b rst_rb vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMlw_b nsww_b vbias width_b vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsww_b vdd width_gate_b nsww_b vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCw_b width_b vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vwb_rst rst_wb 0 PWL(0 0 0.379 0 0.38 0.9 0.385 0.9 0.386 0 1.0 0)
+XMrstw_b width_b rst_wb vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMn1b net_n1b rise_b vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2b sym_b width_b vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMp1b net_n1b net_n1b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2b sym_b net_n1b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ================================================================
+* BEAT C: sym=0.208, T_rise=13.9ms, T_width=66.7ms
+* Start at t=0.6s
+* ================================================================
+
+Vgc_rise rise_gate_c 0 PWL(0 0 0.599 0 0.6 0.9 0.6139 0.9 0.6140 0 1.0 0)
+Vgc_width width_gate_c 0 PWL(0 0 0.599 0 0.6 0.9 0.6667 0.9 0.6668 0 1.0 0)
+
+XMlr_c nswr_c vbias rise_c vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMswr_c vdd rise_gate_c nswr_c vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCr_c rise_c vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vrc_rst rst_rc 0 PWL(0 0 0.579 0 0.58 0.9 0.585 0.9 0.586 0 1.0 0)
+XMrstr_c rise_c rst_rc vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMlw_c nsww_c vbias width_c vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsww_c vdd width_gate_c nsww_c vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCw_c width_c vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vwc_rst rst_wc 0 PWL(0 0 0.579 0 0.58 0.9 0.585 0.9 0.586 0 1.0 0)
+XMrstw_c width_c rst_wc vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMn1c net_n1c rise_c vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2c sym_c width_c vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMp1c net_n1c net_n1c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2c sym_c net_n1c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ================================================================
+
+.tran 0.1m 0.85
+
+* Measure timer voltages after each beat's timers stop
+* Beat A: rise stops at 158.3ms, width stops at 263.9ms
+.meas tran Va_rise FIND V(rise_a) AT=0.28
+.meas tran Va_width FIND V(width_a) AT=0.28
+.meas tran Va_sym FIND V(sym_a) AT=0.28
+
+* Beat B: rise stops at 411.1ms, width stops at 422.2ms
+.meas tran Vb_rise FIND V(rise_b) AT=0.45
+.meas tran Vb_width FIND V(width_b) AT=0.45
+.meas tran Vb_sym FIND V(sym_b) AT=0.45
+
+* Beat C: rise stops at 613.9ms, width stops at 666.7ms
+.meas tran Vc_rise FIND V(rise_c) AT=0.70
+.meas tran Vc_width FIND V(width_c) AT=0.70
+.meas tran Vc_sym FIND V(sym_c) AT=0.70
+
+.control
+  run
+  echo ""
+  echo "=== FULL LOG TIMER + CORRECTED GILBERT CELL ==="
+  echo ""
+  echo "Beat A: sym=0.356, T_rise=58.3ms, T_width=163.9ms"
+  print Va_rise Va_width Va_sym
+  echo ""
+  echo "Beat B: sym=0.500, T_rise=11.1ms, T_width=22.2ms"
+  print Vb_rise Vb_width Vb_sym
+  echo ""
+  echo "Beat C: sym=0.208, T_rise=13.9ms, T_width=66.7ms"
+  print Vc_rise Vc_width Vc_sym
+  echo ""
+  echo "=== SUMMARY ==="
+  echo "  Target symmetries: 0.356, 0.500, 0.208"
+  echo "  Timer voltage ratios should reflect time ratios"
+  echo "  sym_out should be monotonic with symmetry"
+  echo ""
+  quit
+.endc
+
+.end

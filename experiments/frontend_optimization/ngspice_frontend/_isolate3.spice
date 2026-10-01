@@ -1,0 +1,64 @@
+* Test each feature circuit individually
+.title isolate_each_feature
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+.include "resistor_div.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+.include "otac_bpf.spice"
+.include "rr_timing.spice"
+.include "beat_instability.spice"
+.include "pwave_energy.spice"
+.include "qrs_width.spice"
+.include "slope_ratio.spice"
+.include "qrs_symmetry.spice"
+
+* Separate VDD per feature
+Vdd1 vdd1 0 0.9
+Vdd2 vdd2 0 0.9
+Vdd3 vdd3 0 0.9
+Vdd4 vdd4 0 0.9
+Vdd5 vdd5 0 0.9
+Vdd6 vdd6 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vref vref 0 0.45
+Vinp cond 0 0.45
+
+Vrpk rpeak_trig 0 0
+Vqg qrs_gate 0 0
+Vpg pwave_gate 0 0
+
+Xrr rpeak_trig f_rr vdd1 vdd1 vss vbias rr_timing
+Xins beat_instability_dummy cond qrs_gate rpeak_trig f_ins vdd2 vss vbias vref beat_instability
+Xpw cond pwave_gate rpeak_trig f_pw vdd3 vss vbias vref pwave_energy
+Xwid vref cond qrs_gate rpeak_trig f_wid vdd4 vss vbias qrs_width
+Xslp cond qrs_gate rpeak_trig f_slp vdd5 vss vbias vref slope_ratio
+Xsym qrs_gate rpeak_trig f_wid f_sym rpeak_trig vdd6 vss vbias qrs_symmetry
+
+.op
+
+.control
+  run
+  echo "=== Per-feature current ==="
+  echo "RR timing:"
+  print -i(Vdd1)
+  echo "Beat instability:"
+  print -i(Vdd2)
+  echo "P-wave energy:"
+  print -i(Vdd3)
+  echo "QRS width:"
+  print -i(Vdd4)
+  echo "Slope ratio:"
+  print -i(Vdd5)
+  echo "QRS symmetry:"
+  print -i(Vdd6)
+  quit
+.endc
+
+.end

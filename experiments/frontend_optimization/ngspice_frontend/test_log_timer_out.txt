@@ -1,0 +1,92 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_log_timer
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+gate_a                                       0
+n_sw_a                               0.0170852
+timer_a                               0.017082
+xca.a                                        0
+xca.b1                                       0
+reset_a                                      0
+gate_b                                       0
+n_sw_b                               0.0170852
+timer_b                               0.017082
+xcb.a                                        0
+xcb.b1                                       0
+reset_b                                      0
+gate_c                                       0
+n_sw_c                               0.0170852
+timer_c                               0.017082
+xcc.a                                        0
+xcc.b1                                       0
+reset_c                                      0
+gate_d                                       0
+n_sw_d                               0.0170852
+timer_d                               0.017082
+xcd.a                                        0
+xcd.b1                                       0
+reset_d                                      0
+vrd#branch                                   0
+vgd#branch                                   0
+vrc#branch                                   0
+vgc#branch                                   0
+vrb#branch                                   0
+vgb#branch                                   0
+vra#branch                                   0
+vga#branch                                   0
+vbias#branch                                 0
+vss#branch                           3.286e-13
+vdd#branch                          -3.286e-13
+
+ Reference value :  0.00000e+00 Reference value :  2.40620e-01 Reference value :  5.19359e-01
+No. of Data Rows : 7108
+
+  Measurements for Transient Analysis
+
+va_11ms             =  1.526436e-01
+vb_22ms             =  1.718689e-01
+vc_58ms             =  1.980196e-01
+vd_164ms            =  2.236387e-01
+va_5ms              =  1.306551e-01
+vb_11ms             =  1.526433e-01
+vc_29ms             =  1.794417e-01
+vd_82ms             =  2.069512e-01
+va_rst              =  8.016078e-04
+vb_rst              =  8.016078e-04
+vc_rst              =  8.016078e-04
+vd_rst              =  8.016078e-04
+
+
+=== LOG TIMER CHARACTERIZATION ===
+
+After reset (should be ~0):
+
+At end of charge (key values):
+  11ms    22ms    58ms    164ms
+
+Midpoint (half duration):
+  5.5ms   11ms    29ms    82ms
+
+If logarithmic: V(t) = k * ln(1+t/tau)
+  V(t/2) / V(t) should decrease with t (unlike linear 0.5)
+  Specifically: ln(1+t/2tau) / ln(1+t/tau)
+
+Voltage ratios (for Gilbert cell test):
+  V_11ms / V_22ms should give symmetry = 11/22 = 0.500
+  V_58ms / V_164ms should give symmetry = 58/164 = 0.354
+  V_11ms / V_164ms should give symmetry = 11/164 = 0.067
+
+ngspice-43 done

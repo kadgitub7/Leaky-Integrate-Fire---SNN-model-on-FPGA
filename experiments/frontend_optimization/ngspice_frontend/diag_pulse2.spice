@@ -1,0 +1,236 @@
+* Pulse debug v2 - dense measurements
+.title diag_pulse2
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.001
+.temp 27
+
+.include "rr_timing.spice"
+.include "inverter.spice"
+.include "nand2.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Rpeak at 10us, 1ms wide
+Vrpeak rpeak_trigger 0 PWL(0 0 9.999e-6 0 10e-6 0.9 1.01e-3 0.9 1.011e-3 0 2e-3 0)
+
+Xrr rpeak_trigger f_rr_ratio f_rr_asym vdd vss vbias rr_timing
+
+.ic V(Xrr.net_timer)=0.5
+
+* Fine timestep
+.tran 1n 100u
+
+.meas tran ph2_0 FIND V(Xrr.ph2) AT=0.000010000000
+.meas tran prerr_0 FIND V(Xrr.sh_prerr) AT=0.000010000000
+.meas tran timer_0 FIND V(Xrr.net_timer) AT=0.000010000000
+.meas tran a6_0 FIND V(Xrr.a6) AT=0.000010000000
+.meas tran a9_0 FIND V(Xrr.a9) AT=0.000010000000
+.meas tran ph2_10 FIND V(Xrr.ph2) AT=0.000010010000
+.meas tran prerr_10 FIND V(Xrr.sh_prerr) AT=0.000010010000
+.meas tran timer_10 FIND V(Xrr.net_timer) AT=0.000010010000
+.meas tran a6_10 FIND V(Xrr.a6) AT=0.000010010000
+.meas tran a9_10 FIND V(Xrr.a9) AT=0.000010010000
+.meas tran ph2_20 FIND V(Xrr.ph2) AT=0.000010020000
+.meas tran prerr_20 FIND V(Xrr.sh_prerr) AT=0.000010020000
+.meas tran timer_20 FIND V(Xrr.net_timer) AT=0.000010020000
+.meas tran a6_20 FIND V(Xrr.a6) AT=0.000010020000
+.meas tran a9_20 FIND V(Xrr.a9) AT=0.000010020000
+.meas tran ph2_30 FIND V(Xrr.ph2) AT=0.000010030000
+.meas tran prerr_30 FIND V(Xrr.sh_prerr) AT=0.000010030000
+.meas tran timer_30 FIND V(Xrr.net_timer) AT=0.000010030000
+.meas tran a6_30 FIND V(Xrr.a6) AT=0.000010030000
+.meas tran a9_30 FIND V(Xrr.a9) AT=0.000010030000
+.meas tran ph2_40 FIND V(Xrr.ph2) AT=0.000010040000
+.meas tran prerr_40 FIND V(Xrr.sh_prerr) AT=0.000010040000
+.meas tran timer_40 FIND V(Xrr.net_timer) AT=0.000010040000
+.meas tran a6_40 FIND V(Xrr.a6) AT=0.000010040000
+.meas tran a9_40 FIND V(Xrr.a9) AT=0.000010040000
+.meas tran ph2_50 FIND V(Xrr.ph2) AT=0.000010050000
+.meas tran prerr_50 FIND V(Xrr.sh_prerr) AT=0.000010050000
+.meas tran timer_50 FIND V(Xrr.net_timer) AT=0.000010050000
+.meas tran a6_50 FIND V(Xrr.a6) AT=0.000010050000
+.meas tran a9_50 FIND V(Xrr.a9) AT=0.000010050000
+.meas tran ph2_60 FIND V(Xrr.ph2) AT=0.000010060000
+.meas tran prerr_60 FIND V(Xrr.sh_prerr) AT=0.000010060000
+.meas tran timer_60 FIND V(Xrr.net_timer) AT=0.000010060000
+.meas tran a6_60 FIND V(Xrr.a6) AT=0.000010060000
+.meas tran a9_60 FIND V(Xrr.a9) AT=0.000010060000
+.meas tran ph2_70 FIND V(Xrr.ph2) AT=0.000010070000
+.meas tran prerr_70 FIND V(Xrr.sh_prerr) AT=0.000010070000
+.meas tran timer_70 FIND V(Xrr.net_timer) AT=0.000010070000
+.meas tran a6_70 FIND V(Xrr.a6) AT=0.000010070000
+.meas tran a9_70 FIND V(Xrr.a9) AT=0.000010070000
+.meas tran ph2_80 FIND V(Xrr.ph2) AT=0.000010080000
+.meas tran prerr_80 FIND V(Xrr.sh_prerr) AT=0.000010080000
+.meas tran timer_80 FIND V(Xrr.net_timer) AT=0.000010080000
+.meas tran a6_80 FIND V(Xrr.a6) AT=0.000010080000
+.meas tran a9_80 FIND V(Xrr.a9) AT=0.000010080000
+.meas tran ph2_90 FIND V(Xrr.ph2) AT=0.000010090000
+.meas tran prerr_90 FIND V(Xrr.sh_prerr) AT=0.000010090000
+.meas tran timer_90 FIND V(Xrr.net_timer) AT=0.000010090000
+.meas tran a6_90 FIND V(Xrr.a6) AT=0.000010090000
+.meas tran a9_90 FIND V(Xrr.a9) AT=0.000010090000
+.meas tran ph2_100 FIND V(Xrr.ph2) AT=0.000010100000
+.meas tran prerr_100 FIND V(Xrr.sh_prerr) AT=0.000010100000
+.meas tran timer_100 FIND V(Xrr.net_timer) AT=0.000010100000
+.meas tran a6_100 FIND V(Xrr.a6) AT=0.000010100000
+.meas tran a9_100 FIND V(Xrr.a9) AT=0.000010100000
+.meas tran ph2_200 FIND V(Xrr.ph2) AT=0.000010200000
+.meas tran prerr_200 FIND V(Xrr.sh_prerr) AT=0.000010200000
+.meas tran timer_200 FIND V(Xrr.net_timer) AT=0.000010200000
+.meas tran a6_200 FIND V(Xrr.a6) AT=0.000010200000
+.meas tran a9_200 FIND V(Xrr.a9) AT=0.000010200000
+.meas tran ph2_300 FIND V(Xrr.ph2) AT=0.000010300000
+.meas tran prerr_300 FIND V(Xrr.sh_prerr) AT=0.000010300000
+.meas tran timer_300 FIND V(Xrr.net_timer) AT=0.000010300000
+.meas tran a6_300 FIND V(Xrr.a6) AT=0.000010300000
+.meas tran a9_300 FIND V(Xrr.a9) AT=0.000010300000
+.meas tran ph2_400 FIND V(Xrr.ph2) AT=0.000010400000
+.meas tran prerr_400 FIND V(Xrr.sh_prerr) AT=0.000010400000
+.meas tran timer_400 FIND V(Xrr.net_timer) AT=0.000010400000
+.meas tran a6_400 FIND V(Xrr.a6) AT=0.000010400000
+.meas tran a9_400 FIND V(Xrr.a9) AT=0.000010400000
+.meas tran ph2_500 FIND V(Xrr.ph2) AT=0.000010500000
+.meas tran prerr_500 FIND V(Xrr.sh_prerr) AT=0.000010500000
+.meas tran timer_500 FIND V(Xrr.net_timer) AT=0.000010500000
+.meas tran a6_500 FIND V(Xrr.a6) AT=0.000010500000
+.meas tran a9_500 FIND V(Xrr.a9) AT=0.000010500000
+.meas tran ph2_600 FIND V(Xrr.ph2) AT=0.000010600000
+.meas tran prerr_600 FIND V(Xrr.sh_prerr) AT=0.000010600000
+.meas tran timer_600 FIND V(Xrr.net_timer) AT=0.000010600000
+.meas tran a6_600 FIND V(Xrr.a6) AT=0.000010600000
+.meas tran a9_600 FIND V(Xrr.a9) AT=0.000010600000
+.meas tran ph2_700 FIND V(Xrr.ph2) AT=0.000010700000
+.meas tran prerr_700 FIND V(Xrr.sh_prerr) AT=0.000010700000
+.meas tran timer_700 FIND V(Xrr.net_timer) AT=0.000010700000
+.meas tran a6_700 FIND V(Xrr.a6) AT=0.000010700000
+.meas tran a9_700 FIND V(Xrr.a9) AT=0.000010700000
+.meas tran ph2_800 FIND V(Xrr.ph2) AT=0.000010800000
+.meas tran prerr_800 FIND V(Xrr.sh_prerr) AT=0.000010800000
+.meas tran timer_800 FIND V(Xrr.net_timer) AT=0.000010800000
+.meas tran a6_800 FIND V(Xrr.a6) AT=0.000010800000
+.meas tran a9_800 FIND V(Xrr.a9) AT=0.000010800000
+.meas tran ph2_900 FIND V(Xrr.ph2) AT=0.000010900000
+.meas tran prerr_900 FIND V(Xrr.sh_prerr) AT=0.000010900000
+.meas tran timer_900 FIND V(Xrr.net_timer) AT=0.000010900000
+.meas tran a6_900 FIND V(Xrr.a6) AT=0.000010900000
+.meas tran a9_900 FIND V(Xrr.a9) AT=0.000010900000
+.meas tran ph2_1000 FIND V(Xrr.ph2) AT=0.000011000000
+.meas tran prerr_1000 FIND V(Xrr.sh_prerr) AT=0.000011000000
+.meas tran timer_1000 FIND V(Xrr.net_timer) AT=0.000011000000
+.meas tran a6_1000 FIND V(Xrr.a6) AT=0.000011000000
+.meas tran a9_1000 FIND V(Xrr.a9) AT=0.000011000000
+.meas tran ph2_1500 FIND V(Xrr.ph2) AT=0.000011500000
+.meas tran prerr_1500 FIND V(Xrr.sh_prerr) AT=0.000011500000
+.meas tran timer_1500 FIND V(Xrr.net_timer) AT=0.000011500000
+.meas tran a6_1500 FIND V(Xrr.a6) AT=0.000011500000
+.meas tran a9_1500 FIND V(Xrr.a9) AT=0.000011500000
+.meas tran ph2_2000 FIND V(Xrr.ph2) AT=0.000012000000
+.meas tran prerr_2000 FIND V(Xrr.sh_prerr) AT=0.000012000000
+.meas tran timer_2000 FIND V(Xrr.net_timer) AT=0.000012000000
+.meas tran a6_2000 FIND V(Xrr.a6) AT=0.000012000000
+.meas tran a9_2000 FIND V(Xrr.a9) AT=0.000012000000
+.meas tran ph2_2500 FIND V(Xrr.ph2) AT=0.000012500000
+.meas tran prerr_2500 FIND V(Xrr.sh_prerr) AT=0.000012500000
+.meas tran timer_2500 FIND V(Xrr.net_timer) AT=0.000012500000
+.meas tran a6_2500 FIND V(Xrr.a6) AT=0.000012500000
+.meas tran a9_2500 FIND V(Xrr.a9) AT=0.000012500000
+.meas tran ph2_3000 FIND V(Xrr.ph2) AT=0.000013000000
+.meas tran prerr_3000 FIND V(Xrr.sh_prerr) AT=0.000013000000
+.meas tran timer_3000 FIND V(Xrr.net_timer) AT=0.000013000000
+.meas tran a6_3000 FIND V(Xrr.a6) AT=0.000013000000
+.meas tran a9_3000 FIND V(Xrr.a9) AT=0.000013000000
+.meas tran ph2_3500 FIND V(Xrr.ph2) AT=0.000013500000
+.meas tran prerr_3500 FIND V(Xrr.sh_prerr) AT=0.000013500000
+.meas tran timer_3500 FIND V(Xrr.net_timer) AT=0.000013500000
+.meas tran a6_3500 FIND V(Xrr.a6) AT=0.000013500000
+.meas tran a9_3500 FIND V(Xrr.a9) AT=0.000013500000
+.meas tran ph2_4000 FIND V(Xrr.ph2) AT=0.000014000000
+.meas tran prerr_4000 FIND V(Xrr.sh_prerr) AT=0.000014000000
+.meas tran timer_4000 FIND V(Xrr.net_timer) AT=0.000014000000
+.meas tran a6_4000 FIND V(Xrr.a6) AT=0.000014000000
+.meas tran a9_4000 FIND V(Xrr.a9) AT=0.000014000000
+.meas tran ph2_4500 FIND V(Xrr.ph2) AT=0.000014500000
+.meas tran prerr_4500 FIND V(Xrr.sh_prerr) AT=0.000014500000
+.meas tran timer_4500 FIND V(Xrr.net_timer) AT=0.000014500000
+.meas tran a6_4500 FIND V(Xrr.a6) AT=0.000014500000
+.meas tran a9_4500 FIND V(Xrr.a9) AT=0.000014500000
+.meas tran ph2_5000 FIND V(Xrr.ph2) AT=0.000015000000
+.meas tran prerr_5000 FIND V(Xrr.sh_prerr) AT=0.000015000000
+.meas tran timer_5000 FIND V(Xrr.net_timer) AT=0.000015000000
+.meas tran a6_5000 FIND V(Xrr.a6) AT=0.000015000000
+.meas tran a9_5000 FIND V(Xrr.a9) AT=0.000015000000
+.meas tran ph2_5500 FIND V(Xrr.ph2) AT=0.000015500000
+.meas tran prerr_5500 FIND V(Xrr.sh_prerr) AT=0.000015500000
+.meas tran timer_5500 FIND V(Xrr.net_timer) AT=0.000015500000
+.meas tran a6_5500 FIND V(Xrr.a6) AT=0.000015500000
+.meas tran a9_5500 FIND V(Xrr.a9) AT=0.000015500000
+.meas tran ph2_6000 FIND V(Xrr.ph2) AT=0.000016000000
+.meas tran prerr_6000 FIND V(Xrr.sh_prerr) AT=0.000016000000
+.meas tran timer_6000 FIND V(Xrr.net_timer) AT=0.000016000000
+.meas tran a6_6000 FIND V(Xrr.a6) AT=0.000016000000
+.meas tran a9_6000 FIND V(Xrr.a9) AT=0.000016000000
+.meas tran ph2_6500 FIND V(Xrr.ph2) AT=0.000016500000
+.meas tran prerr_6500 FIND V(Xrr.sh_prerr) AT=0.000016500000
+.meas tran timer_6500 FIND V(Xrr.net_timer) AT=0.000016500000
+.meas tran a6_6500 FIND V(Xrr.a6) AT=0.000016500000
+.meas tran a9_6500 FIND V(Xrr.a9) AT=0.000016500000
+.meas tran ph2_7000 FIND V(Xrr.ph2) AT=0.000017000000
+.meas tran prerr_7000 FIND V(Xrr.sh_prerr) AT=0.000017000000
+.meas tran timer_7000 FIND V(Xrr.net_timer) AT=0.000017000000
+.meas tran a6_7000 FIND V(Xrr.a6) AT=0.000017000000
+.meas tran a9_7000 FIND V(Xrr.a9) AT=0.000017000000
+.meas tran ph2_7500 FIND V(Xrr.ph2) AT=0.000017500000
+.meas tran prerr_7500 FIND V(Xrr.sh_prerr) AT=0.000017500000
+.meas tran timer_7500 FIND V(Xrr.net_timer) AT=0.000017500000
+.meas tran a6_7500 FIND V(Xrr.a6) AT=0.000017500000
+.meas tran a9_7500 FIND V(Xrr.a9) AT=0.000017500000
+.meas tran ph2_8000 FIND V(Xrr.ph2) AT=0.000018000000
+.meas tran prerr_8000 FIND V(Xrr.sh_prerr) AT=0.000018000000
+.meas tran timer_8000 FIND V(Xrr.net_timer) AT=0.000018000000
+.meas tran a6_8000 FIND V(Xrr.a6) AT=0.000018000000
+.meas tran a9_8000 FIND V(Xrr.a9) AT=0.000018000000
+.meas tran ph2_8500 FIND V(Xrr.ph2) AT=0.000018500000
+.meas tran prerr_8500 FIND V(Xrr.sh_prerr) AT=0.000018500000
+.meas tran timer_8500 FIND V(Xrr.net_timer) AT=0.000018500000
+.meas tran a6_8500 FIND V(Xrr.a6) AT=0.000018500000
+.meas tran a9_8500 FIND V(Xrr.a9) AT=0.000018500000
+.meas tran ph2_9000 FIND V(Xrr.ph2) AT=0.000019000000
+.meas tran prerr_9000 FIND V(Xrr.sh_prerr) AT=0.000019000000
+.meas tran timer_9000 FIND V(Xrr.net_timer) AT=0.000019000000
+.meas tran a6_9000 FIND V(Xrr.a6) AT=0.000019000000
+.meas tran a9_9000 FIND V(Xrr.a9) AT=0.000019000000
+.meas tran ph2_9500 FIND V(Xrr.ph2) AT=0.000019500000
+.meas tran prerr_9500 FIND V(Xrr.sh_prerr) AT=0.000019500000
+.meas tran timer_9500 FIND V(Xrr.net_timer) AT=0.000019500000
+.meas tran a6_9500 FIND V(Xrr.a6) AT=0.000019500000
+.meas tran a9_9500 FIND V(Xrr.a9) AT=0.000019500000
+.meas tran ph2_10000 FIND V(Xrr.ph2) AT=0.000020000000
+.meas tran prerr_10000 FIND V(Xrr.sh_prerr) AT=0.000020000000
+.meas tran timer_10000 FIND V(Xrr.net_timer) AT=0.000020000000
+.meas tran a6_10000 FIND V(Xrr.a6) AT=0.000020000000
+.meas tran a9_10000 FIND V(Xrr.a9) AT=0.000020000000
+.meas tran ph2_20000 FIND V(Xrr.ph2) AT=0.000030000000
+.meas tran prerr_20000 FIND V(Xrr.sh_prerr) AT=0.000030000000
+.meas tran timer_20000 FIND V(Xrr.net_timer) AT=0.000030000000
+.meas tran a6_20000 FIND V(Xrr.a6) AT=0.000030000000
+.meas tran a9_20000 FIND V(Xrr.a9) AT=0.000030000000
+.meas tran ph2_50000 FIND V(Xrr.ph2) AT=0.000060000000
+.meas tran prerr_50000 FIND V(Xrr.sh_prerr) AT=0.000060000000
+.meas tran timer_50000 FIND V(Xrr.net_timer) AT=0.000060000000
+.meas tran a6_50000 FIND V(Xrr.a6) AT=0.000060000000
+.meas tran a9_50000 FIND V(Xrr.a9) AT=0.000060000000
+.meas tran ph2_90000 FIND V(Xrr.ph2) AT=0.000100000000
+.meas tran prerr_90000 FIND V(Xrr.sh_prerr) AT=0.000100000000
+.meas tran timer_90000 FIND V(Xrr.net_timer) AT=0.000100000000
+.meas tran a6_90000 FIND V(Xrr.a6) AT=0.000100000000
+.meas tran a9_90000 FIND V(Xrr.a9) AT=0.000100000000
+
+.end

@@ -1,0 +1,158 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: energy_measurement
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+vref                                      0.45
+ecg_in                                    0.25
+ecg_in_l1                                 0.25
+rpeak_trigger                                0
+qrs_gate                                     0
+qrs_sym_gate                                 0
+pwave_gate                                   0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      1.91447e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.tail_r                           0.0546598
+xrr.net_r1                             0.46929
+f_rr_ratio                            0.130959
+xrr.mid_ref                           0.218464
+xrr.tail_a                          0.00433493
+xrr.net_a1                             0.40478
+f_rr_asym                             0.195574
+xinstab0.qrs_gate_bar                      0.9
+xinstab0.xota_pk.net1                 0.399253
+xinstab0.net_pk_raw                0.000109329
+xinstab0.peak_node                 3.46089e-06
+xinstab0.xota_pk.net_tail          2.68835e-05
+xinstab0.net_pk_gated                      0.9
+xinstab0.xcpeak.a                            0
+xinstab0.xcpeak.b1                           0
+peak_out_l0                        3.46089e-06
+xinstab0.tail_i                       0.112023
+xinstab0.net_i1                       0.537961
+f_instab_l0                           0.128208
+xinstab1.qrs_gate_bar                      0.9
+xinstab1.xota_pk.net1                 0.399253
+xinstab1.net_pk_raw                0.000109329
+xinstab1.peak_node                 3.46089e-06
+xinstab1.xota_pk.net_tail          2.68835e-05
+xinstab1.net_pk_gated                      0.9
+xinstab1.xcpeak.a                            0
+xinstab1.xcpeak.b1                           0
+peak_out_l1                        3.46089e-06
+xinstab1.tail_i                       0.112023
+xinstab1.net_i1                       0.537961
+f_instab_l1                           0.128208
+xpwave.xota_hpf_lp.net1               0.171615
+xpwave.hpf_vlp                        0.249366
+xpwave.xota_hpf_lp.net_tail         0.00970674
+xpwave.xchpf_lp.a                            0
+xpwave.xchpf_lp.b1                           0
+xpwave.xota_hpf_sub.net1              0.171615
+xpwave.bpf_mid                        0.249366
+xpwave.xota_hpf_sub.net_tail        0.00970674
+xpwave.xota_lpf.net1                  0.172056
+xpwave.bpf_pw                           0.2487
+xpwave.xota_lpf.net_tail            0.00956573
+xpwave.xclpf.a                               0
+xpwave.xclpf.b1                              0
+xpwave.pwave_gate_bar                      0.9
+xpwave.vbias_pk                    4.52517e-10
+xpwave.xota_pk.net1                   0.371126
+xpwave.net_pk_cmp                  1.16348e-09
+xpwave.xota_pk.net_tail               0.165873
+f_pwave                              0.0160234
+xpwave.net_pk_cmp_bar                      0.9
+xpwave.xcpk.a                                0
+xpwave.xcpk.b1                               0
+xwidth.xota_wcmp.net1                 0.171633
+xwidth.width_cmp_out                0.00987155
+xwidth.xota_wcmp.net_tail           0.00972096
+xwidth.qrs_gate_bar                        0.9
+xwidth.width_gate_gated            1.41373e-10
+xwidth.net_w_bias                          0.9
+xwidth.net_w_sw                       0.226117
+f_width                             0.00253791
+xwidth.xcwidth.a                             0
+xwidth.xcwidth.b1                            0
+xsym.qrs_onset_bar                         0.9
+xsym.rpeak_bar                             0.9
+xsym.net_latch                     4.16118e-11
+xsym.xclatch.a                               0
+xsym.xclatch.b1                              0
+xsym.net_latch_bar                         0.9
+xsym.net_rise_bias                         0.9
+xsym.net_rise_sw                      0.197215
+xsym.rise_timer                    4.15428e-11
+xsym.xcrise.a                                0
+xsym.xcrise.b1                               0
+rise_timer_out                     4.15428e-11
+xsym.net_fall_bias                         0.9
+xsym.net_fall_sw                      0.197215
+xsym.fall_timer                     0.00253791
+xsym.xcfall.a                                0
+xsym.xcfall.b1                               0
+fall_timer_out                      0.00253791
+xsym.tail_s                         2.8926e-05
+xsym.net_sy1                          0.399259
+f_sym                                 0.396846
+xslope.tail_sl                      2.8926e-05
+xslope.net_sl1                        0.396846
+f_slope                               0.399259
+vpwave#branch                                0
+vsym#branch                                  0
+vqrs#branch                                  0
+vrpeak#branch                                0
+vecg2#branch                                 0
+vecg#branch                                  0
+vref#branch                                  0
+vbias#branch                      -1.29081e-13
+vss#branch                          8.0044e-10
+vdd#branch                        -8.00312e-10
+
+
+No. of Data Rows : 50238
+
+  Measurements for Transient Analysis
+
+total_charge        =   -5.64656e-09 from=  1.00000e-01 to=  4.68060e+00
+avg_current         =  -1.234471e-09 from=  1.000000e-01 to=  4.680600e+00
+charge_b0           =   -9.27919e-10 from=  1.00000e-01 to=  9.48610e-01
+avg_i_b0            =  -1.093312e-09 from=  1.000000e-01 to=  9.486722e-01
+charge_b1           =   -9.10008e-10 from=  9.48610e-01 to=  1.66667e+00
+avg_i_b1            =  -1.271518e-09 from=  9.486100e-01 to=  1.666677e+00
+charge_b2           =   -1.37661e-09 from=  1.66667e+00 to=  2.58611e+00
+avg_i_b2            =  -1.499735e-09 from=  1.666670e+00 to=  2.586183e+00
+charge_b3           =   -1.26708e-09 from=  2.58611e+00 to=  3.70833e+00
+avg_i_b3            =  -1.128837e-09 from=  2.586110e+00 to=  3.708383e+00
+charge_b4           =   -1.04106e-09 from=  3.70833e+00 to=  4.58056e+00
+avg_i_b4            =  -1.197234e-09 from=  3.708330e+00 to=  4.580628e+00
+peak_current        =  -2.104344e-07 at=  4.994723e-01
+
+
+Total analysis time (seconds) = 18.993
+
+Total elapsed time (seconds) = 27.856 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  971.617 MB.
+Maximum ngspice program size =  149.391 MB.
+Current ngspice program size =  149.391 MB.
+

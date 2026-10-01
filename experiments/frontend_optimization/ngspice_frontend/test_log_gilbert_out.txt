@@ -1,0 +1,73 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_log_gilbert
+
+
+=== CORRECTED GILBERT CELL WITH LOG TIMER VOLTAGES ===
+
+Format: Beat Vrise(mV) Vwidth(mV) Target_Sym Sym_Out(mV)
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+B1: Vr=198 Vw=224 target=0.356 sym_out_mV=16.2485
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B2: Vr=153 Vw=172 target=0.500 sym_out_mV=21.5251
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B3: Vr=161 Vw=213 target=0.130 sym_out_mV=7.05971
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B4: Vr=153 Vw=211 target=0.091 sym_out_mV=5.91811
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B5: Vr=157 Vw=201 target=0.208 sym_out_mV=9.00974
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B6: Vr=165 Vw=213 target=0.152 sym_out_mV=7.9595
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B7: Vr=157 Vw=205 target=0.167 sym_out_mV=7.96847
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B8: Vr=197 Vw=224 target=0.339 sym_out_mV=15.6773
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B9: Vr=157 Vw=174 target=0.556 sym_out_mV=23.424
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B10: Vr=153 Vw=202 target=0.154 sym_out_mV=7.73505
+
+--- Key node voltages (last beat) ---
+v(net_n1) = 2.532926e-01
+v(sym_out) = 7.735049e-03
+v(vrise) = 1.530000e-01
+v(vwidth) = 2.020000e-01
+
+NOTE: V(sym_out) is expected to be VERY small (few mV)
+because both NMOS are in deep subthreshold (~pA currents)
+and the output NMOS enters triode to balance the current
+
+ngspice-43 done

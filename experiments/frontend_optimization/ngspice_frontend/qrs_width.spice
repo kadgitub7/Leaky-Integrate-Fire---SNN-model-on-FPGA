@@ -1,0 +1,59 @@
+* ============================================================
+* FEATURE 6: QRS Width (qrs_width_L0)
+*
+* Time ECG is above a threshold during QRS window
+* Uses vref as threshold (ECG baseline < vref < QRS peak)
+*
+* Implementation: comparator + gated current-source timer
+*
+* SKY130 transistor-level
+* Pin order: peak_voltage ecg_in qrs_gate rpeak_trigger width_out vdd vss vbias
+* ============================================================
+
+.subckt qrs_width peak_voltage ecg_in qrs_gate rpeak_trigger width_out vdd vss vbias
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+* --- Threshold: use peak_voltage directly as threshold ---
+* For vref input: threshold = vref = 0.45V
+* ECG baseline (~0.15V) < threshold < QRS peak (~0.5-0.7V)
+* Width = time ECG > threshold during QRS window
+
+* --- Comparator: ecg > threshold? ---
+Xota_wcmp ecg_in peak_voltage width_cmp_out vdd vss vbias ota_5t
+
+* AND with qrs_gate: transmission gate passes comparator output during QRS
+Xinv_qgate qrs_gate qrs_gate_bar vdd vss inverter_sub
+XMand_n width_cmp_out qrs_gate width_gate_gated vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMand_p width_cmp_out qrs_gate_bar width_gate_gated vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMand_pull width_gate_gated qrs_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* --- Width timer: current charges cap while above threshold ---
+* Target: ~16nA charge current with Vbias=0.35V
+*   160ms -> V = 16n*0.16/5p = 512mV
+*   20ms  -> V = 16n*0.02/5p = 64mV
+* Capacitor: 5pF = 50x50um MIM
+
+* Bias current (L=70 W=0.42 for ~22nA at Vbias=0.35V)
+XMw_bias net_w_bias vbias net_w_sw vss sky130_fd_pr__nfet_01v8 L=70 W=0.42 nf=1
+XMw_gate net_w_sw width_gate_gated vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Diode-connected PMOS mirror reference (was missing!)
+XMw_ref net_w_bias net_w_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* PMOS charger (mirrors reference current to charge timer cap)
+XMw_charge width_out net_w_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Disable: pull bias node to VDD when QRS gate is off (turns off PMOS charger)
+XMw_disable net_w_bias qrs_gate vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+XCwidth width_out vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Reset before each QRS window
+XMw_reset width_out rpeak_trigger vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* --- TOTAL: 1 OTA (comparator) + 7 transistors + 1 cap ---
+* GATED to QRS window
+
+.ends qrs_width

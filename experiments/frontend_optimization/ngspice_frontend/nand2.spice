@@ -1,0 +1,8 @@
+* 2-input NAND gate -- SKY130
+
+.subckt nand2 a b out vdd vss
+XMp1 out a vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMp2 out b vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn1 out a mid vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMn2 mid b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+.ends nand2

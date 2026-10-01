@@ -1,0 +1,86 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_qrs_sym_v3
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+xsym.rpeak_bar                             0.9
+rpeak                                        0
+xsym.qrs_gate_bar                          0.9
+qrs_gate                                     0
+xsym.latch_bar                             0.9
+xsym.latch                         4.16118e-11
+xsym.xclatch.a                               0
+xsym.xclatch.b1                              0
+xsym.nr1                           3.88953e-06
+xsym.nr                            3.88903e-06
+xsym.rise_cap                      5.02255e-10
+xsym.xcr.a                                   0
+xsym.xcr.b1                                  0
+xsym.nw                             3.8891e-06
+xsym.width_cap                     5.02264e-10
+xsym.xcw.a                                   0
+xsym.xcw.b1                                  0
+xsym.net_n1                           0.399222
+sym_out                               0.399222
+vrpeak#branch                                0
+vgate#branch                                 0
+vbias#branch                                 0
+vss#branch                          8.1611e-13
+vdd#branch                        -8.16161e-13
+
+
+No. of Data Rows : 29338
+
+  Measurements for Transient Analysis
+
+v1s                 =  1.239366e-02
+v2s                 =  2.220516e-02
+v3s                 =  5.202456e-03
+v4s                 =  3.909745e-03
+v5s                 =  8.381248e-03
+v6s                 =  5.921474e-03
+v7s                 =  6.813099e-03
+v8s                 =  1.179659e-02
+v9s                 =  2.477602e-02
+v10s                =  6.449893e-03
+v1r                 =  1.892941e-01
+v1w                 =  2.231881e-01
+v2r                 =  1.518860e-01
+v2w                 =  1.702645e-01
+v3r                 =  1.549508e-01
+v3w                 =  2.174077e-01
+v4r                 =  1.437509e-01
+v4w                 =  2.162570e-01
+v5r                 =  1.546607e-01
+v5w                 =  2.010634e-01
+v6r                 =  1.594203e-01
+v6w                 =  2.174053e-01
+v7r                 =  1.533657e-01
+v7w                 =  2.066344e-01
+v8r                 =  1.877892e-01
+v8w                 =  2.231885e-01
+v9r                 =  1.581048e-01
+v9w                 =  1.739377e-01
+v10r                =  1.478021e-01
+v10w                =  2.029535e-01
+idd                 =  -8.439078e-12 from=  5.000000e-02 to=  2.900000e+00
+
+
+============================================================
+QRS SYMMETRY v3 — PURE ANALOG — ALL 10 BEATS
+============================================================
+
+ngspice-43 done

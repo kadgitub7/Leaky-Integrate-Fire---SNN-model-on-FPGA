@@ -1,0 +1,262 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: diag_pulse
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+rpeak_trigger                                0
+xrr.a1                                     0.9
+xrr.xcdly1.a                                 0
+xrr.xcdly1.b1                                0
+xrr.a2                              9.0827e-11
+xrr.xcdly2.a                                 0
+xrr.xcdly2.b1                                0
+xrr.a3                                     0.9
+xrr.xcdly3.a                                 0
+xrr.xcdly3.b1                                0
+xrr.a4                              9.0827e-11
+xrr.xcdly4.a                                 0
+xrr.xcdly4.b1                                0
+xrr.a5                                     0.9
+xrr.xcdly5.a                                 0
+xrr.xcdly5.b1                                0
+xrr.a6                              9.0827e-11
+xrr.xcdly6.a                                 0
+xrr.xcdly6.b1                                0
+xrr.a7                                     0.9
+xrr.xcdly7.a                                 0
+xrr.xcdly7.b1                                0
+xrr.a8                              9.0827e-11
+xrr.xcdly8.a                                 0
+xrr.xcdly8.b1                                0
+xrr.a9                                     0.9
+xrr.xcdly9.a                                 0
+xrr.xcdly9.b1                                0
+xrr.a10                             9.0827e-11
+xrr.xcdly10.a                                0
+xrr.xcdly10.b1                               0
+xrr.a11                                    0.9
+xrr.xcdly11.a                                0
+xrr.xcdly11.b1                               0
+xrr.ph1_bar                                0.9
+xrr.xnand_ph1.mid                  8.50828e-10
+xrr.ph1                             9.0827e-11
+xrr.ph2_bar                                0.9
+xrr.xnand_ph2.mid                  8.50828e-10
+xrr.ph2                             9.0827e-11
+xrr.net_timer                              0.5
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sh_prerr                          0.449995
+xrr.sh_postrr                         0.449993
+xrr.xchold_postrr.a                          0
+xrr.xchold_postrr.b1                         0
+xrr.xchold_prerr.a                           0
+xrr.xchold_prerr.b1                          0
+xrr.net_g1                          0.00717963
+f_rr_ratio                            0.889227
+xrr.net_ga1                         0.00717994
+f_rr_asym                           0.00717957
+vrpeak#branch                                0
+vbias#branch                                 0
+vss#branch                         8.74836e-09
+vdd#branch                        -8.60154e-09
+
+
+No. of Data Rows : 1000014
+
+  Measurements for Transient Analysis
+
+rpeak_at_0ns        =  9.000000e-01
+timer_at_0ns        =  4.999954e-01
+prerr_at_0ns        =  4.499930e-01
+postrr_at_0ns       =  4.499909e-01
+ph1_at_0ns          =  -9.181187e-03
+ph2_at_0ns          =  -9.334764e-08
+a3_at_0ns           =  9.006026e-01
+a6_at_0ns           =  -7.370200e-11
+a9_at_0ns           =  9.000000e-01
+a11_at_0ns          =  9.000000e-01
+rpeak_at_5ns        =  9.000000e-01
+timer_at_5ns        =  4.999954e-01
+prerr_at_5ns        =  4.499323e-01
+postrr_at_5ns       =  4.499296e-01
+ph1_at_5ns          =  1.304550e-02
+ph2_at_5ns          =  2.141679e-08
+a3_at_5ns           =  8.994535e-01
+a6_at_5ns           =  2.883033e-09
+a9_at_5ns           =  9.000000e-01
+a11_at_5ns          =  9.000000e-01
+rpeak_at_10ns       =  9.000000e-01
+timer_at_10ns       =  4.999954e-01
+prerr_at_10ns       =  4.499830e-01
+postrr_at_10ns      =  4.499808e-01
+ph1_at_10ns         =  4.436562e-01
+ph2_at_10ns         =  2.198242e-08
+a3_at_10ns          =  8.994992e-01
+a6_at_10ns          =  7.310524e-10
+a9_at_10ns          =  9.000000e-01
+a11_at_10ns         =  9.000000e-01
+rpeak_at_15ns       =  9.000000e-01
+timer_at_15ns       =  4.999954e-01
+prerr_at_15ns       =  4.500410e-01
+postrr_at_15ns      =  4.500395e-01
+ph1_at_15ns         =  8.318800e-01
+ph2_at_15ns         =  2.306025e-08
+a3_at_15ns          =  8.995713e-01
+a6_at_15ns          =  2.897621e-10
+a9_at_15ns          =  9.000000e-01
+a11_at_15ns         =  9.000000e-01
+rpeak_at_20ns       =  9.000000e-01
+timer_at_20ns       =  4.999954e-01
+prerr_at_20ns       =  4.500580e-01
+postrr_at_20ns      =  4.500566e-01
+ph1_at_20ns         =  8.988697e-01
+ph2_at_20ns         =  9.144986e-11
+a3_at_20ns          =  8.996599e-01
+a6_at_20ns          =  -4.295388e-10
+a9_at_20ns          =  9.000000e-01
+a11_at_20ns         =  9.000000e-01
+rpeak_at_25ns       =  9.000000e-01
+timer_at_25ns       =  4.999954e-01
+prerr_at_25ns       =  4.500582e-01
+postrr_at_25ns      =  4.500570e-01
+ph1_at_25ns         =  8.999841e-01
+ph2_at_25ns         =  3.049505e-13
+a3_at_25ns          =  8.997437e-01
+a6_at_25ns          =  -1.009330e-10
+a9_at_25ns          =  9.000000e-01
+a11_at_25ns         =  9.000000e-01
+rpeak_at_30ns       =  9.000000e-01
+timer_at_30ns       =  4.999954e-01
+prerr_at_30ns       =  4.500582e-01
+postrr_at_30ns      =  4.500570e-01
+ph1_at_30ns         =  8.999997e-01
+ph2_at_30ns         =  5.482048e-11
+a3_at_30ns          =  8.998172e-01
+a6_at_30ns          =  4.006174e-11
+a9_at_30ns          =  9.000000e-01
+a11_at_30ns         =  9.000000e-01
+rpeak_at_35ns       =  9.000000e-01
+timer_at_35ns       =  4.999954e-01
+prerr_at_35ns       =  4.500581e-01
+postrr_at_35ns      =  4.500570e-01
+ph1_at_35ns         =  9.000000e-01
+ph2_at_35ns         =  6.711227e-11
+a3_at_35ns          =  8.998820e-01
+a6_at_35ns          =  7.918723e-11
+a9_at_35ns          =  9.000000e-01
+a11_at_35ns         =  9.000000e-01
+rpeak_at_40ns       =  9.000000e-01
+timer_at_40ns       =  4.999954e-01
+prerr_at_40ns       =  4.500581e-01
+postrr_at_40ns      =  4.500569e-01
+ph1_at_40ns         =  9.000000e-01
+ph2_at_40ns         =  7.035356e-11
+a3_at_40ns          =  8.999397e-01
+a6_at_40ns          =  8.742812e-11
+a9_at_40ns          =  9.000000e-01
+a11_at_40ns         =  9.000000e-01
+rpeak_at_50ns       =  9.000000e-01
+timer_at_50ns       =  4.999954e-01
+prerr_at_50ns       =  4.500580e-01
+postrr_at_50ns      =  4.500569e-01
+ph1_at_50ns         =  9.000000e-01
+ph2_at_50ns         =  7.308150e-11
+a3_at_50ns          =  9.000392e-01
+a6_at_50ns          =  8.979533e-11
+a9_at_50ns          =  9.000000e-01
+a11_at_50ns         =  9.000000e-01
+rpeak_at_100ns      =  9.000000e-01
+timer_at_100ns      =  4.999954e-01
+prerr_at_100ns      =  4.500577e-01
+postrr_at_100ns     =  4.500569e-01
+ph1_at_100ns        =  9.000000e-01
+ph2_at_100ns        =  8.104201e-11
+a3_at_100ns         =  9.003795e-01
+a6_at_100ns         =  9.077920e-11
+a9_at_100ns         =  9.000000e-01
+a11_at_100ns        =  9.000000e-01
+rpeak_at_200ns      =  9.000000e-01
+timer_at_200ns      =  4.999953e-01
+prerr_at_200ns      =  4.500575e-01
+postrr_at_200ns     =  4.500568e-01
+ph1_at_200ns        =  9.000000e-01
+ph2_at_200ns        =  8.734538e-11
+a3_at_200ns         =  9.008629e-01
+a6_at_200ns         =  9.084396e-11
+a9_at_200ns         =  9.000000e-01
+a11_at_200ns        =  9.000000e-01
+rpeak_at_500ns      =  9.000000e-01
+timer_at_500ns      =  4.999952e-01
+prerr_at_500ns      =  4.500574e-01
+postrr_at_500ns     =  4.500567e-01
+ph1_at_500ns        =  9.000000e-01
+ph2_at_500ns        =  8.975248e-11
+a3_at_500ns         =  8.992672e-01
+a6_at_500ns         =  8.868597e-11
+a9_at_500ns         =  9.000000e-01
+a11_at_500ns        =  9.000000e-01
+rpeak_at_1000ns     =  9.000000e-01
+timer_at_1000ns     =  4.999950e-01
+prerr_at_1000ns     =  4.499947e-01
+postrr_at_1000ns    =  4.499927e-01
+ph1_at_1000ns       =  5.520622e-09
+ph2_at_1000ns       =  9.332711e-11
+a3_at_1000ns        =  1.067958e-05
+a6_at_1000ns        =  7.564855e-08
+a9_at_1000ns        =  9.000000e-01
+a11_at_1000ns       =  9.000000e-01
+rpeak_at_5000ns     =  9.000000e-01
+timer_at_5000ns     =  5.006414e-01
+prerr_at_5000ns     =  4.502526e-01
+postrr_at_5000ns    =  4.499928e-01
+ph1_at_5000ns       =  9.725292e-11
+ph2_at_5000ns       =  1.384210e-09
+a3_at_5000ns        =  1.516484e-08
+a6_at_5000ns        =  9.000014e-01
+a9_at_5000ns        =  3.548165e-08
+a11_at_5000ns       =  8.200696e-10
+rpeak_at_10000ns    =  9.000000e-01
+timer_at_10000ns    =  5.037056e-01
+prerr_at_10000ns    =  4.502526e-01
+postrr_at_10000ns   =  4.499928e-01
+ph1_at_10000ns      =  9.207233e-11
+ph2_at_10000ns      =  1.348880e-09
+a3_at_10000ns       =  6.786833e-09
+a6_at_10000ns       =  9.000003e-01
+a9_at_10000ns       =  9.194757e-09
+a11_at_10000ns      =  8.202445e-10
+rpeak_at_50000ns    =  9.000000e-01
+timer_at_50000ns    =  5.281607e-01
+prerr_at_50000ns    =  4.502526e-01
+postrr_at_50000ns   =  4.499928e-01
+ph1_at_50000ns      =  9.086578e-11
+ph2_at_50000ns      =  1.341105e-09
+a3_at_50000ns       =  1.200716e-09
+a6_at_50000ns       =  9.000000e-01
+a9_at_50000ns       =  1.264165e-09
+a11_at_50000ns      =  8.224144e-10
+
+
+Total analysis time (seconds) = 269.835
+
+Total elapsed time (seconds) = 279.591 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1287.676 MB.
+Maximum ngspice program size =  158.441 MB.
+Current ngspice program size =  158.441 MB.
+

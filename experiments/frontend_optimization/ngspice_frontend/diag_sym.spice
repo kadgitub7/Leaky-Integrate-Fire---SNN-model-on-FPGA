@@ -1,0 +1,105 @@
+* QRS Symmetry Timer Debug
+.title diag_sym_debug
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* QRS onset: HIGH from 0.46s to 0.54s
+Vonset qrs_onset 0 PWL(0 0 0.459 0 0.460 0.9 0.540 0.9 0.541 0 1.0 0)
+
+* Peak detect: HIGH at 0.5s (1ms pulse)
+Vpeak peak_detect 0 PWL(0 0 0.499 0 0.500 0.9 0.501 0.9 0.502 0 1.0 0)
+
+* rpeak trigger: same as peak_detect
+Vrpeak rpeak_trigger 0 PWL(0 0 0.499 0 0.500 0.9 0.501 0.9 0.502 0 1.0 0)
+
+* Width voltage (from qrs_width, approximate)
+Vwidth width_voltage 0 0.05
+
+* ========== INLINED QRS_SYMMETRY ==========
+
+Xinv_pk peak_detect peak_detect_bar vdd vss inverter_sub
+
+* Bias current for timer
+XMsym_bias net_sym_bias vbias net_sym_sw vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMsym_gate net_sym_sw qrs_onset vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Diode-connected PMOS mirror reference
+XMsym_ref net_sym_bias net_sym_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Charge current source
+XMsym_charge net_sym net_sym_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Disable when onset inactive
+XMsym_disable net_sym_bias qrs_onset vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Stop at peak detect
+XMsym_pk_stop net_sym_bias peak_detect_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Timer cap
+XCsym net_sym vss sky130_fd_pr__cap_mim_m3_1 W=35 L=35
+
+* Reset
+XMsym_reset net_sym rpeak_trigger vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Buffer
+Rsym_buf net_sym sym_timer_out 100
+
+* Gilbert cell
+XMsy1 net_sy1 net_sym vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsy2 sym_out width_voltage vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsy3 net_sy1 net_sy1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMsy4 sym_out net_sy1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ========================================
+
+.tran 0.1m 0.7
+
+* Before QRS gate opens
+.meas tran bias_t400 FIND V(net_sym_bias) AT=0.40
+.meas tran timer_t400 FIND V(net_sym) AT=0.40
+.meas tran sw_t400 FIND V(net_sym_sw) AT=0.40
+
+* Just after QRS gate opens (5ms in)
+.meas tran bias_t465 FIND V(net_sym_bias) AT=0.465
+.meas tran timer_t465 FIND V(net_sym) AT=0.465
+.meas tran sw_t465 FIND V(net_sym_sw) AT=0.465
+
+* 20ms into QRS
+.meas tran bias_t480 FIND V(net_sym_bias) AT=0.480
+.meas tran timer_t480 FIND V(net_sym) AT=0.480
+
+* 35ms into QRS (5ms before rpeak)
+.meas tran bias_t495 FIND V(net_sym_bias) AT=0.495
+.meas tran timer_t495 FIND V(net_sym) AT=0.495
+.meas tran sym_t495 FIND V(sym_out) AT=0.495
+
+* Just after rpeak
+.meas tran timer_t505 FIND V(net_sym) AT=0.505
+.meas tran bias_t505 FIND V(net_sym_bias) AT=0.505
+
+* After QRS gate closes
+.meas tran timer_t550 FIND V(net_sym) AT=0.550
+.meas tran sym_t550 FIND V(sym_out) AT=0.550
+
+* Measure bias current indirectly: voltage ramp rate on cap
+* dV/dt = I/C, so I = C * dV/dt
+.meas tran timer_ramp_start FIND V(net_sym) AT=0.462
+.meas tran timer_ramp_end FIND V(net_sym) AT=0.472
+* I = C * (V2-V1)/(t2-t1) = 0.8pF * dV / 10ms
+
+.meas tran pkbar_t465 FIND V(peak_detect_bar) AT=0.465
+.meas tran onset_t465 FIND V(qrs_onset) AT=0.465
+
+.end

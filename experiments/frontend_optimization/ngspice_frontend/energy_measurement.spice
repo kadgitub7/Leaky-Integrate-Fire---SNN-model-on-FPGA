@@ -1,0 +1,58 @@
+* Frontend Energy Measurement - OTA current vs bias sweep
+* Plus individual device characterization at key bias points
+.title frontend_energy_measurement
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+
+.include "ota_5t_subthreshold.spice"
+
+* --- Test circuit: Single OTA with load ---
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vcm inp 0 0.45
+Vdiff inn inp 0
+XOTA inn inp vout vdd vss vbias ota_5t
+Cload vout 0 10p
+
+* Bias voltage
+Vbias vbias 0 0.35
+
+* === Fine sweep: Vbias from 0.30V to 0.50V ===
+.dc Vbias 0.30 0.50 0.005
+
+* Measure: supply current at key bias voltages
+.meas dc I_0p30 find -i(Vdd) at=0.30
+.meas dc I_0p32 find -i(Vdd) at=0.32
+.meas dc I_0p34 find -i(Vdd) at=0.34
+.meas dc I_0p35 find -i(Vdd) at=0.35
+.meas dc I_0p36 find -i(Vdd) at=0.36
+.meas dc I_0p38 find -i(Vdd) at=0.38
+.meas dc I_0p40 find -i(Vdd) at=0.40
+.meas dc I_0p42 find -i(Vdd) at=0.42
+.meas dc I_0p44 find -i(Vdd) at=0.44
+.meas dc I_0p46 find -i(Vdd) at=0.46
+.meas dc I_0p48 find -i(Vdd) at=0.48
+.meas dc I_0p50 find -i(Vdd) at=0.50
+
+.control
+  run
+
+  echo ""
+  echo "================================================"
+  echo "  OTA Supply Current vs Bias - SKY130 tt 27C"
+  echo "  VDD=0.9V, L_diff=4u, W_diff=2u"
+  echo "  L_tail=8u, W_tail=1u"
+  echo "================================================"
+  echo ""
+
+  print I_0p30 I_0p32 I_0p34 I_0p35 I_0p36 I_0p38 I_0p40 I_0p42 I_0p44 I_0p46 I_0p48 I_0p50
+
+  echo ""
+  echo "--- Full sweep data ---"
+  print -i(Vdd)
+
+  quit
+.endc
+
+.end

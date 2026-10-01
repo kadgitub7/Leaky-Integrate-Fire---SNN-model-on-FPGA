@@ -1,0 +1,166 @@
+{
+  "description": "Analog vs digital feature validation",
+  "n_beats": 42,
+  "records": [
+    "100",
+    "103",
+    "105",
+    "111",
+    "113",
+    "200"
+  ],
+  "correlations": [
+    {
+      "feature": "rr_ratio",
+      "analog_node": "f_rr_ratio",
+      "spearman_rho": 0.21821570375172192,
+      "spearman_pval": 0.1650403952528817,
+      "pearson_r": 0.2832760427851738,
+      "n_valid": 42,
+      "dig_range": [
+        0.7458696144197187,
+        1.2901199257389764
+      ],
+      "ana_range": [
+        0.02511887,
+        0.2124683
+      ],
+      "dig_mean": 1.0033512249826786,
+      "ana_mean": 0.05748268023809524,
+      "status": "FAIL"
+    },
+    {
+      "feature": "rr_asymmetry",
+      "analog_node": "f_rr_asym",
+      "spearman_rho": -0.04140669313669882,
+      "spearman_pval": 0.7945866033455274,
+      "pearson_r": 0.02045141623833581,
+      "n_valid": 42,
+      "dig_range": [
+        0.6294963947259459,
+        1.6902173582348778
+      ],
+      "ana_range": [
+        0.06878917,
+        0.8508317
+      ],
+      "dig_mean": 1.028393270987012,
+      "ana_mean": 0.4867835647619048,
+      "status": "FAIL"
+    },
+    {
+      "feature": "beat_instability_L0",
+      "analog_node": "f_instab_l0",
+      "spearman_rho": -0.5387731950409206,
+      "spearman_pval": 0.00023232475512515499,
+      "pearson_r": -0.323251073647202,
+      "n_valid": 42,
+      "dig_range": [
+        0.0,
+        1.2982455988509287
+      ],
+      "ana_range": [
+        0.0008035124,
+        0.02014981
+      ],
+      "dig_mean": 0.17466374790180272,
+      "ana_mean": 0.009318708338095238,
+      "status": "WARN"
+    },
+    {
+      "feature": "beat_instability_L1",
+      "analog_node": "f_instab_l1",
+      "spearman_rho": -0.1436732710550871,
+      "spearman_pval": 0.3640201165701923,
+      "pearson_r": -0.23945120527877767,
+      "n_valid": 42,
+      "dig_range": [
+        0.0,
+        0.6507936301335356
+      ],
+      "ana_range": [
+        0.0006648521,
+        0.01979968
+      ],
+      "dig_mean": 0.14809733783070864,
+      "ana_mean": 0.00508204319047619,
+      "status": "FAIL"
+    },
+    {
+      "feature": "pwave_energy_L0",
+      "analog_node": "f_pwave",
+      "spearman_rho": 0.03221161852410819,
+      "spearman_pval": 0.839519881344739,
+      "pearson_r": -0.02272460552946973,
+      "n_valid": 42,
+      "dig_range": [
+        0.0009532552211253674,
+        0.01345048704105993
+      ],
+      "ana_range": [
+        0.4442175,
+        0.4442176
+      ],
+      "dig_mean": 0.003987634088612086,
+      "ana_mean": 0.4442175023809523,
+      "status": "FAIL"
+    },
+    {
+      "feature": "qrs_width_L0",
+      "analog_node": "f_width",
+      "spearman_rho": NaN,
+      "spearman_pval": NaN,
+      "pearson_r": 0.0,
+      "n_valid": 42,
+      "dig_range": [
+        16.666666666666668,
+        163.88888888888889
+      ],
+      "ana_range": [
+        0.8999967,
+        0.8999967
+      ],
+      "dig_mean": 101.71957671957671,
+      "ana_mean": 0.8999967000000001,
+      "status": "FAIL"
+    },
+    {
+      "feature": "slope_ratio_L0",
+      "analog_node": "f_slope",
+      "spearman_rho": -0.10956263038222379,
+      "spearman_pval": 0.48975251222284333,
+      "pearson_r": 0.04600731855215228,
+      "n_valid": 42,
+      "dig_range": [
+        0.29629629627597415,
+        1.3636363634067947
+      ],
+      "ana_range": [
+        0.8998154,
+        0.8999987
+      ],
+      "dig_mean": 0.8257888324909997,
+      "ana_mean": 0.8999933142857143,
+      "status": "FAIL"
+    },
+    {
+      "feature": "qrs_symmetry_L0",
+      "analog_node": "f_sym",
+      "spearman_rho": NaN,
+      "spearman_pval": NaN,
+      "pearson_r": 0.0,
+      "n_valid": 42,
+      "dig_range": [
+        0.0888888888691358,
+        0.7999999994666667
+      ],
+      "ana_range": [
+        0.8999999,
+        0.8999999
+      ],
+      "dig_mean": 0.3281180521075089,
+      "ana_mean": 0.8999998999999997,
+      "status": "FAIL"
+    }
+  ]
+}

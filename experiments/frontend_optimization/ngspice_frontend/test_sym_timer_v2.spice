@@ -1,0 +1,118 @@
+* ============================================================
+* TEST v2: Timer sizing for QRS symmetry
+*
+* Target: linear ramp from 0 to ~0.5V over 164ms (widest QRS)
+* This means ~10ms rise time gives ~30mV (minimum for divider)
+*
+* Test: 4 durations: 10ms, 20ms, 50ms, 120ms
+* Verify linearity: V(t) should scale linearly with t
+* ============================================================
+
+.title test_sym_timer_v2
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* All timers share this architecture:
+* NMOS bias (L=50) -> gate switch -> PMOS mirror -> cap (70x70)
+* Disable PFET (gate = onset_signal)
+
+* === TIMER A: 10ms (shortest realistic rise time) ===
+Vga gate_a 0 PWL(0 0 0.0999 0 0.1 0.9 0.11 0.9 0.1101 0 0.7 0)
+XMba net_ba vbias net_swa vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMswa net_swa gate_a vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMra net_ba net_ba vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMca ta net_ba vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMda net_ba gate_a vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCa ta vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+Vra ra 0 PWL(0 0 0.079 0 0.08 0.9 0.085 0.9 0.086 0 0.7 0)
+XMresa ta ra vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === TIMER B: 20ms ===
+Vgb gate_b 0 PWL(0 0 0.1999 0 0.2 0.9 0.22 0.9 0.2201 0 0.7 0)
+XMbb net_bb vbias net_swb vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMswb net_swb gate_b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMrb net_bb net_bb vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcb tb net_bb vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMdb net_bb gate_b vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCb tb vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+Vrb rb 0 PWL(0 0 0.179 0 0.18 0.9 0.185 0.9 0.186 0 0.7 0)
+XMresb tb rb vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === TIMER C: 50ms ===
+Vgc gate_c 0 PWL(0 0 0.2999 0 0.3 0.9 0.35 0.9 0.3501 0 0.7 0)
+XMbc net_bc vbias net_swc vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMswc net_swc gate_c vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMrc net_bc net_bc vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcc tc net_bc vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMdc net_bc gate_c vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCc tc vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+Vrc rc 0 PWL(0 0 0.279 0 0.28 0.9 0.285 0.9 0.286 0 0.7 0)
+XMresc tc rc vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === TIMER D: 120ms (near-maximum) ===
+Vgd gate_d 0 PWL(0 0 0.3999 0 0.4 0.9 0.52 0.9 0.5201 0 0.7 0)
+XMbd net_bd vbias net_swd vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMswd net_swd gate_d vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMrd net_bd net_bd vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcd td net_bd vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMdd net_bd gate_d vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCd td vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+Vrd rd 0 PWL(0 0 0.379 0 0.38 0.9 0.385 0.9 0.386 0 0.7 0)
+XMresd td rd vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.tran 0.1m 0.6
+
+* After reset
+.meas tran Va_rst FIND V(ta) AT=0.099
+.meas tran Vb_rst FIND V(tb) AT=0.199
+.meas tran Vc_rst FIND V(tc) AT=0.299
+.meas tran Vd_rst FIND V(td) AT=0.399
+
+* At end of charge
+.meas tran Va_10ms FIND V(ta) AT=0.11
+.meas tran Vb_20ms FIND V(tb) AT=0.22
+.meas tran Vc_50ms FIND V(tc) AT=0.35
+.meas tran Vd_120ms FIND V(td) AT=0.52
+
+* Intermediate for linearity
+.meas tran Vc_25ms FIND V(tc) AT=0.325
+.meas tran Vd_60ms FIND V(td) AT=0.46
+
+.control
+  run
+  echo ""
+  echo "=== TIMER V2: Sizing for QRS symmetry ==="
+  echo ""
+  echo "After reset:"
+  print Va_rst Vb_rst Vc_rst Vd_rst
+  echo ""
+  echo "End of charge (key results):"
+  echo "  10ms  20ms  50ms  120ms"
+  print Va_10ms Vb_20ms Vc_50ms Vd_120ms
+  echo ""
+  echo "Linearity check:"
+  echo "  V(50ms) at 25ms / V(50ms) at 50ms:"
+  print Vc_25ms Vc_50ms
+  echo "  V(120ms) at 60ms / V(120ms) at 120ms:"
+  print Vd_60ms Vd_120ms
+  echo ""
+  echo "Ratios (should scale linearly with time):"
+  echo "  V_20/V_10 should be ~2.0"
+  echo "  V_50/V_10 should be ~5.0"
+  echo "  V_120/V_10 should be ~12.0"
+  quit
+.endc
+
+.end

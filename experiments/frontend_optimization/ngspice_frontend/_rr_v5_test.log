@@ -1,0 +1,464 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: rr_timing_v5_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+capture_trig                                 0
+rpeak_trigger                                0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      1.91447e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         3.41873e-06
+xrr.prev_node                      3.18807e-06
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                     2.82034e-06
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                      2.63005e-06
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                         2.79485e-05
+xrr.net_r1                            0.399255
+rr_ratio_out                          0.399366
+xrr.tail_a                         2.79485e-05
+xrr.net_a1                            0.399255
+rr_asym_out                           0.399288
+vcopy#branch                                 0
+vrpeak#branch                                0
+vcapt#branch                                 0
+vbias#branch                                 0
+vss#branch                         5.14786e-13
+vdd#branch                        -5.14744e-13
+
+
+No. of Data Rows : 68457
+
+  Measurements for Transient Analysis
+
+timer_b0            =  1.914469e-06
+sf_b0               =  3.418731e-06
+prev_b0             =  3.188072e-06
+ewma_b0             =  2.630055e-06
+ratio_b0            =  3.993664e-01
+asym_b0             =  3.992875e-01
+prev_capt_b0        =  -6.182633e-04
+sf_capt_b0          =  3.121466e-06
+timer_b1            =  5.994158e-01
+sf_b1               =  2.004223e-01
+prev_b1             =  1.147112e-02
+ewma_b1             =  2.591794e-04
+ratio_b1            =  8.998662e-01
+asym_b1             =  8.998241e-01
+prev_capt_b1        =  1.958536e-01
+sf_capt_b1          =  1.974927e-01
+timer_b2            =  5.917037e-01
+sf_b2               =  1.942686e-01
+prev_b2             =  1.945147e-01
+ewma_b2             =  1.991480e-02
+ratio_b2            =  8.997443e-01
+asym_b2             =  2.258108e-01
+prev_capt_b2        =  1.895244e-01
+sf_capt_b2          =  1.913194e-01
+timer_b3            =  6.084208e-01
+sf_b3               =  2.076713e-01
+prev_b3             =  1.883283e-01
+ewma_b3             =  3.686583e-02
+ratio_b3            =  8.997239e-01
+asym_b3             =  8.776419e-01
+prev_capt_b3        =  2.029383e-01
+sf_capt_b3          =  2.047077e-01
+timer_b4            =  6.135700e-01
+sf_b4               =  2.118058e-01
+prev_b4             =  2.017513e-01
+ewma_b4             =  5.342626e-02
+ratio_b4            =  8.996193e-01
+asym_b4             =  8.621775e-01
+prev_capt_b4        =  2.070921e-01
+sf_capt_b4          =  2.088365e-01
+timer_b5            =  6.251650e-01
+sf_b5               =  2.211200e-01
+prev_b5             =  2.059545e-01
+ewma_b5             =  6.873037e-02
+ratio_b5            =  8.995553e-01
+asym_b5             =  8.724795e-01
+prev_capt_b5        =  2.164241e-01
+sf_capt_b5          =  2.181423e-01
+timer_b6            =  6.122824e-01
+sf_b6               =  2.107747e-01
+prev_b6             =  2.151353e-01
+ewma_b6             =  8.342102e-02
+ratio_b6            =  8.991318e-01
+asym_b6             =  5.830462e-02
+prev_capt_b6        =  2.061721e-01
+sf_capt_b6          =  2.078039e-01
+timer_b7            =  6.174336e-01
+sf_b7               =  2.149105e-01
+prev_b7             =  2.050010e-01
+ewma_b7             =  9.560626e-02
+ratio_b7            =  8.989212e-01
+asym_b7             =  8.616698e-01
+prev_capt_b7        =  2.102883e-01
+sf_capt_b7          =  2.119361e-01
+timer_b8            =  6.032741e-01
+sf_b8               =  2.035493e-01
+prev_b8             =  2.089628e-01
+ewma_b8             =  1.069717e-01
+ratio_b8            =  8.979979e-01
+asym_b8             =  5.199439e-02
+prev_capt_b8        =  1.991462e-01
+sf_capt_b8          =  2.005811e-01
+timer_b9            =  5.994159e-01
+sf_b9               =  2.004567e-01
+prev_b9             =  1.978828e-01
+ewma_b9             =  1.160747e-01
+ratio_b9            =  8.971940e-01
+asym_b9             =  6.594072e-01
+prev_capt_b9        =  1.960877e-01
+sf_capt_b9          =  1.974928e-01
+timer_b10           =  6.019879e-01
+sf_b10              =  2.025184e-01
+prev_b10            =  1.948578e-01
+ewma_b10            =  1.239571e-01
+ratio_b10           =  8.966949e-01
+asym_b10            =  8.531642e-01
+prev_capt_b10       =  1.981562e-01
+sf_capt_b10         =  1.995528e-01
+timer_b11           =  6.109950e-01
+sf_b11              =  2.097427e-01
+prev_b11            =  1.969657e-01
+ewma_b11            =  1.312612e-01
+ratio_b11           =  8.966824e-01
+asym_b11            =  8.686463e-01
+prev_capt_b11       =  2.053461e-01
+sf_capt_b11         =  2.067715e-01
+timer_b12           =  6.097079e-01
+sf_b12              =  2.087099e-01
+prev_b12            =  2.041391e-01
+ewma_b12            =  1.385530e-01
+ratio_b12           =  8.957973e-01
+asym_b12            =  8.160844e-01
+prev_capt_b12       =  2.044880e-01
+sf_capt_b12         =  2.057394e-01
+timer_b13           =  6.161456e-01
+sf_b13              =  2.138770e-01
+prev_b13            =  2.033163e-01
+ewma_b13            =  1.450270e-01
+ratio_b13           =  8.956311e-01
+asym_b13            =  8.635589e-01
+prev_capt_b13       =  2.096072e-01
+sf_capt_b13         =  2.109025e-01
+timer_b14           =  6.251650e-01
+sf_b14              =  2.211221e-01
+prev_b14            =  2.084722e-01
+ewma_b14            =  1.513690e-01
+ratio_b14           =  8.957353e-01
+asym_b14            =  8.682256e-01
+prev_capt_b14       =  2.168297e-01
+sf_capt_b14         =  2.181423e-01
+timer_b15           =  6.329023e-01
+sf_b15              =  2.273426e-01
+prev_b15            =  2.157248e-01
+ewma_b15            =  1.578021e-01
+ratio_b15           =  8.957023e-01
+asym_b15            =  8.659286e-01
+prev_capt_b15       =  2.230736e-01
+sf_capt_b15         =  2.243582e-01
+timer_b16           =  6.225873e-01
+sf_b16              =  2.190507e-01
+prev_b16            =  2.218356e-01
+ewma_b16            =  1.642108e-01
+ratio_b16           =  8.934020e-01
+asym_b16            =  7.257456e-02
+prev_capt_b16       =  2.151984e-01
+sf_capt_b16         =  2.160724e-01
+timer_b17           =  6.200101e-01
+sf_b17              =  2.169804e-01
+prev_b17            =  2.140246e-01
+ewma_b17            =  1.691852e-01
+ratio_b17           =  8.918274e-01
+asym_b17            =  6.877171e-01
+prev_capt_b17       =  2.131501e-01
+sf_capt_b17         =  2.140036e-01
+timer_b18           =  6.071339e-01
+sf_b18              =  2.066451e-01
+prev_b18            =  2.118487e-01
+ewma_b18            =  1.734477e-01
+ratio_b18           =  8.869012e-01
+asym_b18            =  5.329250e-02
+prev_capt_b18       =  2.033300e-01
+sf_capt_b18         =  2.036760e-01
+timer_b19           =  6.019879e-01
+sf_b19              =  2.025187e-01
+prev_b19            =  2.020516e-01
+ewma_b19            =  1.762947e-01
+ratio_b19           =  8.831658e-01
+asym_b19            =  3.172728e-01
+prev_capt_b19       =  1.992305e-01
+sf_capt_b19         =  1.995527e-01
+timer_b20           =  6.097078e-01
+sf_b20              =  2.087100e-01
+prev_b20            =  1.980425e-01
+ewma_b20            =  1.784484e-01
+ratio_b20           =  8.854671e-01
+asym_b20            =  8.639511e-01
+prev_capt_b20       =  2.050635e-01
+sf_capt_b20         =  2.057393e-01
+timer_b21           =  6.109951e-01
+sf_b21              =  2.097429e-01
+prev_b21            =  2.038721e-01
+ewma_b21            =  1.809716e-01
+ratio_b21           =  8.846568e-01
+asym_b21            =  8.392411e-01
+prev_capt_b21       =  2.062480e-01
+sf_capt_b21         =  2.067714e-01
+timer_b22           =  6.303226e-01
+sf_b22              =  2.252681e-01
+prev_b22            =  2.051465e-01
+ewma_b22            =  1.833701e-01
+ratio_b22           =  8.901362e-01
+asym_b22            =  8.782616e-01
+prev_capt_b22       =  2.212450e-01
+sf_capt_b22         =  2.222851e-01
+timer_b23           =  6.161455e-01
+sf_b23              =  2.138770e-01
+prev_b23            =  2.199749e-01
+ewma_b23            =  1.870267e-01
+ratio_b23           =  8.835010e-01
+asym_b23            =  5.039299e-02
+prev_capt_b23       =  2.107862e-01
+sf_capt_b23         =  2.109024e-01
+timer_b24           =  6.277435e-01
+sf_b24              =  2.231946e-01
+prev_b24            =  2.096745e-01
+ewma_b24            =  1.892715e-01
+ratio_b24           =  8.871617e-01
+asym_b24            =  8.698152e-01
+prev_capt_b24       =  2.194291e-01
+sf_capt_b24         =  2.202131e-01
+timer_b25           =  6.174335e-01
+sf_b25              =  2.149112e-01
+prev_b25            =  2.181748e-01
+ewma_b25            =  1.921524e-01
+ratio_b25           =  8.806257e-01
+asym_b25            =  6.708491e-02
+prev_capt_b25       =  2.118599e-01
+sf_capt_b25         =  2.119358e-01
+timer_b26           =  6.251650e-01
+sf_b26              =  2.211222e-01
+prev_b26            =  2.107362e-01
+ewma_b26            =  1.939891e-01
+ratio_b26           =  8.836380e-01
+asym_b26            =  8.629237e-01
+prev_capt_b26       =  2.175715e-01
+sf_capt_b26         =  2.181422e-01
+timer_b27           =  6.161456e-01
+sf_b27              =  2.138770e-01
+prev_b27            =  2.163173e-01
+ewma_b27            =  1.962096e-01
+ratio_b27           =  8.757917e-01
+asym_b27            =  7.695153e-02
+prev_capt_b27       =  2.109647e-01
+sf_capt_b27         =  2.109024e-01
+timer_b28           =  6.109950e-01
+sf_b28              =  2.097429e-01
+prev_b28            =  2.097182e-01
+ewma_b28            =  1.975420e-01
+ratio_b28           =  8.675011e-01
+asym_b28            =  2.379313e-01
+prev_capt_b28       =  2.069287e-01
+sf_capt_b28         =  2.067714e-01
+timer_b29           =  5.942738e-01
+sf_b29              =  1.963372e-01
+prev_b29            =  2.055786e-01
+ewma_b29            =  1.983186e-01
+ratio_b29           =  8.652242e-02
+asym_b29            =  3.936801e-02
+prev_capt_b29       =  1.945215e-01
+sf_capt_b29         =  1.933760e-01
+timer_b30           =  5.904189e-01
+sf_b30              =  1.932502e-01
+prev_b30            =  1.932050e-01
+ewma_b30            =  1.977781e-01
+ratio_b30           =  5.585028e-02
+asym_b30            =  2.706218e-01
+prev_capt_b30       =  1.910984e-01
+sf_capt_b30         =  1.902914e-01
+timer_b31           =  6.135700e-01
+sf_b31              =  2.118094e-01
+prev_b31            =  1.899427e-01
+ewma_b31            =  1.969698e-01
+ratio_b31           =  8.721069e-01
+asym_b31            =  8.799199e-01
+prev_capt_b31       =  2.082643e-01
+sf_capt_b31         =  2.088364e-01
+timer_b32           =  6.200101e-01
+sf_b32              =  2.169805e-01
+prev_b32            =  2.071141e-01
+ewma_b32            =  1.979588e-01
+ratio_b32           =  8.772384e-01
+asym_b32            =  8.614891e-01
+prev_capt_b32       =  2.136444e-01
+sf_capt_b32         =  2.140036e-01
+timer_b33           =  6.135700e-01
+sf_b33              =  2.118094e-01
+prev_b33            =  2.123952e-01
+ewma_b33            =  1.993854e-01
+ratio_b33           =  8.679224e-01
+asym_b33            =  1.587190e-01
+prev_capt_b33       =  2.090121e-01
+sf_capt_b33         =  2.088363e-01
+timer_b34           =  6.019879e-01
+sf_b34              =  2.025187e-01
+prev_b34            =  2.077010e-01
+ewma_b34            =  2.001961e-01
+ratio_b34           =  6.185336e-01
+asym_b34            =  5.298152e-02
+prev_capt_b34       =  2.003063e-01
+sf_capt_b34         =  1.995526e-01
+timer_b35           =  6.122824e-01
+sf_b35              =  2.107760e-01
+prev_b35            =  1.991385e-01
+ewma_b35            =  2.000623e-01
+ratio_b35           =  8.640299e-01
+asym_b35            =  8.662678e-01
+prev_capt_b35       =  2.076216e-01
+sf_capt_b35         =  2.078037e-01
+timer_b36           =  6.122824e-01
+sf_b36              =  2.107760e-01
+prev_b36            =  2.064362e-01
+ewma_b36            =  2.006729e-01
+ratio_b36           =  8.623436e-01
+asym_b36            =  8.078146e-01
+prev_capt_b36       =  2.078810e-01
+sf_capt_b36         =  2.078037e-01
+timer_b37           =  5.981301e-01
+sf_b37              =  1.994267e-01
+prev_b37            =  2.065495e-01
+ewma_b37            =  2.012327e-01
+ratio_b37           =  9.097863e-02
+asym_b37            =  4.518858e-02
+prev_capt_b37       =  1.974981e-01
+sf_capt_b37         =  1.964631e-01
+timer_b38           =  5.917036e-01
+sf_b38              =  1.942789e-01
+prev_b38            =  1.961640e-01
+ewma_b38            =  2.006985e-01
+ratio_b38           =  4.708155e-02
+asym_b38            =  8.941914e-02
+prev_capt_b38       =  1.923112e-01
+sf_capt_b38         =  1.913193e-01
+timer_b39           =  5.865654e-01
+sf_b39              =  1.901658e-01
+prev_b39            =  1.909665e-01
+ewma_b39            =  1.996953e-01
+ratio_b39           =  3.818438e-02
+asym_b39            =  1.614282e-01
+prev_capt_b39       =  1.882940e-01
+sf_capt_b39         =  1.872094e-01
+timer_b40           =  5.904189e-01
+sf_b40              =  1.932503e-01
+prev_b40            =  1.870374e-01
+ewma_b40            =  1.983927e-01
+ratio_b40           =  5.244251e-02
+asym_b40            =  8.439470e-01
+prev_capt_b40       =  1.908471e-01
+sf_capt_b40         =  1.902914e-01
+timer_b41           =  6.084208e-01
+sf_b41              =  2.076775e-01
+prev_b41            =  1.896668e-01
+ewma_b41            =  1.974947e-01
+ratio_b41           =  8.626464e-01
+asym_b41            =  8.762368e-01
+prev_capt_b41       =  2.043478e-01
+sf_capt_b41         =  2.047075e-01
+timer_b42           =  6.135700e-01
+sf_b42              =  2.118095e-01
+prev_b42            =  2.031729e-01
+ewma_b42            =  1.980350e-01
+ratio_b42           =  8.704100e-01
+asym_b42            =  8.572959e-01
+prev_capt_b42       =  2.086550e-01
+sf_capt_b42         =  2.088364e-01
+timer_b43           =  6.071339e-01
+sf_b43              =  2.066452e-01
+prev_b43            =  2.073803e-01
+ewma_b43            =  1.989501e-01
+ratio_b43           =  8.531716e-01
+asym_b43            =  1.489014e-01
+prev_capt_b43       =  2.040243e-01
+sf_capt_b43         =  2.036760e-01
+timer_b44           =  6.007018e-01
+sf_b44              =  2.014877e-01
+prev_b44            =  2.027242e-01
+ewma_b44            =  1.993034e-01
+ratio_b44           =  5.989204e-01
+asym_b44            =  1.140471e-01
+prev_capt_b44       =  1.991044e-01
+sf_capt_b44         =  1.985224e-01
+timer_b45           =  5.955591e-01
+sf_b45              =  1.973667e-01
+prev_b45            =  1.977958e-01
+ewma_b45            =  1.991215e-01
+ratio_b45           =  9.289020e-02
+asym_b45            =  1.955891e-01
+prev_capt_b45       =  1.951152e-01
+sf_capt_b45         =  1.944047e-01
+timer_b46           =  6.007019e-01
+sf_b46              =  2.014878e-01
+prev_b46            =  1.938975e-01
+ewma_b46            =  1.985726e-01
+ratio_b46           =  7.043605e-01
+asym_b46            =  8.528358e-01
+prev_capt_b46       =  1.987206e-01
+sf_capt_b46         =  1.985225e-01
+timer_b47           =  5.865654e-01
+sf_b47              =  1.901658e-01
+prev_b47            =  1.973448e-01
+ewma_b47            =  1.984183e-01
+ratio_b47           =  4.116925e-02
+asym_b47            =  4.420804e-02
+prev_capt_b47       =  1.885632e-01
+sf_capt_b47         =  1.872094e-01
+timer_b48           =  5.852813e-01
+sf_b48              =  1.891383e-01
+prev_b48            =  1.872593e-01
+ewma_b48            =  1.972679e-01
+ratio_b48           =  4.140676e-02
+asym_b48            =  5.759400e-01
+prev_capt_b48       =  1.870630e-01
+sf_capt_b48         =  1.861826e-01
+timer_b49           =  5.865654e-01
+sf_b49              =  1.901658e-01
+prev_b49            =  1.857860e-01
+ewma_b49            =  1.960829e-01
+ratio_b49           =  4.871782e-02
+asym_b49            =  8.152120e-01
+prev_capt_b49       =  1.878731e-01
+sf_capt_b49         =  1.872094e-01
+
+
+Total analysis time (seconds) = 8.071
+
+Total elapsed time (seconds) = 16.760 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1958.719 MB.
+Maximum ngspice program size =   60.812 MB.
+Current ngspice program size =   60.812 MB.
+

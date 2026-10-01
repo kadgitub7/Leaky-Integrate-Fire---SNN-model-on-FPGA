@@ -1,0 +1,37 @@
+* ============================================================
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability v5
+*
+* v4 had CMRR issues: tail NFET fell into triode at low V_cm.
+* v5 fixes: larger diff pair W/L to reduce Vgs_diff and lower V_tail.
+* ECG input range shifted to 0.30-0.46V for more headroom.
+*
+* Python equivalent: (peak - prev_peak) [signed diff]
+* Analog: S&H + diff pair with diode loads, proportional output
+*
+* Pin: ecg_in capture_trig copy_trig instab_out vdd vss vbias
+* ============================================================
+
+.subckt beat_instability_v5 ecg_in capture_trig copy_trig instab_out vdd vss vbias
+
+* === CURRENT PEAK CAPTURE ===
+XMcurr ecg_in capture_trig curr_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCcurr curr_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA SAMPLE (for prev update) ===
+XMesamp ecg_in capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === PREV UPDATE at copy_trig ===
+XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === DIFF PAIR: instability output ===
+* Large W/L (W=8 L=1) to reduce Vgs_diff and keep tail in saturation
+* Diode-connected regular PMOS loads for proportional output
+XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMi1 net_i1 curr_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMi2 instab_out prev_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+.ends beat_instability_v5

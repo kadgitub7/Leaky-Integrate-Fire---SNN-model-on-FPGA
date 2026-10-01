@@ -1,0 +1,104 @@
+* Mirror test v5 - in-range dimensions only
+.title mirror_v5
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Reset: HIGH for first 100us, then LOW
+Vreset reset_ctl 0 PWL(0 0.9 0.0001 0.9 0.00011 0 0.01 0)
+
+* === NMOS bias current measurement ===
+* W=0.42 L=8 Vgs=0.35V (valid: Bin 039 for NFET)
+XMn_bias cap_nbias vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMn_rst cap_nbias reset_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCn cap_nbias vdd sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === A: Mirror ref=W7L8, charge=W7L8 (1:1 copy, verify mirror works) ===
+XMbias_a net_ref_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMref_a net_ref_a net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=7 nf=1
+XMcharge_a cap_a net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=7 nf=1
+XMrst_a cap_a reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCa cap_a vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === B: Mirror ref=W7L8, charge=W0.42L8 (0.06x ratio) ===
+XMcharge_b cap_b net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XMrst_b cap_b reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCb cap_b vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === C: Mirror ref=W7L8, charge=W1L8 (0.143x ratio) ===
+XMcharge_c cap_c net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMrst_c cap_c reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCc cap_c vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === D: Mirror ref=W7L8, charge=W3L8 (0.43x ratio) ===
+XMcharge_d cap_d net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=3 nf=1
+XMrst_d cap_d reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCd cap_d vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === E: Ref with nf (W=7 nf=2 = eff14), charge W=0.42 L=8 ===
+XMbias_e net_ref_e vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMref_e net_ref_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=7 nf=2
+XMcharge_e cap_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XMrst_e cap_e reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCe cap_e vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === F: NMOS bias W=0.42 L=20 (lower current) ===
+XMbias_f net_ref_f vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMref_f net_ref_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=7 nf=1
+XMcharge_f cap_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XMrst_f cap_f reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCf cap_f vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+.tran 0.001m 3.0m
+
+* Gate voltages
+.meas tran vg_a FIND V(net_ref_a) AT=0.0005
+.meas tran vg_e FIND V(net_ref_e) AT=0.0005
+.meas tran vg_f FIND V(net_ref_f) AT=0.0005
+
+.meas tran v_nbias_50 FIND V(cap_nbias) AT=0.0001600
+.meas tran v_nbias_200 FIND V(cap_nbias) AT=0.0003100
+.meas tran v_nbias_500 FIND V(cap_nbias) AT=0.0006100
+.meas tran v_nbias_1000 FIND V(cap_nbias) AT=0.0011100
+.meas tran v_nbias_2000 FIND V(cap_nbias) AT=0.0021100
+.meas tran v_a_50 FIND V(cap_a) AT=0.0001600
+.meas tran v_a_200 FIND V(cap_a) AT=0.0003100
+.meas tran v_a_500 FIND V(cap_a) AT=0.0006100
+.meas tran v_a_1000 FIND V(cap_a) AT=0.0011100
+.meas tran v_a_2000 FIND V(cap_a) AT=0.0021100
+.meas tran v_b_50 FIND V(cap_b) AT=0.0001600
+.meas tran v_b_200 FIND V(cap_b) AT=0.0003100
+.meas tran v_b_500 FIND V(cap_b) AT=0.0006100
+.meas tran v_b_1000 FIND V(cap_b) AT=0.0011100
+.meas tran v_b_2000 FIND V(cap_b) AT=0.0021100
+.meas tran v_c_50 FIND V(cap_c) AT=0.0001600
+.meas tran v_c_200 FIND V(cap_c) AT=0.0003100
+.meas tran v_c_500 FIND V(cap_c) AT=0.0006100
+.meas tran v_c_1000 FIND V(cap_c) AT=0.0011100
+.meas tran v_c_2000 FIND V(cap_c) AT=0.0021100
+.meas tran v_d_50 FIND V(cap_d) AT=0.0001600
+.meas tran v_d_200 FIND V(cap_d) AT=0.0003100
+.meas tran v_d_500 FIND V(cap_d) AT=0.0006100
+.meas tran v_d_1000 FIND V(cap_d) AT=0.0011100
+.meas tran v_d_2000 FIND V(cap_d) AT=0.0021100
+.meas tran v_e_50 FIND V(cap_e) AT=0.0001600
+.meas tran v_e_200 FIND V(cap_e) AT=0.0003100
+.meas tran v_e_500 FIND V(cap_e) AT=0.0006100
+.meas tran v_e_1000 FIND V(cap_e) AT=0.0011100
+.meas tran v_e_2000 FIND V(cap_e) AT=0.0021100
+.meas tran v_f_50 FIND V(cap_f) AT=0.0001600
+.meas tran v_f_200 FIND V(cap_f) AT=0.0003100
+.meas tran v_f_500 FIND V(cap_f) AT=0.0006100
+.meas tran v_f_1000 FIND V(cap_f) AT=0.0011100
+.meas tran v_f_2000 FIND V(cap_f) AT=0.0021100
+
+.end

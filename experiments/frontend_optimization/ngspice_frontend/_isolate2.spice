@@ -1,0 +1,67 @@
+* Feature-by-feature current isolation
+.title isolate_features
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+.include "resistor_div.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+.include "otac_bpf.spice"
+.include "rectifier.spice"
+.include "comparator.spice"
+.include "rr_timing.spice"
+.include "beat_instability.spice"
+.include "pwave_energy.spice"
+.include "qrs_width.spice"
+.include "slope_ratio.spice"
+.include "qrs_symmetry.spice"
+.include "sh_channel.spice"
+.include "sh_bank.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+Xvref vdd vss vref resistor_div
+
+* ECG at mid-rail
+Vecg inp 0 0.45
+
+* Stage 1-2 infrastructure
+Xbuf inp buf_out buf_out vdd vss vbias ota_5t
+Xhpf buf_out hp_out vdd vss vbias otac_hpf cap_w=100 cap_l=100
+Xlpf hp_out cond vdd vss vbias otac_lpf cap_w=17 cap_l=17
+Xbpf cond bpf_out vdd vss vbias otac_bpf cl_hpf=39 cw_hpf=39 cl_lpf=24 cw_lpf=24
+Xrect bpf_out rect_out vref vdd vss vbias rectifier
+Xenv rect_out env_out vdd vss vbias otac_lpf cap_w=77 cap_l=77
+Xthresh env_out thresh_out vdd vss vbias otac_lpf cap_w=50 cap_l=50
+Xcmp env_out thresh_out rpeak vdd vss vbias comparator
+
+* Timing (all low = idle)
+Vrpk rpeak_trig 0 0
+Vqg qrs_gate 0 0
+Vpg pwave_gate 0 0
+
+* Features
+Xrr rpeak_trig f_rr_ratio f_rr_asym vdd vss vbias rr_timing
+Xins0 cond qrs_gate rpeak_trig f_ins0 vdd vss vbias vref beat_instability
+Xins1 cond qrs_gate rpeak_trig f_ins1 vdd vss vbias vref beat_instability
+Xpw cond pwave_gate rpeak_trig f_pw vdd vss vbias vref pwave_energy
+Xwid vref cond qrs_gate rpeak_trig f_wid vdd vss vbias qrs_width
+Xslp cond qrs_gate rpeak_trig f_slp vdd vss vbias vref slope_ratio
+Xsym qrs_gate rpeak_trig f_wid f_sym rpeak_trig vdd vss vbias qrs_symmetry
+
+.op
+
+.control
+  run
+  echo "=== Total current with all features ==="
+  print -i(Vdd)
+  quit
+.endc
+
+.end

@@ -1,0 +1,90 @@
+* ============================================================
+* STAGE 2: R-Peak Detection
+* BPF(8-20Hz) + Rectifier + Envelope(2Hz) + Threshold(0.1Hz) + Comparator
+* ALWAYS-ON (9 OTAs)
+* ============================================================
+
+.title stage2_rpeak_detector
+
+.lib "C:/src/skywater-pdk-libs-sky130_fd_pr/models/sky130.lib.spice" tt
+
+.include "ota_5t_subthreshold.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+.include "otac_bpf.spice"
+.include "rectifier.spice"
+.include "comparator.spice"
+.include "bias_gen.spice"
+.include "inverter.spice"
+
+.param vdd_val = 1.8
+
+Vdd vdd 0 {vdd_val}
+Vref vref 0 0.9
+
+Xbias vbias vdd 0 bias_gen
+
+* Conditioned ECG input (from Stage 1 or PWL for standalone test)
+Vecg ecg_cond_L0 0 PWL file="ecg_multbeat_L0.txt"
+
+* ==========================================
+* BPF: 8-20 Hz for QRS energy extraction
+* HPF(8Hz): C=2.98pF -> MIM 39x39um
+* LPF(20Hz): C=1.19pF -> MIM 24x24um
+* 3 OTAs total
+* ==========================================
+
+Xbpf ecg_cond_L0 bpf_out vdd 0 vbias otac_bpf cl_hpf=39 cw_hpf=39 cl_lpf=24 cw_lpf=24
+
+* ==========================================
+* Precision rectifier: |BPF output|
+* 3 OTAs + switches
+* ==========================================
+
+Xrect bpf_out rect_out vref vdd 0 vbias rectifier
+
+* ==========================================
+* Envelope detector: LPF at 2 Hz
+* C: gm~150pS, fc=2Hz -> C=11.9pF -> MIM 77x77um
+* 1 OTA
+* ==========================================
+
+Xenv rect_out env_out vdd 0 vbias otac_lpf cap_w=77 cap_l=77
+
+* ==========================================
+* Adaptive threshold: slow LPF at ~0.2 Hz
+* C: ~50x50um gives roughly 5pF -> fc ~= gm/(2pi*C) ~= 5Hz
+* Use larger cap for slower tracking
+* 1 OTA
+* ==========================================
+
+Xthresh env_out thresh_out vdd 0 vbias otac_lpf cap_w=50 cap_l=50
+
+* ==========================================
+* Comparator: envelope > threshold -> rpeak_trigger
+* 1 OTA + 2 inverters
+* ==========================================
+
+Xcmp env_out thresh_out rpeak_trigger vdd 0 vbias comparator
+
+* ==========================================
+* ENERGY MEASUREMENT
+* ==========================================
+
+.tran 10u 10
+
+.meas tran I_stage2_avg AVG abs(i(Vdd)) FROM=2 TO=9
+.meas tran P_stage2_avg AVG par('v(vdd)*abs(i(Vdd))') FROM=2 TO=9
+.meas tran E_stage2_per_beat PARAM par('P_stage2_avg * 0.833')
+
+.control
+  run
+  echo ""
+  echo "=== STAGE 2: R-PEAK DETECTION ENERGY ==="
+  print I_stage2_avg P_stage2_avg E_stage2_per_beat
+
+  plot v(ecg_cond_L0) v(bpf_out) v(rect_out) title "Signal chain"
+  plot v(env_out) v(thresh_out) v(rpeak_trigger) title "Detection"
+.endc
+
+.end

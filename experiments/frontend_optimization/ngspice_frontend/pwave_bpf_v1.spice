@@ -1,0 +1,63 @@
+* ============================================================
+* FEATURE 5: P-wave Energy (BPF Peak) — Gm-C Bandpass Filter
+*
+* Python proxy: max(|BPF_output|) in P-wave window
+*   BPF: 2nd-order Butterworth bandpass at 3-8Hz
+*   RF accuracy: 95.43% (matches sum(pw²)/fs baseline)
+*
+* Analog: Cascaded HPF (3Hz) + LPF (8Hz) using OTA-C
+*   Each OTA is a simple 5T diff pair with current mirror
+*   Followed by S&H peak detector (gated by P-wave window)
+*
+* HPF at 3Hz: blocks DC/baseline wander
+*   Gm_H = 2*pi*3 * C_H, C_H = 10pF → Gm_H = 188pS, I_tail ≈ 14pA
+*
+* LPF at 8Hz: blocks QRS high-frequency content
+*   Gm_L = 2*pi*8 * C_L, C_L = 10pF → Gm_L = 503pS, I_tail ≈ 37pA
+*
+* Total bias: ~50pA
+*
+* Pin: ecg_l1 pw_gate peak_out vdd vss vbias_hpf vbias_lpf
+* ============================================================
+
+* === OTA subcircuit ===
+* Simple 5T OTA: diff pair (M1,M2) + PMOS mirror (M3,M4) + tail (M5)
+* Output = Gm * (Vp - Vn), Gm = I_tail / (2*n*Vt)
+.subckt ota_5t inp inn out vdd vss vbias W_in=2 L_in=4 W_tail=0.42 L_tail=8 W_load=2 L_load=4
+XM5 tail vbias vss vss sky130_fd_pr__nfet_01v8 L={L_tail} W={W_tail} nf=1
+XM1 net1 inp tail vss sky130_fd_pr__nfet_01v8 L={L_in} W={W_in} nf=1
+XM2 out inn tail vss sky130_fd_pr__nfet_01v8 L={L_in} W={W_in} nf=1
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L={L_load} W={W_load} nf=1
+XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L={L_load} W={W_load} nf=1
+.ends ota_5t
+
+* === Main BPF + Peak Detector ===
+.subckt pwave_bpf_v1 ecg_l1 pw_gate peak_out vdd vss vbias_hpf vbias_lpf
+
+* --- Stage 1: LPF at 8Hz ---
+* OTA: Vin+ = ecg_l1, Vin- = lpf_out (negative feedback)
+* C_L on output: Gm_L / C_L = 2*pi*8 → Gm_L ≈ 503pS with C=10pF
+* With vbias_lpf setting I_tail ≈ 37pA: Gm ≈ 37pA/(2*1.4*26mV) = 509pS
+Xota_lpf ecg_l1 lpf_out lpf_out vdd vss vbias_lpf ota_5t W_in=2 L_in=4 W_tail=0.42 L_tail=8 W_load=2 L_load=4
+XC_lpf lpf_out vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* --- Stage 2: HPF at 3Hz ---
+* HPF = input - LPF(input at 3Hz)
+* First compute LPF of lpf_out at 3Hz:
+* OTA: Vin+ = lpf_out, Vin- = hpf_lp (negative feedback)
+* C_H on output: Gm_H / C_H = 2*pi*3 → Gm_H ≈ 188pS with C=10pF
+* With vbias_hpf setting I_tail ≈ 14pA: Gm ≈ 14pA/(2*1.4*26mV) = 192pS
+Xota_hpf lpf_out hpf_lp hpf_lp vdd vss vbias_hpf ota_5t W_in=2 L_in=4 W_tail=0.42 L_tail=8 W_load=2 L_load=4
+XC_hpf hpf_lp vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* HPF output = lpf_out - hpf_lp (bandpass = LPF - LPF of LPF)
+* Use diff pair to compute difference
+Xota_diff lpf_out hpf_lp bpf_out vdd vss vbias_lpf ota_5t W_in=2 L_in=4 W_tail=0.42 L_tail=8 W_load=2 L_load=4
+
+* --- Peak Detector ---
+* Gated S&H: captures BPF output during P-wave window
+* Simple approach: S&H switch gated by pw_gate
+XMpk bpf_out pw_gate peak_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCpk peak_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends pwave_bpf_v1

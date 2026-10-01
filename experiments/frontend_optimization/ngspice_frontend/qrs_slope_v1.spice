@@ -1,0 +1,40 @@
+* ============================================================
+* FEATURE 7: QRS Slope Ratio v1 — Post-R Descent Difference
+*
+* Python proxy: v_biased@R+14ms - v_biased@R+69ms
+*   Captures slope asymmetry from only post-R-peak samples.
+*   RF accuracy: 95.38% (better than original |qrs@25%|/|qrs@75%|)
+*
+* Analog: Two S&H capture ECG at R+14ms and R+69ms,
+*   then a diode-loaded diff pair computes the difference.
+*
+* For narrow QRS (normal): v@14ms ≈ baseline, v@69ms ≈ baseline
+*   → difference ≈ 0
+* For wide QRS (PVC): v@14ms still elevated, v@69ms near baseline
+*   → difference > 0 (large positive)
+* For negative R (S-dominant): v@14ms dipping, v@69ms baseline
+*   → difference < 0 (negative)
+*
+* Pin: ecg_in sample14_trig sample69_trig slope_out vdd vss vbias
+* ============================================================
+
+.subckt qrs_slope_v1 ecg_in sample14_trig sample69_trig slope_out vdd vss vbias
+
+* === S&H at R+14ms ===
+XMs14 ecg_in sample14_trig sh14 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCs14 sh14 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* === S&H at R+69ms ===
+XMs69 ecg_in sample69_trig sh69 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCs69 sh69 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* === DIFF PAIR with diode-connected PMOS loads ===
+* Output proportional to (sh14 - sh69), gain ~0.6
+* Same architecture as validated beat_instability_v5
+XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1 dnet sh14 dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2 slope_out sh69 dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+XMd4 slope_out slope_out vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+
+.ends qrs_slope_v1

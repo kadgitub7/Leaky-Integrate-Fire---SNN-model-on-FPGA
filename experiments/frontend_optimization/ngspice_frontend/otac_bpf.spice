@@ -1,0 +1,25 @@
+* ============================================================
+* OTA-C Second-order Bandpass Filter
+* BPF = HPF(f_low) cascaded with LPF(f_high)
+* SKY130 transistor-level
+*
+* Pin order: vin vout vdd vss vbias
+* Parameters: cl_hpf, cw_hpf (HPF cap), cl_lpf, cw_lpf (LPF cap)
+* ============================================================
+
+.subckt otac_bpf vin vout vdd vss vbias
+.param cl_hpf = 10
+.param cw_hpf = 10
+.param cl_lpf = 5
+.param cw_lpf = 5
+
+.include "otac_hpf.spice"
+.include "otac_lpf.spice"
+
+* HPF stage (sets lower corner frequency)
+Xhpf vin vmid vdd vss vbias otac_hpf cap_w={cw_hpf} cap_l={cl_hpf}
+
+* LPF stage (sets upper corner frequency)
+Xlpf vmid vout vdd vss vbias otac_lpf cap_w={cw_lpf} cap_l={cl_lpf}
+
+.ends otac_bpf

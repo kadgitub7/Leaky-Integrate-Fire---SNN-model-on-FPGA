@@ -1,0 +1,140 @@
+* ============================================================
+* FEATURES 1 & 2: RR Timing v2 (rr_ratio, rr_asymmetry)
+*
+* Python:
+*   rr_ratio = pre_rr / local_rr   (local_rr = mean of last ~20 RR)
+*   rr_asym = pre_rr / post_rr
+*
+* Analog:
+*   Timer: 320pF MIM cap pre-charged to VDD at rpeak, discharged by
+*   subthreshold NFET (~148pA). V_timer encodes RR interval linearly:
+*     V_timer = VDD - (I/C)*t ≈ 0.9 - 0.463*t
+*
+*   rr_ratio: diff pair compares V_sample (current timer) to V_ewma
+*     (charge-sharing EWMA of timer voltage, ~20-beat average).
+*     The diff pair output ∝ tanh(k*(V_sample - V_ewma))
+*     ∝ tanh(k*(local_rr - pre_rr))   [inverted timer scale]
+*     This is monotonic in pre_rr/local_rr near ratio=1.
+*
+*   rr_asym: diff pair compares V_previous (timer from last beat)
+*     to V_sample (timer from current beat).
+*     Output ∝ tanh(k*(V_previous - V_sample))
+*     ∝ tanh(k*(pre_rr_current - pre_rr_previous))
+*     Since pre_rr_current = post_rr_previous, this encodes
+*     the asymmetry between consecutive intervals.
+*
+* Timing (from digital controller):
+*   sample_trig: 2ms pulse BEFORE rpeak_trigger — captures timer V
+*   rpeak_trigger: 5ms pulse — pre-charges timer, triggers EWMA update
+*   copy_trig: 2ms pulse after rpeak_trigger — copies sample to prev
+*
+* Pin order: sample_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out vdd vss vbias
+* ============================================================
+
+.subckt rr_timing_v2 sample_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out vdd vss vbias
+
+.include "inverter.spice"
+
+* --- RR interval timer (unchanged from v1) ---
+* Inverted rpeak for pre-charge PMOS
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* Pre-charge to VDD at each rpeak (PMOS ON when rpeak_bar LOW)
+XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Discharge: NMOS in subthreshold, ~148pA continuous drain
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Timer capacitor: 400x400 MIM = ~320pF
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* === S&H: capture timer voltage at sample_trig ===
+* Timer voltage is ~0.5-0.7V at sampling time.
+* NFET switch: Vgs = 0.9 - 0.6 = 0.3V. This is BELOW Vth (0.45V)!
+* -> NFET alone cannot pass these mid-rail voltages at VDD=0.9V.
+*
+* Solution: use PMOS switch instead. PMOS gate=sample_bar (inverted).
+* When sample_trig HIGH -> sample_bar LOW -> PMOS ON.
+* |Vgs| = V_source - V_gate = 0.6 - 0 = 0.6V > |Vtp|=0.45V. OK.
+Xinv_samp sample_trig sample_bar vdd vss inverter_sub
+XMsamp net_timer sample_bar sample_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Sample cap: 5pF (50x50 MIM) - large enough for low noise
+XCsamp sample_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA of timer voltage ===
+* Charge-sharing EWMA: at copy_trig, connect sample_node to ewma_node.
+* Alpha = C_samp / (C_samp + C_ewma)
+* For ~20-beat average: alpha ≈ 0.05 -> C_ewma = C_samp * (1-alpha)/alpha
+*   = 5pF * 19 = 95pF. Use 100pF (W=224 L=224 MIM).
+* Actually alpha=0.1 (10-beat) is more practical: C_ewma = 45pF (W=150 L=150)
+*
+* PMOS switch for charge-sharing (same mid-rail voltage issue):
+Xinv_copy copy_trig copy_bar vdd vss inverter_sub
+XMewma sample_node copy_bar ewma_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* EWMA cap: 45pF (150x150 MIM) -> alpha = 5/(5+45) = 0.1
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === Previous beat S&H for rr_asym ===
+* At copy_trig: copy sample_node to prev_node.
+* But we need to save the PREVIOUS sample before overwriting.
+* Sequence: sample_trig captures new timer -> copy_trig shares sample with ewma
+*   AND copies sample to prev. Then rpeak precharges timer.
+*
+* Actually the timing works because:
+* 1. sample_trig fires: sample_node gets new timer voltage
+* 2. copy_trig fires: shares sample -> ewma (EWMA update)
+*    AND copies sample -> prev (for next beat's asymmetry comparison)
+*
+* Wait — we want prev_node to hold the PREVIOUS beat's sample.
+* If we copy at copy_trig, prev gets the CURRENT sample, not previous.
+*
+* Fix: use a two-stage pipeline:
+*   prev_node is updated BEFORE sample_node gets new value.
+*   Timing: rpeak_trigger copies old sample to prev, THEN
+*           sample_trig captures new timer onto sample.
+*
+* Actually simpler: just use copy_trig for EWMA only.
+* For prev_node: at rpeak_trigger, copy sample_node to prev_node
+*   (this is the value from the PREVIOUS beat, captured last cycle).
+*   Then sample_trig fires and overwrites sample_node with new value.
+*
+* Timeline per beat:
+*   rpeak_trigger[N] -> copy sample(N-1) to prev_node
+*                    -> precharge timer
+*   sample_trig[N+1] -> capture timer(N->N+1) to sample_node
+*   copy_trig[N+1]   -> EWMA update: share sample with ewma
+*   rpeak_trigger[N+1] -> copy sample(N->N+1) to prev_node
+*                      -> precharge timer
+*
+* At measurement time (just before rpeak[N+1]):
+*   sample_node = V_timer(pre_rr of beat N+1) = current
+*   prev_node = V_timer(pre_rr of beat N) = previous
+*   ewma_node = EWMA of all past timer voltages = local average
+*   rr_ratio = f(sample - ewma) ∝ pre_rr vs local_rr
+*   rr_asym = f(prev - sample) ∝ prev_pre_rr vs current_pre_rr
+
+* PMOS switch: copies sample to prev at rpeak_trigger
+XMprev sample_node rpeak_bar prev_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Prev cap: 5pF (50x50 MIM)
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === Diff pair: rr_ratio = f(sample_node - ewma_node) ===
+* When current RR > average: timer lower -> sample lower -> output changes
+XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_r net_r1 sample_node tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_r rr_ratio_out ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_r rr_ratio_out net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* === Diff pair: rr_asym = f(prev_node - sample_node) ===
+* Compares previous beat's timer to current beat's timer
+XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_a net_a1 prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_a rr_asym_out sample_node tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_a rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends rr_timing_v2

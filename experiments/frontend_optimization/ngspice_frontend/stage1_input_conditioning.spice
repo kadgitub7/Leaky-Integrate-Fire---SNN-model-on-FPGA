@@ -1,0 +1,75 @@
+* ============================================================
+* STAGE 1: Input Conditioning -- 2-lead ECG
+* Buffer + HPF(0.5Hz) + LPF(40Hz) per lead
+* All transistor-level SKY130
+* ALWAYS-ON (8 OTAs + 1 bias generator)
+* ============================================================
+
+.title stage1_input_conditioning
+
+.lib "C:/src/skywater-pdk-libs-sky130_fd_pr/models/sky130.lib.spice" tt
+
+.include "ota_5t_subthreshold.spice"
+.include "bias_gen.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+
+.param vdd_val = 1.8
+
+Vdd vdd 0 {vdd_val}
+
+* Bias generator (shared by all OTAs)
+Xbias vbias vdd 0 bias_gen
+
+* ECG inputs (PWL from MIT-BIH)
+Vecg0 ecg_raw_L0 0 PWL file="ecg_multbeat_L0.txt"
+Vecg1 ecg_raw_L1 0 PWL file="ecg_multbeat_L1.txt"
+
+* ==========================================
+* Lead 0: Buffer + HPF(0.5Hz) + LPF(40Hz)
+* ==========================================
+
+* Unity-gain buffer (protects from electrode impedance)
+Xbuf0 ecg_raw_L0 ecg_buf_L0 ecg_buf_L0 vdd 0 vbias ota_5t
+
+* HPF at 0.5 Hz (baseline wander removal)
+* gm~150pS, fc=0.5Hz -> C~=48pF -> MIM 155x155um
+* Using 100x100um for area constraint (fc~0.75Hz, acceptable)
+Xhpf0 ecg_buf_L0 ecg_hp_L0 vdd 0 vbias otac_hpf cap_w=100 cap_l=100
+
+* LPF at 40 Hz (anti-alias)
+* gm~150pS, fc=40Hz -> C=0.6pF -> MIM 17x17um
+Xlpf0 ecg_hp_L0 ecg_cond_L0 vdd 0 vbias otac_lpf cap_w=17 cap_l=17
+
+* ==========================================
+* Lead 1: identical chain
+* ==========================================
+
+Xbuf1 ecg_raw_L1 ecg_buf_L1 ecg_buf_L1 vdd 0 vbias ota_5t
+Xhpf1 ecg_buf_L1 ecg_hp_L1 vdd 0 vbias otac_hpf cap_w=100 cap_l=100
+Xlpf1 ecg_hp_L1 ecg_cond_L1 vdd 0 vbias otac_lpf cap_w=17 cap_l=17
+
+* ==========================================
+* ENERGY MEASUREMENT
+* ==========================================
+
+.tran 10u 10
+
+.meas tran I_stage1_avg AVG abs(i(Vdd)) FROM=2 TO=9
+.meas tran P_stage1_avg AVG par('v(vdd)*abs(i(Vdd))') FROM=2 TO=9
+.meas tran E_stage1_per_beat PARAM par('P_stage1_avg * 0.833')
+
+.control
+  run
+  echo ""
+  echo "=== STAGE 1: INPUT CONDITIONING ENERGY ==="
+  print I_stage1_avg P_stage1_avg E_stage1_per_beat
+  echo "I_stage1_avg = average supply current (A)"
+  echo "P_stage1_avg = average power (W)"
+  echo "E_stage1_per_beat = energy per beat at 72bpm (J)"
+
+  plot v(ecg_raw_L0) v(ecg_cond_L0) title "Lead 0: Raw vs Conditioned"
+  plot v(ecg_raw_L1) v(ecg_cond_L1) title "Lead 1: Raw vs Conditioned"
+.endc
+
+.end

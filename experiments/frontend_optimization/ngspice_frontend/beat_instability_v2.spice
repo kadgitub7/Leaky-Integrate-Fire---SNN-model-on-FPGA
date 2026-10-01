@@ -1,0 +1,121 @@
+* ============================================================
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability (per lead)
+*
+* Python: |peak_current - peak_previous| / peak_previous
+* Analog v2: peak detector + EWMA follower + diff pair
+*
+* Architecture:
+*   1. Peak detector: OTA + PMOS charges peak_cap during QRS
+*      - Small cap (1pF) for fast tracking
+*      - Reset at QRS gate onset via edge detector
+*      - No continuous leak
+*   2. EWMA tracker: gated OTA follower drives ewma_cap
+*      - OTA enabled during QRS (when peak_node is being driven)
+*      - Large ewma_cap (20pF) for slow averaging
+*      - PMOS charges UP only (one-sided follower)
+*      - Weak NFET leak allows slow discharge when peaks drop
+*   3. Diff pair: peak_node vs ewma_node
+*      - Output encodes deviation from running average
+*
+* Pin order: ecg_in qrs_gate rpeak_trigger instab_out peak_out vdd vss vbias
+* ============================================================
+
+.subckt beat_instability_v2 ecg_in qrs_gate rpeak_trigger instab_out peak_out vdd vss vbias
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+Xinv_qgate qrs_gate qrs_gate_bar vdd vss inverter_sub
+
+* === EDGE DETECTOR: QRS gate rising edge -> reset pulse ===
+* RC delay on qrs_gate_bar: when QRS gate goes HIGH, qrs_gate_bar
+* goes LOW. The delayed version stays HIGH briefly.
+* AND(qrs_gate, delayed_qrs_gate_bar) = brief pulse at rising edge.
+* Simpler: use rpeak_trigger for reset since it fires near QRS onset.
+* Actually rpeak fires at peak, not onset. Use QRS gate directly.
+*
+* Reset peak at QRS gate onset:
+* When QRS gate rises, briefly pull peak_node to VSS.
+* Use an RC edge detector: inverter delay chain.
+Xinv_edge1 qrs_gate qrs_gate_del1 vdd vss inverter_sub
+Xinv_edge2 qrs_gate_del1 qrs_gate_del2 vdd vss inverter_sub
+* qrs_gate_del2 follows qrs_gate with ~2 inverter delays
+* Edge pulse = qrs_gate AND NOT(qrs_gate_del2)
+* When gate rises: gate=1, del2=0 briefly -> pulse=1
+* After delay: gate=1, del2=1 -> pulse=0
+* Problem: inverter delay is ~ns, we need ~us pulse for reset.
+* Use an RC delay instead:
+XCedge qrs_gate_bar_del vss sky130_fd_pr__cap_mim_m3_1 W=10 L=10
+Redge qrs_gate_bar qrs_gate_bar_del 100k
+* qrs_gate_bar_del lags qrs_gate_bar by RC = 100k * 0.2pF = 20us
+* When QRS gate rises: qrs_gate_bar -> LOW, qrs_gate_bar_del still HIGH
+* edge_pulse = qrs_gate AND qrs_gate_bar_del
+XMedge_n1 edge_pulse qrs_gate net_edge_mid vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMedge_n2 net_edge_mid qrs_gate_bar_del vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMedge_p1 edge_pulse qrs_gate_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMedge_p2 edge_pulse qrs_gate_bar_del vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+* edge_pulse HIGH for ~20us at QRS gate onset
+
+* === PEAK DETECTOR ===
+* OTA: vinn=peak_node (+), vinp=ecg_in (-)
+* When ecg_in > peak_node: Vinn < Vinp, output goes HIGH... wait
+* OTA output = gm * (Vinn - Vinp) = gm * (peak_node - ecg_in)
+* When ecg_in > peak_node: output LOW -> PMOS ON -> charges peak_node UP
+* When ecg_in < peak_node: output HIGH -> PMOS OFF -> peak holds
+* CORRECT for peak detection: peak_node tracks upward to max(ecg_in)
+Xota_pk peak_node ecg_in net_pk_raw vdd vss vbias ota_5t
+
+* Gate: pass OTA output during QRS, pull HIGH when off
+XMpk_gate_p net_pk_raw qrs_gate_bar net_pk_gated vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMpk_gate_n net_pk_raw qrs_gate net_pk_gated vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMpk_pullup net_pk_gated qrs_gate vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* PMOS charges peak cap (regular PFET for faster response at 0.9V)
+XMpk_charge vdd net_pk_gated peak_node vdd sky130_fd_pr__pfet_01v8 L=4 W=1 nf=1
+
+* Peak capacitor: 22x22 MIM ~ 1pF (small for fast charging)
+XCpeak peak_node vss sky130_fd_pr__cap_mim_m3_1 W=22 L=22
+
+* Reset at QRS gate onset (edge pulse)
+XMpk_reset peak_node edge_pulse vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Buffer output
+Rpeak_buf peak_node peak_out 100
+
+* === EWMA TRACKER ===
+* OTA follower: drives ewma_node toward peak_node
+* vinn=ewma_node (+), vinp=peak_node (-)
+* When peak_node > ewma_node: output LOW -> PMOS charges ewma UP
+* When peak_node < ewma_node: output HIGH -> PMOS OFF
+* One-sided: ewma only tracks upward. Leak NFET allows slow downward.
+Xota_ewma ewma_node peak_node net_ewma_raw vdd vss vbias ota_5t
+
+* Gate EWMA OTA to QRS window
+XMew_gate_p net_ewma_raw qrs_gate_bar net_ewma_gated vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMew_gate_n net_ewma_raw qrs_gate net_ewma_gated vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMew_pullup net_ewma_gated qrs_gate vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* PMOS charges ewma_cap (HVT for slow, controlled charging)
+XMew_charge vdd net_ewma_gated ewma_node vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+
+* EWMA capacitor: 100x100 MIM = 20pF
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Weak leak for slow discharge (L=100 for very low current at Vbias)
+XMew_leak ewma_node vbias vss vss sky130_fd_pr__nfet_01v8 L=100 W=0.42 nf=1
+
+* === DIFF PAIR: instability output ===
+* Compares peak_node to ewma_node
+* peak_node on + side (net_i1), ewma_node on - side (instab_out)
+* When peak > ewma: more current through Mi1, less through Mi2
+*   -> net_i1 drops, instab_out rises
+* When peak < ewma: instab_out drops
+* instab_out HIGH = peak above average (PVC)
+* instab_out LOW = peak below average
+XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMi1 net_i1 peak_node tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi2 instab_out ewma_node tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends beat_instability_v2

@@ -1,0 +1,115 @@
+* ============================================================
+* TEST: Characterize the Gilbert cell divider transfer function
+* Sweep 10 real MIT-BIH beat voltage pairs through the 4-transistor
+* Gilbert cell and measure sym_out for each.
+* ============================================================
+
+.title test_gilbert_char
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Input voltage sources (will be altered per beat)
+Vrise vrise 0 0.168
+Vwidth vwidth 0 0.472
+
+* Gilbert cell: same as design guide
+XMn1 net_n1 vrise vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2 net_n2 vwidth vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMp1 sym_out net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2 net_n2 net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.op
+
+.control
+  echo ""
+  echo "=== GILBERT CELL CHARACTERIZATION ==="
+  echo "Beat Vrise Vwidth Target_Ratio Sym_Out"
+  echo ""
+
+  * Beat 1: sym=0.356
+  alter Vrise 0.168
+  alter Vwidth 0.472
+  op
+  let sout1 = V(sym_out)
+  echo "B1: Vr=0.168 Vw=0.472 target=0.356 sym_out=$&sout1"
+
+  * Beat 2: sym=0.500
+  alter Vrise 0.032
+  alter Vwidth 0.064
+  op
+  let sout2 = V(sym_out)
+  echo "B2: Vr=0.032 Vw=0.064 target=0.500 sym_out=$&sout2"
+
+  * Beat 3: sym=0.130
+  alter Vrise 0.048
+  alter Vwidth 0.368
+  op
+  let sout3 = V(sym_out)
+  echo "B3: Vr=0.048 Vw=0.368 target=0.130 sym_out=$&sout3"
+
+  * Beat 4: sym=0.091
+  alter Vrise 0.032
+  alter Vwidth 0.352
+  op
+  let sout4 = V(sym_out)
+  echo "B4: Vr=0.032 Vw=0.352 target=0.091 sym_out=$&sout4"
+
+  * Beat 5: sym=0.208
+  alter Vrise 0.040
+  alter Vwidth 0.192
+  op
+  let sout5 = V(sym_out)
+  echo "B5: Vr=0.040 Vw=0.192 target=0.208 sym_out=$&sout5"
+
+  * Beat 6: sym=0.152
+  alter Vrise 0.056
+  alter Vwidth 0.368
+  op
+  let sout6 = V(sym_out)
+  echo "B6: Vr=0.056 Vw=0.368 target=0.152 sym_out=$&sout6"
+
+  * Beat 7: sym=0.167
+  alter Vrise 0.040
+  alter Vwidth 0.240
+  op
+  let sout7 = V(sym_out)
+  echo "B7: Vr=0.040 Vw=0.240 target=0.167 sym_out=$&sout7"
+
+  * Beat 8: sym=0.339
+  alter Vrise 0.160
+  alter Vwidth 0.472
+  op
+  let sout8 = V(sym_out)
+  echo "B8: Vr=0.160 Vw=0.472 target=0.339 sym_out=$&sout8"
+
+  * Beat 9: sym=0.556
+  alter Vrise 0.040
+  alter Vwidth 0.072
+  op
+  let sout9 = V(sym_out)
+  echo "B9: Vr=0.040 Vw=0.072 target=0.556 sym_out=$&sout9"
+
+  * Beat 10: sym=0.154
+  alter Vrise 0.032
+  alter Vwidth 0.208
+  op
+  let sout10 = V(sym_out)
+  echo "B10: Vr=0.032 Vw=0.208 target=0.154 sym_out=$&sout10"
+
+  echo ""
+  echo "Also check node voltages for last beat:"
+  print V(net_n1) V(net_n2) V(sym_out)
+  echo ""
+  quit
+.endc
+
+.end

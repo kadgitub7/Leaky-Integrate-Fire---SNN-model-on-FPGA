@@ -1,0 +1,11 @@
+* PWL file syntax test
+.title pwl_test
+V1 n1 0 PWL file = ecg_L0.txt
+R1 n1 0 1k
+.tran 1m 0.1
+.control
+run
+print v(n1)
+quit
+.endc
+.end

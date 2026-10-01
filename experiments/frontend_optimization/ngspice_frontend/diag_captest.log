@@ -1,0 +1,82 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning: can't parse 'rmeas#branch': ignored
+Warning: singular matrix:  check node cap_test3
+
+Note: Starting dynamic gmin stepping
+Warning: singular matrix:  check node cap_test4
+
+Warning: Dynamic gmin stepping failed
+Note: Starting true gmin stepping
+Warning: singular matrix:  check node cap_test4
+
+Warning: singular matrix:  check node cap_test4
+
+Warning: singular matrix:  check node cap_test4
+
+Warning: singular matrix:  check node cap_test4
+
+Warning: True gmin stepping failed
+Note: Starting source stepping
+Warning: source stepping failed
+Note: Transient op started
+Note: Transient op finished successfully
+
+Note: No compatibility mode selected!
+
+
+Circuit: cap_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+cap_test1                           0.00198689
+xctest1.a                          4.74281e-11
+xctest1.b1                         4.28178e-13
+cap_test2                          0.000498356
+xctest2.a                           4.7107e-11
+xctest2.b1                         1.06991e-13
+cap_test3                           0.00999995
+cap_test4                               0.0001
+vbias                                     0.35
+net_bias                                   0.9
+vbias#branch                      -4.48002e-08
+vss#branch                         5.89656e-08
+vdd#branch                        -1.41664e-08
+
+Error: no such vector as i(rmeas).
+ .meas tran ibias find i(rmeas) at=0.0005 failed!
+
+
+No. of Data Rows : 108
+
+  Measurements for Transient Analysis
+
+ct1_01              =  2.185559e-02
+ct1_05              =  1.013264e-01
+ct1_10              =  2.006561e-01
+ct2_01              =  5.481900e-03
+ct2_05              =  2.541583e-02
+ct2_10              =  5.033268e-02
+ct3_01              =  1.099939e-01
+ct3_05              =  5.098700e-01
+ct4_01              =  1.099999e-03
+ct4_05              =  5.099987e-03
+ct4_10              =  1.009995e-02
+
+
+Total analysis time (seconds) = 0.027
+
+Total elapsed time (seconds) = 6.550 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2609.719 MB.
+Maximum ngspice program size =   42.242 MB.
+Current ngspice program size =   38.035 MB.
+

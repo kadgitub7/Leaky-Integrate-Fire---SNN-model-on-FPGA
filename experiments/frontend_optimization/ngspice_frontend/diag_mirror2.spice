@@ -1,0 +1,89 @@
+* PMOS Current Mirror W-scaling Verification v2
+.title mirror_char_v2
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ===== Reference branch =====
+XMbias net_ref vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref net_ref net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+
+* Reference copy (same W/L as ref)
+XMref_copy cap_ref net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XCref cap_ref vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror A: W=0.42 L=8 (ratio 0.042) =====
+XMa cap_a net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XCa cap_a vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror B: W=1 L=8 (ratio 0.1) =====
+XMb cap_b net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XCb cap_b vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror C: W=5 L=8 (ratio 0.5) =====
+XMc cap_c net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=5 nf=1
+XCc cap_c vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror D: longer L for more reduction =====
+* W=0.42 L=80 on ref with L=8: expect L ratio too (I prop W/L)
+XMd cap_d net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=80 W=0.42 nf=1
+XCd cap_d vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror E: matched L=40 ref+charger =====
+XMbias_e net_ref_e vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_e net_ref_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=10 nf=1
+XMe cap_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XCe cap_e vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+* ===== Mirror F: matched L=40, ref W=42 (100:1 ratio) =====
+XMbias_f net_ref_f vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_f net_ref_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=42 nf=1
+XMf cap_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XCf cap_f vss sky130_fd_pr__cap_mim_m3_1 W=200 L=200
+
+.tran 0.01m 2.0m
+
+* Measure at multiple times
+.meas tran ref_gate FIND V(net_ref) AT=0.0001
+.meas tran refe_gate FIND V(net_ref_e) AT=0.0001
+.meas tran reff_gate FIND V(net_ref_f) AT=0.0001
+
+.meas tran v_ref_1 FIND V(cap_ref) AT=0.000100
+.meas tran v_ref_5 FIND V(cap_ref) AT=0.000500
+.meas tran v_ref_10 FIND V(cap_ref) AT=0.001000
+.meas tran v_ref_20 FIND V(cap_ref) AT=0.002000
+.meas tran v_a_1 FIND V(cap_a) AT=0.000100
+.meas tran v_a_5 FIND V(cap_a) AT=0.000500
+.meas tran v_a_10 FIND V(cap_a) AT=0.001000
+.meas tran v_a_20 FIND V(cap_a) AT=0.002000
+.meas tran v_b_1 FIND V(cap_b) AT=0.000100
+.meas tran v_b_5 FIND V(cap_b) AT=0.000500
+.meas tran v_b_10 FIND V(cap_b) AT=0.001000
+.meas tran v_b_20 FIND V(cap_b) AT=0.002000
+.meas tran v_c_1 FIND V(cap_c) AT=0.000100
+.meas tran v_c_5 FIND V(cap_c) AT=0.000500
+.meas tran v_c_10 FIND V(cap_c) AT=0.001000
+.meas tran v_c_20 FIND V(cap_c) AT=0.002000
+.meas tran v_d_1 FIND V(cap_d) AT=0.000100
+.meas tran v_d_5 FIND V(cap_d) AT=0.000500
+.meas tran v_d_10 FIND V(cap_d) AT=0.001000
+.meas tran v_d_20 FIND V(cap_d) AT=0.002000
+.meas tran v_e_1 FIND V(cap_e) AT=0.000100
+.meas tran v_e_5 FIND V(cap_e) AT=0.000500
+.meas tran v_e_10 FIND V(cap_e) AT=0.001000
+.meas tran v_e_20 FIND V(cap_e) AT=0.002000
+.meas tran v_f_1 FIND V(cap_f) AT=0.000100
+.meas tran v_f_5 FIND V(cap_f) AT=0.000500
+.meas tran v_f_10 FIND V(cap_f) AT=0.001000
+.meas tran v_f_20 FIND V(cap_f) AT=0.002000
+
+.end

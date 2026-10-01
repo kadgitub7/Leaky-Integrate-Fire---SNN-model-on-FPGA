@@ -1,0 +1,143 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: qrs_slope_v1_test_200
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+ecg_in                                     0.3
+sample14_trig                                0
+sample69_trig                                0
+xslope.sh14                          0.0711864
+xslope.xcs14.a                               0
+xslope.xcs14.b1                              0
+xslope.sh69                          0.0711864
+xslope.xcs69.a                               0
+xslope.xcs69.b1                              0
+xslope.dtail                         0.0012937
+xslope.dnet                           0.417721
+slope_out                             0.417721
+vs69#branch                                  0
+vs14#branch                                  0
+vecg#branch                       -3.83606e-14
+vbias#branch                                 0
+vss#branch                         7.30196e-12
+vdd#branch                         -7.2636e-12
+
+
+No. of Data Rows : 239888
+
+  Measurements for Transient Analysis
+
+slope_b0            =  3.337178e-01
+sh14_b0             =  3.079353e-01
+sh69_b0             =  2.810745e-01
+slope_b1            =  2.990530e-01
+sh14_b1             =  1.988107e-01
+sh69_b1             =  2.843496e-01
+slope_b2            =  3.480418e-01
+sh14_b2             =  3.257435e-01
+sh69_b2             =  2.776913e-01
+slope_b3            =  2.998536e-01
+sh14_b3             =  2.081069e-01
+sh69_b3             =  2.845834e-01
+slope_b4            =  3.493974e-01
+sh14_b4             =  3.282579e-01
+sh69_b4             =  2.783326e-01
+slope_b5            =  2.980516e-01
+sh14_b5             =  1.972610e-01
+sh69_b5             =  2.917606e-01
+slope_b6            =  3.479997e-01
+sh14_b6             =  3.245376e-01
+sh69_b6             =  2.765604e-01
+slope_b7            =  3.012133e-01
+sh14_b7             =  1.964594e-01
+sh69_b7             =  2.694945e-01
+slope_b8            =  3.496973e-01
+sh14_b8             =  3.271157e-01
+sh69_b8             =  2.768013e-01
+slope_b9            =  2.992002e-01
+sh14_b9             =  1.887306e-01
+sh69_b9             =  2.776428e-01
+slope_b10           =  3.328847e-01
+sh14_b10            =  2.992397e-01
+sh69_b10            =  2.739552e-01
+slope_b11           =  3.415388e-01
+sh14_b11            =  3.120549e-01
+sh69_b11            =  2.733524e-01
+slope_b12           =  3.372480e-01
+sh14_b12            =  3.044231e-01
+sh69_b12            =  2.722302e-01
+slope_b13           =  3.422391e-01
+sh14_b13            =  3.160552e-01
+sh69_b13            =  2.762635e-01
+slope_b14           =  3.439113e-01
+sh14_b14            =  3.268633e-01
+sh69_b14            =  2.845146e-01
+slope_b15           =  3.500297e-01
+sh14_b15            =  3.326685e-01
+sh69_b15            =  2.818375e-01
+slope_b16           =  3.503087e-01
+sh14_b16            =  3.349058e-01
+sh69_b16            =  2.836753e-01
+slope_b17           =  3.495774e-01
+sh14_b17            =  3.378224e-01
+sh69_b17            =  2.875437e-01
+slope_b18           =  3.515245e-01
+sh14_b18            =  3.430210e-01
+sh69_b18            =  2.900893e-01
+slope_b19           =  3.485675e-01
+sh14_b19            =  3.320512e-01
+sh69_b19            =  2.832014e-01
+slope_b20           =  3.455210e-01
+sh14_b20            =  3.240210e-01
+sh69_b20            =  2.794635e-01
+slope_b21           =  3.014211e-01
+sh14_b21            =  2.054036e-01
+sh69_b21            =  2.736582e-01
+slope_b22           =  3.461346e-01
+sh14_b22            =  3.260393e-01
+sh69_b22            =  2.806011e-01
+slope_b23           =  2.996589e-01
+sh14_b23            =  1.960895e-01
+sh69_b23            =  2.784767e-01
+slope_b24           =  3.474709e-01
+sh14_b24            =  3.210911e-01
+sh69_b24            =  2.738902e-01
+slope_b25           =  2.987994e-01
+sh14_b25            =  2.000968e-01
+sh69_b25            =  2.870801e-01
+slope_b26           =  4.223942e-01
+sh14_b26            =  3.983240e-01
+sh69_b26            =  2.614147e-01
+slope_b27           =  3.413644e-01
+sh14_b27            =  3.222094e-01
+sh69_b27            =  2.835611e-01
+slope_b28           =  2.987780e-01
+sh14_b28            =  2.081329e-01
+sh69_b28            =  2.924118e-01
+slope_b29           =  3.348988e-01
+sh14_b29            =  3.148654e-01
+sh69_b29            =  2.859977e-01
+
+
+Total analysis time (seconds) = 21.032
+
+Total elapsed time (seconds) = 30.242 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1617.145 MB.
+Maximum ngspice program size =   52.566 MB.
+Current ngspice program size =   50.180 MB.
+

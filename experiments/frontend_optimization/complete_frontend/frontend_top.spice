@@ -1,0 +1,137 @@
+* ============================================================
+* COMPLETE ANALOG FRONTEND — ASIC-Ready ECG Classifier
+* ============================================================
+*
+* SKY130 130nm CMOS, VDD=0.9V, subthreshold operation
+*
+* This is the COMPLETE frontend as it would be fabricated.
+* Signal chain: Electrodes → IA → R-peak Detect → Trigger Gen
+*              → Feature Extraction → 8 Analog Outputs
+*
+* === BLOCK DIAGRAM ===
+*
+*  Electrode L0 ──→ [IA_L0] ──→ ecg_amp_l0 ──┬→ [R-peak Det] → rpeak_pulse
+*  Electrode L1 ──→ [IA_L1] ──→ ecg_amp_l1 ─┐│                     │
+*                                             ││    ┌────────────────┘
+*  [Bias Gen] → vbias, vref                  ││    ↓
+*                                             ││  [Delay Timer] → post-R triggers
+*                                             ││  [P-wave Pred] → pre-R triggers
+*                                             ││    │
+*                                             ↓↓    ↓
+*                                      [Feature Extraction ×8]
+*                                             │
+*                                    8 analog feature outputs
+*                                             │
+*                                    [To ReRAM crossbar classifier]
+*
+* === CIRCUIT INVENTORY ===
+*
+*  1. Bias Generator          — 1× (vbias + vref generation)
+*  2. Instrumentation Amps    — 2× (one per ECG lead)
+*  3. R-peak Detector         — 1× (comparator on IA_L0 output)
+*  4. Post-R Delay Timer      — 1× (5 comparators + timer cap)
+*  5. P-wave Predictor        — 1× (2 source followers + 2 comparators)
+*  6. RR Timing (F1,F2)       — 1× (cap timer + EWMA + 2 diff pairs)
+*  7. Beat Instability (F3)   — 1× (S&H + EWMA + diff pair, Lead 0)
+*  8. Beat Instability (F4)   — 1× (S&H + EWMA + diff pair, Lead 1)
+*  9. P-wave Diff (F5)        — 1× (2 S&H + diff pair, Lead 0)
+* 10. QRS Width (F6)          — 1× (passive S&H, Lead 0)
+* 11. QRS Slope (F7)          — 1× (2 S&H + diff pair, Lead 0)
+* 12. QRS Symmetry (F8)       — 1× (passive S&H, Lead 0)
+*
+* Total: ~95 MOSFETs, ~25 MIM caps
+* ============================================================
+
+.include "bias_gen.spice"
+.include "ia.spice"
+.include "rpeak_detector.spice"
+.include "delay_timer.spice"
+.include "pwave_predictor.spice"
+.include "inverter.spice"
+.include "rr_timing.spice"
+.include "beat_instability.spice"
+.include "pwave_diff.spice"
+.include "qrs_width.spice"
+.include "qrs_slope.spice"
+.include "qrs_symmetry.spice"
+
+* ============================================================
+* TOP-LEVEL SUBCIRCUIT: Complete ASIC Frontend
+* ============================================================
+*
+* Inputs:
+*   elec_l0_p, elec_l0_n  — Differential electrode pair, Lead 0
+*   elec_l1_p, elec_l1_n  — Differential electrode pair, Lead 1
+*   rpeak_threshold        — Comparator threshold for R-peak detection
+*   vth_14, vth_69, vth_83, vth_300, vth_10 — Delay timer thresholds
+*
+* Outputs:
+*   f1..f8                 — 8 analog feature voltages
+*
+* Power:
+*   vdd, vss               — 0.9V supply
+*
+* Self-generated internal signals:
+*   vbias, vref            — From bias generator
+*   ecg_amp_l0, ecg_amp_l1 — Amplified ECG from IAs
+*   rpeak_pulse            — R-peak detection output
+*   All trigger signals    — From delay timer + P-wave predictor
+* ============================================================
+
+.subckt asic_frontend elec_l0_p elec_l0_n elec_l1_p elec_l1_n
++ rpeak_threshold
++ vth_14 vth_69 vth_83 vth_300 vth_10
++ f1_rr_ratio f2_rr_asym
++ f3_bi_l0 f4_bi_l1
++ f5_pwave f6_width f7_slope f8_symmetry
++ vdd vss
+
+* === 1. BIAS GENERATOR ===
+Xbias_gen vbias vref vdd vss bias_gen
+
+* === 2. INSTRUMENTATION AMPLIFIERS (one per lead) ===
+Xia_l0 elec_l0_p elec_l0_n ecg_amp_l0 vdd vss vbias vref ia
+Xia_l1 elec_l1_p elec_l1_n ecg_amp_l1 vdd vss vbias vref ia
+
+* === 3. R-PEAK DETECTOR ===
+Xrpeak ecg_amp_l0 rpeak_threshold rpeak_pulse vdd vss vbias rpeak_detector
+
+* === 4. POST-R DELAY TIMER ===
+* Generates: trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
+Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
++ vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
+
+* === 5. FEATURE EXTRACTION — F1 & F2: RR Timing ===
+* Must be instantiated before P-wave predictor (provides timer/EWMA nodes)
+* trig_rr_cap comes from P-wave predictor's rr_capture comparator (~R-5ms)
+* rpeak_pulse serves as trig_rr_rpeak (precharge at R-peak)
+* trig_rr_copy from delay timer (R+10ms, EWMA charge-sharing)
+Xrr ecg_amp_l0 trig_rr_cap rpeak_pulse trig_rr_copy
++   f1_rr_ratio f2_rr_asym rr_timer_node rr_ewma_node vdd vss vbias rr_timing
+
+* === 6. P-WAVE PREDICTOR ===
+* Uses timer/EWMA nodes exposed by rr_timing
+* Generates: trig_pw_base, trig_pw_peak, trig_rr_cap
+Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap vdd vss vbias pwave_predictor
+
+* === 7. REMAINING FEATURE EXTRACTION CIRCUITS ===
+
+* F3: Beat Instability — Lead 0
+Xbi_l0 ecg_amp_l0 rpeak_pulse trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
+
+* F4: Beat Instability — Lead 1
+Xbi_l1 ecg_amp_l1 rpeak_pulse trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
+
+* F5: P-wave Signed Difference (Lead 0)
+Xpwave ecg_amp_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
+
+* F6: QRS Width (Lead 0)
+Xwidth ecg_amp_l0 trig_wid f6_width vdd vss qrs_width
+
+* F7: QRS Slope (Lead 0)
+Xslope ecg_amp_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
+
+* F8: QRS Symmetry (Lead 0)
+Xsym ecg_amp_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
+
+.ends asic_frontend

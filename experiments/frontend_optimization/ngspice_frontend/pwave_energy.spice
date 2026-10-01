@@ -1,0 +1,63 @@
+* ============================================================
+* FEATURE 5: P-wave Energy (pwave_energy_L1)
+*
+* BPF(3-8Hz) of ECG, peak-detected over pre-QRS window
+* Peak amplitude is monotonic with P-wave energy
+*
+* BPF: ALWAYS-ON (must have settled output before gate opens)
+* Peak detector: GATED to P-wave window via bias pass-gate
+*   Uses comparator + transmission gate (no Vt drop)
+*
+* SKY130 transistor-level
+* Pin order: ecg_in pwave_gate rpeak_trigger pw_energy_out vdd vss vbias vref
+* ============================================================
+
+.subckt pwave_energy ecg_in pwave_gate rpeak_trigger pw_energy_out vdd vss vbias vref
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+* --- Bandpass filter 3-8 Hz (ALWAYS-ON, inlined) ---
+
+* HPF LPF path: OTA follower tracks DC of ecg_in
+Xota_hpf_lp ecg_in hpf_vlp hpf_vlp vdd vss vbias ota_5t
+XChpf_lp hpf_vlp vss sky130_fd_pr__cap_mim_m3_1 W=63 L=63
+
+* HPF subtractor: bpf_mid = ecg_in - hpf_vlp (positive P-wave -> positive output)
+* Swapped inputs vs old design so P-wave produces positive peak
+Xota_hpf_sub ecg_in hpf_vlp bpf_mid vdd vss vbias ota_5t
+
+* LPF stage: OTA follower + cap
+Xota_lpf bpf_mid bpf_pw bpf_pw vdd vss vbias ota_5t
+XClpf bpf_pw vss sky130_fd_pr__cap_mim_m3_1 W=39 L=39
+
+* --- Gated peak detector using comparator + transmission gate ---
+Xinv_pg pwave_gate pwave_gate_bar vdd vss inverter_sub
+
+* Gated bias: pass vbias through NMOS switch when pwave_gate HIGH
+* NMOS can pass 0.35V since Vgate(0.9V) - Vt(0.45V) = 0.45V > 0.35V
+XMpk_pass vbias_pk pwave_gate vbias vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Pull bias to VSS when gate off (disables comparator OTA)
+XMpk_bdis vbias_pk pwave_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Comparator OTA: drives high when bpf_pw > pw_energy_out
+Xota_pk bpf_pw pw_energy_out net_pk_cmp vdd vss vbias_pk ota_5t
+
+* Pull comparator output LOW when gate is off
+XMpk_pull net_pk_cmp pwave_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Invert comparator for TG PMOS gate
+Xinv_cmp net_pk_cmp net_pk_cmp_bar vdd vss inverter_sub
+
+* Transmission gate: passes bpf_pw to hold cap when comparator HIGH
+XMtg_n bpf_pw net_pk_cmp pw_energy_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMtg_p bpf_pw net_pk_cmp_bar pw_energy_out vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Hold capacitor
+XCpk pw_energy_out vss sky130_fd_pr__cap_mim_m3_1 W=16 L=16
+
+* Reset peak detector before each beat
+XMpk_reset pw_energy_out rpeak_trigger vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.ends pwave_energy

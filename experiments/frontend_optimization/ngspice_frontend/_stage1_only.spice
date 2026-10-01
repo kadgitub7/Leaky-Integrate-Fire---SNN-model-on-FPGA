@@ -1,0 +1,37 @@
+* Stage 1 only - pure OTAs, no inverters
+.title stage1_energy_check
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.temp 27
+
+.include "ota_5t_subthreshold.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Simple test signal
+Vecg inp 0 PWL(0 0.45 0.5 0.50 1.0 0.40 1.5 0.45 2.0 0.50)
+
+* 3 OTAs: buffer + HPF + LPF (same as 1 lead of stage 1)
+Xbuf inp buf_out buf_out vdd vss vbias ota_5t
+Xhpf buf_out hp_out vdd vss vbias otac_hpf cap_w=100 cap_l=100
+Xlpf hp_out lp_out vdd vss vbias otac_lpf cap_w=17 cap_l=17
+
+.tran 200u 2.0 uic
+
+.meas tran I_avg AVG i(Vdd) FROM=0.5 TO=1.8
+.meas tran I_rms RMS i(Vdd) FROM=0.5 TO=1.8
+
+.control
+  run
+  echo "=== Stage 1 (1 lead, 3+2=5 OTAs) energy ==="
+  print I_avg I_rms
+  quit
+.endc
+
+.end

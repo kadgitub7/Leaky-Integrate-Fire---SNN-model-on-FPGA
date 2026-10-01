@@ -1,0 +1,4 @@
+
+Checking parameters for BSIM 4.5 model xmref_e:sky130_fd_pr__pfet_01v8_hvt__model.11
+Warning: Nfactor = -1.60973 is negative.
+Warning: Pdibl2 = -0.0050394 is negative.

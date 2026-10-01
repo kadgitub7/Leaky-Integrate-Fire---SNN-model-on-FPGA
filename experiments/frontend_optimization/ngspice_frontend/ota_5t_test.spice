@@ -1,0 +1,91 @@
+* OTA 5T Subthreshold Characterization - SKY130
+* Measures supply current at various bias points for energy estimation
+.title ota_5t_characterization
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+
+.include "ota_5t_subthreshold.spice"
+
+* --- Test circuit ---
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Bias voltage sweep source
+Vbias vbias 0 0.35
+
+* Input: mid-rail common mode
+Vcm inp 0 0.45
+Vdiff inn inp 0
+
+* OTA instance
+XOTA inn inp vout vdd vss vbias ota_5t
+
+* Load cap (typical S&H)
+Cload vout 0 10p
+
+* === DC operating point at nominal bias ===
+.op
+
+.control
+  * Run operating point
+  run
+
+  echo ""
+  echo "============================================="
+  echo "  OTA 5T Subthreshold - SKY130 tt corner"
+  echo "  VDD=0.9V, Vbias=0.35V, T=27C"
+  echo "============================================="
+  echo ""
+
+  * Supply current (from VDD source, negative = current flowing out)
+  echo "--- Supply Current ---"
+  print -i(Vdd)
+
+  * Individual device currents
+  echo "--- Tail current (M5) ---"
+  print @m.xota.xm5.msky130_fd_pr__nfet_01v8[id]
+  echo "--- Diff pair M1 ---"
+  print @m.xota.xm1.msky130_fd_pr__nfet_01v8[id]
+  echo "--- Diff pair M2 ---"
+  print @m.xota.xm2.msky130_fd_pr__nfet_01v8[id]
+  echo "--- Load M3 ---"
+  print @m.xota.xm3.msky130_fd_pr__pfet_01v8_hvt[id]
+  echo "--- Load M4 ---"
+  print @m.xota.xm4.msky130_fd_pr__pfet_01v8_hvt[id]
+
+  * Threshold voltages
+  echo ""
+  echo "--- Threshold Voltages ---"
+  print @m.xota.xm1.msky130_fd_pr__nfet_01v8[vth]
+  print @m.xota.xm3.msky130_fd_pr__pfet_01v8_hvt[vth]
+  print @m.xota.xm5.msky130_fd_pr__nfet_01v8[vth]
+
+  * Transconductance
+  echo ""
+  echo "--- Transconductance ---"
+  print @m.xota.xm1.msky130_fd_pr__nfet_01v8[gm]
+  print @m.xota.xm2.msky130_fd_pr__nfet_01v8[gm]
+
+  * Output resistance
+  echo ""
+  echo "--- Output Resistance ---"
+  print @m.xota.xm2.msky130_fd_pr__nfet_01v8[gds]
+  print @m.xota.xm4.msky130_fd_pr__pfet_01v8_hvt[gds]
+
+  echo ""
+  echo "============================================="
+  echo "  Bias Voltage Sweep"
+  echo "============================================="
+
+  * Sweep bias voltage to map current vs Vbias
+  dc Vbias 0.25 0.50 0.01
+
+  * Print table header
+  echo "Vbias(V)  Isupply(A)"
+  print -i(Vdd)
+
+  quit
+.endc
+
+.end

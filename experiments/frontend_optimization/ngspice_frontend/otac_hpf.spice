@@ -1,0 +1,24 @@
+* ============================================================
+* OTA-C First-order High-pass Filter
+* HPF = input - LPF(input)
+* Uses two OTAs: one for LPF, one as subtractor
+* SKY130 transistor-level
+*
+* Pin order: vin vout vdd vss vbias
+* Parameters: cap_w, cap_l (MIM cap for LPF corner)
+* ============================================================
+
+.subckt otac_hpf vin vout vdd vss vbias
+.param cap_w = 10
+.param cap_l = 10
+
+.include "ota_5t_subthreshold.spice"
+
+* LPF path: extracts low-frequency content
+Xota_lp vin vlp vlp vdd vss vbias ota_5t
+XClp vlp vss sky130_fd_pr__cap_mim_m3_1 W={cap_w} L={cap_l}
+
+* Subtractor: vout = vin - vlp (high-pass output)
+Xota_sub vlp vin vout vdd vss vbias ota_5t
+
+.ends otac_hpf

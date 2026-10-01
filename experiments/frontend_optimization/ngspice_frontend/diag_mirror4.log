@@ -1,0 +1,112 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: mirror_v4
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+reset_ctl                                  0.9
+net_ref_a                             0.177279
+cap_a                              1.50238e-07
+xca.a                                        0
+xca.b1                                       0
+cap_b                               1.5224e-07
+xcb.a                                        0
+xcb.b1                                       0
+cap_c                              9.07897e-08
+xcc.a                                        0
+xcc.b1                                       0
+cap_d                              9.15278e-08
+xcd.a                                        0
+xcd.b1                                       0
+net_ref_e                              0.11684
+cap_e                              1.03306e-07
+xce.a                                        0
+xce.b1                                       0
+net_ref_f                             0.167038
+cap_f                              3.53563e-08
+xcf.a                                        0
+xcf.b1                                       0
+vreset#branch                                0
+vbias#branch                                 0
+vss#branch                         2.78799e-10
+vdd#branch                        -2.78799e-10
+
+
+Error: measure  v_a_40  find(AT) : out of interval
+ .meas tran v_a_40 find v(cap_a) at=0.0051000 failed!
+
+
+Error: measure  v_b_40  find(AT) : out of interval
+ .meas tran v_b_40 find v(cap_b) at=0.0051000 failed!
+
+
+Error: measure  v_c_40  find(AT) : out of interval
+ .meas tran v_c_40 find v(cap_c) at=0.0051000 failed!
+
+
+Error: measure  v_d_40  find(AT) : out of interval
+ .meas tran v_d_40 find v(cap_d) at=0.0051000 failed!
+
+
+Error: measure  v_e_40  find(AT) : out of interval
+ .meas tran v_e_40 find v(cap_e) at=0.0051000 failed!
+
+
+Error: measure  v_f_40  find(AT) : out of interval
+ .meas tran v_f_40 find v(cap_f) at=0.0051000 failed!
+
+
+No. of Data Rows : 514
+
+  Measurements for Transient Analysis
+
+vg_a                =  1.772805e-01
+vg_e                =  1.168397e-01
+vg_f                =  1.670380e-01
+v_a_1               =  2.789509e-04
+v_a_5               =  1.064448e-03
+v_a_10              =  2.046099e-03
+v_a_20              =  4.008721e-03
+v_b_1               =  2.830621e-04
+v_b_5               =  1.079134e-03
+v_b_10              =  2.074019e-03
+v_b_20              =  4.063152e-03
+v_c_1               =  1.579235e-04
+v_c_5               =  6.326975e-04
+v_c_10              =  1.226093e-03
+v_c_20              =  2.412675e-03
+v_d_1               =  1.594187e-04
+v_d_5               =  6.380280e-04
+v_d_10              =  1.236218e-03
+v_d_20              =  2.432391e-03
+v_e_1               =  1.834152e-04
+v_e_5               =  7.236545e-04
+v_e_10              =  1.398869e-03
+v_e_20              =  2.749021e-03
+v_f_1               =  4.503730e-05
+v_f_5               =  2.299372e-04
+v_f_10              =  4.610369e-04
+v_f_20              =  9.231534e-04
+
+
+Total analysis time (seconds) = 0.08
+
+Total elapsed time (seconds) = 6.794 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1912.738 MB.
+Maximum ngspice program size =   55.074 MB.
+Current ngspice program size =   55.074 MB.
+

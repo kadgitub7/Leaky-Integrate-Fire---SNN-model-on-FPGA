@@ -1,0 +1,93 @@
+* Mirror test v4 - with reset switch
+.title mirror_v4
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Reset control: HIGH for first 1ms, then LOW
+Vreset reset_ctl 0 PWL(0 0.9 0.001 0.9 0.0011 0 0.01 0)
+
+* === A: Reference (PMOS W=10 L=8, same as in rr_timing) ===
+XMbias_a net_ref_a vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_a net_ref_a net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XMcharge_a cap_a net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XMrst_a cap_a reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCa cap_a vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === B: Mirror W=0.42 L=8 (expect 0.042x of A) ===
+XMcharge_b cap_b net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XMrst_b cap_b reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCb cap_b vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === C: Mirror W=1 L=8 (expect 0.1x of A) ===
+XMcharge_c cap_c net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMrst_c cap_c reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCc cap_c vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === D: Mirror W=5 L=8 (expect 0.5x of A) ===
+XMcharge_d cap_d net_ref_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=5 nf=1
+XMrst_d cap_d reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCd cap_d vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === E: Matched L=40 mirror (ref W=10, charge W=0.42) ===
+XMbias_e net_ref_e vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_e net_ref_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=10 nf=1
+XMcharge_e cap_e net_ref_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XMrst_e cap_e reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCe cap_e vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === F: Matched L=40, large ref (W=42 for 100:1) ===
+XMbias_f net_ref_f vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_f net_ref_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=42 nf=1
+XMcharge_f cap_f net_ref_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XMrst_f cap_f reset_ctl vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCf cap_f vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+.tran 0.01m 5.0m
+
+* Gate voltages
+.meas tran vg_a FIND V(net_ref_a) AT=0.002
+.meas tran vg_e FIND V(net_ref_e) AT=0.002
+.meas tran vg_f FIND V(net_ref_f) AT=0.002
+
+.meas tran v_a_1 FIND V(cap_a) AT=0.0012000
+.meas tran v_a_5 FIND V(cap_a) AT=0.0016000
+.meas tran v_a_10 FIND V(cap_a) AT=0.0021000
+.meas tran v_a_20 FIND V(cap_a) AT=0.0031000
+.meas tran v_a_40 FIND V(cap_a) AT=0.0051000
+.meas tran v_b_1 FIND V(cap_b) AT=0.0012000
+.meas tran v_b_5 FIND V(cap_b) AT=0.0016000
+.meas tran v_b_10 FIND V(cap_b) AT=0.0021000
+.meas tran v_b_20 FIND V(cap_b) AT=0.0031000
+.meas tran v_b_40 FIND V(cap_b) AT=0.0051000
+.meas tran v_c_1 FIND V(cap_c) AT=0.0012000
+.meas tran v_c_5 FIND V(cap_c) AT=0.0016000
+.meas tran v_c_10 FIND V(cap_c) AT=0.0021000
+.meas tran v_c_20 FIND V(cap_c) AT=0.0031000
+.meas tran v_c_40 FIND V(cap_c) AT=0.0051000
+.meas tran v_d_1 FIND V(cap_d) AT=0.0012000
+.meas tran v_d_5 FIND V(cap_d) AT=0.0016000
+.meas tran v_d_10 FIND V(cap_d) AT=0.0021000
+.meas tran v_d_20 FIND V(cap_d) AT=0.0031000
+.meas tran v_d_40 FIND V(cap_d) AT=0.0051000
+.meas tran v_e_1 FIND V(cap_e) AT=0.0012000
+.meas tran v_e_5 FIND V(cap_e) AT=0.0016000
+.meas tran v_e_10 FIND V(cap_e) AT=0.0021000
+.meas tran v_e_20 FIND V(cap_e) AT=0.0031000
+.meas tran v_e_40 FIND V(cap_e) AT=0.0051000
+.meas tran v_f_1 FIND V(cap_f) AT=0.0012000
+.meas tran v_f_5 FIND V(cap_f) AT=0.0016000
+.meas tran v_f_10 FIND V(cap_f) AT=0.0021000
+.meas tran v_f_20 FIND V(cap_f) AT=0.0031000
+.meas tran v_f_40 FIND V(cap_f) AT=0.0051000
+
+.end

@@ -1,0 +1,19 @@
+* ============================================================
+* Sample-and-Hold Channel
+* Transmission gate + hold capacitor
+* SKY130 transistor-level
+*
+* Pin order: vin vout clk clk_bar vdd vss
+* Hold cap: 10 pF (70x70um MIM) -- holds ~100ms with <1% droop
+* ============================================================
+
+.subckt sh_channel vin vout clk clk_bar vdd vss
+
+* Transmission gate (NMOS + PMOS in parallel)
+XMn vin clk vout vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMp vin clk_bar vout vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Hold capacitor (10 pF = 70x70um MIM at 2fF/um^2)
+XChold vout vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+
+.ends sh_channel

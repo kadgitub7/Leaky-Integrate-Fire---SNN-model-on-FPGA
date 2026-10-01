@@ -1,0 +1,45 @@
+.title OTA-C LPF Frequency Characterization
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.001 gmin=1e-15
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* === OTA-C LPF ===
+* OTA: 5T diff pair, Vin+ = input, Vin- = output (neg feedback)
+* Cap on output -> LPF with f_c = Gm / (2*pi*C)
+
+* Tail current source
+XM5 tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+* Diff pair
+XM1 net1 inp tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM2 out inn tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+* PMOS current mirror
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* Connect as LPF: negative feedback
+* Vin- = output
+.connect inn out
+
+* 10pF cap on output
+XClpf out vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* Bias: sweep different values
+Vbias vbias 0 0.35
+
+* Input: start at 0.45V (mid-rail), apply step, then sinusoids
+* First let circuit settle, then apply small AC signal
+Vin inp 0 DC 0.45 AC 0.01
+
+* AC analysis: sweep from 0.1Hz to 100Hz
+.ac dec 50 0.1 100
+
+* Print magnitude of output
+.print ac vm(out) vp(out)
+
+* Also measure DC operating point
+.op
+
+.end

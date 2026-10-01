@@ -1,0 +1,91 @@
+* Minimal mirror test
+.title mirror_minimal
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* === TEST A: Measure NMOS bias current ===
+* NMOS drain charges a 20pF cap (W=100 L=100 MIM)
+* Expect ~38nA: V at 1ms = 38e-9 * 1e-3 / 20e-12 = 1.9V -> clips
+* Measure at 0.1ms: V = 38e-9 * 0.1e-3 / 20e-12 = 0.19V
+XMnmos_test cap_nmos vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+Vnmos_supply cap_nmos_top 0 0.9
+Rnmos_series cap_nmos_top cap_nmos 1k
+XCnmos cap_nmos vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === TEST B: Single mirror (ref W=10 L=8, charge W=10 L=8 same) ===
+XMbias_b net_ref_b vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_b net_ref_b net_ref_b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XMcharge_b cap_b net_ref_b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XCb cap_b vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === TEST C: Mirror with W=0.42 charger ===
+XMbias_c net_ref_c vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_c net_ref_c net_ref_c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XMcharge_c cap_c net_ref_c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XCc cap_c vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === TEST D: Mirror matched L=40, ref W=10, charge W=0.42 ===
+XMbias_d net_ref_d vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMref_d net_ref_d net_ref_d vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=10 nf=1
+XMcharge_d cap_d net_ref_d vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XCd cap_d vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === TEST E: Just a PMOS with fixed Vgs charging a cap ===
+* Gate at 0.177V (known from ref), source at VDD
+* Expect same current as reference
+XMcharge_e cap_e net_gate_e vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+Vgate_e net_gate_e 0 0.177
+XCe cap_e vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* === TEST F: PMOS W=0.42 with same gate voltage ===
+XMcharge_f cap_f net_gate_f vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+Vgate_f net_gate_f 0 0.177
+XCf cap_f vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+.tran 0.001m 0.5m
+
+.meas tran v_nmos_10us FIND V(cap_nmos) AT=0.0000100
+.meas tran v_nmos_50us FIND V(cap_nmos) AT=0.0000500
+.meas tran v_nmos_100us FIND V(cap_nmos) AT=0.0001000
+.meas tran v_nmos_200us FIND V(cap_nmos) AT=0.0002000
+.meas tran v_nmos_500us FIND V(cap_nmos) AT=0.0005000
+.meas tran v_b_10us FIND V(cap_b) AT=0.0000100
+.meas tran v_b_50us FIND V(cap_b) AT=0.0000500
+.meas tran v_b_100us FIND V(cap_b) AT=0.0001000
+.meas tran v_b_200us FIND V(cap_b) AT=0.0002000
+.meas tran v_b_500us FIND V(cap_b) AT=0.0005000
+.meas tran v_c_10us FIND V(cap_c) AT=0.0000100
+.meas tran v_c_50us FIND V(cap_c) AT=0.0000500
+.meas tran v_c_100us FIND V(cap_c) AT=0.0001000
+.meas tran v_c_200us FIND V(cap_c) AT=0.0002000
+.meas tran v_c_500us FIND V(cap_c) AT=0.0005000
+.meas tran v_d_10us FIND V(cap_d) AT=0.0000100
+.meas tran v_d_50us FIND V(cap_d) AT=0.0000500
+.meas tran v_d_100us FIND V(cap_d) AT=0.0001000
+.meas tran v_d_200us FIND V(cap_d) AT=0.0002000
+.meas tran v_d_500us FIND V(cap_d) AT=0.0005000
+.meas tran v_e_10us FIND V(cap_e) AT=0.0000100
+.meas tran v_e_50us FIND V(cap_e) AT=0.0000500
+.meas tran v_e_100us FIND V(cap_e) AT=0.0001000
+.meas tran v_e_200us FIND V(cap_e) AT=0.0002000
+.meas tran v_e_500us FIND V(cap_e) AT=0.0005000
+.meas tran v_f_10us FIND V(cap_f) AT=0.0000100
+.meas tran v_f_50us FIND V(cap_f) AT=0.0000500
+.meas tran v_f_100us FIND V(cap_f) AT=0.0001000
+.meas tran v_f_200us FIND V(cap_f) AT=0.0002000
+.meas tran v_f_500us FIND V(cap_f) AT=0.0005000
+.meas tran vg_b FIND V(net_ref_b) AT=0.0001
+.meas tran vg_c FIND V(net_ref_c) AT=0.0001
+.meas tran vg_d FIND V(net_ref_d) AT=0.0001
+
+.end

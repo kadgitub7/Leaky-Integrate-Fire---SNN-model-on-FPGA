@@ -1,0 +1,203 @@
+* Pulse generation debug - fine timestep
+.title diag_pulse
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.001
+.temp 27
+
+.include "rr_timing.spice"
+.include "inverter.spice"
+.include "nand2.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Single rpeak at 10us, 1ms wide
+Vrpeak rpeak_trigger 0 PWL(0 0 9.999e-6 0 10e-6 0.9 1.01e-3 0.9 1.011e-3 0 2e-3 0)
+
+Xrr rpeak_trigger f_rr_ratio f_rr_asym vdd vss vbias rr_timing
+
+* Set initial timer voltage to simulate a decayed timer
+.ic V(Xrr.net_timer)=0.5
+
+* Fine timestep: 0.1ns over 2ms
+.tran 0.1n 100u
+
+* Measure delay chain outputs at 10us + various offsets
+.meas tran rpeak_at_0ns FIND V(rpeak_trigger) AT=0.000010000000
+.meas tran timer_at_0ns FIND V(Xrr.net_timer) AT=0.000010000000
+.meas tran prerr_at_0ns FIND V(Xrr.sh_prerr) AT=0.000010000000
+.meas tran postrr_at_0ns FIND V(Xrr.sh_postrr) AT=0.000010000000
+.meas tran ph1_at_0ns FIND V(Xrr.ph1) AT=0.000010000000
+.meas tran ph2_at_0ns FIND V(Xrr.ph2) AT=0.000010000000
+.meas tran a3_at_0ns FIND V(Xrr.a3) AT=0.000010000000
+.meas tran a6_at_0ns FIND V(Xrr.a6) AT=0.000010000000
+.meas tran a9_at_0ns FIND V(Xrr.a9) AT=0.000010000000
+.meas tran a11_at_0ns FIND V(Xrr.a11) AT=0.000010000000
+.meas tran rpeak_at_5ns FIND V(rpeak_trigger) AT=0.000010005000
+.meas tran timer_at_5ns FIND V(Xrr.net_timer) AT=0.000010005000
+.meas tran prerr_at_5ns FIND V(Xrr.sh_prerr) AT=0.000010005000
+.meas tran postrr_at_5ns FIND V(Xrr.sh_postrr) AT=0.000010005000
+.meas tran ph1_at_5ns FIND V(Xrr.ph1) AT=0.000010005000
+.meas tran ph2_at_5ns FIND V(Xrr.ph2) AT=0.000010005000
+.meas tran a3_at_5ns FIND V(Xrr.a3) AT=0.000010005000
+.meas tran a6_at_5ns FIND V(Xrr.a6) AT=0.000010005000
+.meas tran a9_at_5ns FIND V(Xrr.a9) AT=0.000010005000
+.meas tran a11_at_5ns FIND V(Xrr.a11) AT=0.000010005000
+.meas tran rpeak_at_10ns FIND V(rpeak_trigger) AT=0.000010010000
+.meas tran timer_at_10ns FIND V(Xrr.net_timer) AT=0.000010010000
+.meas tran prerr_at_10ns FIND V(Xrr.sh_prerr) AT=0.000010010000
+.meas tran postrr_at_10ns FIND V(Xrr.sh_postrr) AT=0.000010010000
+.meas tran ph1_at_10ns FIND V(Xrr.ph1) AT=0.000010010000
+.meas tran ph2_at_10ns FIND V(Xrr.ph2) AT=0.000010010000
+.meas tran a3_at_10ns FIND V(Xrr.a3) AT=0.000010010000
+.meas tran a6_at_10ns FIND V(Xrr.a6) AT=0.000010010000
+.meas tran a9_at_10ns FIND V(Xrr.a9) AT=0.000010010000
+.meas tran a11_at_10ns FIND V(Xrr.a11) AT=0.000010010000
+.meas tran rpeak_at_15ns FIND V(rpeak_trigger) AT=0.000010015000
+.meas tran timer_at_15ns FIND V(Xrr.net_timer) AT=0.000010015000
+.meas tran prerr_at_15ns FIND V(Xrr.sh_prerr) AT=0.000010015000
+.meas tran postrr_at_15ns FIND V(Xrr.sh_postrr) AT=0.000010015000
+.meas tran ph1_at_15ns FIND V(Xrr.ph1) AT=0.000010015000
+.meas tran ph2_at_15ns FIND V(Xrr.ph2) AT=0.000010015000
+.meas tran a3_at_15ns FIND V(Xrr.a3) AT=0.000010015000
+.meas tran a6_at_15ns FIND V(Xrr.a6) AT=0.000010015000
+.meas tran a9_at_15ns FIND V(Xrr.a9) AT=0.000010015000
+.meas tran a11_at_15ns FIND V(Xrr.a11) AT=0.000010015000
+.meas tran rpeak_at_20ns FIND V(rpeak_trigger) AT=0.000010020000
+.meas tran timer_at_20ns FIND V(Xrr.net_timer) AT=0.000010020000
+.meas tran prerr_at_20ns FIND V(Xrr.sh_prerr) AT=0.000010020000
+.meas tran postrr_at_20ns FIND V(Xrr.sh_postrr) AT=0.000010020000
+.meas tran ph1_at_20ns FIND V(Xrr.ph1) AT=0.000010020000
+.meas tran ph2_at_20ns FIND V(Xrr.ph2) AT=0.000010020000
+.meas tran a3_at_20ns FIND V(Xrr.a3) AT=0.000010020000
+.meas tran a6_at_20ns FIND V(Xrr.a6) AT=0.000010020000
+.meas tran a9_at_20ns FIND V(Xrr.a9) AT=0.000010020000
+.meas tran a11_at_20ns FIND V(Xrr.a11) AT=0.000010020000
+.meas tran rpeak_at_25ns FIND V(rpeak_trigger) AT=0.000010025000
+.meas tran timer_at_25ns FIND V(Xrr.net_timer) AT=0.000010025000
+.meas tran prerr_at_25ns FIND V(Xrr.sh_prerr) AT=0.000010025000
+.meas tran postrr_at_25ns FIND V(Xrr.sh_postrr) AT=0.000010025000
+.meas tran ph1_at_25ns FIND V(Xrr.ph1) AT=0.000010025000
+.meas tran ph2_at_25ns FIND V(Xrr.ph2) AT=0.000010025000
+.meas tran a3_at_25ns FIND V(Xrr.a3) AT=0.000010025000
+.meas tran a6_at_25ns FIND V(Xrr.a6) AT=0.000010025000
+.meas tran a9_at_25ns FIND V(Xrr.a9) AT=0.000010025000
+.meas tran a11_at_25ns FIND V(Xrr.a11) AT=0.000010025000
+.meas tran rpeak_at_30ns FIND V(rpeak_trigger) AT=0.000010030000
+.meas tran timer_at_30ns FIND V(Xrr.net_timer) AT=0.000010030000
+.meas tran prerr_at_30ns FIND V(Xrr.sh_prerr) AT=0.000010030000
+.meas tran postrr_at_30ns FIND V(Xrr.sh_postrr) AT=0.000010030000
+.meas tran ph1_at_30ns FIND V(Xrr.ph1) AT=0.000010030000
+.meas tran ph2_at_30ns FIND V(Xrr.ph2) AT=0.000010030000
+.meas tran a3_at_30ns FIND V(Xrr.a3) AT=0.000010030000
+.meas tran a6_at_30ns FIND V(Xrr.a6) AT=0.000010030000
+.meas tran a9_at_30ns FIND V(Xrr.a9) AT=0.000010030000
+.meas tran a11_at_30ns FIND V(Xrr.a11) AT=0.000010030000
+.meas tran rpeak_at_35ns FIND V(rpeak_trigger) AT=0.000010035000
+.meas tran timer_at_35ns FIND V(Xrr.net_timer) AT=0.000010035000
+.meas tran prerr_at_35ns FIND V(Xrr.sh_prerr) AT=0.000010035000
+.meas tran postrr_at_35ns FIND V(Xrr.sh_postrr) AT=0.000010035000
+.meas tran ph1_at_35ns FIND V(Xrr.ph1) AT=0.000010035000
+.meas tran ph2_at_35ns FIND V(Xrr.ph2) AT=0.000010035000
+.meas tran a3_at_35ns FIND V(Xrr.a3) AT=0.000010035000
+.meas tran a6_at_35ns FIND V(Xrr.a6) AT=0.000010035000
+.meas tran a9_at_35ns FIND V(Xrr.a9) AT=0.000010035000
+.meas tran a11_at_35ns FIND V(Xrr.a11) AT=0.000010035000
+.meas tran rpeak_at_40ns FIND V(rpeak_trigger) AT=0.000010040000
+.meas tran timer_at_40ns FIND V(Xrr.net_timer) AT=0.000010040000
+.meas tran prerr_at_40ns FIND V(Xrr.sh_prerr) AT=0.000010040000
+.meas tran postrr_at_40ns FIND V(Xrr.sh_postrr) AT=0.000010040000
+.meas tran ph1_at_40ns FIND V(Xrr.ph1) AT=0.000010040000
+.meas tran ph2_at_40ns FIND V(Xrr.ph2) AT=0.000010040000
+.meas tran a3_at_40ns FIND V(Xrr.a3) AT=0.000010040000
+.meas tran a6_at_40ns FIND V(Xrr.a6) AT=0.000010040000
+.meas tran a9_at_40ns FIND V(Xrr.a9) AT=0.000010040000
+.meas tran a11_at_40ns FIND V(Xrr.a11) AT=0.000010040000
+.meas tran rpeak_at_50ns FIND V(rpeak_trigger) AT=0.000010050000
+.meas tran timer_at_50ns FIND V(Xrr.net_timer) AT=0.000010050000
+.meas tran prerr_at_50ns FIND V(Xrr.sh_prerr) AT=0.000010050000
+.meas tran postrr_at_50ns FIND V(Xrr.sh_postrr) AT=0.000010050000
+.meas tran ph1_at_50ns FIND V(Xrr.ph1) AT=0.000010050000
+.meas tran ph2_at_50ns FIND V(Xrr.ph2) AT=0.000010050000
+.meas tran a3_at_50ns FIND V(Xrr.a3) AT=0.000010050000
+.meas tran a6_at_50ns FIND V(Xrr.a6) AT=0.000010050000
+.meas tran a9_at_50ns FIND V(Xrr.a9) AT=0.000010050000
+.meas tran a11_at_50ns FIND V(Xrr.a11) AT=0.000010050000
+.meas tran rpeak_at_100ns FIND V(rpeak_trigger) AT=0.000010100000
+.meas tran timer_at_100ns FIND V(Xrr.net_timer) AT=0.000010100000
+.meas tran prerr_at_100ns FIND V(Xrr.sh_prerr) AT=0.000010100000
+.meas tran postrr_at_100ns FIND V(Xrr.sh_postrr) AT=0.000010100000
+.meas tran ph1_at_100ns FIND V(Xrr.ph1) AT=0.000010100000
+.meas tran ph2_at_100ns FIND V(Xrr.ph2) AT=0.000010100000
+.meas tran a3_at_100ns FIND V(Xrr.a3) AT=0.000010100000
+.meas tran a6_at_100ns FIND V(Xrr.a6) AT=0.000010100000
+.meas tran a9_at_100ns FIND V(Xrr.a9) AT=0.000010100000
+.meas tran a11_at_100ns FIND V(Xrr.a11) AT=0.000010100000
+.meas tran rpeak_at_200ns FIND V(rpeak_trigger) AT=0.000010200000
+.meas tran timer_at_200ns FIND V(Xrr.net_timer) AT=0.000010200000
+.meas tran prerr_at_200ns FIND V(Xrr.sh_prerr) AT=0.000010200000
+.meas tran postrr_at_200ns FIND V(Xrr.sh_postrr) AT=0.000010200000
+.meas tran ph1_at_200ns FIND V(Xrr.ph1) AT=0.000010200000
+.meas tran ph2_at_200ns FIND V(Xrr.ph2) AT=0.000010200000
+.meas tran a3_at_200ns FIND V(Xrr.a3) AT=0.000010200000
+.meas tran a6_at_200ns FIND V(Xrr.a6) AT=0.000010200000
+.meas tran a9_at_200ns FIND V(Xrr.a9) AT=0.000010200000
+.meas tran a11_at_200ns FIND V(Xrr.a11) AT=0.000010200000
+.meas tran rpeak_at_500ns FIND V(rpeak_trigger) AT=0.000010500000
+.meas tran timer_at_500ns FIND V(Xrr.net_timer) AT=0.000010500000
+.meas tran prerr_at_500ns FIND V(Xrr.sh_prerr) AT=0.000010500000
+.meas tran postrr_at_500ns FIND V(Xrr.sh_postrr) AT=0.000010500000
+.meas tran ph1_at_500ns FIND V(Xrr.ph1) AT=0.000010500000
+.meas tran ph2_at_500ns FIND V(Xrr.ph2) AT=0.000010500000
+.meas tran a3_at_500ns FIND V(Xrr.a3) AT=0.000010500000
+.meas tran a6_at_500ns FIND V(Xrr.a6) AT=0.000010500000
+.meas tran a9_at_500ns FIND V(Xrr.a9) AT=0.000010500000
+.meas tran a11_at_500ns FIND V(Xrr.a11) AT=0.000010500000
+.meas tran rpeak_at_1000ns FIND V(rpeak_trigger) AT=0.000011000000
+.meas tran timer_at_1000ns FIND V(Xrr.net_timer) AT=0.000011000000
+.meas tran prerr_at_1000ns FIND V(Xrr.sh_prerr) AT=0.000011000000
+.meas tran postrr_at_1000ns FIND V(Xrr.sh_postrr) AT=0.000011000000
+.meas tran ph1_at_1000ns FIND V(Xrr.ph1) AT=0.000011000000
+.meas tran ph2_at_1000ns FIND V(Xrr.ph2) AT=0.000011000000
+.meas tran a3_at_1000ns FIND V(Xrr.a3) AT=0.000011000000
+.meas tran a6_at_1000ns FIND V(Xrr.a6) AT=0.000011000000
+.meas tran a9_at_1000ns FIND V(Xrr.a9) AT=0.000011000000
+.meas tran a11_at_1000ns FIND V(Xrr.a11) AT=0.000011000000
+.meas tran rpeak_at_5000ns FIND V(rpeak_trigger) AT=0.000015000000
+.meas tran timer_at_5000ns FIND V(Xrr.net_timer) AT=0.000015000000
+.meas tran prerr_at_5000ns FIND V(Xrr.sh_prerr) AT=0.000015000000
+.meas tran postrr_at_5000ns FIND V(Xrr.sh_postrr) AT=0.000015000000
+.meas tran ph1_at_5000ns FIND V(Xrr.ph1) AT=0.000015000000
+.meas tran ph2_at_5000ns FIND V(Xrr.ph2) AT=0.000015000000
+.meas tran a3_at_5000ns FIND V(Xrr.a3) AT=0.000015000000
+.meas tran a6_at_5000ns FIND V(Xrr.a6) AT=0.000015000000
+.meas tran a9_at_5000ns FIND V(Xrr.a9) AT=0.000015000000
+.meas tran a11_at_5000ns FIND V(Xrr.a11) AT=0.000015000000
+.meas tran rpeak_at_10000ns FIND V(rpeak_trigger) AT=0.000020000000
+.meas tran timer_at_10000ns FIND V(Xrr.net_timer) AT=0.000020000000
+.meas tran prerr_at_10000ns FIND V(Xrr.sh_prerr) AT=0.000020000000
+.meas tran postrr_at_10000ns FIND V(Xrr.sh_postrr) AT=0.000020000000
+.meas tran ph1_at_10000ns FIND V(Xrr.ph1) AT=0.000020000000
+.meas tran ph2_at_10000ns FIND V(Xrr.ph2) AT=0.000020000000
+.meas tran a3_at_10000ns FIND V(Xrr.a3) AT=0.000020000000
+.meas tran a6_at_10000ns FIND V(Xrr.a6) AT=0.000020000000
+.meas tran a9_at_10000ns FIND V(Xrr.a9) AT=0.000020000000
+.meas tran a11_at_10000ns FIND V(Xrr.a11) AT=0.000020000000
+.meas tran rpeak_at_50000ns FIND V(rpeak_trigger) AT=0.000060000000
+.meas tran timer_at_50000ns FIND V(Xrr.net_timer) AT=0.000060000000
+.meas tran prerr_at_50000ns FIND V(Xrr.sh_prerr) AT=0.000060000000
+.meas tran postrr_at_50000ns FIND V(Xrr.sh_postrr) AT=0.000060000000
+.meas tran ph1_at_50000ns FIND V(Xrr.ph1) AT=0.000060000000
+.meas tran ph2_at_50000ns FIND V(Xrr.ph2) AT=0.000060000000
+.meas tran a3_at_50000ns FIND V(Xrr.a3) AT=0.000060000000
+.meas tran a6_at_50000ns FIND V(Xrr.a6) AT=0.000060000000
+.meas tran a9_at_50000ns FIND V(Xrr.a9) AT=0.000060000000
+.meas tran a11_at_50000ns FIND V(Xrr.a11) AT=0.000060000000
+
+.end

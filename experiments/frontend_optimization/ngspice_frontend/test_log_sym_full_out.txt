@@ -1,0 +1,107 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_log_sym_full
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+rise_gate_a                                  0
+width_gate_a                                 0
+nswr_a                               0.0170852
+rise_a                                0.017082
+xcr_a.a                                      0
+xcr_a.b1                                     0
+rst_ra                                       0
+nsww_a                               0.0170852
+width_a                               0.017082
+xcw_a.a                                      0
+xcw_a.b1                                     0
+rst_wa                                       0
+net_n1a                                0.38298
+sym_a                                  0.38298
+vwidth_log_a                          0.017082
+rise_gate_b                                  0
+width_gate_b                                 0
+nswr_b                               0.0170852
+rise_b                                0.017082
+xcr_b.a                                      0
+xcr_b.b1                                     0
+rst_rb                                       0
+nsww_b                               0.0170852
+width_b                               0.017082
+xcw_b.a                                      0
+xcw_b.b1                                     0
+rst_wb                                       0
+net_n1b                                0.38298
+sym_b                                  0.38298
+rise_gate_c                                  0
+width_gate_c                                 0
+nswr_c                               0.0170852
+rise_c                                0.017082
+xcr_c.a                                      0
+xcr_c.b1                                     0
+rst_rc                                       0
+nsww_c                               0.0170852
+width_c                               0.017082
+xcw_c.a                                      0
+xcw_c.b1                                     0
+rst_wc                                       0
+net_n1c                                0.38298
+sym_c                                  0.38298
+vwc_rst#branch                               0
+vrc_rst#branch                               0
+vgc_width#branch                             0
+vgc_rise#branch                              0
+vwb_rst#branch                               0
+vrb_rst#branch                               0
+vgb_width#branch                             0
+vgb_rise#branch                              0
+vwire_a#branch                               0
+vwa_rst#branch                               0
+vra_rst#branch                               0
+vga_width#branch                             0
+vga_rise#branch                              0
+vbias#branch                                 0
+vss#branch                         1.31047e-12
+vdd#branch                        -1.31037e-12
+
+ Reference value :  0.00000e+00 Reference value :  1.58620e-01 Reference value :  3.38920e-01 Reference value :  5.11020e-01 Reference value :  6.84520e-01
+No. of Data Rows : 8598
+
+  Measurements for Transient Analysis
+
+va_rise             =  1.882346e-01
+va_width            =  2.222728e-01
+va_sym              =  1.233421e-02
+vb_rise             =  1.510754e-01
+vb_width            =  1.704553e-01
+vb_sym              =  2.121997e-02
+vc_rise             =  1.531819e-01
+vc_width            =  1.990245e-01
+vc_sym              =  8.522313e-03
+
+
+=== FULL LOG TIMER + CORRECTED GILBERT CELL ===
+
+Beat A: sym=0.356, T_rise=58.3ms, T_width=163.9ms
+
+Beat B: sym=0.500, T_rise=11.1ms, T_width=22.2ms
+
+Beat C: sym=0.208, T_rise=13.9ms, T_width=66.7ms
+
+=== SUMMARY ===
+  Target symmetries: 0.356, 0.500, 0.208
+  Timer voltage ratios should reflect time ratios
+  sym_out should be monotonic with symmetry
+
+ngspice-43 done

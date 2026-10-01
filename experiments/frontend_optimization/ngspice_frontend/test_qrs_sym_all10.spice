@@ -1,0 +1,282 @@
+* ============================================================
+* COMPLETE QRS SYMMETRY TEST: All 10 ground-truth beats
+*
+* Architecture: Log timers + Corrected Gilbert cell
+* Shared timer pair, reset between beats
+*
+* Ground truth from qrs_sym_ground_truth.json
+* Python formula: symmetry = time_to_peak / qrs_width
+*
+* Beat data (T_rise_ms, T_width_ms, sym_python):
+*  B1  rec100: 58.333, 163.889, 0.35593
+*  B2  rec103: 11.111,  22.222, 0.50000
+*  B3  rec105: 16.667, 127.778, 0.13043
+*  B4  rec111: 11.111, 122.222, 0.09091
+*  B5  rec200: 13.889,  66.667, 0.20833
+*  B6  rec210: 19.444, 127.778, 0.15217
+*  B7  rec212: 13.889,  83.333, 0.16667
+*  B8  rec219: 55.556, 163.889, 0.33898
+*  B9  rec221: 13.889,  25.000, 0.55556
+*  B10 rec231: 11.111,  72.222, 0.15385
+* ============================================================
+
+.title test_qrs_sym_all10
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ================================================================
+* CONTROL SIGNALS (PWL)
+* Each beat: 300ms window
+*   reset 10ms, settle 10ms, then timers run
+* ================================================================
+
+* Reset pulse: HIGH for 10ms before each beat
+Vrst reset 0 PWL(
++ 0 0.9 0.010 0.9 0.011 0
++ 0.030 0 0.031 0.9 0.040 0.9 0.041 0
++ 0.330 0 0.331 0.9 0.340 0.9 0.341 0
++ 0.630 0 0.631 0.9 0.640 0.9 0.641 0
++ 0.930 0 0.931 0.9 0.940 0.9 0.941 0
++ 1.230 0 1.231 0.9 1.240 0.9 1.241 0
++ 1.530 0 1.531 0.9 1.540 0.9 1.541 0
++ 1.830 0 1.831 0.9 1.840 0.9 1.841 0
++ 2.130 0 2.131 0.9 2.140 0.9 2.141 0
++ 2.430 0 2.431 0.9 2.440 0.9 2.441 0
++ 2.730 0 2.731 0.9 2.740 0.9 2.741 0
++ 3.0 0)
+
+* Rise gate: HIGH from beat start to start+T_rise
+Vrg rise_gate 0 PWL(
++ 0 0
++ 0.0499 0 0.050 0.9 0.10833 0.9 0.10843 0
++ 0.3499 0 0.350 0.9 0.36111 0.9 0.36121 0
++ 0.6499 0 0.650 0.9 0.66667 0.9 0.66677 0
++ 0.9499 0 0.950 0.9 0.96111 0.9 0.96121 0
++ 1.2499 0 1.250 0.9 1.26389 0.9 1.26399 0
++ 1.5499 0 1.550 0.9 1.56944 0.9 1.56954 0
++ 1.8499 0 1.850 0.9 1.86389 0.9 1.86399 0
++ 2.1499 0 2.150 0.9 2.20556 0.9 2.20566 0
++ 2.4499 0 2.450 0.9 2.46389 0.9 2.46399 0
++ 2.7499 0 2.750 0.9 2.76111 0.9 2.76121 0
++ 3.0 0)
+
+* Width gate: HIGH from beat start to start+T_width
+Vwg width_gate 0 PWL(
++ 0 0
++ 0.0499 0 0.050 0.9 0.21389 0.9 0.21399 0
++ 0.3499 0 0.350 0.9 0.37222 0.9 0.37232 0
++ 0.6499 0 0.650 0.9 0.77778 0.9 0.77788 0
++ 0.9499 0 0.950 0.9 1.07222 0.9 1.07232 0
++ 1.2499 0 1.250 0.9 1.31667 0.9 1.31677 0
++ 1.5499 0 1.550 0.9 1.67778 0.9 1.67788 0
++ 1.8499 0 1.850 0.9 1.93333 0.9 1.93343 0
++ 2.1499 0 2.150 0.9 2.31389 0.9 2.31399 0
++ 2.4499 0 2.450 0.9 2.47500 0.9 2.47510 0
++ 2.7499 0 2.750 0.9 2.82222 0.9 2.82232 0
++ 3.0 0)
+
+* ================================================================
+* SHARED LOG RISE TIMER
+* Subthreshold NMOS charges MIM cap logarithmically
+* V_rise = n*Vt * ln(1 + T_rise/tau)
+* ================================================================
+
+XMlr nswr vbias rise_cap vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMswr vdd rise_gate nswr vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCr rise_cap vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+XMrstr rise_cap reset vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* ================================================================
+* SHARED LOG WIDTH TIMER
+* ================================================================
+
+XMlw nsww vbias width_cap vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsww vdd width_gate nsww vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCw width_cap vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+XMrstw width_cap reset vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* ================================================================
+* CORRECTED GILBERT CELL (diode-connected XMp1)
+*
+* In1 = Is * exp(V_rise / (n*Vt))
+* In2 = Is * exp(V_width / (n*Vt))
+* XMp1 diode: mirrors In1 to XMp2
+* sym_gilb settles where XMn2 triode current = mirrored In1
+*
+* Output: sym_gilb = Vt * exp((V_rise - V_width)/(n*Vt))
+*       ~ Vt * T_rise/T_width = Vt * symmetry  (for T >> tau)
+* ================================================================
+
+XMn1 net_n1 rise_cap vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2 sym_gilb width_cap vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMp1 net_n1 net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2 sym_gilb net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ================================================================
+* IDEAL AMPLIFIER (30x gain for characterization)
+* In final design: replace with PMOS CS amp or switched-cap
+* ================================================================
+
+E_amp sym_out 0 sym_gilb 0 30
+
+* ================================================================
+* TRANSIENT ANALYSIS
+* ================================================================
+
+.tran 0.1m 2.9
+
+* Measure timer voltages and sym output for each beat
+* Measurement 20ms after width timer stops
+
+* B1: rec100 sym=0.35593, width stops at 0.21389
+.meas tran V1r FIND V(rise_cap) AT=0.234
+.meas tran V1w FIND V(width_cap) AT=0.234
+.meas tran V1g FIND V(sym_gilb) AT=0.234
+.meas tran V1o FIND V(sym_out) AT=0.234
+
+* B2: rec103 sym=0.50000, width stops at 0.37222
+.meas tran V2r FIND V(rise_cap) AT=0.392
+.meas tran V2w FIND V(width_cap) AT=0.392
+.meas tran V2g FIND V(sym_gilb) AT=0.392
+.meas tran V2o FIND V(sym_out) AT=0.392
+
+* B3: rec105 sym=0.13043, width stops at 0.77778
+.meas tran V3r FIND V(rise_cap) AT=0.798
+.meas tran V3w FIND V(width_cap) AT=0.798
+.meas tran V3g FIND V(sym_gilb) AT=0.798
+.meas tran V3o FIND V(sym_out) AT=0.798
+
+* B4: rec111 sym=0.09091, width stops at 1.07222
+.meas tran V4r FIND V(rise_cap) AT=1.092
+.meas tran V4w FIND V(width_cap) AT=1.092
+.meas tran V4g FIND V(sym_gilb) AT=1.092
+.meas tran V4o FIND V(sym_out) AT=1.092
+
+* B5: rec200 sym=0.20833, width stops at 1.31667
+.meas tran V5r FIND V(rise_cap) AT=1.337
+.meas tran V5w FIND V(width_cap) AT=1.337
+.meas tran V5g FIND V(sym_gilb) AT=1.337
+.meas tran V5o FIND V(sym_out) AT=1.337
+
+* B6: rec210 sym=0.15217, width stops at 1.67778
+.meas tran V6r FIND V(rise_cap) AT=1.698
+.meas tran V6w FIND V(width_cap) AT=1.698
+.meas tran V6g FIND V(sym_gilb) AT=1.698
+.meas tran V6o FIND V(sym_out) AT=1.698
+
+* B7: rec212 sym=0.16667, width stops at 1.93333
+.meas tran V7r FIND V(rise_cap) AT=1.953
+.meas tran V7w FIND V(width_cap) AT=1.953
+.meas tran V7g FIND V(sym_gilb) AT=1.953
+.meas tran V7o FIND V(sym_out) AT=1.953
+
+* B8: rec219 sym=0.33898, width stops at 2.31389
+.meas tran V8r FIND V(rise_cap) AT=2.334
+.meas tran V8w FIND V(width_cap) AT=2.334
+.meas tran V8g FIND V(sym_gilb) AT=2.334
+.meas tran V8o FIND V(sym_out) AT=2.334
+
+* B9: rec221 sym=0.55556, width stops at 2.47500
+.meas tran V9r FIND V(rise_cap) AT=2.495
+.meas tran V9w FIND V(width_cap) AT=2.495
+.meas tran V9g FIND V(sym_gilb) AT=2.495
+.meas tran V9o FIND V(sym_out) AT=2.495
+
+* B10: rec231 sym=0.15385, width stops at 2.82222
+.meas tran V10r FIND V(rise_cap) AT=2.842
+.meas tran V10w FIND V(width_cap) AT=2.842
+.meas tran V10g FIND V(sym_gilb) AT=2.842
+.meas tran V10o FIND V(sym_out) AT=2.842
+
+.control
+  run
+  echo ""
+  echo "============================================================"
+  echo "QRS SYMMETRY: ALL 10 BEATS - LOG TIMER + CORRECTED GILBERT"
+  echo "============================================================"
+  echo ""
+  echo "Beat  Record  Sym_Python  V_rise(mV)  V_width(mV)  Gilb(mV)  Amp30x(mV)"
+  echo "----  ------  ----------  ----------  -----------  --------  ----------"
+  echo ""
+  let g1 = V1g*1000
+  let o1 = V1o*1000
+  let r1 = V1r*1000
+  let w1 = V1w*1000
+  echo "B1    100     0.35593     $&r1    $&w1    $&g1    $&o1"
+  echo ""
+  let g2 = V2g*1000
+  let o2 = V2o*1000
+  let r2 = V2r*1000
+  let w2 = V2w*1000
+  echo "B2    103     0.50000     $&r2    $&w2    $&g2    $&o2"
+  echo ""
+  let g3 = V3g*1000
+  let o3 = V3o*1000
+  let r3 = V3r*1000
+  let w3 = V3w*1000
+  echo "B3    105     0.13043     $&r3    $&w3    $&g3    $&o3"
+  echo ""
+  let g4 = V4g*1000
+  let o4 = V4o*1000
+  let r4 = V4r*1000
+  let w4 = V4w*1000
+  echo "B4    111     0.09091     $&r4    $&w4    $&g4    $&o4"
+  echo ""
+  let g5 = V5g*1000
+  let o5 = V5o*1000
+  let r5 = V5r*1000
+  let w5 = V5w*1000
+  echo "B5    200     0.20833     $&r5    $&w5    $&g5    $&o5"
+  echo ""
+  let g6 = V6g*1000
+  let o6 = V6o*1000
+  let r6 = V6r*1000
+  let w6 = V6w*1000
+  echo "B6    210     0.15217     $&r6    $&w6    $&g6    $&o6"
+  echo ""
+  let g7 = V7g*1000
+  let o7 = V7o*1000
+  let r7 = V7r*1000
+  let w7 = V7w*1000
+  echo "B7    212     0.16667     $&r7    $&w7    $&g7    $&o7"
+  echo ""
+  let g8 = V8g*1000
+  let o8 = V8o*1000
+  let r8 = V8r*1000
+  let w8 = V8w*1000
+  echo "B8    219     0.33898     $&r8    $&w8    $&g8    $&o8"
+  echo ""
+  let g9 = V9g*1000
+  let o9 = V9o*1000
+  let r9 = V9r*1000
+  let w9 = V9w*1000
+  echo "B9    221     0.55556     $&r9    $&w9    $&g9    $&o9"
+  echo ""
+  let g10 = V10g*1000
+  let o10 = V10o*1000
+  let r10 = V10r*1000
+  let w10 = V10w*1000
+  echo "B10   231     0.15385     $&r10    $&w10    $&g10    $&o10"
+  echo ""
+  echo "============================================================"
+  echo "MONOTONICITY CHECK (sorted by sym_python):"
+  echo "  B4(0.091) < B3(0.130) < B6(0.152) < B10(0.154)"
+  echo "  < B7(0.167) < B5(0.208) < B8(0.339) < B1(0.356)"
+  echo "  < B2(0.500) < B9(0.556)"
+  echo "  Gilbert output should follow same order"
+  echo "============================================================"
+  echo ""
+  quit
+.endc
+
+.end

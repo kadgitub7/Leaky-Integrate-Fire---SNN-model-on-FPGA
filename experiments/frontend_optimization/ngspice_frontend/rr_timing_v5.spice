@@ -1,0 +1,75 @@
+* ============================================================
+* FEATURES 1 & 2: RR Timing v5
+*
+* Timer → source follower → diff pairs (live sf_out inputs)
+*
+* Timer: 320pF MIM, VDD precharge at rpeak, ~148pA discharge
+*   V_timer ≈ 0.59-0.62V at typical HR (0.6-0.67s)
+*
+* Source follower: NFET, level-shifts timer down by ~0.40V
+*   V_sf ≈ 0.20-0.22V (NFET switches work at Vgs=0.7V)
+*
+* Control signals (3 pins):
+*   capture_trig: 2ms pulse, 5ms before rpeak
+*     Captures sf_out → prev_cap (5pF) and esamp_cap (5pF)
+*     Fast NFET switches settle in ~ns. Timer still discharging.
+*   rpeak_trigger: 5ms pulse at rpeak
+*     PMOS precharges timer to VDD. sf_out jumps to ~0.5V.
+*     Prev/esamp already captured; switches are OFF.
+*   copy_trig: 2ms pulse, 10ms after rpeak
+*     Charge-shares esamp (5pF) ↔ ewma (45pF)
+*     ewma_new = 0.1*sf_val + 0.9*ewma_old
+*     prev_node untouched → holds captured value for next beat
+*
+* Diff pair readout (valid just before capture_trig):
+*   rr_ratio: sf_out (current) vs ewma_node (average)
+*   rr_asym: sf_out (current) vs prev_node (previous beat)
+*
+* Pin: capture_trig rpeak_trigger copy_trig
+*      rr_ratio_out rr_asym_out vdd vss vbias
+* ============================================================
+
+.subckt rr_timing_v5 capture_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out vdd vss vbias
+
+.include "inverter.spice"
+
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* === TIMER ===
+XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* === SOURCE FOLLOWER ===
+XMsf vdd net_timer sf_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMsf_bias sf_out vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* === PREV CAPTURE at capture_trig ===
+XMprev sf_out capture_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA SAMPLE at capture_trig (separate from prev) ===
+XMesamp sf_out capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA CHARGE-SHARE at copy_trig ===
+XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === DIFF PAIR: rr_ratio ===
+* Current mirror loads → high gain, comparator-like output
+XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_r net_r1 sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_r rr_ratio_out ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_r rr_ratio_out net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* === DIFF PAIR: rr_asym ===
+* Current mirror loads → high gain, comparator-like output
+XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_a net_a1 sf_out tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_a rr_asym_out prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_a rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends rr_timing_v5

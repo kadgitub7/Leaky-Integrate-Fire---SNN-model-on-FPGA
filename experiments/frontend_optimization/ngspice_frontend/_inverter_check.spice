@@ -1,0 +1,41 @@
+* Check inverter crowbar current with OTA-level input
+.title inverter_crowbar_test
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+.include "comparator.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* Comparator with mid-rail inputs (worst case)
+Vinp vinp 0 0.46
+Vinn vinn 0 0.44
+Xcmp vinp vinn vout vdd vss vbias comparator
+
+* Standalone inverter with mid-rail input
+Vmid vmid 0 0.45
+Xinv1 vmid inv_out vdd vss inverter_sub
+
+.op
+
+.control
+  run
+  echo "=== Inverter crowbar test ==="
+  echo "Comparator output:"
+  print v(vout)
+  echo "Total VDD current:"
+  print -i(Vdd)
+  echo "Inverter input:"
+  print v(vmid)
+  echo "Inverter output:"
+  print v(inv_out)
+  quit
+.endc
+
+.end

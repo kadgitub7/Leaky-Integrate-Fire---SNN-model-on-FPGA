@@ -1,0 +1,83 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: peak_detector_v3_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+ecg_in                                    0.25
+qrs_gate                                     0
+reset_trig                                   0
+net1                                  0.591256
+ota_out                                    0.9
+peak_node                           0.00254148
+net_tail                              0.199823
+net_tail_sw                        2.61788e-06
+xcpk.a                                       0
+xcpk.b1                                      0
+vreset#branch                                0
+vqrs#branch                                  0
+vecg#branch                                  0
+vbias#branch                                 0
+vss#branch                         9.05335e-14
+vdd#branch                         -9.0586e-14
+
+
+No. of Data Rows : 60163
+
+  Measurements for Transient Analysis
+
+ecg_pk_b0           =  4.000000e-01
+pk_hold_b0          =  4.045539e-01
+pk_reset_b0         =  2.649494e-02
+pk_rpk_b0           =  4.062119e-01
+ota_rpk_b0          =  1.736953e-01
+pk_late_b0          =  4.091750e-01
+ecg_pk_b1           =  5.000000e-01
+pk_hold_b1          =  6.243598e-01
+pk_reset_b1         =  2.753821e-02
+pk_rpk_b1           =  5.520628e-01
+ota_rpk_b1          =  1.359262e-01
+pk_late_b1          =  6.208708e-01
+ecg_pk_b2           =  6.000000e-01
+pk_hold_b2          =  8.357245e-01
+pk_reset_b2         =  2.869328e-02
+pk_rpk_b2           =  6.547355e-01
+ota_rpk_b2          =  1.316056e-01
+pk_late_b2          =  7.454748e-01
+ecg_pk_b3           =  7.000000e-01
+pk_hold_b3          =  9.064528e-01
+pk_reset_b3         =  2.972372e-02
+pk_rpk_b3           =  7.132730e-01
+ota_rpk_b3          =  1.313133e-01
+pk_late_b3          =  8.048788e-01
+ecg_pk_b4           =  5.500000e-01
+pk_hold_b4          =  7.452479e-01
+pk_reset_b4         =  2.794537e-02
+pk_rpk_b4           =  6.107766e-01
+ota_rpk_b4          =  1.325316e-01
+pk_late_b4          =  6.971327e-01
+
+
+Total analysis time (seconds) = 5.477
+
+Total elapsed time (seconds) = 13.368 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1221.301 MB.
+Maximum ngspice program size =   50.129 MB.
+Current ngspice program size =   50.129 MB.
+

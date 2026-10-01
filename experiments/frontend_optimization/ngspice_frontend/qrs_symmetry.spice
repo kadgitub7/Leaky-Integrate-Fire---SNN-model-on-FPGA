@@ -1,0 +1,82 @@
+* ============================================================
+* FEATURE 8: QRS Symmetry Ratio (qrs_symmetry_L0)
+*
+* Two matched timers:
+*   Rise timer: charges from QRS onset to rpeak
+*   Fall timer: charges from rpeak to QRS gate end
+*
+* Gilbert cell: rise_timer / fall_timer
+*   Symmetric QRS -> rise=fall -> output balanced (~mid-rail)
+*   Early peak (fast rise) -> rise<fall -> output lower
+*   Late peak (slow rise) -> rise>fall -> output higher
+*
+* SKY130 transistor-level
+* Pin order: qrs_onset rpeak_trigger sym_out rise_timer_out fall_timer_out vdd vss vbias
+* ============================================================
+
+.subckt qrs_symmetry qrs_onset rpeak_trigger sym_out rise_timer_out fall_timer_out vdd vss vbias
+
+.include "inverter.spice"
+
+* --- Inverted signals ---
+Xinv_onset qrs_onset qrs_onset_bar vdd vss inverter_sub
+Xinv_rpeak rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* --- Cap-based latch: HIGH after rpeak, CLEARED when QRS gate closes ---
+* SET by rpeak (PMOS pulls to VDD when rpeak_bar=LOW)
+* CLEARED when qrs_onset goes LOW (NMOS pulls to VSS)
+XClatch net_latch vss sky130_fd_pr__cap_mim_m3_1 W=5 L=5
+XMlatch_set net_latch rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMlatch_clear net_latch qrs_onset_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+Xinv_latch net_latch net_latch_bar vdd vss inverter_sub
+
+* === RISE TIMER: charges from QRS onset, stops at rpeak ===
+
+XMrise_bias net_rise_bias vbias net_rise_sw vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMrise_gate net_rise_sw qrs_onset vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMrise_ref net_rise_bias net_rise_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMrise_charge rise_timer net_rise_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Disable when QRS onset inactive
+XMrise_dis net_rise_bias qrs_onset vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Stop after rpeak: latch HIGH -> latch_bar LOW -> PFET ON -> bias to VDD
+XMrise_stop net_rise_bias net_latch_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+XCrise rise_timer vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Reset when QRS gate closes
+XMrise_reset rise_timer qrs_onset_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+Rrise_buf rise_timer rise_timer_out 100
+
+* === FALL TIMER: charges from rpeak to QRS gate end ===
+
+XMfall_bias net_fall_bias vbias net_fall_sw vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMfall_gate net_fall_sw net_latch vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMfall_ref net_fall_bias net_fall_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMfall_charge fall_timer net_fall_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Disable when latch LOW (before rpeak): PFET ON when gate=LOW
+XMfall_dis net_fall_bias net_latch vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Disable when QRS onset LOW
+XMfall_dis2 net_fall_bias qrs_onset vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+XCfall fall_timer vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Reset at rpeak
+XMfall_reset fall_timer rpeak_trigger vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+Rfall_buf fall_timer fall_timer_out 100
+
+* --- Differential pair with tail + diode loads (graded output) ---
+XMsy_tail tail_s vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMsy1 net_sy1 rise_timer tail_s vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsy2 sym_out fall_timer tail_s vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsy3 net_sy1 net_sy1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMsy4 sym_out sym_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends qrs_symmetry

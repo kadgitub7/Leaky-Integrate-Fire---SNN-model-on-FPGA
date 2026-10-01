@@ -1,0 +1,21 @@
+* ============================================================
+* OTA-C First-order Low-pass Filter
+* fc = gm / (2*pi*C)
+* SKY130 transistor-level
+*
+* Pin order: vin vout vdd vss vbias
+* Parameters: cap_w, cap_l (MIM cap dimensions in um)
+* ============================================================
+
+.subckt otac_lpf vin vout vdd vss vbias
+.param cap_w = 5
+.param cap_l = 5
+
+* OTA drives current into cap
+.include "ota_5t_subthreshold.spice"
+Xota vin vout vout vdd vss vbias ota_5t
+
+* Integration capacitor (MIM, ~2 fF/um^2)
+XCint vout vss sky130_fd_pr__cap_mim_m3_1 W={cap_w} L={cap_l}
+
+.ends otac_lpf

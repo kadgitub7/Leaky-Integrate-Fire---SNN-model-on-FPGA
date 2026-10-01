@@ -1,0 +1,80 @@
+.title gated_integrator_test
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear gmin=1e-15 abstol=1e-15 reltol=0.005
+.temp 27
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vbase ecg_base 0 0.25
+Vecg ecg_in 0 PWL(0.0000000 0.250000 0.4550000 0.250000 0.4600000 0.250000 0.5000000 0.400000 0.5400000 0.250000 0.5450000 0.250000 1.2550000 0.250000 1.2600000 0.250000 1.3000000 0.700000 1.3400000 0.250000 1.3450000 0.250000 2.0550000 0.250000 2.0600000 0.250000 2.1000000 0.420000 2.1400000 0.250000 2.1450000 0.250000 2.8550000 0.250000 2.8600000 0.250000 2.9000000 0.680000 2.9400000 0.250000 2.9450000 0.250000 3.6550000 0.250000 3.6600000 0.250000 3.7000000 0.410000 3.7400000 0.250000 3.7450000 0.250000 4.4550000 0.250000 4.4600000 0.250000 4.5000000 0.650000 4.5400000 0.250000 4.5450000 0.250000 5.2550000 0.250000 5.2600000 0.250000 5.3000000 0.430000 5.3400000 0.250000 5.3450000 0.250000 6.0550000 0.250000 6.0600000 0.250000 6.1000000 0.600000 6.1400000 0.250000 6.1450000 0.250000 6.8550000 0.250000 6.8600000 0.250000 6.9000000 0.450000 6.9400000 0.250000 6.9450000 0.250000 7.6550000 0.250000 7.6600000 0.250000 7.7000000 0.550000 7.7400000 0.250000 7.7450000 0.250000 8.5000000 0.250000)
+Vqrs qrs_gate 0 PWL(0.0000000 0.000000 0.4590000 0.000000 0.4600000 0.900000 0.5400000 0.900000 0.5410000 0.000000 1.2590000 0.000000 1.2600000 0.900000 1.3400000 0.900000 1.3410000 0.000000 2.0590000 0.000000 2.0600000 0.900000 2.1400000 0.900000 2.1410000 0.000000 2.8590000 0.000000 2.8600000 0.900000 2.9400000 0.900000 2.9410000 0.000000 3.6590000 0.000000 3.6600000 0.900000 3.7400000 0.900000 3.7410000 0.000000 4.4590000 0.000000 4.4600000 0.900000 4.5400000 0.900000 4.5410000 0.000000 5.2590000 0.000000 5.2600000 0.900000 5.3400000 0.900000 5.3410000 0.000000 6.0590000 0.000000 6.0600000 0.900000 6.1400000 0.900000 6.1410000 0.000000 6.8590000 0.000000 6.8600000 0.900000 6.9400000 0.900000 6.9410000 0.000000 7.6590000 0.000000 7.6600000 0.900000 7.7400000 0.900000 7.7410000 0.000000 8.5000000 0.000000)
+Vreset reset_trig 0 PWL(0.0000000 0.000000 0.4510000 0.000000 0.4520000 0.900000 0.4570000 0.900000 0.4580000 0.000000 1.2510000 0.000000 1.2520000 0.900000 1.2570000 0.900000 1.2580000 0.000000 2.0510000 0.000000 2.0520000 0.900000 2.0570000 0.900000 2.0580000 0.000000 2.8510000 0.000000 2.8520000 0.900000 2.8570000 0.900000 2.8580000 0.000000 3.6510000 0.000000 3.6520000 0.900000 3.6570000 0.900000 3.6580000 0.000000 4.4510000 0.000000 4.4520000 0.900000 4.4570000 0.900000 4.4580000 0.000000 5.2510000 0.000000 5.2520000 0.900000 5.2570000 0.900000 5.2580000 0.000000 6.0510000 0.000000 6.0520000 0.900000 6.0570000 0.900000 6.0580000 0.000000 6.8510000 0.000000 6.8520000 0.900000 6.8570000 0.900000 6.8580000 0.000000 7.6510000 0.000000 7.6520000 0.900000 7.6570000 0.900000 7.6580000 0.000000 8.5000000 0.000000)
+
+Xinv_qg qrs_gate qrs_gate_bar vdd vss inverter_sub
+
+* === GATED INTEGRATOR ===
+* Transconductor: diff pair converts (ecg - baseline) to current
+* Tail current gated by QRS gate (stacked NFETs)
+* Integration cap charges proportionally to QRS area
+
+* Diff pair: ecg_in on Mia (drain=net_ia), ecg_base on Mib (drain=integ_out)
+* When ecg > base: Mia conducts more, net_ia drops, Mib less current
+* PMOS mirror: M3(diode on net_ia) mirrors to M4(integ_out)
+* Current through M4 > current through Mib -> integ_out RISES
+* So: integ_out proportional to integral(ecg - baseline) during QRS
+
+* PMOS current mirror
+XM3 net_ia net_ia vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XM4 integ_node net_ia vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Diff pair inputs
+XMia net_ia ecg_in tail_int vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMib integ_node ecg_base tail_int vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* Gated tail: bias NFET + gate switch
+XMtail_b tail_int vbias net_tsw vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+XMtail_g net_tsw qrs_gate vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
+
+* Integration cap: 5pF (50x50 MIM)
+XCint integ_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Reset NFET: pull integ_node to VSS before each QRS
+XMrst integ_node reset_trig vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Hmm, wait. The diff pair output (integ_node) connects to BOTH:
+* 1. The PMOS mirror output (M4 drain)
+* 2. The NFET diff pair (Mib drain)
+* 3. The integration cap
+* The cap integrates the DIFFERENCE current (I_M4 - I_Mib)
+* When ecg > base: I_Mia > I_Mib, so I_M3 > I_Mib
+* I_M4 = I_M3 > I_Mib -> net charge INTO integ_node -> voltage RISES
+* When ecg = base: I_M4 = I_Mib -> no net charge -> voltage stable
+* When ecg < base: I_M4 < I_Mib -> net discharge -> voltage DROPS
+* Good: integ_node rises when ECG is above baseline (QRS)
+
+.tran 0.1m 8.5000
+
+.meas tran integ_b0 FIND V(integ_node) AT=0.5450000
+.meas tran ireset_b0 FIND V(integ_node) AT=0.4610000
+.meas tran integ_b1 FIND V(integ_node) AT=1.3450000
+.meas tran ireset_b1 FIND V(integ_node) AT=1.2610000
+.meas tran integ_b2 FIND V(integ_node) AT=2.1450000
+.meas tran ireset_b2 FIND V(integ_node) AT=2.0610000
+.meas tran integ_b3 FIND V(integ_node) AT=2.9450000
+.meas tran ireset_b3 FIND V(integ_node) AT=2.8610000
+.meas tran integ_b4 FIND V(integ_node) AT=3.7450000
+.meas tran ireset_b4 FIND V(integ_node) AT=3.6610000
+.meas tran integ_b5 FIND V(integ_node) AT=4.5450000
+.meas tran ireset_b5 FIND V(integ_node) AT=4.4610000
+.meas tran integ_b6 FIND V(integ_node) AT=5.3450000
+.meas tran ireset_b6 FIND V(integ_node) AT=5.2610000
+.meas tran integ_b7 FIND V(integ_node) AT=6.1450000
+.meas tran ireset_b7 FIND V(integ_node) AT=6.0610000
+.meas tran integ_b8 FIND V(integ_node) AT=6.9450000
+.meas tran ireset_b8 FIND V(integ_node) AT=6.8610000
+.meas tran integ_b9 FIND V(integ_node) AT=7.7450000
+.meas tran ireset_b9 FIND V(integ_node) AT=7.6610000
+
+.end

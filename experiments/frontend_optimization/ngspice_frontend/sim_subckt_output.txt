@@ -1,0 +1,100 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_qrs_sym_subckt
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+xsym.qrs_gate_bar                          0.9
+qrs_gate                                     0
+xsym.rpeak_bar                             0.9
+rpeak                                        0
+xsym.net_latch                     4.16118e-11
+xsym.xclatch.a                               0
+xsym.xclatch.b1                              0
+xsym.latch_bar                             0.9
+xsym.nand_out                              0.9
+xsym.ns_nand                       8.50828e-10
+xsym.rise_enable                    9.0827e-11
+xsym.nswr                           3.8891e-06
+xsym.rise_cap                      5.02264e-10
+xsym.xcr.a                                   0
+xsym.xcr.b1                                  0
+xsym.nsww                           3.8891e-06
+xsym.width_cap                     5.02264e-10
+xsym.xcw.a                                   0
+xsym.xcw.b1                                  0
+v_rise                             5.02264e-10
+v_width                            5.02264e-10
+xsym.net_n1                           0.399222
+sym_out                               0.399222
+sym_amp                                11.9767
+e_amp#branch                                 0
+vrpeak#branch                                0
+vgate#branch                                 0
+vbias#branch                                 0
+vss#branch                         9.40204e-13
+vdd#branch                        -9.40345e-13
+
+ Reference value :  0.00000e+00 Reference value :  2.03790e-01 Reference value :  3.72320e-01 Reference value :  5.71645e-01 Reference value :  7.79897e-01 Reference value :  9.70270e-01 Reference value :  1.11374e+00 Reference value :  1.29945e+00 Reference value :  1.50789e+00 Reference value :  1.64000e+00 Reference value :  1.83540e+00 Reference value :  2.02105e+00 Reference value :  2.20552e+00 Reference value :  2.36811e+00 Reference value :  2.54812e+00 Reference value :  2.73162e+00
+No. of Data Rows : 29338
+
+  Measurements for Transient Analysis
+
+v1r                 =  1.893937e-01
+v1w                 =  2.231873e-01
+v1s                 =  1.243483e-02
+v1a                 =  3.730448e-01
+v2r                 =  1.519898e-01
+v2w                 =  1.702641e-01
+v2s                 =  2.230311e-02
+v2a                 =  6.690932e-01
+v3r                 =  1.550529e-01
+v3w                 =  2.174075e-01
+v3s                 =  5.217794e-03
+v3a                 =  1.565338e-01
+v4r                 =  1.438590e-01
+v4w                 =  2.162569e-01
+v4s                 =  3.921669e-03
+v4a                 =  1.176501e-01
+v5r                 =  1.547636e-01
+v5w                 =  2.010632e-01
+v5s                 =  8.407636e-03
+v5a                 =  2.522291e-01
+v6r                 =  1.595223e-01
+v6w                 =  2.174051e-01
+v6s                 =  5.939144e-03
+v6a                 =  1.781743e-01
+v7r                 =  1.534750e-01
+v7w                 =  2.066342e-01
+v7s                 =  6.835214e-03
+v7a                 =  2.050564e-01
+v8r                 =  1.878891e-01
+v8w                 =  2.231877e-01
+v8s                 =  1.183538e-02
+v8a                 =  3.550613e-01
+v9r                 =  1.582077e-01
+v9w                 =  1.739371e-01
+v9s                 =  2.489324e-02
+v9a                 =  7.467972e-01
+v10r                =  1.479060e-01
+v10w                =  2.029533e-01
+v10s                =  6.469650e-03
+v10a                =  1.940895e-01
+
+
+============================================================
+QRS SYMMETRY v2 SUBCIRCUIT - ALL 10 BEATS
+============================================================
+
+ngspice-43 done

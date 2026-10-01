@@ -1,0 +1,13 @@
+* FEATURE 8: QRS Symmetry — R-peak Voltage
+*
+* Proxy: ECG at R-peak. Normal → high R, PVC → low/negative R.
+* Single NFET S&H captures ECG at the R-peak moment.
+*
+* Trigger: sample_r_trig (at R-peak)
+
+.subckt qrs_symmetry ecg_in sample_r_trig sym_out vdd vss
+
+XMsr ecg_in sample_r_trig sym_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsr sym_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends qrs_symmetry

@@ -1,0 +1,56 @@
+* Cap and mirror characterization
+.title cap_test
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* TEST 1: Ideal current source into MIM cap (W=50 L=50)
+* If C=5pF, 10nA should give V = 10e-9 * 1e-3 / 5e-12 = 2V -> clips
+* If C=5pF, 1nA should give V = 1e-9 * 1e-3 / 5e-12 = 0.2V
+Itest1 vdd cap_test1 DC 1n
+XCtest1 cap_test1 vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* TEST 2: Same but with W=100 L=100 (expect 4x capacitance = 20pF)
+Itest2 vdd cap_test2 DC 1n
+XCtest2 cap_test2 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* TEST 3: Ideal 1pF cap with 1nA (reference)
+* V = 1e-9 * 1e-3 / 1e-12 = 1V -> clips at 0.9V
+Itest3 vdd cap_test3 DC 1n
+Ctest3 cap_test3 vss 1p
+
+* TEST 4: Ideal 100pF cap with 1nA
+* V = 1e-9 * 1e-3 / 100e-12 = 0.01V
+Itest4 vdd cap_test4 DC 1n
+Ctest4 cap_test4 vss 100p
+
+* TEST 5: NMOS bias current measurement
+* L=40 W=0.42 Vgs=0.35V
+Vbias vbias 0 0.35
+XMtest net_bias vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+Rmeas vdd net_bias 1
+
+.tran 0.01m 1.0m
+
+.meas tran ct1_01 FIND V(cap_test1) AT=0.0001
+.meas tran ct1_05 FIND V(cap_test1) AT=0.0005
+.meas tran ct1_10 FIND V(cap_test1) AT=0.001
+
+.meas tran ct2_01 FIND V(cap_test2) AT=0.0001
+.meas tran ct2_05 FIND V(cap_test2) AT=0.0005
+.meas tran ct2_10 FIND V(cap_test2) AT=0.001
+
+.meas tran ct3_01 FIND V(cap_test3) AT=0.0001
+.meas tran ct3_05 FIND V(cap_test3) AT=0.0005
+
+.meas tran ct4_01 FIND V(cap_test4) AT=0.0001
+.meas tran ct4_05 FIND V(cap_test4) AT=0.0005
+.meas tran ct4_10 FIND V(cap_test4) AT=0.001
+
+.meas tran ibias FIND I(Rmeas) AT=0.0005
+
+.end

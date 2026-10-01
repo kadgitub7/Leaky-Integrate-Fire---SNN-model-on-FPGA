@@ -1,0 +1,57 @@
+* FEATURES 1 & 2: RR Timing — Timer + Source Follower + Diff Pairs
+*
+* Timer: 320pF MIM cap, VDD precharge at rpeak, ~148pA discharge via vbias
+* Source follower: level-shifts timer output down by ~0.40V
+* EWMA: charge-share esamp(5pF) with ewma(45pF) at copy_trig → α=0.1
+* Diff pairs (current mirror loads, high gain):
+*   rr_ratio: sf_out vs ewma_node (current / average)
+*   rr_asym:  sf_out vs prev_node (current / previous)
+*
+* Triggers: capture_trig (R-5ms), rpeak_trigger (R), copy_trig (R+10ms)
+* Outputs:  rr_ratio_out, rr_asym_out (read just before capture_trig)
+
+.subckt rr_timing ecg_unused capture_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
+
+* inverter_sub must be included by the top-level netlist
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* Timer
+XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* Source follower
+XMsf vdd net_timer sf_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMsf_bias sf_out vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Prev capture at capture_trig
+XMprev sf_out capture_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* EWMA sample at capture_trig
+XMesamp sf_out capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* EWMA charge-share at copy_trig
+XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* Diff pair: rr_ratio (current mirror loads)
+XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_r net_r1 sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_r rr_ratio_out ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_r rr_ratio_out net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Diff pair: rr_asym (current mirror loads)
+XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_a net_a1 sf_out tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_a rr_asym_out prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_a rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Expose internal nodes for P-wave predictor
+R_timer_out net_timer timer_out 0
+R_ewma_out ewma_node ewma_out 0
+
+.ends rr_timing

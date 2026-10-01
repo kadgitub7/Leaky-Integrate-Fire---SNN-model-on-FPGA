@@ -1,0 +1,9 @@
+* ============================================================
+* CMOS Inverter -- SKY130
+* Used for complementary clock generation and logic
+* ============================================================
+
+.subckt inverter_sub vin vout vdd vss
+XMp vout vin vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn vout vin vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+.ends inverter_sub

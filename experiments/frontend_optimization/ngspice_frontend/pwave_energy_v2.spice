@@ -1,0 +1,69 @@
+* ============================================================
+* FEATURE 5: P-wave Energy v2 (pwave_energy_L1)
+*
+* Pure analog, VDD=0.9V, SKY130 transistors only.
+* No ideal components. No digital correction.
+*
+* Architecture:
+*   BPF(3-8Hz): coupling-cap HPF + OTA-C LPF (always-on)
+*   MIN detector: comparator OTA + TG + hold cap (gated)
+*   Captures minimum of BPF output during P-wave window
+*   (P-waves in lead 1 produce negative BPF excursions)
+*
+* Component count: 26T + 3 caps
+* Pin order: ecg_in pwave_gate rpeak_trigger pw_energy_out vdd vss vbias vref
+* ============================================================
+
+.subckt pwave_energy_v2 ecg_in pwave_gate rpeak_trigger pw_energy_out vdd vss vbias vref
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+* === Bandpass Filter 3-8 Hz (ALWAYS-ON) ===
+
+* --- HPF stage: coupling cap + OTA bias to vref ---
+* C_hp = 2fF/um^2 * 375 * 375 = 281.25 pF => f_hp ~ 1.7 Hz
+XChp ecg_in hp_out sky130_fd_pr__cap_mim_m3_1 W=375 L=375
+Xota_hp vref hp_out hp_out vdd vss vbias ota_5t
+
+* --- LPF stage: OTA follower + cap to ground ---
+* gm_lp ~ 1.66 nS, C_lp = 32.8 pF => f_lp ~ 8 Hz
+Xota_lp hp_out bpf_out bpf_out vdd vss vbias ota_5t
+XClp bpf_out vss sky130_fd_pr__cap_mim_m3_1 W=128 L=128
+
+* === Gated MIN Detector ===
+* Tracks minimum of bpf_out during P-wave window.
+* Reset to VDD at each R-peak so it can track downward.
+
+* Invert pwave_gate for complementary control
+Xinv_pg pwave_gate pwave_gate_bar vdd vss inverter_sub
+
+* Gated bias: pass vbias to comparator tail when pwave_gate HIGH
+XMpk_pass vbias_pk pwave_gate vbias vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* Pull bias to VSS when gate off (disables comparator)
+XMpk_bdis vbias_pk pwave_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Comparator OTA: output HIGH when pw_energy_out > bpf_out
+* (i.e., bpf_out has dipped below stored minimum)
+* vout = A*(vinn - vinp) = A*(pw_energy_out - bpf_out)
+Xota_pk pw_energy_out bpf_out net_pk_cmp vdd vss vbias_pk ota_5t
+
+* Pull comparator output LOW when gate off
+XMpk_pull net_pk_cmp pwave_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Invert comparator for PFET TG gate
+Xinv_cmp net_pk_cmp net_pk_cmp_bar vdd vss inverter_sub
+
+* Transmission gate: passes bpf_out to hold cap when comparator HIGH
+* L=2 reduces off-state leakage
+XMtg_n bpf_out net_pk_cmp pw_energy_out vss sky130_fd_pr__nfet_01v8 L=2 W=2 nf=1
+XMtg_p bpf_out net_pk_cmp_bar pw_energy_out vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+
+* Hold capacitor — 10 pF
+XCpk pw_energy_out vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+
+* Reset MIN detector to VDD at each R-peak (PFET pull-up)
+Xinv_rpeak rpeak_trigger rpeak_trigger_bar vdd vss inverter_sub
+XMpk_reset pw_energy_out rpeak_trigger_bar vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+
+.ends pwave_energy_v2

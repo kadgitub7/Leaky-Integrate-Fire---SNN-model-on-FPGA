@@ -1,0 +1,37 @@
+* ============================================================
+* FEATURE 8: QRS Symmetry v1 — Initial Descent Magnitude
+*
+* Python proxy: v_biased@R - v_biased@R+8ms
+*   Captures how quickly ECG drops after R-peak.
+*   RF accuracy: 95.88% (better than original argmax/len = 95.35%)
+*
+* Analog: Two S&H capture ECG at R-peak and R+8ms,
+*   then a diode-loaded diff pair computes the difference.
+*
+* For symmetric QRS: fast descent → large difference
+* For asymmetric QRS (slow descent): small difference
+* For PVC (wide QRS): still elevated at R+8ms → small diff
+*
+* Pin: ecg_in sample_r_trig sample_r8_trig sym_out vdd vss vbias
+* ============================================================
+
+.subckt qrs_symmetry_v1 ecg_in sample_r_trig sample_r8_trig sym_out vdd vss vbias
+
+* === S&H at R-peak ===
+XMsr ecg_in sample_r_trig shr vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsr shr vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* === S&H at R+8ms ===
+XMs8 ecg_in sample_r8_trig shr8 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCs8 shr8 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* === DIFF PAIR with diode-connected PMOS loads ===
+* Output proportional to (shr - shr8), gain ~0.6
+* Same architecture as validated beat_instability_v5 and qrs_slope_v1
+XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1 dnet shr dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2 sym_out shr8 dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+XMd4 sym_out sym_out vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+
+.ends qrs_symmetry_v1

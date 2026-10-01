@@ -1,0 +1,70 @@
+* ============================================================
+* QRS Symmetry v3: Pure Analog — SKY130, VDD=0.9V
+*
+* Computes symmetry = time_to_peak / qrs_width
+*
+* How it works:
+*   1. Two matched log timers convert T_rise and T_width
+*      to voltages: V = n*Vt * ln(1 + T/tau)
+*   2. An SR latch stops the rise timer at R-peak
+*   3. A corrected Gilbert cell divides the two currents:
+*      the subthreshold exp(V) cancels the ln(T) compression,
+*      so the output is V_out ≈ Vt * (T_rise/T_width)
+*
+* 19 transistors + 3 MIM capacitors. No ideal sources.
+*
+* Inputs:
+*   qrs_gate  — HIGH during full QRS window (onset to offset)
+*   rpeak     — pulse at R-peak
+*   vdd, vss  — 0.9V / 0V
+*   vbias     — log timer bias (0.35V)
+*
+* Output:
+*   sym_out   — voltage proportional to symmetry (~Vt * sym)
+* ============================================================
+
+.subckt qrs_symmetry_v3 qrs_gate rpeak sym_out vdd vss vbias
+
+.include "inverter.spice"
+
+* === Complementary signals (3 inverters = 6T) ===
+Xinv_rpeak rpeak rpeak_bar vdd vss inverter_sub
+Xinv_gate  qrs_gate qrs_gate_bar vdd vss inverter_sub
+Xinv_latch latch latch_bar vdd vss inverter_sub
+
+* === SR Latch (2T + 1 cap) ===
+* SET when rpeak fires (rpeak_bar LOW turns on PFET)
+* CLEAR when qrs_gate falls (qrs_gate_bar HIGH turns on NFET)
+XClatch latch vss sky130_fd_pr__cap_mim_m3_1 W=5 L=5
+XMlatch_s latch rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMlatch_c latch qrs_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === Log Rise Timer (4T + 1 cap) ===
+* Two series NFET switches gate the charge path:
+*   SW1: qrs_gate (ON during QRS window)
+*   SW2: latch_bar (ON before rpeak, OFF after)
+* Charges only when both are ON = onset-to-rpeak interval
+XMsw_r1 vdd qrs_gate nr1 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMsw_r2 nr1 latch_bar nr vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMlog_r  nr vbias rise_cap vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XCr rise_cap vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+XMrst_r  rise_cap qrs_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === Log Width Timer (3T + 1 cap) ===
+* Single switch: charges for full QRS window duration
+XMsw_w  vdd qrs_gate nw vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMlog_w nw vbias width_cap vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XCw width_cap vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+XMrst_w width_cap qrs_gate_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === Corrected Gilbert Cell (4T) ===
+* NMOS pair converts timer voltages to currents (exp cancels ln)
+* PMOS mirror: XMp1 diode-connected provides reference
+* At sym_out, XMn2 enters triode where mirror current = drain current
+* Output: sym_out ≈ Vt * (T_rise/T_width) = Vt * symmetry
+XMn1 net_n1  rise_cap  vss vss sky130_fd_pr__nfet_01v8     L=4 W=2 nf=1
+XMn2 sym_out width_cap vss vss sky130_fd_pr__nfet_01v8     L=4 W=2 nf=1
+XMp1 net_n1  net_n1    vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMp2 sym_out net_n1    vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends qrs_symmetry_v3

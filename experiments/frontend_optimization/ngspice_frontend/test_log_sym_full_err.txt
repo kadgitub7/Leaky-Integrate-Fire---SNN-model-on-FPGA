@@ -1,0 +1,4 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning from checkvalid: vector va_rise is not available or has zero length.
+Warning from checkvalid: vector vb_rise is not available or has zero length.
+Warning from checkvalid: vector vc_rise is not available or has zero length.

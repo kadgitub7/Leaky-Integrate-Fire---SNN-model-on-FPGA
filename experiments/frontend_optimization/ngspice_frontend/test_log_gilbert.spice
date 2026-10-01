@@ -1,0 +1,145 @@
+* ============================================================
+* TEST: Log timer + CORRECTED Gilbert cell
+*
+* Fix from design guide: add diode connection at net_n1
+* (XMp1 drain=gate=net_n1 instead of drain=sym_out)
+*
+* With log timer voltages, the subthreshold exponential I-V
+* should recover the time ratio: T_rise/T_width = symmetry
+*
+* Test 3 beats, then all 10 via OP sweeps
+* ============================================================
+
+.title test_log_gilbert
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Log timer voltage inputs (from test_log_timer simulation)
+Vrise vrise 0 0.198
+Vwidth vwidth 0 0.224
+
+* === CORRECTED Gilbert cell ===
+* Key fix: XMp1 is now DIODE-CONNECTED (drain=gate=net_n1)
+* This provides current to net_n1 and sets the mirror reference
+
+* NMOS V-to-I converters (subthreshold: Id = I0*exp(Vgs/(n*Vt)))
+XMn1 net_n1 vrise vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn2 sym_out vwidth vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* PMOS current mirror (HVT for low leakage)
+* XMp1: DIODE-CONNECTED (drain=gate=net_n1) - THIS IS THE FIX
+XMp1 net_n1 net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+* XMp2: mirror, copies Id1 to sym_out branch
+XMp2 sym_out net_n1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.op
+
+.control
+  echo ""
+  echo "=== CORRECTED GILBERT CELL WITH LOG TIMER VOLTAGES ==="
+  echo ""
+  echo "Format: Beat Vrise(mV) Vwidth(mV) Target_Sym Sym_Out(mV)"
+  echo ""
+
+  * Beat 1: rec100 T_rise=58.3ms T_width=163.9ms sym=0.356
+  * Log timer: Vr~198mV Vw~224mV (interpolated from sim data)
+  alter Vrise 0.198
+  alter Vwidth 0.224
+  op
+  let s1 = V(sym_out)*1000
+  echo "B1: Vr=198 Vw=224 target=0.356 sym_out_mV=$&s1"
+
+  * Beat 2: rec103 T_rise=11.1ms T_width=22.2ms sym=0.500
+  * Log timer: Vr~153mV Vw~172mV
+  alter Vrise 0.153
+  alter Vwidth 0.172
+  op
+  let s2 = V(sym_out)*1000
+  echo "B2: Vr=153 Vw=172 target=0.500 sym_out_mV=$&s2"
+
+  * Beat 3: rec105 T_rise=16.7ms T_width=127.8ms sym=0.130
+  * Log timer: Vr~161mV Vw~213mV
+  alter Vrise 0.161
+  alter Vwidth 0.213
+  op
+  let s3 = V(sym_out)*1000
+  echo "B3: Vr=161 Vw=213 target=0.130 sym_out_mV=$&s3"
+
+  * Beat 4: rec111 T_rise=11.1ms T_width=122.2ms sym=0.091
+  * Log timer: Vr~153mV Vw~211mV
+  alter Vrise 0.153
+  alter Vwidth 0.211
+  op
+  let s4 = V(sym_out)*1000
+  echo "B4: Vr=153 Vw=211 target=0.091 sym_out_mV=$&s4"
+
+  * Beat 5: rec200 T_rise=13.9ms T_width=66.7ms sym=0.208
+  * Log timer: Vr~157mV Vw~201mV
+  alter Vrise 0.157
+  alter Vwidth 0.201
+  op
+  let s5 = V(sym_out)*1000
+  echo "B5: Vr=157 Vw=201 target=0.208 sym_out_mV=$&s5"
+
+  * Beat 6: rec210 T_rise=19.4ms T_width=127.8ms sym=0.152
+  * Log timer: Vr~165mV Vw~213mV
+  alter Vrise 0.165
+  alter Vwidth 0.213
+  op
+  let s6 = V(sym_out)*1000
+  echo "B6: Vr=165 Vw=213 target=0.152 sym_out_mV=$&s6"
+
+  * Beat 7: rec212 T_rise=13.9ms T_width=83.3ms sym=0.167
+  * Log timer: Vr~157mV Vw~205mV
+  alter Vrise 0.157
+  alter Vwidth 0.205
+  op
+  let s7 = V(sym_out)*1000
+  echo "B7: Vr=157 Vw=205 target=0.167 sym_out_mV=$&s7"
+
+  * Beat 8: rec219 T_rise=55.6ms T_width=163.9ms sym=0.339
+  * Log timer: Vr~197mV Vw~224mV
+  alter Vrise 0.197
+  alter Vwidth 0.224
+  op
+  let s8 = V(sym_out)*1000
+  echo "B8: Vr=197 Vw=224 target=0.339 sym_out_mV=$&s8"
+
+  * Beat 9: rec221 T_rise=13.9ms T_width=25.0ms sym=0.556
+  * Log timer: Vr~157mV Vw~174mV
+  alter Vrise 0.157
+  alter Vwidth 0.174
+  op
+  let s9 = V(sym_out)*1000
+  echo "B9: Vr=157 Vw=174 target=0.556 sym_out_mV=$&s9"
+
+  * Beat 10: rec231 T_rise=11.1ms T_width=72.2ms sym=0.154
+  * Log timer: Vr~153mV Vw~202mV
+  alter Vrise 0.153
+  alter Vwidth 0.202
+  op
+  let s10 = V(sym_out)*1000
+  echo "B10: Vr=153 Vw=202 target=0.154 sym_out_mV=$&s10"
+
+  echo ""
+  echo "--- Key node voltages (last beat) ---"
+  print V(net_n1) V(sym_out) V(vrise) V(vwidth)
+
+  echo ""
+  echo "NOTE: V(sym_out) is expected to be VERY small (few mV)"
+  echo "because both NMOS are in deep subthreshold (~pA currents)"
+  echo "and the output NMOS enters triode to balance the current"
+  echo ""
+  quit
+.endc
+
+.end

@@ -1,0 +1,11 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: OTA-C LPF Frequency Characterization
+
+Error on line 24 or its substitute:
+  .connect inn out
+ unimplemented dot command '.connect'
+    Simulation interrupted due to error!
+

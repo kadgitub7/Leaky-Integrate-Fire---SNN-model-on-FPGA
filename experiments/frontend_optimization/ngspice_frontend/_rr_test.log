@@ -1,0 +1,87 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: rr_timing_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+rpeak_trigger                                0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      1.91447e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.tail_r                           0.0546598
+xrr.net_r1                            0.469319
+rr_ratio_out                          0.130959
+xrr.mid_ref                           0.218464
+xrr.tail_a                          0.00433493
+xrr.net_a1                            0.404781
+rr_asym_out                           0.195574
+vrpeak#branch                                0
+vbias#branch                                 0
+vss#branch                         1.65622e-10
+vdd#branch                        -1.65622e-10
+
+
+No. of Data Rows : 85327
+
+  Measurements for Transient Analysis
+
+timer_b0            =  1.914469e-06
+ratio_b0            =  1.309588e-01
+asym_b0             =  1.955743e-01
+timer_b1            =  5.958300e-01
+ratio_b1            =  2.273272e-01
+asym_b1             =  3.519400e-01
+timer_b2            =  5.881223e-01
+ratio_b2            =  2.272092e-01
+asym_b2             =  3.518151e-01
+timer_b3            =  6.048298e-01
+ratio_b3            =  2.274389e-01
+asym_b3             =  3.520583e-01
+timer_b4            =  6.099760e-01
+ratio_b4            =  2.274923e-01
+asym_b4             =  3.521148e-01
+timer_b5            =  6.215643e-01
+ratio_b5            =  2.275901e-01
+asym_b5             =  3.522185e-01
+timer_b6            =  6.086892e-01
+ratio_b6            =  2.274796e-01
+asym_b6             =  3.521014e-01
+timer_b7            =  6.138373e-01
+ratio_b7            =  2.275281e-01
+asym_b7             =  3.521527e-01
+timer_b8            =  5.996861e-01
+ratio_b8            =  2.273782e-01
+asym_b8             =  3.519940e-01
+timer_b9            =  5.958301e-01
+ratio_b9            =  2.273272e-01
+asym_b9             =  3.519400e-01
+timer_b10           =  5.984006e-01
+ratio_b10           =  2.273618e-01
+asym_b10            =  3.519766e-01
+timer_b11           =  6.074025e-01
+ratio_b11           =  2.274665e-01
+asym_b11            =  3.520875e-01
+
+
+Total analysis time (seconds) = 8.218
+
+Total elapsed time (seconds) = 17.451 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2075.527 MB.
+Maximum ngspice program size =   58.156 MB.
+Current ngspice program size =   56.898 MB.
+

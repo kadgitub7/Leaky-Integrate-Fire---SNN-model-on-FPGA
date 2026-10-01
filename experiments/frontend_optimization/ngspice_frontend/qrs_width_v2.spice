@@ -1,0 +1,50 @@
+* ============================================================
+* FEATURE 6: QRS Width v2
+*
+* Python: width = duration where QRS > 0.3 * prev_peak
+* Analog: charge-sharing threshold + comparator + discharge timer
+*
+* Threshold: 0.3*prev_peak + 0.7*baseline via charge sharing
+*   C_peak (312fF) samples prev_peak, C_base (722fF) samples baseline
+*   After sharing: V_thresh = 0.302*Vpeak + 0.698*Vbase
+*
+* Comparator: NFET diff pair with mirror loads (sharp switching)
+*   comp_out HIGH when ecg_in > thresh_node
+*
+* Timer: PFET reset charges cap to VDD, NFET switch+current source
+*   discharges when comp_out HIGH. Lower output = wider QRS.
+*
+* Pin: ecg_in prev_peak_in vbase thresh_load thresh_share
+*      width_hold width_out vdd vss vbias
+* ============================================================
+
+.subckt qrs_width_v2 ecg_in prev_peak_in vbase thresh_load thresh_share width_hold width_out vdd vss vbias
+
+* === THRESHOLD GENERATOR ===
+* Load phase (thresh_load HIGH): charge caps to their target voltages
+XMtl prev_peak_in thresh_load thresh_peak vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCtp thresh_peak vss sky130_fd_pr__cap_mim_m3_1 W=12 L=13
+
+XMtb vbase thresh_load thresh_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCtb thresh_node vss sky130_fd_pr__cap_mim_m3_1 W=19 L=19
+
+* Share phase (thresh_share HIGH): connect C_peak to C_base
+XMts thresh_peak thresh_share thresh_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === COMPARATOR ===
+XMc_tail ctail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMc1 cnet ecg_in ctail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMc2 comp_out thresh_node ctail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMc3 cnet cnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMc4 comp_out cnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* === TIMER ===
+* PFET reset: charges cap to VDD when width_hold LOW
+XMrst vdd width_hold width_out vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+* Timer cap: 5pF
+XCtmr width_out vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+* Discharge path: NFET switch gated by comp_out, NFET current source
+XMsw width_out comp_out sw_mid vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMisrc sw_mid vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+
+.ends qrs_width_v2

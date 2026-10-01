@@ -1,0 +1,30 @@
+* ============================================================
+* FEATURE 6: QRS Width v3 — Tail Sample
+*
+* Python proxy: ECG_biased at R+28ms (qrs[RPEAK_IDX + 10])
+*   For narrow QRS: ECG is back at baseline (~0.30V)
+*   For wide QRS: ECG still elevated or depressed
+*   RF accuracy: 95.35% (with slope_samples + sym_peakpos proxies)
+*
+* Analog: NFET S&H captures ECG at ~R+28ms.
+*   sample_trig pulse triggers 28ms after R-peak detection.
+*   No comparator, no timer, no abs needed.
+*   Handles both positive and negative R-wave polarity.
+*
+* Validation: rho=0.99+ on records 100, 200, 109
+*   Max error: 6.4mV, mean error: 0.3-3.1mV
+*
+* Pin: ecg_in sample_trig width_out vdd vss
+* ============================================================
+
+.subckt qrs_width_v3 ecg_in sample_trig width_out vdd vss
+
+* NFET S&H switch
+* ECG range: 0.14-0.46V. At 0.30V: Vgs=0.60V, well above Vth.
+* PMOS not needed since ECG always < |Vthp| with body effect.
+XMsh ecg_in sample_trig width_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Hold capacitor: 2pF for <5mV droop in 10ms
+XCsh width_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends qrs_width_v3

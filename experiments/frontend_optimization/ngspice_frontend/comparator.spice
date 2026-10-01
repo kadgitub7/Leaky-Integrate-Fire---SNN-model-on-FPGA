@@ -1,0 +1,22 @@
+* ============================================================
+* Open-Loop Comparator
+* OTA in open-loop (high gain) + inverter buffer for rail-to-rail
+* Envelope detector upstream provides noise rejection
+* SKY130 transistor-level
+*
+* Pin order: vinp vinn vout vdd vss vbias
+* ============================================================
+
+.subckt comparator vinp vinn vout vdd vss vbias
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+* Main OTA -- open loop, maximum gain
+Xota vinp vinn vout_raw vdd vss vbias ota_5t
+
+* Output buffer (two cascaded inverters for rail-to-rail digital)
+Xinv1 vout_raw vout_inv vdd vss inverter_sub
+Xinv2 vout_inv vout vdd vss inverter_sub
+
+.ends comparator

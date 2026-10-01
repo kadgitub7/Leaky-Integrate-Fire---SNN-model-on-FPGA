@@ -1,0 +1,78 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: width_ecg_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+threshold_in                              0.25
+ecg_in                                    0.25
+qrs_gate                                     0
+rpeak_trigger                                0
+xwidth.xota_wcmp.net1                 0.171612
+xwidth.width_cmp_out                  0.164603
+xwidth.xota_wcmp.net_tail           0.00970465
+xwidth.qrs_gate_bar                        0.9
+xwidth.width_gate_gated            3.60535e-10
+xwidth.net_w_bias                          0.9
+xwidth.net_w_sw                       0.160815
+width_out                           0.00253791
+xwidth.xcwidth.a                             0
+xwidth.xcwidth.b1                            0
+vrpeak#branch                                0
+vqrs#branch                                  0
+vecg#branch                                  0
+vthr#branch                                  0
+vbias#branch                                 0
+vss#branch                         8.88053e-11
+vdd#branch                        -8.88054e-11
+
+
+No. of Data Rows : 43709
+
+  Measurements for Transient Analysis
+
+width_b0            =  6.231993e-02
+thr_b0              =  3.904820e-01
+width_b1            =  5.268401e-02
+thr_b1              =  4.028170e-01
+width_b2            =  6.575228e-02
+thr_b2              =  3.795180e-01
+width_b3            =  6.144031e-02
+thr_b3              =  4.082990e-01
+width_b4            =  6.653130e-02
+thr_b4              =  3.671830e-01
+width_b5            =  6.263448e-02
+thr_b5              =  3.911680e-01
+width_b6            =  5.712951e-02
+thr_b6              =  3.582740e-01
+width_b7            =  5.156284e-02
+thr_b7              =  3.411420e-01
+width_b8            =  5.875507e-02
+thr_b8              =  3.692390e-01
+width_b9            =  6.202790e-02
+thr_b9              =  4.041880e-01
+
+
+Total analysis time (seconds) = 5.401
+
+Total elapsed time (seconds) = 14.353 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2461.785 MB.
+Maximum ngspice program size =   54.867 MB.
+Current ngspice program size =   54.867 MB.
+

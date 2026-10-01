@@ -1,0 +1,112 @@
+* ============================================================
+* COMPLETE FRONTEND: All stages, transistor-level SKY130
+* Full energy measurement across entire signal chain
+* ============================================================
+
+.title frontend_8feat_complete_sky130
+
+.lib "C:/src/skywater-pdk-libs-sky130_fd_pr/models/sky130.lib.spice" tt
+
+.include "ota_5t_subthreshold.spice"
+.include "bias_gen.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+.include "otac_bpf.spice"
+.include "rectifier.spice"
+.include "comparator.spice"
+.include "inverter.spice"
+.include "resistor_div.spice"
+.include "rr_timing.spice"
+.include "beat_instability.spice"
+.include "pwave_energy.spice"
+.include "qrs_width.spice"
+.include "slope_ratio.spice"
+.include "qrs_symmetry.spice"
+.include "sh_bank.spice"
+
+.param vdd_val = 1.8
+.param t_sim = 10
+
+Vdd vdd 0 {vdd_val}
+
+* Mid-supply reference
+Xvref_gen vdd 0 vref resistor_div
+
+* ECG inputs
+Vecg0 ecg_raw_L0 0 PWL file="ecg_multbeat_L0.txt"
+Vecg1 ecg_raw_L1 0 PWL file="ecg_multbeat_L1.txt"
+
+* Shared bias generator
+Xbias vbias vdd 0 bias_gen
+
+* ==========================================
+* STAGE 1: Input conditioning (always-on, 8 OTAs)
+* ==========================================
+Xbuf0 ecg_raw_L0 ecg_buf_L0 ecg_buf_L0 vdd 0 vbias ota_5t
+Xhpf0 ecg_buf_L0 ecg_hp_L0 vdd 0 vbias otac_hpf cap_w=100 cap_l=100
+Xlpf0 ecg_hp_L0 ecg_cond_L0 vdd 0 vbias otac_lpf cap_w=17 cap_l=17
+Xbuf1 ecg_raw_L1 ecg_buf_L1 ecg_buf_L1 vdd 0 vbias ota_5t
+Xhpf1 ecg_buf_L1 ecg_hp_L1 vdd 0 vbias otac_hpf cap_w=100 cap_l=100
+Xlpf1 ecg_hp_L1 ecg_cond_L1 vdd 0 vbias otac_lpf cap_w=17 cap_l=17
+
+* ==========================================
+* STAGE 2: R-peak detection (always-on, 9 OTAs)
+* ==========================================
+Xbpf ecg_cond_L0 bpf_out vdd 0 vbias otac_bpf cl_hpf=39 cw_hpf=39 cl_lpf=24 cw_lpf=24
+Xrect bpf_out rect_out vref vdd 0 vbias rectifier
+Xenv rect_out env_out vdd 0 vbias otac_lpf cap_w=77 cap_l=77
+Xthresh env_out thresh_out vdd 0 vbias otac_lpf cap_w=50 cap_l=50
+Xcmp env_out thresh_out rpeak_trigger vdd 0 vbias comparator
+
+* ==========================================
+* STAGE 3: Feature extraction
+* ==========================================
+* P-wave BPF (always-on, 3 OTAs)
+Xpwave ecg_cond_L0 pwave_gate rpeak_trigger f_pwave vdd 0 vbias pwave_energy
+
+* RR timing (gated, ~14 transistors)
+Xrr rpeak_trigger f_rr_ratio f_rr_asym vdd 0 vbias rr_timing
+
+* Beat instability L0 (gated, 4 OTAs)
+Xinstab0 ecg_cond_L0 qrs_gate rpeak_trigger f_instab_L0 vdd 0 vbias vref beat_instability
+
+* Beat instability L1 (gated, 4 OTAs)
+Xinstab1 ecg_cond_L1 qrs_gate rpeak_trigger f_instab_L1 vdd 0 vbias vref beat_instability
+
+* QRS width (gated, 1 OTA)
+Xwidth peak_L0 ecg_cond_L0 qrs_gate rpeak_trigger f_width vdd 0 vbias qrs_width
+
+* Slope ratio (gated, 4 OTAs)
+Xslope ecg_cond_L0 qrs_gate rpeak_trigger f_slope vdd 0 vbias vref slope_ratio
+
+* QRS symmetry (gated, 0 OTAs, 9 transistors)
+Xsym qrs_onset_sig peak_detect_sig f_width f_sym rpeak_trigger vdd 0 vbias qrs_symmetry
+
+* ==========================================
+* STAGE 4: S&H bank (pulse, 8 channels)
+* ==========================================
+Xsh f_rr_ratio f_rr_asym f_instab_L0 f_instab_L1 f_pwave f_width f_slope f_sym
++ o_rr_ratio o_rr_asym o_instab_L0 o_instab_L1 o_pwave o_width o_slope o_sym
++ sample_clk sample_clk_bar vdd 0 sh_bank
+
+* ==========================================
+* ENERGY MEASUREMENTS
+* ==========================================
+
+.tran 10u {t_sim}
+
+* Total supply current and power
+.meas tran I_total_avg AVG abs(i(Vdd)) FROM=2 TO=9
+.meas tran P_total_avg AVG par('v(vdd)*abs(i(Vdd))') FROM=2 TO=9
+.meas tran E_per_beat PARAM par('P_total_avg * 0.833')
+
+.control
+  run
+  echo ""
+  echo "============================================================"
+  echo " FRONTEND ENERGY BUDGET -- SKY130 Transistor-Level"
+  echo "============================================================"
+  print I_total_avg P_total_avg E_per_beat
+.endc
+
+.end

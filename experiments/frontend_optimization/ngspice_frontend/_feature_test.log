@@ -1,0 +1,279 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: feature_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+vref                                      0.45
+ecg_base_ref                              0.25
+width_threshold                           0.25
+ecg_in                                    0.25
+ecg_in_l1                                 0.25
+rpeak_trigger                                0
+qrs_gate                                     0
+qrs_sym_gate                                 0
+pwave_gate                                   0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      1.91447e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.tail_r                           0.0546598
+xrr.net_r1                             0.46929
+f_rr_ratio                            0.130959
+xrr.mid_ref                           0.218464
+xrr.tail_a                          0.00433493
+xrr.net_a1                             0.40478
+f_rr_asym                             0.195574
+xinstab0.qrs_gate_bar                      0.9
+xinstab0.xota_pk.net1                 0.399253
+xinstab0.net_pk_raw                0.000109329
+xinstab0.peak_node                 3.46089e-06
+xinstab0.xota_pk.net_tail          2.68835e-05
+xinstab0.net_pk_gated                      0.9
+xinstab0.xcpeak.a                            0
+xinstab0.xcpeak.b1                           0
+peak_out_l0                        3.46089e-06
+xinstab0.tail_i                       0.112023
+xinstab0.net_i1                       0.537961
+f_instab_l0                           0.128208
+xinstab1.qrs_gate_bar                      0.9
+xinstab1.xota_pk.net1                 0.399253
+xinstab1.net_pk_raw                0.000109329
+xinstab1.peak_node                 3.46089e-06
+xinstab1.xota_pk.net_tail          2.68835e-05
+xinstab1.net_pk_gated                      0.9
+xinstab1.xcpeak.a                            0
+xinstab1.xcpeak.b1                           0
+peak_out_l1                        3.46089e-06
+xinstab1.tail_i                       0.112023
+xinstab1.net_i1                       0.537961
+f_instab_l1                           0.128208
+xwidth.xota_wcmp.net1                 0.171612
+xwidth.width_cmp_out                  0.164603
+xwidth.xota_wcmp.net_tail           0.00970465
+xwidth.qrs_gate_bar                        0.9
+xwidth.width_gate_gated            3.60535e-10
+xwidth.net_w_bias                          0.9
+xwidth.net_w_sw                       0.226117
+f_width                             0.00253791
+xwidth.xcwidth.a                             0
+xwidth.xcwidth.b1                            0
+xpwave.xota_hpf_lp.net1               0.171615
+xpwave.hpf_vlp                        0.249366
+xpwave.xota_hpf_lp.net_tail         0.00970674
+xpwave.xchpf_lp.a                            0
+xpwave.xchpf_lp.b1                           0
+xpwave.xota_hpf_sub.net1              0.171615
+xpwave.bpf_mid                        0.249366
+xpwave.xota_hpf_sub.net_tail        0.00970674
+xpwave.xota_lpf.net1                  0.172056
+xpwave.bpf_pw                           0.2487
+xpwave.xota_lpf.net_tail            0.00956573
+xpwave.xclpf.a                               0
+xpwave.xclpf.b1                              0
+xpwave.pwave_gate_bar                      0.9
+xpwave.vbias_pk                    4.52517e-10
+xpwave.xota_pk.net1                   0.371126
+xpwave.net_pk_cmp                  1.16348e-09
+xpwave.xota_pk.net_tail               0.165873
+f_pwave                              0.0160234
+xpwave.net_pk_cmp_bar                      0.9
+xpwave.xcpk.a                                0
+xpwave.xcpk.b1                               0
+xsym.qrs_onset_bar                         0.9
+xsym.rpeak_bar                             0.9
+xsym.net_latch                     4.16118e-11
+xsym.xclatch.a                               0
+xsym.xclatch.b1                              0
+xsym.net_latch_bar                         0.9
+xsym.net_rise_bias                         0.9
+xsym.net_rise_sw                      0.197215
+xsym.rise_timer                    4.15428e-11
+xsym.xcrise.a                                0
+xsym.xcrise.b1                               0
+rise_timer_out                     4.15428e-11
+xsym.net_fall_bias                         0.9
+xsym.net_fall_sw                      0.197215
+xsym.fall_timer                     0.00253791
+xsym.xcfall.a                                0
+xsym.xcfall.b1                               0
+fall_timer_out                      0.00253791
+xsym.tail_s                         2.8926e-05
+xsym.net_sy1                          0.399259
+f_sym                                 0.396846
+xslope.tail_sl                      2.8926e-05
+xslope.net_sl1                        0.396846
+f_slope                               0.399259
+vpwave#branch                                0
+vsym#branch                                  0
+vqrs#branch                                  0
+vrpeak#branch                                0
+vecg2#branch                                 0
+vecg#branch                                  0
+vthr#branch                                  0
+vecg_base#branch                             0
+vref#branch                                  0
+vbias#branch                      -1.29081e-13
+vss#branch                         8.00387e-10
+vdd#branch                        -8.00259e-10
+
+
+No. of Data Rows : 20121
+
+  Measurements for Transient Analysis
+
+f_rr_ratio_b0       =  1.309588e-01
+f_instab_l1_b0      =  1.282076e-01
+f_rr_asym_b0        =  1.955743e-01
+f_pwave_b0          =  4.081297e-01
+f_width_b0          =  8.904503e-01
+f_instab_l0_b0      =  1.282076e-01
+peak_l0_b0          =  4.219280e-06
+peak_l1_b0          =  3.583030e-06
+thr_b0              =  3.826145e-01
+f_sym_b0            =  3.563933e-01
+f_slope_b0          =  3.968813e-01
+rise_b0             =  4.278901e-11
+fall_b0             =  4.510242e-02
+f_rr_ratio_b1       =  2.278295e-01
+f_instab_l1_b1      =  1.282076e-01
+f_rr_asym_b1        =  3.524731e-01
+f_pwave_b1          =  4.205983e-01
+f_width_b1          =  9.627796e-04
+f_instab_l0_b1      =  1.282076e-01
+peak_l0_b1          =  3.982762e-06
+peak_l1_b1          =  4.093396e-06
+thr_b1              =  3.852060e-01
+f_sym_b1            =  3.465087e-01
+f_slope_b1          =  3.956025e-01
+rise_b1             =  4.349295e-11
+fall_b1             =  5.550069e-02
+f_rr_ratio_b2       =  2.273783e-01
+f_instab_l1_b2      =  1.282076e-01
+f_rr_asym_b2        =  3.519941e-01
+f_pwave_b2          =  4.070698e-01
+f_width_b2          =  8.973354e-01
+f_instab_l0_b2      =  1.282076e-01
+peak_l0_b2          =  4.225676e-06
+peak_l1_b2          =  3.584120e-06
+thr_b2              =  3.848001e-01
+f_sym_b2            =  3.563905e-01
+f_slope_b2          =  3.965354e-01
+rise_b2             =  4.297439e-11
+fall_b2             =  4.510387e-02
+f_rr_ratio_b3       =  2.276837e-01
+f_instab_l1_b3      =  1.282076e-01
+f_rr_asym_b3        =  3.523178e-01
+f_pwave_b3          =  4.069008e-01
+f_width_b3          =  8.751962e-01
+f_instab_l0_b3      =  1.282076e-01
+peak_l0_b3          =  4.395066e-06
+peak_l1_b3          =  3.593522e-06
+thr_b3              =  3.847940e-01
+f_sym_b3            =  3.563909e-01
+f_slope_b3          =  3.965345e-01
+rise_b3             =  4.297488e-11
+fall_b3             =  4.510365e-02
+f_rr_ratio_b4       =  2.278740e-01
+f_instab_l1_b4      =  1.282076e-01
+f_rr_asym_b4        =  3.525209e-01
+f_pwave_b4          =  4.083676e-01
+f_width_b4          =  1.340194e-04
+f_instab_l0_b4      =  1.282076e-01
+peak_l0_b4          =  3.521726e-06
+peak_l1_b4          =  3.802880e-06
+thr_b4              =  4.505319e-01
+f_sym_b4            =  2.971950e-01
+f_slope_b4          =  3.964871e-01
+rise_b4             =  4.312646e-11
+fall_b4             =  1.074747e-01
+f_rr_ratio_b5       =  2.269834e-01
+f_instab_l1_b5      =  1.282076e-01
+f_rr_asym_b5        =  3.515762e-01
+f_pwave_b5          =  4.143406e-01
+f_width_b5          =  5.879953e-01
+f_instab_l0_b5      =  1.282076e-01
+peak_l0_b5          =  3.500900e-06
+peak_l1_b5          =  4.208605e-06
+thr_b5              =  3.451370e-01
+f_sym_b5            =  1.285780e-01
+f_slope_b5          =  4.281071e-01
+rise_b5             =  4.867924e-11
+fall_b5             =  4.081738e-01
+f_rr_ratio_b6       =  2.277239e-01
+f_instab_l1_b6      =  1.282076e-01
+f_rr_asym_b6        =  3.523605e-01
+f_pwave_b6          =  4.137785e-01
+f_width_b6          =  6.855201e-01
+f_instab_l0_b6      =  1.282076e-01
+peak_l0_b6          =  3.493162e-06
+peak_l1_b6          =  4.235384e-06
+thr_b6              =  3.552778e-01
+f_sym_b6            =  3.662886e-01
+f_slope_b6          =  4.019762e-01
+rise_b6             =  4.025343e-11
+fall_b6             =  3.470854e-02
+f_rr_ratio_b7       =  2.276962e-01
+f_instab_l1_b7      =  1.282076e-01
+f_rr_asym_b7        =  3.523310e-01
+f_pwave_b7          =  4.066868e-01
+f_width_b7          =  8.185116e-01
+f_instab_l0_b7      =  1.282076e-01
+peak_l0_b7          =  3.921382e-06
+peak_l1_b7          =  4.213100e-06
+thr_b7              =  3.793559e-01
+f_sym_b7            =  3.563910e-01
+f_slope_b7          =  3.968799e-01
+rise_b7             =  4.278972e-11
+fall_b7             =  4.510372e-02
+f_rr_ratio_b8       =  2.278753e-01
+f_instab_l1_b8      =  1.282076e-01
+f_rr_asym_b8        =  3.525223e-01
+f_pwave_b8          =  3.879792e-01
+f_width_b8          =  7.530197e-03
+f_instab_l0_b8      =  1.282076e-01
+peak_l0_b8          =  3.751727e-06
+peak_l1_b8          =  4.108007e-06
+thr_b8              =  4.285573e-01
+f_sym_b8            =  3.993313e-01
+f_slope_b8          =  3.955497e-01
+rise_b8             =  4.349198e-11
+fall_b8             =  3.868923e-05
+f_rr_ratio_b9       =  2.254504e-01
+f_instab_l1_b9      =  1.282076e-01
+f_rr_asym_b9        =  3.499517e-01
+f_pwave_b9          =  4.060139e-01
+f_width_b9          =  8.972591e-01
+f_instab_l0_b9      =  1.282076e-01
+peak_l0_b9          =  4.342210e-06
+peak_l1_b9          =  3.583524e-06
+thr_b9              =  4.073632e-01
+f_sym_b9            =  3.563963e-01
+f_slope_b9          =  3.968801e-01
+rise_b9             =  4.278965e-11
+fall_b9             =  4.509932e-02
+
+
+Total analysis time (seconds) = 32.65
+
+Total elapsed time (seconds) = 44.492 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1715.227 MB.
+Maximum ngspice program size =  149.898 MB.
+Current ngspice program size =  149.258 MB.
+

@@ -1,0 +1,94 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: diag_pwave_debug
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+vref                                      0.45
+ecg_in                                    0.25
+pwave_gate                                   0
+rpeak_trigger                                0
+xota_hpf_lp.net1                      0.171615
+hpf_vlp                               0.249366
+xota_hpf_lp.net_tail                0.00970674
+xchpf_lp.a                                   0
+xchpf_lp.b1                                  0
+xota_hpf_sub.net1                     0.172073
+bpf_mid                               0.122422
+xota_hpf_sub.net_tail               0.00957845
+xota_lpf.net1                          0.28308
+bpf_pw                                0.122976
+xota_lpf.net_tail                  0.000390248
+xclpf.a                                      0
+xclpf.b1                                     0
+pwave_gate_bar                             0.9
+vbias_pk                            6.1663e-93
+net_pk_bsw                         1.44333e-88
+xota_pk.net1                            0.3738
+net_pk_cmp                         1.08452e-09
+xota_pk.net_tail                     0.0721672
+pw_energy_out                        0.0153221
+net_pk_cmp_bar                             0.9
+xcpk.a                                       0
+xcpk.b1                                      0
+vrpeak#branch                                0
+vpgate#branch                                0
+vecg#branch                                  0
+vref#branch                                  0
+vbias#branch                                 0
+vss#branch                         1.80661e-10
+vdd#branch                        -1.80661e-10
+
+
+No. of Data Rows : 16080
+
+  Measurements for Transient Analysis
+
+ecg_b1_pw           =  3.000000e-01
+hpf_vlp_b1          =  2.942445e-01
+bpf_mid_b1          =  6.566968e-02
+bpf_pw_b1           =  1.065465e-01
+pgate_b1            =  9.000000e-01
+vbias_pk_b1         =  5.038644e-09
+cmp_b1              =  8.321529e-02
+pw_out_b1           =  1.860257e-02
+bpf_pw_base         =  1.229765e-01
+hpf_vlp_base        =  2.493661e-01
+bpf_mid_base        =  1.224220e-01
+pw_out_b1_hold      =  3.323016e-02
+ecg_b2_pw           =  4.500000e-01
+hpf_vlp_b2          =  4.169339e-01
+bpf_mid_b2          =  1.096202e-01
+bpf_pw_b2           =  1.096192e-01
+cmp_b2              =  8.342528e-02
+pw_out_b2           =  1.857339e-02
+pw_out_b2_hold      =  3.276173e-02
+bpf_pw_max_b1       =  4.442168e-01 at=  3.508500e-01
+bpf_pw_min_b1       =  1.052936e-01 at=  3.239500e-01
+bpf_pw_max_b2       =  4.442143e-01 at=  1.160000e+00
+bpf_pw_min_b2       =  1.094217e-01 at=  1.123450e+00
+
+
+Total analysis time (seconds) = 2.453
+
+Total elapsed time (seconds) = 9.452 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  929.738 MB.
+Maximum ngspice program size =   66.965 MB.
+Current ngspice program size =   66.965 MB.
+

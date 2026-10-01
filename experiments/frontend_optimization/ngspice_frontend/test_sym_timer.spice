@@ -1,0 +1,112 @@
+* ============================================================
+* TEST: Isolated timer ramp verification
+*
+* Goal: verify constant-current PMOS charging a MIM cap
+* linearly across 3 durations matching real QRS timings.
+*
+* Disable PFET gate = onset (direct, not inverted):
+*   onset=LOW  -> PFET ON  -> bias=VDD -> no charge (disabled)
+*   onset=HIGH -> PFET OFF -> bias from current source (enabled)
+* ============================================================
+
+.title test_sym_timer
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* === TIMER A: 20ms charge ===
+Vgate_a gate_a 0 PWL(0 0 0.0999 0 0.1 0.9 0.12 0.9 0.1201 0 0.7 0)
+
+XMbias_a net_bias_a vbias net_sw_a vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMgate_a net_sw_a gate_a vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMref_a net_bias_a net_bias_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcharge_a timer_a net_bias_a vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+
+* Disable: pull bias to VDD when gate is LOW (PFET gate=gate_a directly)
+XMdis_a net_bias_a gate_a vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+XCa timer_a vss sky130_fd_pr__cap_mim_m3_1 W=35 L=35
+
+* Reset at t=0.08 (before test starts at 0.1)
+Vreset_a reset_a 0 PWL(0 0 0.079 0 0.08 0.9 0.085 0.9 0.086 0 0.7 0)
+XMreset_a timer_a reset_a vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === TIMER B: 50ms charge ===
+Vgate_b gate_b 0 PWL(0 0 0.2999 0 0.3 0.9 0.35 0.9 0.3501 0 0.7 0)
+
+XMbias_b net_bias_b vbias net_sw_b vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMgate_b net_sw_b gate_b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMref_b net_bias_b net_bias_b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcharge_b timer_b net_bias_b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMdis_b net_bias_b gate_b vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCb timer_b vss sky130_fd_pr__cap_mim_m3_1 W=35 L=35
+Vreset_b reset_b 0 PWL(0 0 0.279 0 0.28 0.9 0.285 0.9 0.286 0 0.7 0)
+XMreset_b timer_b reset_b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === TIMER C: 100ms charge ===
+Vgate_c gate_c 0 PWL(0 0 0.4999 0 0.5 0.9 0.6 0.9 0.6001 0 0.7 0)
+
+XMbias_c net_bias_c vbias net_sw_c vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+XMgate_c net_sw_c gate_c vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMref_c net_bias_c net_bias_c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMcharge_c timer_c net_bias_c vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMdis_c net_bias_c gate_c vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCc timer_c vss sky130_fd_pr__cap_mim_m3_1 W=35 L=35
+Vreset_c reset_c 0 PWL(0 0 0.479 0 0.48 0.9 0.485 0.9 0.486 0 0.7 0)
+XMreset_c timer_c reset_c vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.tran 0.1m 0.7
+
+* Measure after reset (should be ~0)
+.meas tran Va_reset FIND V(timer_a) AT=0.099
+.meas tran Vb_reset FIND V(timer_b) AT=0.299
+.meas tran Vc_reset FIND V(timer_c) AT=0.499
+
+* Measure at midpoint
+.meas tran Va_10ms FIND V(timer_a) AT=0.11
+.meas tran Vb_25ms FIND V(timer_b) AT=0.325
+.meas tran Vc_50ms FIND V(timer_c) AT=0.55
+
+* Measure at end of charge
+.meas tran Va_20ms FIND V(timer_a) AT=0.12
+.meas tran Vb_50ms FIND V(timer_b) AT=0.35
+.meas tran Vc_100ms FIND V(timer_c) AT=0.60
+
+* Measure bias node voltage during charge
+.meas tran bias_a_active FIND V(net_bias_a) AT=0.11
+.meas tran bias_b_active FIND V(net_bias_b) AT=0.325
+.meas tran bias_c_active FIND V(net_bias_c) AT=0.55
+
+.control
+  run
+  echo ""
+  echo "=== TIMER RAMP TEST ==="
+  echo ""
+  echo "After reset (should be ~0):"
+  print Va_reset Vb_reset Vc_reset
+  echo ""
+  echo "At midpoint:"
+  print Va_10ms Vb_25ms Vc_50ms
+  echo ""
+  echo "At end:"
+  print Va_20ms Vb_50ms Vc_100ms
+  echo ""
+  echo "Bias voltages during charge:"
+  print bias_a_active bias_b_active bias_c_active
+  echo ""
+  echo "Linearity: mid/end should be ~0.5"
+  quit
+.endc
+
+.end

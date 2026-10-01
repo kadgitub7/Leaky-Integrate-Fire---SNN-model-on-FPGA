@@ -1,0 +1,59 @@
+* ============================================================
+* FEATURES 1 & 2: RR Timing (rr_ratio, rr_asymmetry)
+*
+* Timer: cap pre-charged to VDD at rpeak, then discharged by
+*   NMOS in deep subthreshold (~150pA at W=0.42 L=8 Vgs=0.35V)
+*   Large MIM cap (~320pF) gives useful voltage range over 0.5-1.5s
+*   Lower remaining voltage = longer RR interval
+*
+* At VDD=0.9V, T-gates cannot pass mid-rail analog signals
+* (Vt~0.45V leaves no headroom). Instead, the timer feeds
+* the Gilbert cell directly. The output sampled just before
+* each rpeak encodes the current RR interval.
+*
+* rr_ratio: timer vs vbias (monotonic in absolute RR interval)
+* rr_asym: timer vs VDD/2 reference (placeholder until dual-timer)
+*
+* SKY130 transistor-level. All devices within model bin ranges.
+* Pin order: rpeak_trigger rr_ratio_out rr_asym_out vdd vss vbias
+* ============================================================
+
+.subckt rr_timing rpeak_trigger rr_ratio_out rr_asym_out vdd vss vbias
+
+.include "inverter.spice"
+
+* Inverted rpeak for pre-charge PMOS
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* --- RR interval timer (current discharge) ---
+* Pre-charge to VDD at each rpeak (PMOS ON when rpeak_bar LOW)
+XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Discharge: NMOS in subthreshold, ~150pA continuous drain
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Timer capacitor: 400x400 MIM = ~320pF
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* --- Differential pair: rr_ratio = f(timer - vbias) ---
+* Diode-connected HVT PMOS loads give bounded analog output
+* Subthreshold tail current from vbias
+XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_r net_r1 net_timer tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_r rr_ratio_out vbias tail_r vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_r rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* --- Differential pair: rr_asym = f(timer - mid_ref) ---
+* mid_ref from diode stack gives ~VDD/2 reference
+* Self-biased: diode NMOS + diode PMOS from VDD to VSS
+XMref_n mid_ref mid_ref vss vss sky130_fd_pr__nfet_01v8 L=4 W=1 nf=1
+XMref_p mid_ref mid_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_a net_a1 net_timer tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_a rr_asym_out mid_ref tail_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMl2_a rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends rr_timing

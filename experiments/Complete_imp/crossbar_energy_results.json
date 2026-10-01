@@ -1,0 +1,30 @@
+{
+  "pdk_source": "sky130_fd_pr_reram__reram_cell.va",
+  "recommended_v_read": 0.15,
+  "recommended_t_read": 2e-07,
+  "nmos_ron_ohms": 1009.733834161315,
+  "conductance_range_us": {
+    "hrs_min": 0.2958,
+    "lrs_max": 99.2732,
+    "on_off_ratio": 335.6
+  },
+  "e_per_mac_pj": {
+    "optimistic": 0.533879,
+    "nominal": 1.267872,
+    "pessimistic": 1.648849
+  },
+  "classifier_energy_nj": {
+    "MLP 20-10_optimistic": 0.804311,
+    "MLP 20-10_nominal": 2.222687,
+    "MLP 20-10_pessimistic": 3.939844,
+    "MLP 40-20_optimistic": 1.322173,
+    "MLP 40-20_nominal": 3.452522,
+    "MLP 40-20_pessimistic": 5.539227,
+    "MLP 48-24_optimistic": 1.589113,
+    "MLP 48-24_nominal": 4.086458,
+    "MLP 48-24_pessimistic": 6.363652,
+    "MLP 80-40_optimistic": 2.998553,
+    "MLP 80-40_nominal": 7.433639,
+    "MLP 80-40_pessimistic": 10.716613
+  }
+}

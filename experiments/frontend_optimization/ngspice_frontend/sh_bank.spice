@@ -1,0 +1,22 @@
+* ============================================================
+* 8-Channel Sample-and-Hold Bank
+* Captures all 8 feature voltages for crossbar classifier input
+* SKY130 transistor-level
+*
+* Pin order: f1..f8 o1..o8 clk clk_bar vdd vss
+* ============================================================
+
+.subckt sh_bank f1 f2 f3 f4 f5 f6 f7 f8 o1 o2 o3 o4 o5 o6 o7 o8 clk clk_bar vdd vss
+
+.include "sh_channel.spice"
+
+Xsh1 f1 o1 clk clk_bar vdd vss sh_channel
+Xsh2 f2 o2 clk clk_bar vdd vss sh_channel
+Xsh3 f3 o3 clk clk_bar vdd vss sh_channel
+Xsh4 f4 o4 clk clk_bar vdd vss sh_channel
+Xsh5 f5 o5 clk clk_bar vdd vss sh_channel
+Xsh6 f6 o6 clk clk_bar vdd vss sh_channel
+Xsh7 f7 o7 clk clk_bar vdd vss sh_channel
+Xsh8 f8 o8 clk clk_bar vdd vss sh_channel
+
+.ends sh_bank

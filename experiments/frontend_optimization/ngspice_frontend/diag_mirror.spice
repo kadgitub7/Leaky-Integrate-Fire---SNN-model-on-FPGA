@@ -1,0 +1,83 @@
+* PMOS Current Mirror W-scaling Verification
+.title mirror_char
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ===== Reference branch =====
+* NMOS bias: L=40 W=0.42, sets I_ref
+XMbias net_ref vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+
+* PMOS diode-connected reference: L=8 W=10
+XMref net_ref net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+
+* Measure reference current via cap
+XMref_copy cap_ref net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=10 nf=1
+XCref cap_ref vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* ===== Mirror outputs with different W =====
+
+* Mirror A: W=0.42 (ratio 0.042:1)
+XMa cap_a net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XCa cap_a vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror B: W=1 (ratio 0.1:1)
+XMb cap_b net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XCb cap_b vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror C: W=2 (ratio 0.2:1)
+XMc cap_c net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=2 nf=1
+XCc cap_c vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror D: W=5 (ratio 0.5:1)
+XMd cap_d net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=5 nf=1
+XCd cap_d vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror E: W=0.42, L=80 (longer channel)
+XMe cap_e net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=80 W=0.42 nf=1
+XCe cap_e vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror F: W=0.42, L=40
+XMf cap_f net_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XCf cap_f vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Mirror G: reference with L=40 instead of L=8
+XMg_ref net_refg net_refg vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=10 nf=1
+XMg_bias net_refg vbias vss vss sky130_fd_pr__nfet_01v8 L=40 W=0.42 nf=1
+XMg cap_g net_refg vdd vdd sky130_fd_pr__pfet_01v8_hvt L=40 W=0.42 nf=1
+XCg cap_g vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+.tran 0.01m 1.0m
+
+* Measure voltages at 0.5ms and 1.0ms
+.meas tran ref_gate FIND V(net_ref) AT=0.0005
+.meas tran refg_gate FIND V(net_refg) AT=0.0005
+
+.meas tran v_ref_05 FIND V(cap_ref) AT=0.0005
+.meas tran v_a_05 FIND V(cap_a) AT=0.0005
+.meas tran v_b_05 FIND V(cap_b) AT=0.0005
+.meas tran v_c_05 FIND V(cap_c) AT=0.0005
+.meas tran v_d_05 FIND V(cap_d) AT=0.0005
+.meas tran v_e_05 FIND V(cap_e) AT=0.0005
+.meas tran v_f_05 FIND V(cap_f) AT=0.0005
+.meas tran v_g_05 FIND V(cap_g) AT=0.0005
+
+.meas tran v_ref_1 FIND V(cap_ref) AT=0.001
+.meas tran v_a_1 FIND V(cap_a) AT=0.001
+.meas tran v_b_1 FIND V(cap_b) AT=0.001
+.meas tran v_c_1 FIND V(cap_c) AT=0.001
+.meas tran v_d_1 FIND V(cap_d) AT=0.001
+.meas tran v_e_1 FIND V(cap_e) AT=0.001
+.meas tran v_f_1 FIND V(cap_f) AT=0.001
+.meas tran v_g_1 FIND V(cap_g) AT=0.001
+
+.end

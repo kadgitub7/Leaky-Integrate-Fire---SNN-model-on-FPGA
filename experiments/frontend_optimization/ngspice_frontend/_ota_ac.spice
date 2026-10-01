@@ -1,0 +1,25 @@
+.title OTA-C LPF AC Test Vbias=0.450
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u gmin=1e-15
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.45
+
+* OTA with neg feedback: Vin+=inp, Vin-=out (direct wire)
+XM5 tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XM1 net1 inp tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM2 out out tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* Cap: MIM, W x L um at 2fF/um^2
+XClpf out vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* Input: DC + small AC
+Vin inp 0 DC 0.45 AC 0.01
+
+.ac dec 30 0.1 1000
+.print ac vm(out)
+.end

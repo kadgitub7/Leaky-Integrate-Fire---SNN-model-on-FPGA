@@ -1,0 +1,26 @@
+* ============================================================
+* FEATURE 7: QRS Slope Ratio (slope_ratio_L0)
+*
+* fall_time / rise_time using timer voltages from qrs_symmetry.
+* Gilbert cell: fall_timer / rise_timer
+*   Fast downslope (short fall) -> fall<rise -> output lower
+*   Slow downslope (long fall) -> fall>rise -> output higher
+*
+* Complements qrs_symmetry (which computes rise/fall).
+* Both use matched timer voltages from qrs_symmetry for proper
+* Gilbert cell operation (inputs in comparable voltage ranges).
+*
+* SKY130 transistor-level
+* Pin order: rise_timer_voltage fall_timer_voltage slope_out vdd vss vbias
+* ============================================================
+
+.subckt slope_ratio rise_timer_voltage fall_timer_voltage slope_out vdd vss vbias
+
+* --- Differential pair with tail + diode loads (graded output) ---
+XMsl_tail tail_sl vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMsl1 net_sl1 fall_timer_voltage tail_sl vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsl2 slope_out rise_timer_voltage tail_sl vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsl3 net_sl1 net_sl1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMsl4 slope_out slope_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends slope_ratio

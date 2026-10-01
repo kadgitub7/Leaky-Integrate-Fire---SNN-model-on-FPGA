@@ -1,0 +1,56 @@
+* RR Timing Debug v4 - direct timer, no S&H
+.title diag_rr_v4
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+.include "rr_timing.spice"
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+Vrpeak rpeak_trigger 0 PWL(0.000000 0.000000 0.499000 0.000000 0.500000 0.900000 0.501000 0.900000 0.502000 0.000000 1.099000 0.000000 1.100000 0.900000 1.101000 0.900000 1.102000 0.000000 1.999000 0.000000 2.000000 0.900000 2.001000 0.900000 2.002000 0.000000 2.599000 0.000000 2.600000 0.900000 2.601000 0.900000 2.602000 0.000000 3.499000 0.000000 3.500000 0.900000 3.501000 0.900000 3.502000 0.000000 4.199000 0.000000 4.200000 0.900000 4.201000 0.900000 4.202000 0.000000 4.700000 0.000000)
+
+Xrr rpeak_trigger f_rr_ratio f_rr_asym vdd vss vbias rr_timing
+
+.tran 0.5m 4.5
+
+.meas tran timer_pre_b1 FIND V(Xrr.net_timer) AT=0.495000
+.meas tran ratio_pre_b1 FIND V(f_rr_ratio) AT=0.495000
+.meas tran asym_pre_b1 FIND V(f_rr_asym) AT=0.495000
+.meas tran midref_pre_b1 FIND V(Xrr.mid_ref) AT=0.495000
+.meas tran timer_pre_b2 FIND V(Xrr.net_timer) AT=1.095000
+.meas tran ratio_pre_b2 FIND V(f_rr_ratio) AT=1.095000
+.meas tran asym_pre_b2 FIND V(f_rr_asym) AT=1.095000
+.meas tran midref_pre_b2 FIND V(Xrr.mid_ref) AT=1.095000
+.meas tran timer_pre_b3 FIND V(Xrr.net_timer) AT=1.995000
+.meas tran ratio_pre_b3 FIND V(f_rr_ratio) AT=1.995000
+.meas tran asym_pre_b3 FIND V(f_rr_asym) AT=1.995000
+.meas tran midref_pre_b3 FIND V(Xrr.mid_ref) AT=1.995000
+.meas tran timer_pre_b4 FIND V(Xrr.net_timer) AT=2.595000
+.meas tran ratio_pre_b4 FIND V(f_rr_ratio) AT=2.595000
+.meas tran asym_pre_b4 FIND V(f_rr_asym) AT=2.595000
+.meas tran midref_pre_b4 FIND V(Xrr.mid_ref) AT=2.595000
+.meas tran timer_pre_b5 FIND V(Xrr.net_timer) AT=3.495000
+.meas tran ratio_pre_b5 FIND V(f_rr_ratio) AT=3.495000
+.meas tran asym_pre_b5 FIND V(f_rr_asym) AT=3.495000
+.meas tran midref_pre_b5 FIND V(Xrr.mid_ref) AT=3.495000
+.meas tran timer_pre_b6 FIND V(Xrr.net_timer) AT=4.195000
+.meas tran ratio_pre_b6 FIND V(f_rr_ratio) AT=4.195000
+.meas tran asym_pre_b6 FIND V(f_rr_asym) AT=4.195000
+.meas tran midref_pre_b6 FIND V(Xrr.mid_ref) AT=4.195000
+.meas tran timer_post_b1 FIND V(Xrr.net_timer) AT=0.510000
+.meas tran timer_post_b2 FIND V(Xrr.net_timer) AT=1.110000
+.meas tran timer_post_b3 FIND V(Xrr.net_timer) AT=2.010000
+.meas tran timer_post_b4 FIND V(Xrr.net_timer) AT=2.610000
+.meas tran timer_post_b5 FIND V(Xrr.net_timer) AT=3.510000
+.meas tran timer_post_b6 FIND V(Xrr.net_timer) AT=4.210000
+
+.end

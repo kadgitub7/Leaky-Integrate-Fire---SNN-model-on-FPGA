@@ -1,0 +1,46 @@
+.title Cascaded OTA-C BPF AC Test
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u gmin=1e-15
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Bias voltages (from characterization):
+* Vbias_8Hz ~ 0.300V -> f_3dB ~ 8.87 Hz
+* Vbias_3Hz ~ 0.250V -> f_3dB ~ 2.55 Hz
+Vbias_lpf vbias_lpf 0 0.300
+Vbias_hpf vbias_hpf 0 0.250
+
+* === LPF at 8Hz (passes 0-8Hz) ===
+XM5a taila vbias_lpf vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XM1a net1a inp taila vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM2a lpf8 lpf8 taila vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM3a net1a net1a vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM4a lpf8 net1a vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XCa lpf8 vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* === LPF at 3Hz (passes 0-3Hz) — baseline tracker ===
+XM5b tailb vbias_hpf vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XM1b net1b inp tailb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM2b lpf3 lpf3 tailb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM3b net1b net1b vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM4b lpf3 net1b vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XCb lpf3 vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* === Subtractor: BPF = LPF_8Hz - LPF_3Hz ===
+* Use diff pair with diode-connected loads (same as validated circuits)
+XM5c tailc vbias_lpf vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XM1c net1c lpf8 tailc vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XM2c bpf_out lpf3 tailc vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XM3c net1c net1c vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+XM4c bpf_out bpf_out vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+
+* Input: DC + AC sweep
+Vin inp 0 DC 0.45 AC 0.01
+
+.ac dec 30 0.1 100
+
+.print ac vm(lpf8) vm(lpf3) vm(bpf_out)
+
+.end

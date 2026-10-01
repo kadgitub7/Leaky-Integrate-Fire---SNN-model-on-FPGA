@@ -1,0 +1,209 @@
+* ============================================================
+* TEST: Complete QRS Symmetry circuit - isolated verification
+*
+* Architecture (matches Python golden model):
+*   Rise timer:  charges from QRS onset to rpeak
+*   Width timer: charges from QRS onset to QRS offset
+*   Divider:     V_rise / V_width = time_to_peak / qrs_width
+*
+* Test cases from MIT-BIH ground truth:
+*   Beat 1 (rec 100): rise=58.3ms, width=163.9ms -> sym=0.356
+*   Beat 2 (rec 103): rise=11.1ms, width=22.2ms  -> sym=0.500
+*   Beat 3 (rec 200): rise=13.9ms, width=66.7ms  -> sym=0.208
+*
+* Each beat gets its own time slot with clear separation.
+* ============================================================
+
+.title test_sym_full
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+.include "inverter.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ============================================================
+* BEAT 1: Record 100 — rise=58.3ms, width=163.9ms, sym=0.356
+* QRS onset at t=0.2s, rpeak at t=0.2583s, QRS offset at t=0.3639s
+* ============================================================
+
+* QRS onset: HIGH from 0.2s to 0.3639s (full QRS width = 163.9ms)
+Vonset1 onset1 0 PWL(0 0 0.1999 0 0.2 0.9 0.3639 0.9 0.364 0 2.0 0)
+
+* Rpeak: pulse at t=0.2583s (58.3ms after onset)
+Vrpeak1 rpeak1 0 PWL(0 0 0.2582 0 0.2583 0.9 0.2593 0.9 0.2594 0 2.0 0)
+
+* Reset: pulse before beat
+Vrst1 rst1 0 PWL(0 0 0.179 0 0.18 0.9 0.185 0.9 0.186 0 2.0 0)
+
+* --- RISE TIMER 1 ---
+* Charges from onset to rpeak (onset=HIGH AND rpeak_latch=LOW)
+* Latch: set HIGH by rpeak, cleared when onset goes LOW
+* When latch=HIGH, stop charging via disable PFET
+
+* Latch (set by rpeak, clear when onset LOW)
+XClatch1 latch1 vss sky130_fd_pr__cap_mim_m3_1 W=5 L=5
+Xinv_onset1 onset1 onset1_bar vdd vss inverter_sub
+Xinv_rpeak1 rpeak1 rpeak1_bar vdd vss inverter_sub
+XMlatch1_set latch1 rpeak1_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMlatch1_clr latch1 onset1_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+Xinv_latch1 latch1 latch1_bar vdd vss inverter_sub
+
+* Rise timer current source
+XMr1_bias nr1_bias vbias nr1_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMr1_gate nr1_sw onset1 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMr1_ref nr1_bias nr1_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr1_chrg rise1 nr1_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr1_dis nr1_bias onset1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+* Stop after rpeak: latch=HIGH -> latch_bar=LOW -> PFET ON -> bias=VDD -> stop
+XMr1_stop nr1_bias latch1_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCr1 rise1 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMr1_rst rise1 rst1 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* --- WIDTH TIMER 1 ---
+* Charges entire time onset is HIGH (no rpeak stop)
+XMw1_bias nw1_bias vbias nw1_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMw1_gate nw1_sw onset1 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMw1_ref nw1_bias nw1_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw1_chrg width1 nw1_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw1_dis nw1_bias onset1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCw1 width1 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMw1_rst width1 rst1 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* --- DIVIDER 1: rise1 / width1 ---
+* Gilbert cell: NMOS pair converts voltages to currents,
+* PMOS mirror ratio gives output voltage ∝ Irise/Iwidth
+XMd1_1 nd1_1 rise1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd1_2 nd1_2 width1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd1_3 sym1_out nd1_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMd1_4 nd1_2 nd1_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ============================================================
+* BEAT 2: Record 103 — rise=11.1ms, width=22.2ms, sym=0.500
+* QRS onset at t=0.6s, rpeak at t=0.6111s, QRS offset at t=0.6222s
+* ============================================================
+
+Vonset2 onset2 0 PWL(0 0 0.5999 0 0.6 0.9 0.6222 0.9 0.6223 0 2.0 0)
+Vrpeak2 rpeak2 0 PWL(0 0 0.6110 0 0.6111 0.9 0.6121 0.9 0.6122 0 2.0 0)
+Vrst2 rst2 0 PWL(0 0 0.579 0 0.58 0.9 0.585 0.9 0.586 0 2.0 0)
+
+XClatch2 latch2 vss sky130_fd_pr__cap_mim_m3_1 W=5 L=5
+Xinv_onset2 onset2 onset2_bar vdd vss inverter_sub
+Xinv_rpeak2 rpeak2 rpeak2_bar vdd vss inverter_sub
+XMlatch2_set latch2 rpeak2_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMlatch2_clr latch2 onset2_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+Xinv_latch2 latch2 latch2_bar vdd vss inverter_sub
+
+XMr2_bias nr2_bias vbias nr2_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMr2_gate nr2_sw onset2 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMr2_ref nr2_bias nr2_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr2_chrg rise2 nr2_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr2_dis nr2_bias onset2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMr2_stop nr2_bias latch2_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCr2 rise2 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMr2_rst rise2 rst2 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMw2_bias nw2_bias vbias nw2_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMw2_gate nw2_sw onset2 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMw2_ref nw2_bias nw2_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw2_chrg width2 nw2_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw2_dis nw2_bias onset2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCw2 width2 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMw2_rst width2 rst2 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMd2_1 nd2_1 rise2 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_2 nd2_2 width2 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd2_3 sym2_out nd2_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMd2_4 nd2_2 nd2_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ============================================================
+* BEAT 3: Record 200 — rise=13.9ms, width=66.7ms, sym=0.208
+* QRS onset at t=1.0s, rpeak at t=1.0139s, QRS offset at t=1.0667s
+* ============================================================
+
+Vonset3 onset3 0 PWL(0 0 0.9999 0 1.0 0.9 1.0667 0.9 1.0668 0 2.0 0)
+Vrpeak3 rpeak3 0 PWL(0 0 1.0138 0 1.0139 0.9 1.0149 0.9 1.015 0 2.0 0)
+Vrst3 rst3 0 PWL(0 0 0.979 0 0.98 0.9 0.985 0.9 0.986 0 2.0 0)
+
+XClatch3 latch3 vss sky130_fd_pr__cap_mim_m3_1 W=5 L=5
+Xinv_onset3 onset3 onset3_bar vdd vss inverter_sub
+Xinv_rpeak3 rpeak3 rpeak3_bar vdd vss inverter_sub
+XMlatch3_set latch3 rpeak3_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMlatch3_clr latch3 onset3_bar vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+Xinv_latch3 latch3 latch3_bar vdd vss inverter_sub
+
+XMr3_bias nr3_bias vbias nr3_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMr3_gate nr3_sw onset3 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMr3_ref nr3_bias nr3_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr3_chrg rise3 nr3_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMr3_dis nr3_bias onset3 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMr3_stop nr3_bias latch3_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCr3 rise3 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMr3_rst rise3 rst3 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMw3_bias nw3_bias vbias nw3_sw vss sky130_fd_pr__nfet_01v8 L=50 W=0.42 nf=1
+XMw3_gate nw3_sw onset3 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMw3_ref nw3_bias nw3_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw3_chrg width3 nw3_bias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMw3_dis nw3_bias onset3 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XCw3 width3 vss sky130_fd_pr__cap_mim_m3_1 W=70 L=70
+XMw3_rst width3 rst3 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMd3_1 nd3_1 rise3 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd3_2 nd3_2 width3 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMd3_3 sym3_out nd3_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMd3_4 nd3_2 nd3_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* ============================================================
+
+.tran 0.1m 1.2
+
+* === BEAT 1 measurements (after QRS offset + 20ms settle) ===
+.meas tran rise1_v FIND V(rise1) AT=0.384
+.meas tran width1_v FIND V(width1) AT=0.384
+.meas tran sym1_v FIND V(sym1_out) AT=0.384
+.meas tran latch1_v FIND V(latch1) AT=0.27
+
+* === BEAT 2 measurements ===
+.meas tran rise2_v FIND V(rise2) AT=0.642
+.meas tran width2_v FIND V(width2) AT=0.642
+.meas tran sym2_v FIND V(sym2_out) AT=0.642
+.meas tran latch2_v FIND V(latch2) AT=0.615
+
+* === BEAT 3 measurements ===
+.meas tran rise3_v FIND V(rise3) AT=1.087
+.meas tran width3_v FIND V(width3) AT=1.087
+.meas tran sym3_v FIND V(sym3_out) AT=1.087
+.meas tran latch3_v FIND V(latch3) AT=1.02
+
+.control
+  run
+  echo ""
+  echo "=== QRS SYMMETRY FULL CIRCUIT TEST ==="
+  echo ""
+  echo "BEAT 1 (rec 100): Python sym=0.356, rise=58.3ms, width=163.9ms"
+  print rise1_v width1_v sym1_v latch1_v
+  echo "  Expected: rise1/width1 ~ 0.356"
+  echo ""
+  echo "BEAT 2 (rec 103): Python sym=0.500, rise=11.1ms, width=22.2ms"
+  print rise2_v width2_v sym2_v latch2_v
+  echo "  Expected: rise2/width2 ~ 0.500"
+  echo ""
+  echo "BEAT 3 (rec 200): Python sym=0.208, rise=13.9ms, width=66.7ms"
+  print rise3_v width3_v sym3_v latch3_v
+  echo "  Expected: rise3/width3 ~ 0.208"
+  echo ""
+  echo "If timer ratios match but sym_out doesn't track,"
+  echo "the Gilbert cell divider needs calibration."
+  quit
+.endc
+
+.end

@@ -1,0 +1,64 @@
+* ============================================================
+* FEATURES 1 & 2: RR Timing v4 (rr_ratio, rr_asymmetry)
+*
+* Timer: 320pF cap, pre-charged to VDD at rpeak, discharged
+*   by subthreshold NFET. V_timer ≈ 0.59-0.62V at typical HR.
+*
+* Key fix: PMOS diff pair instead of NFET.
+*   Timer voltage (~0.6V) is mid-rail. NFET diff pair fails
+*   because Vgs=0.45V ≈ Vth → too much current for pA tail.
+*   PMOS diff pair: Vsg = Vtail - 0.6 ≈ 0.15V << |Vtp| →
+*   deep subthreshold, matches the pA tail current. ✓
+*
+* rr_ratio: PMOS diff pair compares timer to vref (~0.6V)
+*   Output ∝ tanh(k*(timer - vref)) → monotonic in pre_rr.
+*   For RF classifier: monotonic feature → equivalent to ratio.
+*
+* rr_asym: same timer vs mid_ref (placeholder)
+*   Need dual-timer for true pre_rr/post_rr comparison.
+*
+* Pin order: rpeak_trigger rr_ratio_out rr_asym_out vdd vss vbias vref
+* ============================================================
+
+.subckt rr_timing_v4 rpeak_trigger rr_ratio_out rr_asym_out vdd vss vbias vref
+
+.include "inverter.spice"
+
+* Inverted rpeak for pre-charge PMOS
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* --- RR interval timer ---
+XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* === PMOS diff pair: rr_ratio = f(timer - vref) ===
+* Tail: PFET current source. Gate=vbias gives Vsg=VDD-vbias=0.55V.
+* For HVT PFET with L=8 W=0.42: |Vtp|≈0.56V, Vsg=0.55V → subthreshold.
+* Provides ~100-200pA tail current.
+XMtail_r tail_r vbias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+
+* PMOS diff pair: standard PFET for lower |Vtp| → more headroom
+* With inputs at ~0.6V and source (tail) at ~0.75V:
+*   Vsg = 0.75 - 0.6 = 0.15V << |Vtp_std|=0.45V → subthreshold ✓
+* At subthreshold: gm = Id/(nkT/q) = 75pA/0.039 ≈ 1.9 nA/V
+XMd1_r net_r1 net_timer tail_r vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMd2_r rr_ratio_out vref tail_r vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* NFET current mirror load (diode + mirror)
+* NFET at ~0.3V drain: Vgs = Vds (diode) ≈ 0.3V → subthreshold ✓
+XMl1_r net_r1 net_r1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl2_r rr_ratio_out net_r1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* === PMOS diff pair: rr_asym ===
+* Same architecture, compares timer to mid_ref (VDD/2 from diode stack)
+XMref_n mid_ref mid_ref vss vss sky130_fd_pr__nfet_01v8 L=4 W=1 nf=1
+XMref_p mid_ref mid_ref vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+XMtail_a tail_a vbias vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+XMd1_a net_a1 net_timer tail_a vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMd2_a rr_asym_out mid_ref tail_a vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMl1_a net_a1 net_a1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMl2_a rr_asym_out net_a1 vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+.ends rr_timing_v4

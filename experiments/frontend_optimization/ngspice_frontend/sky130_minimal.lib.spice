@@ -1,0 +1,37 @@
+* Minimal SKY130 model library for frontend circuits (ngspice-43 compatible)
+* Pre-processed pm3 files: {expression} syntax stripped (mismatch = 0)
+* R+C, LOD, cap models loaded from original PDK with absolute paths
+
+.lib tt
+* LOD parameters
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/parameters/lod.spice"
+* Corner params + subcircuit defs (pre-processed, no {expr})
+.include "sky130_models/nfet_01v8_tt.corner.spice"
+.include "sky130_models/pfet_01v8_tt.corner.spice"
+.include "sky130_models/pfet_01v8_hvt_tt.corner.spice"
+* R+C models (from original PDK, absolute paths so nested includes work)
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_typical__cap_typical.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_typical__cap_typical__lin.spice"
+* MIM cap model
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/cap_mim_m3/sky130_fd_pr__cap_mim_m3_1.model.spice"
+.endl tt
+
+.lib ss
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/parameters/lod.spice"
+.include "sky130_models/nfet_01v8_ss.corner.spice"
+.include "sky130_models/pfet_01v8_ss.corner.spice"
+.include "sky130_models/pfet_01v8_hvt_ss.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_high__cap_high.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_high__cap_high__lin.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/cap_mim_m3/sky130_fd_pr__cap_mim_m3_1.model.spice"
+.endl ss
+
+.lib ff
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/parameters/lod.spice"
+.include "sky130_models/nfet_01v8_ff.corner.spice"
+.include "sky130_models/pfet_01v8_ff.corner.spice"
+.include "sky130_models/pfet_01v8_hvt_ff.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_low__cap_low.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/models/r+c/res_low__cap_low__lin.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/cap_mim_m3/sky130_fd_pr__cap_mim_m3_1.model.spice"
+.endl ff

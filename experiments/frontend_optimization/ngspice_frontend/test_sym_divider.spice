@@ -1,0 +1,202 @@
+* ============================================================
+* TEST: Divider topologies for subthreshold timer voltages
+*
+* Timer voltages range 0.03V to 0.5V (well below NMOS Vth~0.49V)
+* Test 3 approaches:
+*   A) Level-shifted Gilbert cell (NMOS source followers add offset)
+*   B) PMOS-input Gilbert cell (PMOS Vth is lower magnitude)
+*   C) Translinear loop (true current-mode divider)
+*
+* Input: V_rise and V_width from voltage sources (known values)
+* Expected output should track V_rise / V_width
+* ============================================================
+
+.title test_sym_divider
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* === Test points (from timer measurements) ===
+* Point 1: rise=0.178V, width=0.508V -> ratio=0.350 (Python=0.356)
+* Point 2: rise=0.032V, width=0.067V -> ratio=0.475 (Python=0.500)
+* Point 3: rise=0.040V, width=0.206V -> ratio=0.195 (Python=0.208)
+
+* === APPROACH B: PMOS-input differential pair ===
+* PMOS Vth ~ -0.42V, so gate at 0.9V-0.178V = 0.722V
+* gives |Vgs| = 0.9-0.722 = 0.178V < 0.42V -> still below threshold
+* PMOS HVT has |Vth| ~ 0.7V -> even worse
+*
+* Standard PMOS: gate needs to be < VDD-|Vth| = 0.9-0.42 = 0.48V
+* Timer voltages 0.03-0.5V -> directly usable as PMOS gates!
+* Lower timer V -> stronger PMOS current -> more pull-down on diode load
+*
+* For divider: sym = Irise / (Irise + Iwidth)
+*   In subthreshold: I ∝ exp(-Vgs/(n*Vt)) = exp((Vg-Vs)/(n*Vt))
+*   For PMOS with source=VDD: I ∝ exp((VDD-Vg)/(n*Vt))
+*   So lower Vg -> larger current
+
+* Test point 1: rise=0.178V, width=0.508V
+Vr1 vr1 0 0.178
+Vw1 vw1 0 0.508
+
+* PMOS differential pair with NMOS diode loads
+* Tail current from PMOS biased by vbias_p
+* PMOS gate = timer voltage (lower V = more current)
+XMp1_tail ntail1 vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+XMp1_rise nout1_r vr1 ntail1_r vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMp1_width nout1_w vw1 ntail1_w vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* Split tail current to both branches
+* Each PMOS source gets half the tail
+* Actually for diff pair, need common source (tail)
+* Let me redo: PMOS pair with common source (tail at VDD side)
+
+* --- Approach B v2: PMOS diff pair, NMOS tail at bottom ---
+* Input to PMOS gates (inverted: more voltage = less current)
+* Tail current from VDD-side PMOS
+
+* PMOS current source (tail) from VDD
+XMp1b_tail ntail1b ntail1b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMp1b_tbias ntail1b_ref ntail1b vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMp1b_tbias_n ntail1b_ref vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+* Diff pair: PMOS with common source at tail
+XMp1b_a nout1b_a vr1 ntail1b vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMp1b_b nout1b_b vw1 ntail1b vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* NMOS diode loads
+XMn1b_a nout1b_a nout1b_a vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMn1b_b nout1b_b nout1b_b vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* === Approach C: True subthreshold translinear divider ===
+* In subthreshold: Id = Is * exp(Vgs/(n*Vt))
+* Translinear principle: for NMOS in a loop,
+*   sum of Vgs clockwise = sum of Vgs counterclockwise
+*   -> product of Id clockwise = product of Id counterclockwise
+*
+* To compute Vrise/Vwidth:
+* Convert Vrise and Vwidth to proportional currents first,
+* then use current mirror ratio.
+*
+* Step 1: V-to-I conversion using PMOS (lower gate = more current)
+*   I_rise ∝ exp((VDD - Vrise) / (n*Vt))
+*   I_width ∝ exp((VDD - Vwidth) / (n*Vt))
+*   Ratio: I_rise/I_width = exp((Vwidth - Vrise) / (n*Vt))
+*   This is NOT the voltage ratio! It's exponential.
+*
+* The fundamental problem: subthreshold transistors give exponential
+* I-V, so voltage-mode division requires input above threshold.
+*
+* === Approach D: Use timer voltages as integration times ===
+* Instead of dividing voltages, use the timer approach:
+* Timer 1 charges at rate I for time T_rise -> V1 = I*T_rise/C
+* Timer 2 charges at rate I for time T_width -> V2 = I*T_width/C
+* V1/V2 = T_rise/T_width = symmetry
+*
+* Since both timers use matched I and C, V1/V2 is exact.
+* We just need to READ the ratio.
+*
+* Approach: Use V1 and V2 as PWM thresholds.
+* Ramp a sawtooth against V1: time HIGH = proportional to V1
+* Ramp same sawtooth against V2: time HIGH = proportional to V2
+* Ratio of HIGH times = V1/V2.
+* But this requires more circuitry.
+*
+* === Approach E: Simplest - just output the ratio as the two voltages ===
+* Let the S&H capture both V_rise and V_width.
+* The classifier (ReRAM crossbar) can compute the ratio implicitly
+* since the crossbar does matrix-vector multiplication.
+* Two features instead of one, but no divider needed.
+
+* === Approach F: Level-shift + above-threshold Gilbert cell ===
+* Buffer timer voltages through NMOS source followers biased at Vth:
+*   Vout = Vin + Vgs_sf ≈ Vin + Vth ≈ Vin + 0.49V
+*   Range: 0.03+0.49=0.52V to 0.5+0.49=0.99V -> above threshold
+*   Then standard NMOS Gilbert cell works
+
+* Source follower level shifters
+* SF1: rises timer
+XMsf1_r sf1_r sf1_r vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf1_r_in sf1_r vr1 vr1_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf1_r_bias vr1_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+* SF2: width timer
+XMsf1_w sf1_w sf1_w vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf1_w_in sf1_w vw1 vw1_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf1_w_bias vw1_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+* Gilbert cell on shifted voltages
+XMg1_1 ng1_1 vr1_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg1_2 ng1_2 vw1_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg1_3 sym1f_out ng1_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMg1_4 ng1_2 ng1_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Test point 2: rise=0.040V, width=0.206V
+Vr2 vr2 0 0.040
+Vw2 vw2 0 0.206
+
+XMsf2_r sf2_r sf2_r vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf2_r_in sf2_r vr2 vr2_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf2_r_bias vr2_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+XMsf2_w sf2_w sf2_w vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf2_w_in sf2_w vw2 vw2_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf2_w_bias vw2_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+XMg2_1 ng2_1 vr2_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg2_2 ng2_2 vw2_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg2_3 sym2f_out ng2_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMg2_4 ng2_2 ng2_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+* Test point 3: rise=0.032V, width=0.067V
+Vr3 vr3 0 0.032
+Vw3 vw3 0 0.067
+
+XMsf3_r sf3_r sf3_r vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf3_r_in sf3_r vr3 vr3_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf3_r_bias vr3_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+XMsf3_w sf3_w sf3_w vdd vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=1 nf=1
+XMsf3_w_in sf3_w vw3 vw3_shifted vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsf3_w_bias vw3_shifted vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+
+XMg3_1 ng3_1 vr3_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg3_2 ng3_2 vw3_shifted vss vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMg3_3 sym3f_out ng3_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMg3_4 ng3_2 ng3_1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.op
+
+.control
+  run
+  echo ""
+  echo "=== DIVIDER TOPOLOGY TEST ==="
+  echo ""
+  echo "--- Approach F: Level-shifted Gilbert cell ---"
+  echo ""
+  echo "Point 1: rise=0.178V, width=0.508V, target ratio=0.350"
+  print V(vr1_shifted) V(vw1_shifted) V(sym1f_out)
+  echo ""
+  echo "Point 2: rise=0.040V, width=0.206V, target ratio=0.195"
+  print V(vr2_shifted) V(vw2_shifted) V(sym2f_out)
+  echo ""
+  echo "Point 3: rise=0.032V, width=0.067V, target ratio=0.475"
+  print V(vr3_shifted) V(vw3_shifted) V(sym3f_out)
+  echo ""
+  echo "--- Approach B: PMOS diff pair ---"
+  print V(nout1b_a) V(nout1b_b)
+  echo "  nout_a (driven by rise) vs nout_b (driven by width)"
+  echo "  For ratio < 0.5: rise gate lower -> more PMOS current -> nout_a lower"
+  quit
+.endc
+
+.end

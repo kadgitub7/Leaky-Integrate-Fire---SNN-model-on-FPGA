@@ -1,0 +1,106 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Checking parameters for BSIM 4.5 model xmref_e:sky130_fd_pr__pfet_01v8_hvt__model.11
+Warning: Nfactor = -1.60973 is negative.
+Warning: Pdibl2 = -0.0050394 is negative.
+
+Note: No compatibility mode selected!
+
+
+Circuit: mirror_v5
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+reset_ctl                                  0.9
+cap_nbias                          1.91447e-06
+xcn.a                                      0.9
+xcn.b1                                     0.9
+net_ref_a                             0.117331
+cap_a                               5.4055e-07
+xca.a                                        0
+xca.b1                                       0
+cap_b                              6.03058e-07
+xcb.a                                        0
+xcb.b1                                       0
+cap_c                              4.12059e-07
+xcc.a                                        0
+xcc.b1                                       0
+cap_d                              3.94349e-07
+xcd.a                                        0
+xcd.b1                                       0
+net_ref_e                            0.0444891
+cap_e                              2.70613e-06
+xce.a                                        0
+xce.b1                                       0
+net_ref_f                             0.140816
+cap_f                              3.56928e-07
+xcf.a                                        0
+xcf.b1                                       0
+vreset#branch                                0
+vbias#branch                                 0
+vss#branch                         1.65409e-09
+vdd#branch                        -1.65395e-09
+
+
+No. of Data Rows : 3014
+
+  Measurements for Transient Analysis
+
+vg_a                =  1.173324e-01
+vg_e                =  4.448937e-02
+vg_f                =  1.408161e-01
+v_nbias_50          =  5.157208e-01
+v_nbias_200         =  8.999704e-01
+v_nbias_500         =  8.999704e-01
+v_nbias_1000        =  8.999704e-01
+v_nbias_2000        =  8.999704e-01
+v_a_50              =  3.594869e-04
+v_a_200             =  1.419371e-03
+v_a_500             =  3.538597e-03
+v_a_1000            =  7.069113e-03
+v_a_2000            =  1.412455e-02
+v_b_50              =  4.059262e-04
+v_b_200             =  1.588486e-03
+v_b_500             =  3.953038e-03
+v_b_1000            =  7.892348e-03
+v_b_2000            =  1.576509e-02
+v_c_50              =  2.641250e-04
+v_c_200             =  1.072217e-03
+v_c_500             =  2.688285e-03
+v_c_1000            =  5.381439e-03
+v_c_2000            =  1.076673e-02
+v_d_50              =  2.509704e-04
+v_d_200             =  1.024312e-03
+v_d_500             =  2.570888e-03
+v_d_1000            =  5.148244e-03
+v_d_2000            =  1.030202e-02
+v_e_50              =  1.967178e-03
+v_e_200             =  7.272028e-03
+v_e_500             =  1.787324e-02
+v_e_1000            =  3.551711e-02
+v_e_2000            =  7.071354e-02
+v_f_50              =  2.231951e-04
+v_f_200             =  9.231565e-04
+v_f_500             =  2.322856e-03
+v_f_1000            =  4.655038e-03
+v_f_2000            =  9.317011e-03
+
+
+Total analysis time (seconds) = 0.338
+
+Total elapsed time (seconds) = 6.679 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1895.801 MB.
+Maximum ngspice program size =   57.414 MB.
+Current ngspice program size =   57.414 MB.
+

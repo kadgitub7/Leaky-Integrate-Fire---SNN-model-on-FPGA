@@ -1,0 +1,51 @@
+* ============================================================
+* INSTRUMENTATION AMPLIFIER — Capacitively-Coupled (CCIA)
+* ============================================================
+*
+* Amplifies differential ECG from electrodes (~1mV) to
+* usable range (~100mV centered at VREF).
+*
+* Topology: OTA + capacitive feedback
+*   Gain = C_in / C_fb ≈ 10pF / 0.1pF = 100
+*   DC bias: pseudo-resistors (subthreshold PMOS, >1TΩ)
+*   OTA: 5T subthreshold (same topology as feature diff pairs)
+*
+* Bandwidth: Gm/(2π·C_load) ≈ 148pA/(0.052·5pF) ≈ 570 Hz
+*   (well above 40Hz ECG requirement)
+*
+* Pseudo-resistors: back-to-back subthreshold PMOS
+*   R > 10^12 Ω, sets DC operating point to VREF without
+*   loading the OTA. HPF corner = 1/(2π·R·C_fb) < 0.01 Hz
+*   (removes electrode DC offset)
+*
+* Pin: inp inn out vdd vss vbias vref
+*   inp, inn = differential ECG electrode inputs
+*   out      = amplified ECG output
+*   vref     = DC operating point (= VBASE = 0.300V)
+* ============================================================
+
+.subckt ia inp inn out vdd vss vbias vref
+
+* Input coupling capacitors (~10 pF each)
+XCin_p inp ni_p sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+XCin_n inn ni_n sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* Pseudo-resistors for DC bias (>1 TΩ)
+* Back-to-back subthreshold PMOS diodes
+* Set DC of OTA inputs to VREF
+XMpr1a ni_p vdd vref vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr1b vref vdd ni_p vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr2a ni_n vdd out vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr2b out vdd ni_n vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+
+* 5T OTA (subthreshold)
+XM1 net1 ni_p tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM2 out ni_n tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XM5 tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Feedback capacitor (~0.1 pF) — sets gain = C_in/C_fb = 100
+XCfb out ni_n sky130_fd_pr__cap_mim_m3_1 W=7 L=7
+
+.ends ia

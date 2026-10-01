@@ -1,0 +1,61 @@
+* BPF characterization: measure response at 1, 3, 5, 8, 20, 50 Hz
+* Input: 40mV amplitude sine centered at 0.45V
+
+.title test_bpf_char
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vref vref 0 0.45
+
+.include "ota_5t_subthreshold.spice"
+
+* === BPF under test (same topology as pwave_energy_v2) ===
+
+* HPF: coupling cap + OTA bias to vref
+XChp ecg_in hp_out sky130_fd_pr__cap_mim_m3_1 W=375 L=375
+Xota_hp vref hp_out hp_out vdd vss vbias ota_5t
+
+* LPF: OTA follower + cap
+Xota_lp hp_out bpf_out bpf_out vdd vss vbias ota_5t
+XClp bpf_out vss sky130_fd_pr__cap_mim_m3_1 W=230 L=230
+
+* === Test 1: 5 Hz sine, 40mV amplitude ===
+Vecg ecg_in 0 SIN(0.45 0.04 5 0 0)
+
+.tran 0.1m 4.0
+
+* Measure BPF output amplitude after settling (from t=2s to t=4s)
+.meas tran bpf_max MAX V(bpf_out) FROM=2.0 TO=4.0
+.meas tran bpf_min MIN V(bpf_out) FROM=2.0 TO=4.0
+.meas tran bpf_pp PARAM='bpf_max-bpf_min'
+.meas tran hp_max MAX V(hp_out) FROM=2.0 TO=4.0
+.meas tran hp_min MIN V(hp_out) FROM=2.0 TO=4.0
+.meas tran hp_pp PARAM='hp_max-hp_min'
+
+* Measure OTA tail current to estimate gm
+.meas tran i_tail AVG I(Vdd) FROM=2.0 TO=4.0
+
+* Measure quiescent points
+.meas tran bpf_dc AVG V(bpf_out) FROM=2.0 TO=4.0
+.meas tran hp_dc AVG V(hp_out) FROM=2.0 TO=4.0
+
+.control
+  run
+  echo ""
+  echo "============================================"
+  echo "BPF CHARACTERIZATION @ 5 Hz, 40mV amplitude"
+  echo "============================================"
+  echo ""
+  quit
+.endc
+
+.end

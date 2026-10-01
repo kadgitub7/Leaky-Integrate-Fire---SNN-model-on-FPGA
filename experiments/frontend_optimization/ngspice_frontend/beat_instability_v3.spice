@@ -1,0 +1,48 @@
+* ============================================================
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability
+*
+* Python: |peak_current - peak_previous| / peak_previous
+* Analog: S&H + diff pair comparison with high-alpha prev copy
+*
+* ECG signal from AFE biased to 0.2-0.4V range.
+* At R-peak, ecg_in ≈ peak amplitude of QRS.
+*
+* Timing:
+*   capture_trig (before rpeak, 5ms pulse):
+*     NFET samples ecg_in → curr_cap (5pF) and esamp_cap (45pF)
+*     Vgs = VDD - 0.3V = 0.6V > Vth → NFET switch works.
+*   Diff pair (always on):
+*     Compares curr_cap to prev_cap → instab_out
+*     Both inputs at 0.2-0.4V, tail at ~0.15V → subthreshold OK
+*   copy_trig (after rpeak, 2ms pulse):
+*     Charge-share esamp_cap (45pF) with prev_cap (5pF)
+*     alpha = 45/50 = 0.9 → prev ≈ curr (high-fidelity copy)
+*     After 2 beats: prev is at 99% of actual previous peak.
+*
+* Pin: ecg_in capture_trig copy_trig instab_out vdd vss vbias
+* ============================================================
+
+.subckt beat_instability_v3 ecg_in capture_trig copy_trig instab_out vdd vss vbias
+
+* === CURRENT PEAK CAPTURE ===
+XMcurr ecg_in capture_trig curr_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCcurr curr_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA SAMPLE (for prev update) ===
+XMesamp ecg_in capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === PREV UPDATE at copy_trig ===
+* alpha = 45/(45+5) = 0.9 → prev ≈ 0.9*curr + 0.1*prev_old
+XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === DIFF PAIR: instability output ===
+* Current mirror loads for high-gain comparator output
+XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMi1 net_i1 curr_node tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi2 instab_out prev_node tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMi4 instab_out net_i1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends beat_instability_v3

@@ -1,0 +1,21 @@
+{
+  "description": "Full frontend energy from ngspice transient simulation with real MIT-BIH ECG",
+  "record": "100",
+  "n_beats": 4,
+  "vdd": 0.9,
+  "method": "Full transient simulation \u2014 actual total VDD current, not OTA-count estimate",
+  "results": [
+    {
+      "corner": "tt",
+      "temp_C": 27,
+      "vdd": 0.9,
+      "I_avg_A": 2.058557e-08,
+      "I_avg_nA": 20.585569999999997,
+      "P_avg_nW": 18.527013,
+      "rr_avg_s": 0.8138888888888889,
+      "n_beats": 4,
+      "E_per_beat_nJ": 15.078930024999998,
+      "E_per_beat_pJ": 15078.930024999998
+    }
+  ]
+}

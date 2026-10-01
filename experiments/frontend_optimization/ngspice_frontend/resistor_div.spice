@@ -1,0 +1,12 @@
+* ============================================================
+* Mid-supply Voltage Reference (VDD/2)
+* Diode-connected PMOS + NMOS voltage divider
+* SKY130 transistor-level
+*
+* Pin order: vdd vss vmid
+* ============================================================
+
+.subckt resistor_div vdd vss vmid
+XMr1 vmid vmid vdd vdd sky130_fd_pr__pfet_01v8_hvt L=10 W=0.42 nf=1
+XMr2 vmid vmid vss vss sky130_fd_pr__nfet_01v8 L=10 W=0.42 nf=1
+.ends resistor_div

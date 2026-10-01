@@ -1,0 +1,133 @@
+* ============================================================
+* TEST: QRS Symmetry v3 — Pure Analog, All 10 Beats
+*
+* No ideal sources. No digital correction. Pure SKY130 analog.
+*
+* Beat timing (from qrs_sym_ground_truth.json):
+*  B1  rec100: T_rise=58.333ms, T_width=163.889ms, sym=0.35593
+*  B2  rec103: T_rise=11.111ms, T_width= 22.222ms, sym=0.50000
+*  B3  rec105: T_rise=16.667ms, T_width=127.778ms, sym=0.13043
+*  B4  rec111: T_rise=11.111ms, T_width=122.222ms, sym=0.09091
+*  B5  rec200: T_rise=13.889ms, T_width= 66.667ms, sym=0.20833
+*  B6  rec210: T_rise=19.444ms, T_width=127.778ms, sym=0.15217
+*  B7  rec212: T_rise=13.889ms, T_width= 83.333ms, sym=0.16667
+*  B8  rec219: T_rise=55.556ms, T_width=163.889ms, sym=0.33898
+*  B9  rec221: T_rise=13.889ms, T_width= 25.000ms, sym=0.55556
+*  B10 rec231: T_rise=11.111ms, T_width= 72.222ms, sym=0.15385
+*
+* Each beat: 300ms window. Measure 1ms before qrs_gate falls.
+* ============================================================
+
+.title test_qrs_sym_v3
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* ================================================================
+* Instantiate v3 subcircuit — pure analog, no ideal components
+* ================================================================
+
+.include "qrs_symmetry_v3.spice"
+
+Xsym qrs_gate rpeak sym_out vdd vss vbias qrs_symmetry_v3
+
+* ================================================================
+* QRS_GATE: HIGH from onset to offset for each beat
+* 300ms spacing, starting at t=0.05
+* ================================================================
+
+Vgate qrs_gate 0 PWL(
++ 0 0
++ 0.0499 0 0.050 0.9 0.21389 0.9 0.21399 0
++ 0.3499 0 0.350 0.9 0.37222 0.9 0.37232 0
++ 0.6499 0 0.650 0.9 0.77778 0.9 0.77788 0
++ 0.9499 0 0.950 0.9 1.07222 0.9 1.07232 0
++ 1.2499 0 1.250 0.9 1.31667 0.9 1.31677 0
++ 1.5499 0 1.550 0.9 1.67778 0.9 1.67788 0
++ 1.8499 0 1.850 0.9 1.93333 0.9 1.93343 0
++ 2.1499 0 2.150 0.9 2.31389 0.9 2.31399 0
++ 2.4499 0 2.450 0.9 2.47500 0.9 2.47510 0
++ 2.7499 0 2.750 0.9 2.82222 0.9 2.82232 0
++ 3.0 0)
+
+* ================================================================
+* RPEAK: 2ms pulse at t_start + T_rise for each beat
+* ================================================================
+
+Vrpeak rpeak 0 PWL(
++ 0 0
++ 0.10823 0 0.10833 0.9 0.11033 0.9 0.11043 0
++ 0.36101 0 0.36111 0.9 0.36311 0.9 0.36321 0
++ 0.66657 0 0.66667 0.9 0.66867 0.9 0.66877 0
++ 0.96101 0 0.96111 0.9 0.96311 0.9 0.96321 0
++ 1.26379 0 1.26389 0.9 1.26589 0.9 1.26599 0
++ 1.56934 0 1.56944 0.9 1.57144 0.9 1.57154 0
++ 1.86379 0 1.86389 0.9 1.86589 0.9 1.86599 0
++ 2.20546 0 2.20556 0.9 2.20756 0.9 2.20766 0
++ 2.46379 0 2.46389 0.9 2.46589 0.9 2.46599 0
++ 2.76101 0 2.76111 0.9 2.76311 0.9 2.76321 0
++ 3.0 0)
+
+* ================================================================
+* TRANSIENT ANALYSIS
+* ================================================================
+
+.tran 0.1m 2.9
+
+* Measure sym_out 1ms before qrs_gate falls (timers held)
+.meas tran V1s FIND V(sym_out) AT=0.213
+.meas tran V2s FIND V(sym_out) AT=0.371
+.meas tran V3s FIND V(sym_out) AT=0.777
+.meas tran V4s FIND V(sym_out) AT=1.071
+.meas tran V5s FIND V(sym_out) AT=1.316
+.meas tran V6s FIND V(sym_out) AT=1.677
+.meas tran V7s FIND V(sym_out) AT=1.932
+.meas tran V8s FIND V(sym_out) AT=2.313
+.meas tran V9s FIND V(sym_out) AT=2.474
+.meas tran V10s FIND V(sym_out) AT=2.821
+
+* Also measure internal timer voltages for verification
+.meas tran V1r FIND V(xsym.rise_cap) AT=0.213
+.meas tran V1w FIND V(xsym.width_cap) AT=0.213
+.meas tran V2r FIND V(xsym.rise_cap) AT=0.371
+.meas tran V2w FIND V(xsym.width_cap) AT=0.371
+.meas tran V3r FIND V(xsym.rise_cap) AT=0.777
+.meas tran V3w FIND V(xsym.width_cap) AT=0.777
+.meas tran V4r FIND V(xsym.rise_cap) AT=1.071
+.meas tran V4w FIND V(xsym.width_cap) AT=1.071
+.meas tran V5r FIND V(xsym.rise_cap) AT=1.316
+.meas tran V5w FIND V(xsym.width_cap) AT=1.316
+.meas tran V6r FIND V(xsym.rise_cap) AT=1.677
+.meas tran V6w FIND V(xsym.width_cap) AT=1.677
+.meas tran V7r FIND V(xsym.rise_cap) AT=1.932
+.meas tran V7w FIND V(xsym.width_cap) AT=1.932
+.meas tran V8r FIND V(xsym.rise_cap) AT=2.313
+.meas tran V8w FIND V(xsym.width_cap) AT=2.313
+.meas tran V9r FIND V(xsym.rise_cap) AT=2.474
+.meas tran V9w FIND V(xsym.width_cap) AT=2.474
+.meas tran V10r FIND V(xsym.rise_cap) AT=2.821
+.meas tran V10w FIND V(xsym.width_cap) AT=2.821
+
+* Measure supply current for power
+.meas tran Idd AVG I(Vdd) FROM=0.05 TO=2.9
+
+.control
+  run
+  echo ""
+  echo "============================================================"
+  echo "QRS SYMMETRY v3 — PURE ANALOG — ALL 10 BEATS"
+  echo "============================================================"
+  echo ""
+  quit
+.endc
+
+.end

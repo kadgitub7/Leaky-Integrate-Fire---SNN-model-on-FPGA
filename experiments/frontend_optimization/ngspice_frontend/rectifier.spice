@@ -1,0 +1,41 @@
+* ============================================================
+* Precision Full-Wave Rectifier
+* Uses OTAs + NMOS/PMOS switches for current steering
+* Output = |Vin - Vref|, referenced to Vref
+* SKY130 transistor-level
+*
+* Pin order: vin vout vref vdd vss vbias
+* ============================================================
+
+.subckt rectifier vin vout vref vdd vss vbias
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+* OTA1: comparator -- determines sign of (vin - vref)
+Xota_cmp vin vref vcmp vdd vss vbias ota_5t
+
+* OTA2: positive path -- gain = (vin - vref) when vin > vref
+Xota_pos vref vin vpos vdd vss vbias ota_5t
+
+* OTA3: negative path -- gain = (vref - vin) when vin < vref
+Xota_neg vin vref vneg vdd vss vbias ota_5t
+
+* Complementary comparator output
+Xinv_cmp vcmp vcmp_bar vdd vss inverter_sub
+
+* Positive path switch: passes vpos when vcmp high (vin > vref)
+XMsw_pn vpos vcmp net_sel vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMsw_pp vpos vcmp_bar net_sel vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Negative path switch: passes vneg when vcmp low (vin < vref)
+XMsw_nn vneg vcmp_bar net_sel2 vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMsw_np vneg vcmp net_sel2 vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* Output combiner: OR of both paths through transmission gates
+XMout_n1 net_sel vcmp vout vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMout_p1 net_sel vcmp_bar vout vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMout_n2 net_sel2 vcmp_bar vout vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMout_p2 net_sel2 vcmp vout vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+.ends rectifier

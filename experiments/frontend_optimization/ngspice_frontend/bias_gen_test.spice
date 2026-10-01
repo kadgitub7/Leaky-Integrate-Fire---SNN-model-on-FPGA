@@ -1,0 +1,35 @@
+* ============================================================
+* Bias Generator Characterization Testbench
+* Verifies self-biased current reference produces nA-range bias
+* Sweeps VDD to check PSRR
+* ============================================================
+
+.title bias_gen_characterization
+
+.lib "C:/src/skywater-pdk-libs-sky130_fd_pr/models/sky130.lib.spice" tt
+
+.include "bias_gen.spice"
+
+Vdd vdd 0 1.8
+
+Xbias vbias vdd 0 bias_gen
+
+* Test load: one OTA tail transistor (same sizing as in OTA)
+XMtest drain_test vbias 0 0 sky130_fd_pr__nfet_01v8 L=8 W=1 nf=1
+Vdtest drain_test 0 0.9
+
+.op
+
+* Sweep supply voltage to check PSRR
+.dc Vdd 1.4 2.0 0.01
+
+.control
+  run
+  echo ""
+  echo "=== Bias Generator Operating Point ==="
+  print v(vbias)
+  print abs(i(Vdtest))
+  echo "Target: Vbias ~ 0.25-0.35V, Id ~ 1-10 nA"
+.endc
+
+.end

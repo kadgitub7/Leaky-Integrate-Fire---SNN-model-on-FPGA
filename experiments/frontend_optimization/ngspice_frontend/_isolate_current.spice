@@ -1,0 +1,54 @@
+* Isolate current draw per stage
+.title isolate_current
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+.include "resistor_div.spice"
+.include "otac_lpf.spice"
+.include "otac_hpf.spice"
+.include "otac_bpf.spice"
+.include "rectifier.spice"
+.include "comparator.spice"
+
+* Separate VDD sources per stage to measure current
+Vdd_rdiv vdd_r 0 0.9
+Vdd_s1 vdd_s1 0 0.9
+Vdd_s2 vdd_s2 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vinp inp 0 0.45
+
+* Resistor divider alone
+Xvref vdd_r vss vref resistor_div
+
+* Stage 1: buffer + HPF + LPF (5 OTAs)
+Xbuf inp buf_out buf_out vdd_s1 vss vbias ota_5t
+Xhpf buf_out hp_out vdd_s1 vss vbias otac_hpf cap_w=100 cap_l=100
+Xlpf hp_out lp_out vdd_s1 vss vbias otac_lpf cap_w=17 cap_l=17
+
+* Stage 2: BPF + rectifier + envelope + thresh + comparator (9 OTAs + inverters)
+Xbpf lp_out bpf_out vdd_s2 vss vbias otac_bpf cl_hpf=39 cw_hpf=39 cl_lpf=24 cw_lpf=24
+Xrect bpf_out rect_out vref vdd_s2 vss vbias rectifier
+Xenv rect_out env_out vdd_s2 vss vbias otac_lpf cap_w=77 cap_l=77
+Xthresh env_out thresh_out vdd_s2 vss vbias otac_lpf cap_w=50 cap_l=50
+Xcmp env_out thresh_out rpeak vdd_s2 vss vbias comparator
+
+.op
+
+.control
+  run
+  echo "=== Current breakdown ==="
+  echo "Resistor div:"
+  print -i(Vdd_rdiv)
+  echo "Stage 1 (5 OTAs):"
+  print -i(Vdd_s1)
+  echo "Stage 2 (9 OTAs + inverters):"
+  print -i(Vdd_s2)
+  quit
+.endc
+
+.end

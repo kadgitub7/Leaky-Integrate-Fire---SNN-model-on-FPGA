@@ -1,0 +1,93 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: peak_v1_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+vref                                      0.45
+ecg_in                                    0.25
+qrs_gate                                     0
+rpeak_trigger                                0
+xbi.qrs_gate_bar                           0.9
+xbi.xota_pk.net1                       0.39924
+xbi.net_pk_raw                     0.000109329
+xbi.peak_node                      3.46089e-06
+xbi.xota_pk.net_tail               2.68834e-05
+xbi.net_pk_gated                           0.9
+xbi.xcpeak.a                                 0
+xbi.xcpeak.b1                                0
+peak_out                           3.46089e-06
+xbi.tail_i                            0.112023
+xbi.net_i1                            0.539256
+instab_out                            0.128208
+vrpeak#branch                                0
+vqrs#branch                                  0
+vecg#branch                                  0
+vref#branch                                  0
+vbias#branch                                 0
+vss#branch                         1.39933e-10
+vdd#branch                        -1.39933e-10
+
+
+No. of Data Rows : 30168
+
+  Measurements for Transient Analysis
+
+pk_gate_s_b0        =  2.564532e-01
+pk_rpk_b0           =  4.032806e-01
+pk_gate_e_b0        =  2.496879e-01
+pk_10ms_b0          =  4.714997e-06
+pk_50ms_b0          =  3.584968e-06
+pk_100ms_b0         =  3.510941e-06
+instab_b0           =  1.282076e-01
+pk_gate_s_b1        =  2.564622e-01
+pk_rpk_b1           =  5.920283e-01
+pk_gate_e_b1        =  2.496537e-01
+pk_10ms_b1          =  4.715670e-06
+pk_50ms_b1          =  3.584981e-06
+pk_100ms_b1         =  3.510944e-06
+instab_b1           =  1.282076e-01
+pk_gate_s_b2        =  2.564637e-01
+pk_rpk_b2           =  8.641229e-01
+pk_gate_e_b2        =  2.496197e-01
+pk_10ms_b2          =  4.716348e-06
+pk_50ms_b2          =  3.584995e-06
+pk_100ms_b2         =  3.510946e-06
+instab_b2           =  1.282076e-01
+pk_gate_s_b3        =  2.564651e-01
+pk_rpk_b3           =  8.709213e-01
+pk_gate_e_b3        =  2.495860e-01
+pk_10ms_b3          =  4.717032e-06
+pk_50ms_b3          =  3.585009e-06
+pk_100ms_b3         =  3.510948e-06
+instab_b3           =  1.282076e-01
+pk_gate_s_b4        =  2.564629e-01
+pk_rpk_b4           =  7.547805e-01
+pk_gate_e_b4        =  2.496366e-01
+pk_10ms_b4          =  4.716009e-06
+pk_50ms_b4          =  3.584988e-06
+pk_100ms_b4         =  3.510945e-06
+instab_b4           =  1.282076e-01
+
+
+Total analysis time (seconds) = 2.972
+
+Total elapsed time (seconds) = 11.600 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2299.680 MB.
+Maximum ngspice program size =   55.023 MB.
+Current ngspice program size =   55.023 MB.
+

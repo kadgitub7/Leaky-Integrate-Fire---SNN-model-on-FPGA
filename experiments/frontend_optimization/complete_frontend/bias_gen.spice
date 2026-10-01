@@ -1,0 +1,41 @@
+* ============================================================
+* BIAS GENERATOR — Voltage & Current References
+* ============================================================
+*
+* Generates stable VBIAS (0.300V) and VREF (0.300V) for the
+* entire analog frontend.
+*
+* Topology: Self-biased current source + diode-connected output
+*   PMOS current mirror generates ~150pA reference current.
+*   Diode-connected NFET generates VBIAS from the reference current.
+*   VREF = VBIAS (same node, used for IA DC operating point).
+*
+* In a production ASIC, this would be replaced by a bandgap
+* reference for temperature stability. This design is functional
+* for simulation and provides the correct bias conditions.
+*
+* Startup: requires initial current injection or startup circuit.
+* (In simulation, .ic sets initial conditions.)
+*
+* Pin: vbias vref vdd vss
+* ============================================================
+
+.subckt bias_gen vbias vref vdd vss
+
+* PMOS current mirror (reference branch)
+XMp1 iref iref vdd vdd sky130_fd_pr__pfet_01v8 L=8 W=0.42 nf=1
+XMp2 vbias iref vdd vdd sky130_fd_pr__pfet_01v8 L=8 W=0.42 nf=1
+
+* NFET reference: diode-connected, sets Vbias ≈ 0.30V
+XMn1 iref iref vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* NFET output: diode-connected, generates vbias
+XMn2 vbias vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* VREF = VBIAS (same operating point for IA)
+R_ref vbias vref 0
+
+* Startup: use .ic v(xbias.iref)=0.3 in testbench with uic
+* Production ASIC would use a proper feedback startup circuit
+
+.ends bias_gen

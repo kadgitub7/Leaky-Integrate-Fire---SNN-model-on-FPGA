@@ -1,0 +1,98 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: mirror_minimal
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+cap_nmos                                   0.9
+cap_nmos_top                               0.9
+xcnmos.a                                     0
+xcnmos.b1                                    0
+net_ref_b                             0.177279
+cap_b                                      0.9
+xcb.a                                        0
+xcb.b1                                       0
+net_ref_c                             0.177279
+cap_c                                      0.9
+xcc.a                                        0
+xcc.b1                                       0
+net_ref_d                              0.11684
+cap_d                                      0.9
+xcd.a                                        0
+xcd.b1                                       0
+cap_e                                 0.900063
+net_gate_e                               0.177
+xce.a                                        0
+xce.b1                                       0
+cap_f                                      0.9
+net_gate_f                               0.177
+xcf.a                                        0
+xcf.b1                                       0
+vgate_f#branch                               0
+vgate_e#branch                               0
+vnmos_supply#branch               -3.97175e-11
+vbias#branch                                 0
+vss#branch                         1.54973e-10
+vdd#branch                        -1.15256e-10
+
+
+No. of Data Rows : 508
+
+  Measurements for Transient Analysis
+
+v_nmos_10us         =  9.000000e-01
+v_nmos_50us         =  9.000000e-01
+v_nmos_100us        =  9.000000e-01
+v_nmos_200us        =  9.000000e-01
+v_nmos_500us        =  9.000000e-01
+v_b_10us            =  9.000000e-01
+v_b_50us            =  9.000000e-01
+v_b_100us           =  9.000000e-01
+v_b_200us           =  9.000000e-01
+v_b_500us           =  9.000000e-01
+v_c_10us            =  9.000000e-01
+v_c_50us            =  9.000000e-01
+v_c_100us           =  9.000000e-01
+v_c_200us           =  9.000000e-01
+v_c_500us           =  9.000000e-01
+v_d_10us            =  9.000000e-01
+v_d_50us            =  9.000000e-01
+v_d_100us           =  9.000000e-01
+v_d_200us           =  9.000000e-01
+v_d_500us           =  9.000000e-01
+v_e_10us            =  9.000630e-01
+v_e_50us            =  9.000628e-01
+v_e_100us           =  9.000626e-01
+v_e_200us           =  9.000621e-01
+v_e_500us           =  9.000607e-01
+v_f_10us            =  9.000000e-01
+v_f_50us            =  9.000000e-01
+v_f_100us           =  9.000000e-01
+v_f_200us           =  9.000000e-01
+v_f_500us           =  9.000000e-01
+vg_b                =  1.772786e-01
+vg_c                =  1.772786e-01
+vg_d                =  1.168396e-01
+
+
+Total analysis time (seconds) = 0.074
+
+Total elapsed time (seconds) = 6.797 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2222.645 MB.
+Maximum ngspice program size =   49.754 MB.
+Current ngspice program size =   49.754 MB.
+

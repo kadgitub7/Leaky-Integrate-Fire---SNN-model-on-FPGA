@@ -1,0 +1,52 @@
+* ============================================================
+* FEATURES 3 & 4: Peak Amplitude Deviation (per lead)
+*
+* Python: |peak_current - peak_previous| / peak_previous
+* Analog: peak_node vs vref through differential pair
+*   - OTA peak detector with PMOS feedback (no Vt clip)
+*   - Compares current peak to fixed reference (VREF)
+*   - Higher peaks (PVCs) produce higher output voltage
+*   - Monotonic in peak amplitude — correlates with instability
+*     when beat types are mixed (normal vs PVC)
+*
+* SKY130 transistor-level. All devices within model bin ranges.
+* Pin order: ecg_in qrs_gate rpeak_trigger instab_out peak_out vdd vss vbias vref
+* ============================================================
+
+.subckt beat_instability ecg_in qrs_gate rpeak_trigger instab_out peak_out vdd vss vbias vref
+
+.include "ota_5t_subthreshold.spice"
+.include "inverter.spice"
+
+Xinv_qgate qrs_gate qrs_gate_bar vdd vss inverter_sub
+
+* === PEAK DETECTOR (OTA + PMOS feedback, no Vt clip) ===
+Xota_pk peak_node ecg_in net_pk_raw vdd vss vbias ota_5t
+
+* Gate: pass OTA output during QRS, pull HIGH when off (PMOS stays OFF)
+XMpk_gate_p net_pk_raw qrs_gate_bar net_pk_gated vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMpk_gate_n net_pk_raw qrs_gate net_pk_gated vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMpk_pullup net_pk_gated qrs_gate vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+
+* PMOS charges peak cap from VDD (analog OTA control, no Vt drop)
+XMpk_charge vdd net_pk_gated peak_node vdd sky130_fd_pr__pfet_01v8_hvt L=8 W=0.42 nf=1
+
+* Peak capacitor (~1pF for fast response)
+XCpeak peak_node vss sky130_fd_pr__cap_mim_m3_1 W=22 L=22
+
+* Continuous weak discharge for inter-beat reset
+XMpk_leak peak_node vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+
+* Buffer peak_out (used by qrs_width as threshold)
+Rpeak_buf peak_node peak_out 100
+
+* === AMPLITUDE DEVIATION: differential pair with tail + diode loads ===
+* Compares current peak amplitude to fixed reference (VREF)
+* Output encodes how much the peak deviates from reference
+XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMi1 net_i1 peak_node tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi2 instab_out vref tail_i vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
+
+.ends beat_instability

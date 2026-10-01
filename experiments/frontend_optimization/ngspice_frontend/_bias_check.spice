@@ -1,0 +1,31 @@
+* Check what Vbias the self-biased generator produces at VDD=0.9V
+.title bias_check
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.temp 27
+
+.include "bias_gen.spice"
+.include "ota_5t_subthreshold.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+Xbias vbias vdd vss bias_gen
+
+* One OTA as load
+Vcm inp 0 0.45
+XOTA inp inp vout vdd vss vbias ota_5t
+Cload vout 0 10p
+
+.op
+
+.control
+  run
+  echo "=== Bias Generator at VDD=0.9V ==="
+  print v(vbias)
+  print -i(Vdd)
+  quit
+.endc
+
+.end

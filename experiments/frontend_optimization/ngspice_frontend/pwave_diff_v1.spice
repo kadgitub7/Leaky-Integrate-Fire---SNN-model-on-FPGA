@@ -1,0 +1,37 @@
+* ============================================================
+* FEATURE 5: P-wave Signed Difference — Lead 0
+*
+* Python proxy: ECG_L0@R-131ms - ECG_L0@R-206ms (signed)
+*   RF accuracy: 95.11% combined (only -0.37% from BPF ref)
+*
+* Analog: Two S&H + diff pair (same as qrs_slope_v1)
+*   S&H_1: captures ECG Lead 0 at R - 206ms (baseline)
+*   S&H_2: captures ECG Lead 0 at R - 131ms (P-wave peak)
+*   Diff pair: signed(S&H_2 - S&H_1)
+*
+* Timing: sample_base_trig fires at R - 206ms
+*         sample_peak_trig fires at R - 131ms
+*
+* Pin: ecg_in sample_base_trig sample_peak_trig pw_out vdd vss vbias
+* ============================================================
+
+.subckt pwave_diff_v1 ecg_in sample_base_trig sample_peak_trig pw_out vdd vss vbias
+
+* S&H for baseline (R - 206ms)
+XMsb ecg_in sample_base_trig shb vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsb shb vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* S&H for P-wave peak (R - 131ms)
+XMsp ecg_in sample_peak_trig shp vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsp shp vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+* Diff pair: pw_out reflects (shp - shb), signed
+* When shp > shb: pw_out rises (more current in M2 branch)
+* When shp < shb: pw_out falls
+XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1 dnet shb dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2 pw_out shp dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+XMd4 pw_out dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+
+.ends pwave_diff_v1

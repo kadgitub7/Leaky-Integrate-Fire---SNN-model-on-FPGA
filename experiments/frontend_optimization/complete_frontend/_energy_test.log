@@ -1,0 +1,30 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: energy_measurement_complete_asic_frontend
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 16649
+
+  Measurements for Transient Analysis
+
+avg_i_vdd           =  9.497191e-10 from=  2.806700e+00 to=  5.658583e+00
+max_i_vdd           =  1.716859e-07 at=  4.463739e+00
+min_i_vdd           =  -6.408090e-09 at=  4.464389e+00
+
+
+Total analysis time (seconds) = 12.831
+
+Total elapsed time (seconds) = 23.655 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2003.395 MB.
+Maximum ngspice program size =  134.824 MB.
+Current ngspice program size =  134.824 MB.
+

@@ -1,0 +1,181 @@
+* NMOS Vgs sweep for current characterization
+.title nmos_sweep
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Pre-charge control: HIGH from 0 to 0.1ms, then LOW
+Vpre pre_ctl 0 PWL(0 0.9 0.0001 0.9 0.00011 0 1.0 0)
+
+
+* Vgs = 0.0V
+Vg0 gate0 0 0.0
+XMpre0 cap0 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn0 cap0 gate0 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC0 cap0 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.05V
+Vg1 gate1 0 0.05
+XMpre1 cap1 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn1 cap1 gate1 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC1 cap1 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.08V
+Vg2 gate2 0 0.08
+XMpre2 cap2 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn2 cap2 gate2 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC2 cap2 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.1V
+Vg3 gate3 0 0.1
+XMpre3 cap3 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn3 cap3 gate3 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC3 cap3 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.12V
+Vg4 gate4 0 0.12
+XMpre4 cap4 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn4 cap4 gate4 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC4 cap4 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.15V
+Vg5 gate5 0 0.15
+XMpre5 cap5 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn5 cap5 gate5 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC5 cap5 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.18V
+Vg6 gate6 0 0.18
+XMpre6 cap6 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn6 cap6 gate6 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC6 cap6 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.2V
+Vg7 gate7 0 0.2
+XMpre7 cap7 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn7 cap7 gate7 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC7 cap7 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.22V
+Vg8 gate8 0 0.22
+XMpre8 cap8 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn8 cap8 gate8 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC8 cap8 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.25V
+Vg9 gate9 0 0.25
+XMpre9 cap9 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn9 cap9 gate9 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC9 cap9 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.28V
+Vg10 gate10 0 0.28
+XMpre10 cap10 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn10 cap10 gate10 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC10 cap10 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.3V
+Vg11 gate11 0 0.3
+XMpre11 cap11 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn11 cap11 gate11 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC11 cap11 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+* Vgs = 0.35V
+Vg12 gate12 0 0.35
+XMpre12 cap12 pre_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn12 cap12 gate12 vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XC12 cap12 vss sky130_fd_pr__cap_mim_m3_1 W=100 L=100
+
+.include "inverter.spice"
+Xinv_pre pre_ctl pre_bar vdd vss inverter_sub
+
+.tran 0.01m 100m
+
+.meas tran v0_2 FIND V(cap0) AT=0.0002000
+.meas tran v0_10 FIND V(cap0) AT=0.0010000
+.meas tran v0_50 FIND V(cap0) AT=0.0050000
+.meas tran v0_100 FIND V(cap0) AT=0.0100000
+.meas tran v0_500 FIND V(cap0) AT=0.0500000
+.meas tran v0_1000 FIND V(cap0) AT=0.1000000
+.meas tran v1_2 FIND V(cap1) AT=0.0002000
+.meas tran v1_10 FIND V(cap1) AT=0.0010000
+.meas tran v1_50 FIND V(cap1) AT=0.0050000
+.meas tran v1_100 FIND V(cap1) AT=0.0100000
+.meas tran v1_500 FIND V(cap1) AT=0.0500000
+.meas tran v1_1000 FIND V(cap1) AT=0.1000000
+.meas tran v2_2 FIND V(cap2) AT=0.0002000
+.meas tran v2_10 FIND V(cap2) AT=0.0010000
+.meas tran v2_50 FIND V(cap2) AT=0.0050000
+.meas tran v2_100 FIND V(cap2) AT=0.0100000
+.meas tran v2_500 FIND V(cap2) AT=0.0500000
+.meas tran v2_1000 FIND V(cap2) AT=0.1000000
+.meas tran v3_2 FIND V(cap3) AT=0.0002000
+.meas tran v3_10 FIND V(cap3) AT=0.0010000
+.meas tran v3_50 FIND V(cap3) AT=0.0050000
+.meas tran v3_100 FIND V(cap3) AT=0.0100000
+.meas tran v3_500 FIND V(cap3) AT=0.0500000
+.meas tran v3_1000 FIND V(cap3) AT=0.1000000
+.meas tran v4_2 FIND V(cap4) AT=0.0002000
+.meas tran v4_10 FIND V(cap4) AT=0.0010000
+.meas tran v4_50 FIND V(cap4) AT=0.0050000
+.meas tran v4_100 FIND V(cap4) AT=0.0100000
+.meas tran v4_500 FIND V(cap4) AT=0.0500000
+.meas tran v4_1000 FIND V(cap4) AT=0.1000000
+.meas tran v5_2 FIND V(cap5) AT=0.0002000
+.meas tran v5_10 FIND V(cap5) AT=0.0010000
+.meas tran v5_50 FIND V(cap5) AT=0.0050000
+.meas tran v5_100 FIND V(cap5) AT=0.0100000
+.meas tran v5_500 FIND V(cap5) AT=0.0500000
+.meas tran v5_1000 FIND V(cap5) AT=0.1000000
+.meas tran v6_2 FIND V(cap6) AT=0.0002000
+.meas tran v6_10 FIND V(cap6) AT=0.0010000
+.meas tran v6_50 FIND V(cap6) AT=0.0050000
+.meas tran v6_100 FIND V(cap6) AT=0.0100000
+.meas tran v6_500 FIND V(cap6) AT=0.0500000
+.meas tran v6_1000 FIND V(cap6) AT=0.1000000
+.meas tran v7_2 FIND V(cap7) AT=0.0002000
+.meas tran v7_10 FIND V(cap7) AT=0.0010000
+.meas tran v7_50 FIND V(cap7) AT=0.0050000
+.meas tran v7_100 FIND V(cap7) AT=0.0100000
+.meas tran v7_500 FIND V(cap7) AT=0.0500000
+.meas tran v7_1000 FIND V(cap7) AT=0.1000000
+.meas tran v8_2 FIND V(cap8) AT=0.0002000
+.meas tran v8_10 FIND V(cap8) AT=0.0010000
+.meas tran v8_50 FIND V(cap8) AT=0.0050000
+.meas tran v8_100 FIND V(cap8) AT=0.0100000
+.meas tran v8_500 FIND V(cap8) AT=0.0500000
+.meas tran v8_1000 FIND V(cap8) AT=0.1000000
+.meas tran v9_2 FIND V(cap9) AT=0.0002000
+.meas tran v9_10 FIND V(cap9) AT=0.0010000
+.meas tran v9_50 FIND V(cap9) AT=0.0050000
+.meas tran v9_100 FIND V(cap9) AT=0.0100000
+.meas tran v9_500 FIND V(cap9) AT=0.0500000
+.meas tran v9_1000 FIND V(cap9) AT=0.1000000
+.meas tran v10_2 FIND V(cap10) AT=0.0002000
+.meas tran v10_10 FIND V(cap10) AT=0.0010000
+.meas tran v10_50 FIND V(cap10) AT=0.0050000
+.meas tran v10_100 FIND V(cap10) AT=0.0100000
+.meas tran v10_500 FIND V(cap10) AT=0.0500000
+.meas tran v10_1000 FIND V(cap10) AT=0.1000000
+.meas tran v11_2 FIND V(cap11) AT=0.0002000
+.meas tran v11_10 FIND V(cap11) AT=0.0010000
+.meas tran v11_50 FIND V(cap11) AT=0.0050000
+.meas tran v11_100 FIND V(cap11) AT=0.0100000
+.meas tran v11_500 FIND V(cap11) AT=0.0500000
+.meas tran v11_1000 FIND V(cap11) AT=0.1000000
+.meas tran v12_2 FIND V(cap12) AT=0.0002000
+.meas tran v12_10 FIND V(cap12) AT=0.0010000
+.meas tran v12_50 FIND V(cap12) AT=0.0050000
+.meas tran v12_100 FIND V(cap12) AT=0.0100000
+.meas tran v12_500 FIND V(cap12) AT=0.0500000
+.meas tran v12_1000 FIND V(cap12) AT=0.1000000
+
+.end

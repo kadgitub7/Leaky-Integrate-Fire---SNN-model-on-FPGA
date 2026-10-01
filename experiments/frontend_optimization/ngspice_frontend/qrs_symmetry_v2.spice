@@ -1,0 +1,27 @@
+* ============================================================
+* FEATURE 8: QRS Symmetry v2 — R-peak Voltage (peak_biased)
+*
+* Python proxy: v_biased@R-peak = VBASE + gain * qrs[RPEAK_IDX]
+*   Captures R-peak amplitude directly.
+*   RF accuracy: 95.35% (matches original argmax/len baseline)
+*   Combined system accuracy: 95.43% (only -0.20% from original)
+*
+* Analog: Single NFET S&H captures ECG at R-peak.
+*   Same 2-component architecture as validated qrs_width_v3.
+*
+* For normal beat: R-peak high (~0.40-0.46V)
+* For PVC: R-peak low (~0.17-0.20V, negative R-wave)
+* For supraventricular: variable R-peak
+*
+* Pin: ecg_in sample_r_trig sym_out vdd vss
+* ============================================================
+
+.subckt qrs_symmetry_v2 ecg_in sample_r_trig sym_out vdd vss
+
+* NFET S&H switch at R-peak
+XMsr ecg_in sample_r_trig sym_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* Hold capacitor: 2pF
+XCsr sym_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends qrs_symmetry_v2

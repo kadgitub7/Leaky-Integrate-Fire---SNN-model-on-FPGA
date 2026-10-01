@@ -1,0 +1,79 @@
+.title rr_timing_v2_test
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01
+.temp 27
+.include "rr_timing_v2.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vsamp sample_trig 0 PWL(0.0000000 0.000000 0.9965000 0.000000 0.9970000 0.900000 0.9990000 0.900000 0.9995000 0.000000 1.6520556 0.000000 1.6525556 0.900000 1.6545556 0.900000 1.6550556 0.000000 2.3242778 0.000000 2.3247778 0.900000 2.3267778 0.900000 2.3272778 0.000000 2.9603889 0.000000 2.9608889 0.900000 2.9628889 0.900000 2.9633889 0.000000 3.5853889 0.000000 3.5858889 0.900000 3.5878889 0.900000 3.5883889 0.000000 4.1853889 0.000000 4.1858889 0.900000 4.1878889 0.900000 4.1883889 0.000000 4.8131667 0.000000 4.8136667 0.900000 4.8156667 0.900000 4.8161667 0.000000 5.4298333 0.000000 5.4303333 0.900000 5.4323333 0.900000 5.4328333 0.000000 6.0770556 0.000000 6.0775556 0.900000 6.0795556 0.900000 6.0800556 0.000000 6.7326111 0.000000 6.7331111 0.900000 6.7351111 0.900000 6.7356111 0.000000 7.7361111 0.000000)
+Vrpeak rpeak_trigger 0 PWL(0.0000000 0.000000 0.9990000 0.000000 1.0000000 0.900000 1.0050000 0.900000 1.0060000 0.000000 1.6545556 0.000000 1.6555556 0.900000 1.6605556 0.900000 1.6615556 0.000000 2.3267778 0.000000 2.3277778 0.900000 2.3327778 0.900000 2.3337778 0.000000 2.9628889 0.000000 2.9638889 0.900000 2.9688889 0.900000 2.9698889 0.000000 3.5878889 0.000000 3.5888889 0.900000 3.5938889 0.900000 3.5948889 0.000000 4.1878889 0.000000 4.1888889 0.900000 4.1938889 0.900000 4.1948889 0.000000 4.8156667 0.000000 4.8166667 0.900000 4.8216667 0.900000 4.8226667 0.000000 5.4323333 0.000000 5.4333333 0.900000 5.4383333 0.900000 5.4393333 0.000000 6.0795556 0.000000 6.0805556 0.900000 6.0855556 0.900000 6.0865556 0.000000 6.7351111 0.000000 6.7361111 0.900000 6.7411111 0.900000 6.7421111 0.000000 7.7361111 0.000000)
+Vcopy copy_trig 0 PWL(0.0000000 0.000000 1.0075000 0.000000 1.0080000 0.900000 1.0100000 0.900000 1.0105000 0.000000 1.6630556 0.000000 1.6635556 0.900000 1.6655556 0.900000 1.6660556 0.000000 2.3352778 0.000000 2.3357778 0.900000 2.3377778 0.900000 2.3382778 0.000000 2.9713889 0.000000 2.9718889 0.900000 2.9738889 0.900000 2.9743889 0.000000 3.5963889 0.000000 3.5968889 0.900000 3.5988889 0.900000 3.5993889 0.000000 4.1963889 0.000000 4.1968889 0.900000 4.1988889 0.900000 4.1993889 0.000000 4.8241667 0.000000 4.8246667 0.900000 4.8266667 0.900000 4.8271667 0.000000 5.4408333 0.000000 5.4413333 0.900000 5.4433333 0.900000 5.4438333 0.000000 6.0880556 0.000000 6.0885556 0.900000 6.0905556 0.900000 6.0910556 0.000000 6.7436111 0.000000 6.7441111 0.900000 6.7461111 0.900000 6.7466111 0.000000 7.7361111 0.000000)
+
+Xrr sample_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out vdd vss vbias rr_timing_v2
+
+.tran 0.5m 7.7361
+
+.meas tran timer_b0 FIND V(Xrr.net_timer) AT=0.9950000
+.meas tran sample_b0 FIND V(Xrr.sample_node) AT=1.0120000
+.meas tran ewma_b0 FIND V(Xrr.ewma_node) AT=1.0120000
+.meas tran prev_b0 FIND V(Xrr.prev_node) AT=1.0120000
+.meas tran ratio_b0 FIND V(rr_ratio_out) AT=1.0120000
+.meas tran asym_b0 FIND V(rr_asym_out) AT=1.0120000
+.meas tran timer_b1 FIND V(Xrr.net_timer) AT=1.6505556
+.meas tran sample_b1 FIND V(Xrr.sample_node) AT=1.6675556
+.meas tran ewma_b1 FIND V(Xrr.ewma_node) AT=1.6675556
+.meas tran prev_b1 FIND V(Xrr.prev_node) AT=1.6675556
+.meas tran ratio_b1 FIND V(rr_ratio_out) AT=1.6675556
+.meas tran asym_b1 FIND V(rr_asym_out) AT=1.6675556
+.meas tran timer_b2 FIND V(Xrr.net_timer) AT=2.3227778
+.meas tran sample_b2 FIND V(Xrr.sample_node) AT=2.3397778
+.meas tran ewma_b2 FIND V(Xrr.ewma_node) AT=2.3397778
+.meas tran prev_b2 FIND V(Xrr.prev_node) AT=2.3397778
+.meas tran ratio_b2 FIND V(rr_ratio_out) AT=2.3397778
+.meas tran asym_b2 FIND V(rr_asym_out) AT=2.3397778
+.meas tran timer_b3 FIND V(Xrr.net_timer) AT=2.9588889
+.meas tran sample_b3 FIND V(Xrr.sample_node) AT=2.9758889
+.meas tran ewma_b3 FIND V(Xrr.ewma_node) AT=2.9758889
+.meas tran prev_b3 FIND V(Xrr.prev_node) AT=2.9758889
+.meas tran ratio_b3 FIND V(rr_ratio_out) AT=2.9758889
+.meas tran asym_b3 FIND V(rr_asym_out) AT=2.9758889
+.meas tran timer_b4 FIND V(Xrr.net_timer) AT=3.5838889
+.meas tran sample_b4 FIND V(Xrr.sample_node) AT=3.6008889
+.meas tran ewma_b4 FIND V(Xrr.ewma_node) AT=3.6008889
+.meas tran prev_b4 FIND V(Xrr.prev_node) AT=3.6008889
+.meas tran ratio_b4 FIND V(rr_ratio_out) AT=3.6008889
+.meas tran asym_b4 FIND V(rr_asym_out) AT=3.6008889
+.meas tran timer_b5 FIND V(Xrr.net_timer) AT=4.1838889
+.meas tran sample_b5 FIND V(Xrr.sample_node) AT=4.2008889
+.meas tran ewma_b5 FIND V(Xrr.ewma_node) AT=4.2008889
+.meas tran prev_b5 FIND V(Xrr.prev_node) AT=4.2008889
+.meas tran ratio_b5 FIND V(rr_ratio_out) AT=4.2008889
+.meas tran asym_b5 FIND V(rr_asym_out) AT=4.2008889
+.meas tran timer_b6 FIND V(Xrr.net_timer) AT=4.8116667
+.meas tran sample_b6 FIND V(Xrr.sample_node) AT=4.8286667
+.meas tran ewma_b6 FIND V(Xrr.ewma_node) AT=4.8286667
+.meas tran prev_b6 FIND V(Xrr.prev_node) AT=4.8286667
+.meas tran ratio_b6 FIND V(rr_ratio_out) AT=4.8286667
+.meas tran asym_b6 FIND V(rr_asym_out) AT=4.8286667
+.meas tran timer_b7 FIND V(Xrr.net_timer) AT=5.4283333
+.meas tran sample_b7 FIND V(Xrr.sample_node) AT=5.4453333
+.meas tran ewma_b7 FIND V(Xrr.ewma_node) AT=5.4453333
+.meas tran prev_b7 FIND V(Xrr.prev_node) AT=5.4453333
+.meas tran ratio_b7 FIND V(rr_ratio_out) AT=5.4453333
+.meas tran asym_b7 FIND V(rr_asym_out) AT=5.4453333
+.meas tran timer_b8 FIND V(Xrr.net_timer) AT=6.0755556
+.meas tran sample_b8 FIND V(Xrr.sample_node) AT=6.0925556
+.meas tran ewma_b8 FIND V(Xrr.ewma_node) AT=6.0925556
+.meas tran prev_b8 FIND V(Xrr.prev_node) AT=6.0925556
+.meas tran ratio_b8 FIND V(rr_ratio_out) AT=6.0925556
+.meas tran asym_b8 FIND V(rr_asym_out) AT=6.0925556
+.meas tran timer_b9 FIND V(Xrr.net_timer) AT=6.7311111
+.meas tran sample_b9 FIND V(Xrr.sample_node) AT=6.7481111
+.meas tran ewma_b9 FIND V(Xrr.ewma_node) AT=6.7481111
+.meas tran prev_b9 FIND V(Xrr.prev_node) AT=6.7481111
+.meas tran ratio_b9 FIND V(rr_ratio_out) AT=6.7481111
+.meas tran asym_b9 FIND V(rr_asym_out) AT=6.7481111
+
+.end

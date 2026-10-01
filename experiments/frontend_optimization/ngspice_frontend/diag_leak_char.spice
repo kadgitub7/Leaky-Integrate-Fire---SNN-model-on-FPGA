@@ -1,0 +1,109 @@
+* Leak device characterization for RR timer
+.title leak_char
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Initial charge pulse: 0 to 1ms
+Vcharge charge_ctl 0 PWL(0 0.9 0.001 0.9 0.0011 0 2.0 0)
+
+* Config A: HVT PMOS gate=drain W=10 L=10 (original approach)
+XMa_chg capA charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMa_leak capA capA vss vdd sky130_fd_pr__pfet_01v8_hvt L=10 W=10 nf=1
+XCa capA vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config B: Regular PMOS gate=drain W=0.42 L=10
+XMb_chg capB charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMb_leak capB capB vss vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XCb capB vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config C: Regular PMOS gate=drain W=2 L=10
+XMc_chg capC charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMc_leak capC capC vss vdd sky130_fd_pr__pfet_01v8 L=10 W=2 nf=1
+XCc capC vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config D: Regular PMOS gate=drain W=10 L=10
+XMd_chg capD charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMd_leak capD capD vss vdd sky130_fd_pr__pfet_01v8 L=10 W=10 nf=1
+XCd capD vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config E: NMOS gate=vss (Vgs=0, subthreshold leak) W=0.42 L=10
+XMe_chg capE charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMe_leak capE vss vss vss sky130_fd_pr__nfet_01v8 L=10 W=0.42 nf=1
+XCe capE vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config F: NMOS gate=vss W=2 L=10
+XMf_chg capF charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMf_leak capF vss vss vss sky130_fd_pr__nfet_01v8 L=10 W=2 nf=1
+XCf capF vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config G: Regular PMOS gate=drain W=0.42 L=1 (short channel, more DIBL leak)
+XMg_chg capG charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMg_leak capG capG vss vdd sky130_fd_pr__pfet_01v8 L=1 W=0.42 nf=1
+XCg capG vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* Config H: HVT PMOS gate=drain W=10 L=1 (short, more leaky)
+XMh_chg capH charge_ctl vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMh_leak capH capH vss vdd sky130_fd_pr__pfet_01v8_hvt L=1 W=10 nf=1
+XCh capH vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+.tran 0.1m 1.5
+
+.meas tran capA_10ms FIND V(capA) AT=0.010000
+.meas tran capA_100ms FIND V(capA) AT=0.100000
+.meas tran capA_300ms FIND V(capA) AT=0.300000
+.meas tran capA_600ms FIND V(capA) AT=0.600000
+.meas tran capA_900ms FIND V(capA) AT=0.900000
+.meas tran capA_1200ms FIND V(capA) AT=1.200000
+.meas tran capB_10ms FIND V(capB) AT=0.010000
+.meas tran capB_100ms FIND V(capB) AT=0.100000
+.meas tran capB_300ms FIND V(capB) AT=0.300000
+.meas tran capB_600ms FIND V(capB) AT=0.600000
+.meas tran capB_900ms FIND V(capB) AT=0.900000
+.meas tran capB_1200ms FIND V(capB) AT=1.200000
+.meas tran capC_10ms FIND V(capC) AT=0.010000
+.meas tran capC_100ms FIND V(capC) AT=0.100000
+.meas tran capC_300ms FIND V(capC) AT=0.300000
+.meas tran capC_600ms FIND V(capC) AT=0.600000
+.meas tran capC_900ms FIND V(capC) AT=0.900000
+.meas tran capC_1200ms FIND V(capC) AT=1.200000
+.meas tran capD_10ms FIND V(capD) AT=0.010000
+.meas tran capD_100ms FIND V(capD) AT=0.100000
+.meas tran capD_300ms FIND V(capD) AT=0.300000
+.meas tran capD_600ms FIND V(capD) AT=0.600000
+.meas tran capD_900ms FIND V(capD) AT=0.900000
+.meas tran capD_1200ms FIND V(capD) AT=1.200000
+.meas tran capE_10ms FIND V(capE) AT=0.010000
+.meas tran capE_100ms FIND V(capE) AT=0.100000
+.meas tran capE_300ms FIND V(capE) AT=0.300000
+.meas tran capE_600ms FIND V(capE) AT=0.600000
+.meas tran capE_900ms FIND V(capE) AT=0.900000
+.meas tran capE_1200ms FIND V(capE) AT=1.200000
+.meas tran capF_10ms FIND V(capF) AT=0.010000
+.meas tran capF_100ms FIND V(capF) AT=0.100000
+.meas tran capF_300ms FIND V(capF) AT=0.300000
+.meas tran capF_600ms FIND V(capF) AT=0.600000
+.meas tran capF_900ms FIND V(capF) AT=0.900000
+.meas tran capF_1200ms FIND V(capF) AT=1.200000
+.meas tran capG_10ms FIND V(capG) AT=0.010000
+.meas tran capG_100ms FIND V(capG) AT=0.100000
+.meas tran capG_300ms FIND V(capG) AT=0.300000
+.meas tran capG_600ms FIND V(capG) AT=0.600000
+.meas tran capG_900ms FIND V(capG) AT=0.900000
+.meas tran capG_1200ms FIND V(capG) AT=1.200000
+.meas tran capH_10ms FIND V(capH) AT=0.010000
+.meas tran capH_100ms FIND V(capH) AT=0.100000
+.meas tran capH_300ms FIND V(capH) AT=0.300000
+.meas tran capH_600ms FIND V(capH) AT=0.600000
+.meas tran capH_900ms FIND V(capH) AT=0.900000
+.meas tran capH_1200ms FIND V(capH) AT=1.200000
+
+.end

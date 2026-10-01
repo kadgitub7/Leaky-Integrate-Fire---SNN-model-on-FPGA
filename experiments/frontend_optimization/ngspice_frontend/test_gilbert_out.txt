@@ -1,0 +1,67 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_gilbert_char
+
+
+=== GILBERT CELL CHARACTERIZATION ===
+Beat Vrise Vwidth Target_Ratio Sym_Out
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+B1: Vr=0.168 Vw=0.472 target=0.356 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B2: Vr=0.032 Vw=0.064 target=0.500 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B3: Vr=0.048 Vw=0.368 target=0.130 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B4: Vr=0.032 Vw=0.352 target=0.091 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B5: Vr=0.040 Vw=0.192 target=0.208 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B6: Vr=0.056 Vw=0.368 target=0.152 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B7: Vr=0.040 Vw=0.240 target=0.167 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B8: Vr=0.160 Vw=0.472 target=0.339 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B9: Vr=0.040 Vw=0.072 target=0.556 sym_out=0.9
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+No. of Data Rows : 1
+B10: Vr=0.032 Vw=0.208 target=0.154 sym_out=0.9
+
+Also check node voltages for last beat:
+v(net_n1) = -3.07299e-15
+v(net_n2) = 8.998114e-01
+v(sym_out) = 9.000000e-01
+
+ngspice-43 done

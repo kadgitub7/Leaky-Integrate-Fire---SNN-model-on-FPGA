@@ -1,0 +1,122 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: test_qrs_sym_all10
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+reset                                      0.9
+rise_gate                                    0
+width_gate                                   0
+nswr                               3.88909e-06
+rise_cap                           5.02264e-10
+xcr.a                                        0
+xcr.b1                                       0
+nsww                               3.88909e-06
+width_cap                          5.02264e-10
+xcw.a                                        0
+xcw.b1                                       0
+net_n1                                0.399222
+sym_gilb                              0.399222
+sym_out                                11.9767
+e_amp#branch                                 0
+vwg#branch                                   0
+vrg#branch                                   0
+vrst#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.65664e-13
+vdd#branch                        -4.65678e-13
+
+ Reference value :  0.00000e+00 Reference value :  2.43410e-01 Reference value :  5.07240e-01 Reference value :  7.67890e-01 Reference value :  9.93830e-01 Reference value :  1.22514e+00 Reference value :  1.44219e+00 Reference value :  1.70740e+00 Reference value :  1.97115e+00 Reference value :  2.23288e+00 Reference value :  2.50432e+00 Reference value :  2.77123e+00
+No. of Data Rows : 29374
+
+  Measurements for Transient Analysis
+
+v1r                 =  1.876794e-01
+v1w                 =  2.218615e-01
+v1g                 =  1.227664e-02
+v1o                 =  3.682992e-01
+v2r                 =  1.504503e-01
+v2w                 =  1.704818e-01
+v2g                 =  2.066360e-02
+v2o                 =  6.199081e-01
+v3r                 =  1.534478e-01
+v3w                 =  2.161019e-01
+v3g                 =  5.171727e-03
+v3o                 =  1.551518e-01
+v4r                 =  1.423024e-01
+v4w                 =  2.150836e-01
+v4g                 =  3.878124e-03
+v4o                 =  1.163437e-01
+v5r                 =  1.531828e-01
+v5w                 =  1.998876e-01
+v5g                 =  8.299877e-03
+v5o                 =  2.489963e-01
+v6r                 =  1.578956e-01
+v6w                 =  2.160996e-01
+v6g                 =  5.882574e-03
+v6o                 =  1.764772e-01
+v7r                 =  1.518739e-01
+v7w                 =  2.056488e-01
+v7g                 =  6.708679e-03
+v7o                 =  2.012604e-01
+v8r                 =  1.861791e-01
+v8w                 =  2.218607e-01
+v8g                 =  1.168870e-02
+v8o                 =  3.506609e-01
+v9r                 =  1.566237e-01
+v9w                 =  1.736939e-01
+v9g                 =  2.337508e-02
+v9o                 =  7.012523e-01
+v10r                =  1.463706e-01
+v10w                =  2.019969e-01
+v10g                =  6.356503e-03
+v10o                =  1.906951e-01
+
+
+============================================================
+QRS SYMMETRY: ALL 10 BEATS - LOG TIMER + CORRECTED GILBERT
+============================================================
+
+Beat  Record  Sym_Python  V_rise(mV)  V_width(mV)  Gilb(mV)  Amp30x(mV)
+----  ------  ----------  ----------  -----------  --------  ----------
+
+B1    100     0.35593                 
+
+B2    103     0.50000                 
+
+B3    105     0.13043                 
+
+B4    111     0.09091                 
+
+B5    200     0.20833                 
+
+B6    210     0.15217                 
+
+B7    212     0.16667                 
+
+B8    219     0.33898                 
+
+B9    221     0.55556                 
+
+B10   231     0.15385                 
+
+============================================================
+MONOTONICITY CHECK (sorted by sym_python):
+  B4(0.091) < B3(0.130) < B6(0.152) < B10(0.154)
+  < B7(0.167) < B5(0.208) < B8(0.339) < B1(0.356)
+  < B2(0.500) < B9(0.556)
+  Gilbert output should follow same order
+============================================================
+
+ngspice-43 done

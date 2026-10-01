@@ -1,0 +1,55 @@
+.title peak_v1_test
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear gmin=1e-15 abstol=1e-15 reltol=0.005
+.temp 27
+.include "beat_instability.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+Vref vref 0 0.45
+Vecg ecg_in 0 PWL(0.0000000 0.250000 0.2450000 0.250000 0.2500000 0.250000 0.3000000 0.400000 0.3500000 0.250000 0.3550000 0.250000 0.7450000 0.250000 0.7500000 0.250000 0.8000000 0.500000 0.8500000 0.250000 0.8550000 0.250000 1.2450000 0.250000 1.2500000 0.250000 1.3000000 0.600000 1.3500000 0.250000 1.3550000 0.250000 1.7450000 0.250000 1.7500000 0.250000 1.8000000 0.700000 1.8500000 0.250000 1.8550000 0.250000 2.2450000 0.250000 2.2500000 0.250000 2.3000000 0.550000 2.3500000 0.250000 2.3550000 0.250000 3.0000000 0.250000)
+Vqrs qrs_gate 0 PWL(0.0000000 0.000000 0.2490000 0.000000 0.2500000 0.900000 0.3500000 0.900000 0.3510000 0.000000 0.7490000 0.000000 0.7500000 0.900000 0.8500000 0.900000 0.8510000 0.000000 1.2490000 0.000000 1.2500000 0.900000 1.3500000 0.900000 1.3510000 0.000000 1.7490000 0.000000 1.7500000 0.900000 1.8500000 0.900000 1.8510000 0.000000 2.2490000 0.000000 2.2500000 0.900000 2.3500000 0.900000 2.3510000 0.000000 3.0000000 0.000000)
+Vrpeak rpeak_trigger 0 PWL(0.0000000 0.000000 0.2990000 0.000000 0.3000000 0.900000 0.3020000 0.900000 0.3030000 0.000000 0.7990000 0.000000 0.8000000 0.900000 0.8020000 0.900000 0.8030000 0.000000 1.2990000 0.000000 1.3000000 0.900000 1.3020000 0.900000 1.3030000 0.000000 1.7990000 0.000000 1.8000000 0.900000 1.8020000 0.900000 1.8030000 0.000000 2.2990000 0.000000 2.3000000 0.900000 2.3020000 0.900000 2.3030000 0.000000 3.0000000 0.000000)
+
+Xbi ecg_in qrs_gate rpeak_trigger instab_out peak_out vdd vss vbias vref beat_instability
+
+.tran 0.1m 3.0000
+
+.meas tran pk_gate_s_b0 FIND V(Xbi.peak_node) AT=0.2510000
+.meas tran pk_rpk_b0 FIND V(Xbi.peak_node) AT=0.3000000
+.meas tran pk_gate_e_b0 FIND V(Xbi.peak_node) AT=0.3500000
+.meas tran pk_10ms_b0 FIND V(Xbi.peak_node) AT=0.3600000
+.meas tran pk_50ms_b0 FIND V(Xbi.peak_node) AT=0.4000000
+.meas tran pk_100ms_b0 FIND V(Xbi.peak_node) AT=0.4500000
+.meas tran instab_b0 FIND V(instab_out) AT=0.3600000
+.meas tran pk_gate_s_b1 FIND V(Xbi.peak_node) AT=0.7510000
+.meas tran pk_rpk_b1 FIND V(Xbi.peak_node) AT=0.8000000
+.meas tran pk_gate_e_b1 FIND V(Xbi.peak_node) AT=0.8500000
+.meas tran pk_10ms_b1 FIND V(Xbi.peak_node) AT=0.8600000
+.meas tran pk_50ms_b1 FIND V(Xbi.peak_node) AT=0.9000000
+.meas tran pk_100ms_b1 FIND V(Xbi.peak_node) AT=0.9500000
+.meas tran instab_b1 FIND V(instab_out) AT=0.8600000
+.meas tran pk_gate_s_b2 FIND V(Xbi.peak_node) AT=1.2510000
+.meas tran pk_rpk_b2 FIND V(Xbi.peak_node) AT=1.3000000
+.meas tran pk_gate_e_b2 FIND V(Xbi.peak_node) AT=1.3500000
+.meas tran pk_10ms_b2 FIND V(Xbi.peak_node) AT=1.3600000
+.meas tran pk_50ms_b2 FIND V(Xbi.peak_node) AT=1.4000000
+.meas tran pk_100ms_b2 FIND V(Xbi.peak_node) AT=1.4500000
+.meas tran instab_b2 FIND V(instab_out) AT=1.3600000
+.meas tran pk_gate_s_b3 FIND V(Xbi.peak_node) AT=1.7510000
+.meas tran pk_rpk_b3 FIND V(Xbi.peak_node) AT=1.8000000
+.meas tran pk_gate_e_b3 FIND V(Xbi.peak_node) AT=1.8500000
+.meas tran pk_10ms_b3 FIND V(Xbi.peak_node) AT=1.8600000
+.meas tran pk_50ms_b3 FIND V(Xbi.peak_node) AT=1.9000000
+.meas tran pk_100ms_b3 FIND V(Xbi.peak_node) AT=1.9500000
+.meas tran instab_b3 FIND V(instab_out) AT=1.8600000
+.meas tran pk_gate_s_b4 FIND V(Xbi.peak_node) AT=2.2510000
+.meas tran pk_rpk_b4 FIND V(Xbi.peak_node) AT=2.3000000
+.meas tran pk_gate_e_b4 FIND V(Xbi.peak_node) AT=2.3500000
+.meas tran pk_10ms_b4 FIND V(Xbi.peak_node) AT=2.3600000
+.meas tran pk_50ms_b4 FIND V(Xbi.peak_node) AT=2.4000000
+.meas tran pk_100ms_b4 FIND V(Xbi.peak_node) AT=2.4500000
+.meas tran instab_b4 FIND V(instab_out) AT=2.3600000
+
+.end

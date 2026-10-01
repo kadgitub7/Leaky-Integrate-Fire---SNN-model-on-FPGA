@@ -1,0 +1,75 @@
+* 4x8 1T1R ReRAM Crossbar - Energy Validation
+* SKY130B sky130_fd_pr_reram + sky130_fd_pr__nfet_01v8
+
+.title crossbar_4x8_energy
+
+* Include PDK models (adjust paths!)
+.include "experiments\Complete_imp\skywater-pdk-libs-sky130_fd_pr_reram" tt
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr_reram/models/sky130_fd_pr_reram.spice"
+
+* Supply
+Vdd vdd 0 1.8
+
+* Parameters
+.param v_read = 0.15
+.param t_read = 500n
+.param t_start = 100n
+
+* Wordline drivers (all WLs high during read)
+Vwl0 wl0 0 PULSE(0 1.8 {t_start} 1n 1n {t_read} {2*t_read})
+Vwl1 wl1 0 PULSE(0 1.8 {t_start} 1n 1n {t_read} {2*t_read})
+Vwl2 wl2 0 PULSE(0 1.8 {t_start} 1n 1n {t_read} {2*t_read})
+Vwl3 wl3 0 PULSE(0 1.8 {t_start} 1n 1n {t_read} {2*t_read})
+
+* Bitline read voltage (apply V_read to bitline 0)
+Vbl0 bl0 0 PULSE(0 {v_read} {t_start} 1n 1n {t_read} {2*t_read})
+
+* Source lines (grounded during read)
+Vsl sl 0 0
+
+* === Cell (row, col) = NMOS + ReRAM ===
+* Cell (0,0) - LRS conductance example: 30 uS
+M_0_0 bl0 wl0 mid_0_0 0 sky130_fd_pr__nfet_01v8 W=0.42u L=0.15u
+Xrram_0_0 mid_0_0 sl sky130_fd_pr_reram
+* Set initial conductance state via .ic or model parameter
+
+* Cell (1,0) - LRS: 75 uS
+M_1_0 bl0 wl1 mid_1_0 0 sky130_fd_pr__nfet_01v8 W=0.42u L=0.15u
+Xrram_1_0 mid_1_0 sl sky130_fd_pr_reram
+
+* Cell (2,0) - LRS: 120 uS
+M_2_0 bl0 wl2 mid_2_0 0 sky130_fd_pr__nfet_01v8 W=0.42u L=0.15u
+Xrram_2_0 mid_2_0 sl sky130_fd_pr_reram
+
+* Cell (3,0) - HRS: 0.1 uS (represents zero weight)
+M_3_0 bl0 wl3 mid_3_0 0 sky130_fd_pr__nfet_01v8 W=0.42u L=0.15u
+Xrram_3_0 mid_3_0 sl sky130_fd_pr_reram
+
+* (Repeat for bitlines 1-7 to complete the 4x8 array)
+* ...
+
+* === Measurements ===
+.tran 1n {t_start + 2*t_read}
+
+* Measure supply current
+.meas tran i_supply_avg AVG i(Vdd) FROM={t_start} TO={t_start + t_read}
+.meas tran i_bl0_avg AVG i(Vbl0) FROM={t_start} TO={t_start + t_read}
+
+* Energy = integral of power = integral of V*I over read window
+.meas tran energy_supply INTEG par('v(vdd)*abs(i(Vdd))')
++  FROM={t_start} TO={t_start + t_read}
+
+.meas tran energy_bl0 INTEG par('v(bl0)*abs(i(Vbl0))')
++  FROM={t_start} TO={t_start + t_read}
+
+* Monitor voltages and currents
+.save v(bl0) v(wl0) v(mid_0_0) i(Vdd) i(Vbl0)
+
+.control
+run
+print energy_supply energy_bl0
+print i_supply_avg i_bl0_avg
+plot v(bl0) i(Vbl0)
+.endc
+
+.end

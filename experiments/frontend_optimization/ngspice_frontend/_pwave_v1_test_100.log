@@ -1,0 +1,122 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: pwave_bpf_v1_test_100
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias_lpf                                  0.3
+vbias_hpf                                 0.25
+ecg_l1                                     0.3
+pw_gate                                      0
+taila                                0.0722699
+net1a                                 0.296388
+lpf8                                  0.299974
+xca.a                                        0
+xca.b1                                       0
+tailb                                 0.107651
+net1b                                 0.340286
+lpf3                                  0.300304
+xcb.a                                        0
+xcb.b1                                       0
+tailc                                 0.128007
+net1c                                 0.360626
+bpf_out                               0.360289
+peak_out                              0.071614
+xcsh.a                                       0
+xcsh.b1                                      0
+vpwg#branch                                  0
+vecg#branch                                  0
+vbias_hpf#branch                             0
+vbias_lpf#branch                             0
+vss#branch                         9.11252e-11
+vdd#branch                        -9.11252e-11
+
+
+No. of Data Rows : 54951
+
+  Measurements for Transient Analysis
+
+pw_b0               =  3.594006e-01
+bpf_b0              =  3.599641e-01
+bpf_mid_b0          =  3.595748e-01
+pw_b1               =  3.593700e-01
+bpf_b1              =  3.599359e-01
+bpf_mid_b1          =  3.601770e-01
+pw_b2               =  3.596079e-01
+bpf_b2              =  3.601735e-01
+bpf_mid_b2          =  3.594844e-01
+pw_b3               =  3.591570e-01
+bpf_b3              =  3.597233e-01
+bpf_mid_b3          =  3.597936e-01
+pw_b4               =  3.592341e-01
+bpf_b4              =  3.598028e-01
+bpf_mid_b4          =  3.599420e-01
+pw_b5               =  3.593064e-01
+bpf_b5              =  3.598737e-01
+bpf_mid_b5          =  3.601338e-01
+pw_b6               =  3.593010e-01
+bpf_b6              =  3.598701e-01
+bpf_mid_b6          =  3.602608e-01
+pw_b7               =  3.591123e-01
+bpf_b7              =  3.596793e-01
+bpf_mid_b7          =  3.597781e-01
+pw_b8               =  3.593215e-01
+bpf_b8              =  3.598872e-01
+bpf_mid_b8          =  3.597296e-01
+pw_b9               =  3.590399e-01
+bpf_b9              =  3.596181e-01
+bpf_mid_b9          =  3.596513e-01
+pw_b10              =  3.590259e-01
+bpf_b10             =  3.595913e-01
+bpf_mid_b10         =  3.594998e-01
+pw_b11              =  3.593202e-01
+bpf_b11             =  3.598866e-01
+bpf_mid_b11         =  3.593047e-01
+pw_b12              =  3.592605e-01
+bpf_b12             =  3.598294e-01
+bpf_mid_b12         =  3.597856e-01
+pw_b13              =  3.592793e-01
+bpf_b13             =  3.598462e-01
+bpf_mid_b13         =  3.600054e-01
+pw_b14              =  3.591917e-01
+bpf_b14             =  3.597595e-01
+bpf_mid_b14         =  3.595438e-01
+pw_b15              =  3.593082e-01
+bpf_b15             =  3.598732e-01
+bpf_mid_b15         =  3.595862e-01
+pw_b16              =  3.592940e-01
+bpf_b16             =  3.598617e-01
+bpf_mid_b16         =  3.597317e-01
+pw_b17              =  3.592892e-01
+bpf_b17             =  3.598583e-01
+bpf_mid_b17         =  3.596648e-01
+pw_b18              =  3.592318e-01
+bpf_b18             =  3.597953e-01
+bpf_mid_b18         =  3.593905e-01
+pw_b19              =  3.593615e-01
+bpf_b19             =  3.599268e-01
+bpf_mid_b19         =  3.597702e-01
+
+
+Total analysis time (seconds) = 5.536
+
+Total elapsed time (seconds) = 17.173 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1468.371 MB.
+Maximum ngspice program size =   52.586 MB.
+Current ngspice program size =   52.586 MB.
+

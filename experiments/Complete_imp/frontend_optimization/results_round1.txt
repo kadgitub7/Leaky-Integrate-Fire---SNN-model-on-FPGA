@@ -1,0 +1,193 @@
+================================================================================
+FRONTEND OPTIMIZATION — ROUND 1 RESULTS
+================================================================================
+Date: 2026-09-24
+Script: experiments/frontend_optimization/frontend_optimization.py
+
+METHODOLOGY:
+  - Evaluation type: INTER-PATIENT (DS1 train, DS2 test — no patient overlap)
+  - Classifier: sklearn RandomForestClassifier
+      n_estimators=300, max_depth=15, class_weight='balanced'
+  - No SMOTE oversampling (raw class distribution)
+  - Features z-score normalized (train mean/std applied to test)
+  - Dataset: MIT-BIH Arrhythmia Database, 5-class AAMI mapping
+
+DATA:
+  DS1 (train): 51008 beats  {N:45854, S:944, V:3788, F:414, Q:8}
+  DS2 (test):  48181 beats  {N:42732, S:1837, V:3217, F:388, Q:7}
+
+================================================================================
+1. ANOVA F-SCORES (higher = more discriminative between classes)
+================================================================================
+   1. beat_instability_L1       F=  6463.9  cost= 3  *NOVEL*
+   2. pwave_energy_L0           F=  3272.5  cost= 4  *NOVEL*
+   3. rr_ratio                  F=  3098.0  cost= 3
+   4. st_discordance_L0         F=  2718.8  cost= 4  *NOVEL*
+   5. templ_corr_L0             F=  2045.5  cost=12
+   6. beat_instability_L0       F=  1990.9  cost= 3  *NOVEL*
+   7. rel_area_L1               F=  1372.3  cost= 5
+   8. rr_asymmetry              F=  1143.1  cost= 2
+   9. rel_area_L0               F=  1045.0  cost= 5
+  10. rel_peak_L1               F=   986.3  cost= 5
+  11. pwave_energy_L1           F=   888.3  cost= 4  *NOVEL*
+  12. st_discordance_L1         F=   885.5  cost= 4  *NOVEL*
+  13. rel_peak_L0               F=   814.9  cost= 5
+  14. corr_L0L1                 F=   639.8  cost= 6
+  15. max_slope_L0              F=   405.8  cost= 2
+  16. templ_corr_L1             F=   355.7  cost=12
+  17. peak_amp_L1               F=   292.0  cost= 1
+  18. qrs_energy_L0             F=   284.6  cost= 2
+  19. peak_amp_L0               F=   280.4  cost= 1
+  20. pre_rr                    F=   278.4  cost= 1
+  21. qrs_area_L1               F=   274.7  cost= 2
+  22. qrs_area_L0               F=   267.4  cost= 2
+  23. rel_width_L0              F=   249.1  cost= 5
+  24. qrs_energy_L1             F=   248.9  cost= 2
+  25. rr_std_20                 F=   240.1  cost= 5
+  26. rr_std_10                 F=   195.4  cost= 5
+  27. slope_ratio_L0            F=   165.2  cost= 4
+  28. qrs_symmetry_L0           F=   151.3  cost= 3  *NOVEL*
+  29. slope_ratio_L1            F=   144.1  cost= 4
+  30. qrs_width_L0              F=   139.1  cost= 2
+  31. interlead_divergence      F=   104.2  cost= 3  *NOVEL*
+  32. rel_width_L1              F=   101.9  cost= 5
+  33. post_rr                   F=    92.7  cost= 1
+  34. compensatory_ratio        F=    85.1  cost= 3
+  35. area_ratio_L0L1           F=    72.5  cost= 3
+  36. width_diff_L0L1           F=    41.6  cost= 3
+  37. qrs_width_L1              F=    36.2  cost= 2
+  38. qrs_symmetry_L1           F=    15.7  cost= 3  *NOVEL*
+  39. max_slope_L1              F=     3.1  cost= 2
+
+================================================================================
+2. MUTUAL INFORMATION
+================================================================================
+   1. rr_ratio                  MI=0.1801  cost= 3
+   2. rr_asymmetry              MI=0.1738  cost= 2
+   3. pre_rr                    MI=0.1392  cost= 1
+   4. st_discordance_L0         MI=0.1314  cost= 4  *NOVEL*
+   5. beat_instability_L1       MI=0.1007  cost= 3  *NOVEL*
+   6. templ_corr_L0             MI=0.0854  cost=12
+   7. qrs_symmetry_L0           MI=0.0853  cost= 3  *NOVEL*
+   8. pwave_energy_L0           MI=0.0821  cost= 4  *NOVEL*
+   9. post_rr                   MI=0.0819  cost= 1
+  10. rr_std_10                 MI=0.0782  cost= 5
+  11. rr_std_20                 MI=0.0762  cost= 5
+  12. qrs_symmetry_L1           MI=0.0709  cost= 3  *NOVEL*
+  13. rel_peak_L0               MI=0.0703  cost= 5
+  14. beat_instability_L0       MI=0.0702  cost= 3  *NOVEL*
+  15. rel_width_L1              MI=0.0681  cost= 5
+  16. pwave_energy_L1           MI=0.0590  cost= 4  *NOVEL*
+  17. rel_width_L0              MI=0.0578  cost= 5
+  18. corr_L0L1                 MI=0.0572  cost= 6
+  19. st_discordance_L1         MI=0.0558  cost= 4  *NOVEL*
+  20. rel_area_L1               MI=0.0527  cost= 5
+
+================================================================================
+3. RANDOM FOREST IMPORTANCE (inter-patient)
+================================================================================
+  RF accuracy (all 39 features): 94.11%
+
+   1. rr_ratio                  imp=0.0740  cost= 3
+   2. pre_rr                    imp=0.0719  cost= 1
+   3. templ_corr_L0             imp=0.0612  cost=12
+   4. beat_instability_L1       imp=0.0575  cost= 3  *NOVEL*
+   5. rr_asymmetry              imp=0.0538  cost= 2
+   6. beat_instability_L0       imp=0.0471  cost= 3  *NOVEL*
+   7. corr_L0L1                 imp=0.0437  cost= 6
+   8. st_discordance_L0         imp=0.0406  cost= 4  *NOVEL*
+   9. post_rr                   imp=0.0387  cost= 1
+  10. rel_width_L0              imp=0.0377  cost= 5
+  11. max_slope_L0              imp=0.0336  cost= 2
+  12. rel_area_L0               imp=0.0332  cost= 5
+  13. pwave_energy_L0           imp=0.0315  cost= 4  *NOVEL*
+  14. rel_peak_L0               imp=0.0295  cost= 5
+
+================================================================================
+4. PER-CLASS DISTRIBUTIONS (normalized means)
+================================================================================
+  Feature                          N        S        V        F        Q
+  beat_instability_L1         -0.152   -0.103    1.340    4.733    1.453
+  pwave_energy_L0             -0.129   -0.282    1.584    0.431    0.486
+  rr_ratio                     0.143   -1.198   -1.418   -0.172    2.329
+  st_discordance_L0            0.130   -0.102   -1.421   -1.127    0.855
+  templ_corr_L0                0.112   -0.007   -1.289   -0.553   -2.749
+  beat_instability_L0         -0.112    0.000    1.221    1.165    3.572
+  rr_asymmetry                 0.086   -0.580   -0.951    0.496    1.478
+
+================================================================================
+5. HIGHLY CORRELATED PAIRS (|r| > 0.80)
+================================================================================
+  qrs_area_L0 <-> qrs_energy_L0       r=+0.912
+  post_rr <-> compensatory_ratio      r=+0.873
+  area_ratio_L0L1 <-> interlead_div   r=+0.825
+  qrs_area_L1 <-> qrs_energy_L1       r=+0.818
+
+================================================================================
+7. FEATURE SUBSET ABLATION (RF inter-patient accuracy)
+================================================================================
+
+Set                                                 #F  Cost   Acc%  S-F1  V-F1
+-------------------------------------------------- --- ----- ------ ----- -----
+Current 16 (production)                             16    61  93.67  0.06  0.89
+Current 14 (shared_data)                            14    65  93.74  0.07  0.90
+Proposed 7 (plan)                                    7    22  90.47  0.29  0.80
+Proposed 7 + instability (9)                         9    28  93.00  0.40  0.88
+Proposed 7 + lead1 novel (10)                       10    33  88.22  0.37  0.87
+Hybrid A: timing+templ+novel (9)                     9    46  93.02  0.11  0.88
+Hybrid B: timing+width+adaptive+novel (9)            9    38  93.19  0.35  0.90
+Hybrid C: proposed7+templ+instab (9)                 9    37  93.92  0.43  0.89
+Novel only (9)                                       9    31  83.40  0.01  0.58
+All features (kitchen sink)                         39   143  94.11  0.04  0.93
+
+================================================================================
+8. PER-CLASS ERROR ANALYSIS
+================================================================================
+N-class: 0.8% error rate — misclassified as S(268), V(39), F(35)
+  Novel features show separation on correctly vs incorrectly classified:
+    pwave_energy_L0:      correct=-0.202, wrong=0.436, sep=0.638
+    st_discordance_L0:    correct=-0.307, wrong=0.812, sep=1.119
+    interlead_divergence: correct=0.016, wrong=-0.707, sep=0.724
+
+S-class: 96.3% error rate — misclassified as N(1731), V(38)
+    pwave_energy_L0:      correct=0.732, wrong=-0.623, sep=1.355
+
+V-class: 17.6% error rate — misclassified as N(539), S(26)
+    interlead_divergence: correct=0.013, wrong=1.047, sep=1.034
+
+F-class: 94.3% error rate — misclassified as N(361), V(4)
+    pwave_energy_L0:      correct=2.735, wrong=1.913, sep=0.822
+    st_discordance_L0:    correct=-1.526, wrong=-0.608, sep=0.918
+    qrs_symmetry_L0:      correct=-0.209, wrong=-0.773, sep=0.564
+
+================================================================================
+9. BBB TRAP ANALYSIS
+================================================================================
+  Feature                     Normal N      BBB N    V-class  BBB-V sep
+  st_discordance_L0             -0.198     -0.706     -1.514      0.809
+  pwave_energy_L0               -0.222     -0.095      1.644      1.739
+  beat_instability_L0            0.003     -0.069      2.775      2.845
+  templ_corr_L0                 -0.045      0.188     -1.864      2.051
+  rr_ratio                       0.201      0.069     -1.473      1.542
+
+  BBB N-class in test: 8440, Normal N: 34292, V-class: 3217
+
+================================================================================
+10. GREEDY OPTIMAL SEARCH (by accuracy)
+================================================================================
+   1. rr_ratio                -> 85.77%  cost= 3
+   2. beat_instability_L1     -> 90.17%  cost= 6
+   3. rr_asymmetry            -> 92.42%  cost= 8
+   4. pwave_energy_L1         -> 93.57%  cost=12
+   5. qrs_width_L0            -> 94.52%  cost=14
+   6. beat_instability_L0     -> 95.22%  cost=17
+   7. slope_ratio_L0          -> 95.44%  cost=21
+   8. qrs_symmetry_L0         -> 95.70%  cost=24
+   9. rel_width_L0            -> 95.68%  cost=29
+  10. max_slope_L1            -> 95.96%  cost=31
+  11. qrs_width_L1            -> 96.01%  cost=33
+  12. qrs_area_L0             -> 96.06%  cost=35
+
+
+First 8 feautures provide maximum 95.70% ceiling for inter patient accuracy. This is the best bet to move forward with
+top 8 features          -> 95.70%  cost= 24  F1: N=0.98 S=0.67 V=0.89 F=0.00 Q=0.00

@@ -1,0 +1,131 @@
+* ============================================================
+* TEST: Logarithmic timer characterization
+*
+* CONCEPT: Instead of linear ramp (V = I*t/C), use a subthreshold
+* NMOS directly charging a cap from VDD. As V_cap rises, Vgs
+* decreases, current drops -> V_cap = n*Vt * ln(1 + t/tau)
+*
+* WHY: With log timer voltages, the subthreshold Gilbert cell
+* naturally computes:
+*   exp((V_rise - V_width)/(n*Vt))
+*   = exp(ln(T_rise/T_width))
+*   = T_rise/T_width = symmetry
+*
+* TEST: 4 durations (11ms, 22ms, 58ms, 164ms) covering the
+* full QRS timing range. Verify logarithmic behavior.
+* ============================================================
+
+.title test_log_timer
+
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u
+.option method=gear
+.option gmin=1e-15
+.option abstol=1e-15
+.option reltol=0.005
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* Bias voltage: sets the initial current and tau
+* Lower Vbias -> less initial current -> larger tau
+* We want tau << 11ms (shortest timing), so tau ~ 0.1-1ms
+Vbias vbias 0 0.35
+
+* === LOG TIMER A: 11ms (shortest rise time) ===
+* Architecture:
+*   NMOS M_log: gate=vbias, drain=vdd (through switch), source=v_cap
+*   Enable switch: NMOS between M_log drain and VDD
+*   The NMOS charges the cap logarithmically because as V_cap
+*   rises, Vgs = Vbias - V_cap decreases, reducing current.
+
+Vga gate_a 0 PWL(0 0 0.0999 0 0.1 0.9 0.111 0.9 0.1111 0 0.7 0)
+
+* M_log: subthreshold NMOS with decreasing current as cap charges
+* L=4 W=2 for good subthreshold matching
+XMlog_a n_sw_a vbias timer_a vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* Enable switch: connects M_log drain to VDD when gate_a is HIGH
+XMsw_a vdd gate_a n_sw_a vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* MIM capacitor (30x30 = 900um^2 ~ 1.8pF)
+XCa timer_a vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+
+* Reset
+Vra reset_a 0 PWL(0 0 0.079 0 0.08 0.9 0.085 0.9 0.086 0 0.7 0)
+XMrst_a timer_a reset_a vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === LOG TIMER B: 22ms ===
+Vgb gate_b 0 PWL(0 0 0.1999 0 0.2 0.9 0.222 0.9 0.2221 0 0.7 0)
+XMlog_b n_sw_b vbias timer_b vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsw_b vdd gate_b n_sw_b vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCb timer_b vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vrb reset_b 0 PWL(0 0 0.179 0 0.18 0.9 0.185 0.9 0.186 0 0.7 0)
+XMrst_b timer_b reset_b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === LOG TIMER C: 58ms ===
+Vgc gate_c 0 PWL(0 0 0.2999 0 0.3 0.9 0.358 0.9 0.3581 0 0.7 0)
+XMlog_c n_sw_c vbias timer_c vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsw_c vdd gate_c n_sw_c vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCc timer_c vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vrc reset_c 0 PWL(0 0 0.279 0 0.28 0.9 0.285 0.9 0.286 0 0.7 0)
+XMrst_c timer_c reset_c vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+* === LOG TIMER D: 164ms (widest QRS) ===
+Vgd gate_d 0 PWL(0 0 0.3999 0 0.4 0.9 0.564 0.9 0.5641 0 0.7 0)
+XMlog_d n_sw_d vbias timer_d vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMsw_d vdd gate_d n_sw_d vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCd timer_d vss sky130_fd_pr__cap_mim_m3_1 W=30 L=30
+Vrd reset_d 0 PWL(0 0 0.379 0 0.38 0.9 0.385 0.9 0.386 0 0.7 0)
+XMrst_d timer_d reset_d vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.tran 0.1m 0.7
+
+* Measure at end of charge period
+.meas tran Va_11ms FIND V(timer_a) AT=0.111
+.meas tran Vb_22ms FIND V(timer_b) AT=0.222
+.meas tran Vc_58ms FIND V(timer_c) AT=0.358
+.meas tran Vd_164ms FIND V(timer_d) AT=0.564
+
+* Midpoint checks for log verification
+.meas tran Va_5ms FIND V(timer_a) AT=0.105
+.meas tran Vb_11ms FIND V(timer_b) AT=0.211
+.meas tran Vc_29ms FIND V(timer_c) AT=0.329
+.meas tran Vd_82ms FIND V(timer_d) AT=0.482
+
+* After reset (should be ~0)
+.meas tran Va_rst FIND V(timer_a) AT=0.099
+.meas tran Vb_rst FIND V(timer_b) AT=0.199
+.meas tran Vc_rst FIND V(timer_c) AT=0.299
+.meas tran Vd_rst FIND V(timer_d) AT=0.399
+
+.control
+  run
+  echo ""
+  echo "=== LOG TIMER CHARACTERIZATION ==="
+  echo ""
+  echo "After reset (should be ~0):"
+  print Va_rst Vb_rst Vc_rst Vd_rst
+  echo ""
+  echo "At end of charge (key values):"
+  echo "  11ms    22ms    58ms    164ms"
+  print Va_11ms Vb_22ms Vc_58ms Vd_164ms
+  echo ""
+  echo "Midpoint (half duration):"
+  echo "  5.5ms   11ms    29ms    82ms"
+  print Va_5ms Vb_11ms Vc_29ms Vd_82ms
+  echo ""
+  echo "If logarithmic: V(t) = k * ln(1+t/tau)"
+  echo "  V(t/2) / V(t) should decrease with t (unlike linear 0.5)"
+  echo "  Specifically: ln(1+t/2tau) / ln(1+t/tau)"
+  echo ""
+  echo "Voltage ratios (for Gilbert cell test):"
+  echo "  V_11ms / V_22ms should give symmetry = 11/22 = 0.500"
+  echo "  V_58ms / V_164ms should give symmetry = 58/164 = 0.354"
+  echo "  V_11ms / V_164ms should give symmetry = 11/164 = 0.067"
+  echo ""
+  quit
+.endc
+
+.end

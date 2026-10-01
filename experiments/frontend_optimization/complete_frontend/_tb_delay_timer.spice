@@ -1,0 +1,36 @@
+Delay Timer Testbench
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear gmin=1e-15
+
+.include "inverter.spice"
+.include "delay_timer.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.3
+
+* R-peak pulse at t=10ms
+Vrpeak rpeak_pulse 0 PULSE(0 0.9 0.01 100n 100n 0.0005 100)
+
+* Threshold voltages
+Vth14 vth_14 0 0.858
+Vth69 vth_69 0 0.6930000000000001
+Vth83 vth_83 0 0.8160000000000001
+Vth300 vth_300 0 0.01
+Vth10 vth_10 0 0.01
+
+Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
++ vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
+
+* Initialize timer caps to VDD (as if already precharged)
+.ic v(xdelay.timer_node) = 0.9
+.ic v(xdelay.timer2) = 0.9
+
+.tran 0.1m 400m uic
+
+.control
+run
+set wr_singlescale
+wrdata C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/_tb_delay_data.txt v(trig_s14) v(trig_s69) v(trig_wid) v(trig_bi_copy) v(trig_rr_copy) v(xdelay.timer_node)
+.endc
+.end
