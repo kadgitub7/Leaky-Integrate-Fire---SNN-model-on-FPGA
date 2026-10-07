@@ -1,0 +1,32 @@
+Minimal test
+.lib "C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\experiments\frontend_optimization\ngspice_frontend\sky130_minimal.lib.spice" tt
+.option scale=1.0u
+
+.include "frontend_top.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+Vel0p elec_l0_p 0 0.0005
+Vel0n elec_l0_n 0 -0.0005
+Vel1p elec_l1_p 0 0.0003
+Vel1n elec_l1_n 0 -0.0003
+
+Vthresh rpeak_threshold 0 0.36
+Vth14 vth_14 0 0.47
+Vth69 vth_69 0 0.44
+Vth83 vth_83 0 0.46
+Vth300 vth_300 0 0.32
+Vth10 vth_10 0 0.22
+Vthpb vth_pw_base 0 0.15
+Vthpp vth_pw_peak 0 0.11
+
+Xfe elec_l0_p elec_l0_n elec_l1_p elec_l1_n
++ rpeak_threshold
++ vth_14 vth_69 vth_83 vth_300 vth_10
++ vth_pw_base vth_pw_peak
++ f1 f2 f3 f4 f5 f6 f7 f8
++ vdd vss
+
+.op
+.end

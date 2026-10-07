@@ -51,7 +51,8 @@ XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
 XMl2_a rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8_hvt L=4 W=2 nf=1
 
 * Expose internal nodes for P-wave predictor
-R_timer_out net_timer timer_out 0
+* timer_out = SF-shifted timer (0.1-0.5V range) for comparator compatibility
+R_timer_out sf_out timer_out 0
 R_ewma_out ewma_node ewma_out 0
 
 .ends rr_timing

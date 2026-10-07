@@ -294,24 +294,99 @@ def test_delay_timer():
     lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")
     data_file = os.path.join(FRONTEND_DIR, "_tb_delay_data.txt").replace("\\", "/")
 
-    I_discharge = 300e-12
-    C_timer = 100e-12
-    vth_14_v = VDD - I_discharge * 0.014 / C_timer
-    vth_28_v = VDD - I_discharge * 0.028 / C_timer
-    vth_69_v = VDD - I_discharge * 0.069 / C_timer
-    vth_300_v = max(0.01, VDD - I_discharge * 0.300 / C_timer)
+    # Step 1: Measure actual SF offset and discharge rate with a calibration sim
+    cal_file = os.path.join(FRONTEND_DIR, "_tb_delay_cal.txt").replace("\\", "/")
+    cal_netlist = f"""\
+Delay Timer Calibration
+.lib "{lib_path}" tt
+.option scale=1.0u method=gear gmin=1e-15
 
-    I_fast = 300e-12
-    C_fast = 2.048e-12
-    vth_10_v = max(0.01, VDD - I_fast * 0.010 / C_fast)
+.include "inverter.spice"
+.include "delay_timer.spice"
 
-    print(f"  Threshold voltages:")
-    print(f"    vth_14  = {vth_14_v:.4f}V (14ms delay)")
-    print(f"    vth_28  = {vth_28_v:.4f}V (28ms width delay)")
-    print(f"    vth_69  = {vth_69_v:.4f}V (69ms delay)")
-    print(f"    vth_300 = {vth_300_v:.4f}V (300ms delay)")
-    print(f"    vth_10  = {vth_10_v:.4f}V (10ms fast timer)")
+Vdd vdd 0 {VDD}
+Vss vss 0 0
+Vbias vbias 0 {VBIAS}
 
+* Single R-peak pulse at t=5ms
+Vrpeak rpeak_pulse 0 PULSE(0 {VDD} 5m 100n 100n 0.5m 100)
+
+* Dummy thresholds (won't affect timer behavior)
+Vth14 vth_14 0 0.3
+Vth69 vth_69 0 0.3
+Vth83 vth_83 0 0.3
+Vth300 vth_300 0 0.1
+Vth10 vth_10 0 0.3
+
+Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
++ vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
+
+.ic v(xdelay.timer_node) = {VDD}
+.ic v(xdelay.timer2) = {VDD}
+
+.tran 0.5m 400m uic
+
+.control
+run
+set wr_singlescale
+wrdata {cal_file} v(xdelay.timer_node) v(xdelay.sf_timer) v(xdelay.timer2) v(xdelay.sf_timer2)
+.endc
+.end
+"""
+    result, _ = run_ngspice(cal_netlist, "delay_cal")
+
+    if not os.path.exists(cal_file):
+        print(f"  FAIL: calibration sim produced no output")
+        print(result.stdout[-500:] if result.stdout else "")
+        print(result.stderr[-500:] if result.stderr else "")
+        return False
+
+    cal = load_wrdata(cal_file)
+    ct = cal[:, 0]
+    c_timer = cal[:, 1]
+    c_sf = cal[:, 2]
+    c_timer2 = cal[:, 3]
+    c_sf2 = cal[:, 4]
+
+    # Measure SF offset at t=20ms (timer settled after recharge at t=5.5ms)
+    idx_20 = np.argmin(np.abs(ct - 0.020))
+    sf_offset = c_timer[idx_20] - c_sf[idx_20]
+    sf2_offset = c_timer2[idx_20] - c_sf2[idx_20]
+    print(f"  Source follower offset (main):  {sf_offset*1000:.1f} mV")
+    print(f"  Source follower offset (fast):  {sf2_offset*1000:.1f} mV")
+
+    # Measure discharge rate (sf voltage drop per ms after recharge)
+    idx_10 = np.argmin(np.abs(ct - 0.010))
+    idx_100 = np.argmin(np.abs(ct - 0.100))
+    sf_rate = (c_sf[idx_10] - c_sf[idx_100]) / (ct[idx_100] - ct[idx_10])
+    print(f"  SF discharge rate: {sf_rate*1000:.3f} mV/ms")
+
+    # Print SF voltage at key times
+    sf_at_recharge = c_sf[np.argmin(np.abs(ct - 0.006))]
+    print(f"  SF voltage at recharge: {sf_at_recharge*1000:.1f} mV")
+
+    # Calculate SF-shifted thresholds
+    # V_sf(T) = sf_at_recharge - sf_rate * T
+    vth_14_sf = sf_at_recharge - sf_rate * 0.014
+    vth_28_sf = sf_at_recharge - sf_rate * 0.028
+    vth_69_sf = sf_at_recharge - sf_rate * 0.069
+    vth_300_sf = max(0.02, sf_at_recharge - sf_rate * 0.300)
+
+    # Fast timer SF threshold for 10ms
+    idx_f10 = np.argmin(np.abs(ct - 0.010))
+    idx_f20 = np.argmin(np.abs(ct - 0.020))
+    sf2_rate = (c_sf2[idx_f10] - c_sf2[idx_f20]) / (ct[idx_f20] - ct[idx_f10])
+    sf2_at_recharge = c_sf2[np.argmin(np.abs(ct - 0.006))]
+    vth_10_sf = max(0.02, sf2_at_recharge - sf2_rate * 0.010)
+
+    print(f"\n  SF-shifted thresholds:")
+    print(f"    vth_14  = {vth_14_sf:.4f}V (14ms)")
+    print(f"    vth_28  = {vth_28_sf:.4f}V (28ms)")
+    print(f"    vth_69  = {vth_69_sf:.4f}V (69ms)")
+    print(f"    vth_300 = {vth_300_sf:.4f}V (300ms)")
+    print(f"    vth_10  = {vth_10_sf:.4f}V (10ms fast)")
+
+    # Step 2: Run with correct thresholds
     rpeak_pulse_t = 0.010
     pw = 0.0005
 
@@ -330,17 +405,16 @@ Vbias vbias 0 {VBIAS}
 * R-peak pulse at t=10ms
 Vrpeak rpeak_pulse 0 PULSE(0 {VDD} {rpeak_pulse_t} 100n 100n {pw} 100)
 
-* Threshold voltages
-Vth14 vth_14 0 {vth_14_v}
-Vth69 vth_69 0 {vth_69_v}
-Vth83 vth_83 0 {vth_28_v}
-Vth300 vth_300 0 {vth_300_v}
-Vth10 vth_10 0 {vth_10_v}
+* SF-shifted threshold voltages
+Vth14 vth_14 0 {vth_14_sf}
+Vth69 vth_69 0 {vth_69_sf}
+Vth83 vth_83 0 {vth_28_sf}
+Vth300 vth_300 0 {vth_300_sf}
+Vth10 vth_10 0 {vth_10_sf}
 
 Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
 + vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
 
-* Initialize timer caps to VDD (as if already precharged)
 .ic v(xdelay.timer_node) = {VDD}
 .ic v(xdelay.timer2) = {VDD}
 
@@ -349,7 +423,7 @@ Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
 .control
 run
 set wr_singlescale
-wrdata {data_file} v(trig_s14) v(trig_s69) v(trig_wid) v(trig_bi_copy) v(trig_rr_copy) v(xdelay.timer_node)
+wrdata {data_file} v(trig_s14) v(trig_s69) v(trig_wid) v(trig_bi_copy) v(trig_rr_copy) v(xdelay.sf_timer)
 .endc
 .end
 """

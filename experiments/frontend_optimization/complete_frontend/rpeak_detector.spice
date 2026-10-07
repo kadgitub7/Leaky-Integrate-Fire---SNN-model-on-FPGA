@@ -25,8 +25,8 @@ XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XM4 stg1_out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XM5 tail1 vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
-* Stage 2: inverting amplifier for rail-to-rail output
-XM6 rpeak_out stg1_out vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=2 nf=1
-XM7 rpeak_out stg1_out vss vss sky130_fd_pr__nfet_01v8 L=1 W=1 nf=1
+* Stage 2: output inverter (wide for rail-to-rail drive of 5+ loads)
+XM6 rpeak_out stg1_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XM7 rpeak_out stg1_out vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 
 .ends rpeak_detector

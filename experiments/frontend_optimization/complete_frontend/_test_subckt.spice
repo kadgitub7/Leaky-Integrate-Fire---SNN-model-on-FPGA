@@ -1,0 +1,8 @@
+Subckt test
+.lib "C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\experiments\frontend_optimization\ngspice_frontend\sky130_minimal.lib.spice" tt
+.option scale=1.0u
+
+.include "frontend_top.spice"
+
+* Just list known subcircuits
+.end

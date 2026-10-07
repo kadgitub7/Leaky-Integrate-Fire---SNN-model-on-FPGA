@@ -5,65 +5,47 @@
 * Generates P-wave S&H triggers BEFORE the R-peak by predicting
 * the next R-peak time from the RR timer's EWMA.
 *
-* Concept: The RR timer (in rr_timing.spice) discharges at ~148pA
-* through a 320pF cap. The EWMA node holds the average timer
-* voltage at end-of-interval. Comparators watch the RR timer
-* and fire when it reaches voltage levels corresponding to:
-*   - expected_RR - 206ms → pw_base trigger
-*   - expected_RR - 131ms → pw_peak trigger
+* Inputs:
+*   timer_node — SF-shifted timer from rr_timing (0.1-0.5V range)
+*   ewma_node  — EWMA of SF-shifted timer end-of-interval voltages
+*   vth_base   — Threshold for base trigger (ewma + 95mV, set externally)
+*   vth_peak   — Threshold for peak trigger (ewma + 61mV, set externally)
 *
-* These threshold voltages are derived from the EWMA value:
-*   V_timer(T) = VDD - I*T/C
-*   V_timer(RR-206ms) = VDD - I*(RR-0.206)/C
-*                      = V_timer(RR) + I*0.206/C
-*                      = ewma_val + 0.206 * 148pA/320pF
-*                      = ewma_val + 95mV
-*   V_timer(RR-131ms) = ewma_val + 60mV
+* Comparators watch the SF-shifted timer and fire when it drops
+* below the threshold levels:
+*   - timer < vth_base → pw_base_trig  (R-206ms)
+*   - timer < vth_peak → pw_peak_trig  (R-131ms)
+*   - timer < ewma     → rr_cap_trig   (R-5ms)
 *
-* So we add fixed offsets to the EWMA voltage to get thresholds.
-* Offset generation: small cap divider from VDD.
+* Comparator topology: L=4 W=2 NFET diff pair + L=4 W=2 PMOS
+* current mirror loads (same as validated delay_timer/rr_timing).
+* Operates correctly in the 0.1-0.5V range at 150pA tail current.
 *
-* Pin: timer_node ewma_node pw_base_trig pw_peak_trig vdd vss vbias
+* Pin: timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig
+*      vth_base vth_peak vdd vss vbias
 * ============================================================
 
-.subckt pwave_predictor timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig vdd vss vbias
+.subckt pwave_predictor timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig vth_base vth_peak vdd vss vbias
 
-* Threshold = ewma_node + offset
-* Offset for base (206ms): ΔV = I*0.206/C = 148e-12*0.206/320e-12 = 95.3mV
-* Offset for peak (131ms): ΔV = I*0.131/C = 148e-12*0.131/320e-12 = 60.6mV
-*
-* Generate offset voltages with resistive dividers from ewma_node:
-* Use source followers to level-shift ewma_node up by the offset.
-
-* Source follower for base threshold (+95mV)
-* PMOS source follower: Vout = Vin + |Vgs_p|
-* Adjusting W/L to get ~95mV Vgs above threshold
-XMsf_base vdd ewma_node th_base vdd sky130_fd_pr__pfet_01v8 L=4 W=8 nf=1
-XMsf_base_bias th_base vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
-
-* Source follower for peak threshold (+61mV)
-XMsf_peak vdd ewma_node th_peak vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
-XMsf_peak_bias th_peak vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
-
-* Comparator: fires when timer_node drops below base threshold
-XMcb1 cnb th_base ctb vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcb2 pw_base_trig timer_node ctb vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcb3 cnb cnb vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
-XMcb4 pw_base_trig cnb vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+* Comparator: fires when timer_node drops below base threshold (R-206ms)
+XMcb1 cnb vth_base ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcb2 pw_base_trig timer_node ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcb3 cnb cnb vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcb4 pw_base_trig cnb vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcb5 ctb vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
-* Comparator: fires when timer_node drops below peak threshold
-XMcp1 cnp th_peak ctp vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcp2 pw_peak_trig timer_node ctp vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcp3 cnp cnp vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
-XMcp4 pw_peak_trig cnp vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+* Comparator: fires when timer_node drops below peak threshold (R-131ms)
+XMcp1 cnp vth_peak ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcp2 pw_peak_trig timer_node ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcp3 cnp cnp vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcp4 pw_peak_trig cnp vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcp5 ctp vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
-* Comparator: fires when timer_node drops to ewma level (RR capture, ~R-5ms)
-XMcc1 cnc ewma_node ctc vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcc2 rr_cap_trig timer_node ctc vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
-XMcc3 cnc cnc vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
-XMcc4 rr_cap_trig cnc vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+* Comparator: fires when timer_node drops to EWMA level (RR capture, ~R-5ms)
+XMcc1 cnc ewma_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcc2 rr_cap_trig timer_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcc3 cnc cnc vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcc4 rr_cap_trig cnc vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcc5 ctc vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
 .ends pwave_predictor

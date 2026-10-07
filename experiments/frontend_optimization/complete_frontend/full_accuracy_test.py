@@ -145,7 +145,7 @@ def generate_batch_testbench(beats_batch, gain, batch_id, record_id):
     trig_rpeak_sh = make_trig(rpeak_times, 0, PW, total_time)
     trig_s14 = make_trig(rpeak_times, 5 / FS, PW, total_time)
     trig_s69 = make_trig(rpeak_times, 25 / FS, PW, total_time)
-    trig_wid = make_trig(rpeak_times, 30 / FS, PW, total_time)
+    trig_wid = make_trig(rpeak_times, 10 / FS, PW, total_time)
     trig_bi_copy = make_trig(rpeak_times, 0.300, 0.002, total_time)
 
     lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")

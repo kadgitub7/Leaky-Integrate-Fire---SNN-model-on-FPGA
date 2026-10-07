@@ -81,6 +81,7 @@
 .subckt asic_frontend elec_l0_p elec_l0_n elec_l1_p elec_l1_n
 + rpeak_threshold
 + vth_14 vth_69 vth_83 vth_300 vth_10
++ vth_pw_base vth_pw_peak
 + f1_rr_ratio f2_rr_asym
 + f3_bi_l0 f4_bi_l1
 + f5_pwave f6_width f7_slope f8_symmetry
@@ -110,9 +111,10 @@ Xrr ecg_amp_l0 trig_rr_cap rpeak_pulse trig_rr_copy
 +   f1_rr_ratio f2_rr_asym rr_timer_node rr_ewma_node vdd vss vbias rr_timing
 
 * === 6. P-WAVE PREDICTOR ===
-* Uses timer/EWMA nodes exposed by rr_timing
+* Uses SF-shifted timer/EWMA nodes exposed by rr_timing
+* Thresholds vth_pw_base/peak set externally (SF-domain: ewma + offset)
 * Generates: trig_pw_base, trig_pw_peak, trig_rr_cap
-Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap vdd vss vbias pwave_predictor
+Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap vth_pw_base vth_pw_peak vdd vss vbias pwave_predictor
 
 * === 7. REMAINING FEATURE EXTRACTION CIRCUITS ===
 

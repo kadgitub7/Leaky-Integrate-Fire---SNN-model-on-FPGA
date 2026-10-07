@@ -1,0 +1,154 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning: can't parse 'pw_rr_cap_trig': ignored
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: pwave_predictor_cf_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+timer_node                                 0.5
+ewma_node                                 0.12
+vth_base                                 0.215
+vth_peak                                 0.181
+xpw.cnb                                0.29708
+xpw.ctb                             0.00754496
+pw_base_trig                         0.0075651
+xpw.cnp                               0.324164
+xpw.ctp                             0.00332396
+pw_peak_trig                        0.00333242
+xpw.cnc                                0.37716
+xpw.ctc                            0.000692237
+rr_cap_trig                        0.000693951
+vth_peak#branch                              0
+vth_base#branch                              0
+vewma#branch                                 0
+vtimer#branch                                0
+vbias#branch                                 0
+vss#branch                         6.04936e-11
+vdd#branch                        -6.04937e-11
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_-50ms find v(pw_rr_cap_trig) at=0.963333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_-20ms find v(pw_rr_cap_trig) at=0.993333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_-5ms find v(pw_rr_cap_trig) at=1.008333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_+0ms find v(pw_rr_cap_trig) at=1.013333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_+5ms find v(pw_rr_cap_trig) at=1.018333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_+20ms find v(pw_rr_cap_trig) at=1.033333 failed!
+
+Error: no such vector as v(pw_rr_cap_trig).
+ .meas tran ewma_+50ms find v(pw_rr_cap_trig) at=1.063333 failed!
+
+
+No. of Data Rows : 1208
+
+  Measurements for Transient Analysis
+
+base_-50ms          =  2.954121e-02
+timer_base_-50ms    =  2.337500e-01
+base_-20ms          =  4.799098e-02
+timer_base_-20ms    =  2.225000e-01
+base_-5ms           =  1.050736e-01
+timer_base_-5ms     =  2.168750e-01
+base_+0ms           =  2.731750e-01
+timer_base_+0ms     =  2.150000e-01
+base_+5ms           =  5.689930e-01
+timer_base_+5ms     =  2.131250e-01
+base_+20ms          =  8.512491e-01
+timer_base_+20ms    =  2.075000e-01
+base_+50ms          =  8.754552e-01
+timer_base_+50ms    =  1.962500e-01
+peak_-50ms          =  2.547411e-02
+timer_peak_-50ms    =  1.997499e-01
+peak_-20ms          =  4.437026e-02
+timer_peak_-20ms    =  1.884999e-01
+peak_-5ms           =  1.069542e-01
+timer_peak_-5ms     =  1.828749e-01
+peak_+0ms           =  2.742623e-01
+timer_peak_+0ms     =  1.809999e-01
+peak_+5ms           =  5.645479e-01
+timer_peak_+5ms     =  1.791249e-01
+peak_+20ms          =  8.520899e-01
+timer_peak_+20ms    =  1.734999e-01
+peak_+50ms          =  8.756583e-01
+timer_peak_+50ms    =  1.622499e-01
+timer_ewma_-50ms    =  1.387501e-01
+timer_ewma_-20ms    =  1.275001e-01
+timer_ewma_-5ms     =  1.218751e-01
+timer_ewma_+0ms     =  1.200001e-01
+timer_ewma_+5ms     =  1.181251e-01
+timer_ewma_+20ms    =  1.125001e-01
+timer_ewma_+50ms    =  1.012501e-01
+base_at600          =  1.320082e-02
+peak_at600          =  5.505408e-03
+cap_at600           =  1.112467e-03
+tmr_at600           =  2.750000e-01
+base_at650          =  1.747927e-02
+peak_at650          =  6.988372e-03
+cap_at650           =  1.385916e-03
+tmr_at650           =  2.562500e-01
+base_at700          =  2.645264e-02
+peak_at700          =  9.596386e-03
+cap_at700           =  1.841695e-03
+tmr_at700           =  2.375000e-01
+base_at750          =  6.844597e-02
+peak_at750          =  1.447123e-02
+cap_at750           =  2.607573e-03
+tmr_at750           =  2.187500e-01
+base_at800          =  8.706994e-01
+peak_at800          =  2.524080e-02
+cap_at800           =  3.912087e-03
+tmr_at800           =  2.000000e-01
+base_at850          =  8.860939e-01
+peak_at850          =  2.415309e-01
+cap_at850           =  6.189339e-03
+tmr_at850           =  1.812500e-01
+base_at900          =  8.923233e-01
+peak_at900          =  8.753885e-01
+cap_at900           =  1.036800e-02
+tmr_at900           =  1.625000e-01
+base_at950          =  8.955605e-01
+peak_at950          =  8.877053e-01
+cap_at950           =  1.906384e-02
+tmr_at950           =  1.437500e-01
+base_at1000         =  8.973771e-01
+peak_at1000         =  8.931215e-01
+cap_at1000          =  5.505897e-02
+tmr_at1000          =  1.250000e-01
+base_at1050         =  8.984317e-01
+peak_at1050         =  8.959947e-01
+cap_at1050          =  8.693866e-01
+tmr_at1050          =  1.062500e-01
+
+
+Total analysis time (seconds) = 0.204
+
+Total elapsed time (seconds) = 8.170 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2290.312 MB.
+Maximum ngspice program size =   49.199 MB.
+Current ngspice program size =   49.199 MB.
+
