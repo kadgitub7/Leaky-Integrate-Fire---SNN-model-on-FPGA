@@ -88,7 +88,7 @@ def load_all_beats(record_id):
             'ecg_l1': beat[:, min(1, n_leads-1)].copy(),
             'py_bi_l0': py_bi_l0, 'py_bi_l1': py_bi_l1,
             'py_pw': beat[PW_MID, 0] - beat[PW_S, 0],
-            'py_wid': beat[RPEAK_IDX+QRS_S+30, 0],
+            'py_wid': beat[RPEAK_IDX+QRS_S+10, 0],
             'py_slp': beat[RPEAK_IDX+QRS_S+5, 0] - beat[RPEAK_IDX+QRS_S+25, 0],
             'py_sym': beat[RPEAK_IDX+QRS_S, 0],
         })

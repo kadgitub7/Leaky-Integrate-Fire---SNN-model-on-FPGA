@@ -1,7 +1,7 @@
 * FEATURES 3 & 4: Beat-to-beat Amplitude Instability
 *
 * Captures ECG at R-peak, compares with EWMA of previous peaks.
-* Output: signed difference (curr - prev), proportional via diode loads.
+* Output: signed difference (curr - prev), amplified via current mirror loads.
 *
 * Triggers: capture_trig (at R-peak), copy_trig (R+300ms, between beats)
 * One instance per lead (L0 and L1).
@@ -20,11 +20,11 @@ XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
 XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
-* Diff pair with diode-connected PMOS loads
+* Diff pair with PMOS current mirror active load
 XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMi1 net_i1 curr_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMi2 instab_out prev_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMi4 instab_out net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
 .ends beat_instability
