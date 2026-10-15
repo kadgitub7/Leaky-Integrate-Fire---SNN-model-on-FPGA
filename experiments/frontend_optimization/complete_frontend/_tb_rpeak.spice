@@ -2,22 +2,37 @@ R-Peak Detector Testbench
 .lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
 .option scale=1.0u method=gear gmin=1e-15
 
+.include "bias_gen.spice"
 .include "rpeak_detector.spice"
 
 Vdd vdd 0 0.9
 Vss vss 0 0
-Vbias vbias 0 0.3
-Vthresh threshold 0 0.36
 
-Vecg ecg_in 0 PWL(0.0000 0.3 0.3000 0.3 0.3100 0.42 0.3300 0.42 0.3400 0.3 0.3400 0.3 0.6400 0.3 0.6500 0.42 0.6700 0.42 0.6800 0.3 0.6800 0.3 0.9800 0.3 0.9900 0.42 1.0100 0.42 1.0200 0.3)
+Xbias vbias vref vdd vss bias_gen
 
-Xrpeak ecg_in threshold rpeak_out vdd vss vbias rpeak_detector
+* ECG-like signal: baseline 0.30V with R-peak pulses
+* Varied amplitudes to test threshold discrimination
+* Peak 1: 0.42V (strong), Peak 2: 0.38V (moderate), Peak 3: 0.34V (below threshold)
+Vecg ecg_in 0 PWL(
++ 0 0.30
++ 0.045 0.30 0.048 0.35 0.050 0.42 0.052 0.35 0.055 0.30
++ 0.145 0.30 0.148 0.33 0.150 0.38 0.152 0.33 0.155 0.30
++ 0.245 0.30 0.248 0.32 0.250 0.34 0.252 0.32 0.255 0.30
++ 0.345 0.30 0.348 0.36 0.350 0.45 0.352 0.36 0.355 0.30
++ 0.400 0.30)
 
-.tran 0.1m 1.22 uic
+* Threshold at 0.36V
+Vth threshold 0 0.36
+
+Xrpk ecg_in threshold rpeak_out vdd vss vbias rpeak_detector
+
+.ic v(xbias.iref) = 0.3
+
+.tran 50u 400m uic
 
 .control
 run
 set wr_singlescale
-wrdata C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/_tb_rpeak_data.txt v(rpeak_out) v(ecg_in)
+wrdata C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/_tb_rpeak_data.txt v(ecg_in) v(rpeak_out) v(threshold)
 .endc
 .end

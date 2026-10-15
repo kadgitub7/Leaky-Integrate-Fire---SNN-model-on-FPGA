@@ -15,9 +15,9 @@ XMsp ecg_in sample_peak_trig shp vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 XCsp shp vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
 XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
-XMd1 dnet shb dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-XMd2 pw_out shp dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
-XMd4 pw_out dnet vdd vdd sky130_fd_pr__pfet_01v8 L=1 W=4 nf=1
+XMd1 dnet shp dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2 pw_out shb dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMd4 pw_out pw_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 
 .ends pwave_diff

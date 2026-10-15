@@ -27,25 +27,33 @@
 
 .subckt pwave_predictor timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig vth_base vth_peak vdd vss vbias
 
-* Comparator: fires when timer_node drops below base threshold (R-206ms)
-XMcb1 cnb vth_base ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
-XMcb2 pw_base_trig timer_node ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+* Two-stage comparator for base trigger (R-206ms)
+* Diff pair inputs: M1=timer_node, M2=vth_base
+* When timer < threshold: M1 draws less → stg1 goes HIGH → inverter output HIGH
+XMcb1 cnb timer_node ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcb2 stg1_base vth_base ctb vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
 XMcb3 cnb cnb vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMcb4 pw_base_trig cnb vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcb4 stg1_base cnb vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcb5 ctb vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMcb6 pw_base_trig stg1_base vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMcb7 pw_base_trig stg1_base vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 
-* Comparator: fires when timer_node drops below peak threshold (R-131ms)
-XMcp1 cnp vth_peak ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
-XMcp2 pw_peak_trig timer_node ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+* Two-stage comparator for peak trigger (R-131ms)
+XMcp1 cnp timer_node ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcp2 stg1_peak vth_peak ctp vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
 XMcp3 cnp cnp vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMcp4 pw_peak_trig cnp vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcp4 stg1_peak cnp vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcp5 ctp vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMcp6 pw_peak_trig stg1_peak vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMcp7 pw_peak_trig stg1_peak vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 
-* Comparator: fires when timer_node drops to EWMA level (RR capture, ~R-5ms)
-XMcc1 cnc ewma_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
-XMcc2 rr_cap_trig timer_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+* Two-stage comparator for RR capture (~R-5ms)
+XMcc1 cnc timer_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMcc2 stg1_cap ewma_node ctc vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
 XMcc3 cnc cnc vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMcc4 rr_cap_trig cnc vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMcc4 stg1_cap cnc vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMcc5 ctc vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMcc6 rr_cap_trig stg1_cap vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMcc7 rr_cap_trig stg1_cap vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 
 .ends pwave_predictor

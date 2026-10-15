@@ -1,416 +1,250 @@
 """
-MLP SIZE SWEEP — Find the smallest MLP that matches RF 95.70% accuracy
-=======================================================================
-Uses the same 8-feature pipeline and DS1/DS2 inter-patient split as
-frontend_optimization.py. Replicates the exact RF baseline, then sweeps
-MLP architectures from tiny to large to find the crossover point.
+MLP SIZE SWEEP — Find smallest MLP matching RF 95.70% on the fixed 8 features.
 
-Goal: smallest network (fewest MACs → lowest crossbar energy) that
-      fully preserves the RF accuracy of 95.70%.
+Step 1: extract + cache features (run once, ~5 min)
+Step 2: sweep MLPs on cached data (fast, <1 min)
 
-Run one group at a time for parallelism:
-  python experiments/Complete_imp/classifier/mlp_size_sweep.py --group small
-  python experiments/Complete_imp/classifier/mlp_size_sweep.py --group medium
-  python experiments/Complete_imp/classifier/mlp_size_sweep.py --group large
-  python experiments/Complete_imp/classifier/mlp_size_sweep.py --group xlarge
-
-Or run all:
-  python experiments/Complete_imp/classifier/mlp_size_sweep.py --group all
+python experiments/Complete_imp/classifier/mlp_size_sweep.py
 """
-import sys, os, copy, argparse, json, time
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'frontend_optimization'))
-
-import torch
-import torch.nn as nn
+import os, sys, time, json
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score, confusion_matrix
-from collections import Counter
+import warnings
+warnings.filterwarnings('ignore')
 
-torch.set_num_threads(4)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CACHE_FILE = os.path.join(SCRIPT_DIR, 'features_8_cache.npz')
 
-FEATURE_NAMES_8 = [
-    'rr_ratio', 'beat_instability_L1', 'rr_asymmetry', 'pwave_energy_L1',
-    'qrs_width_L0', 'beat_instability_L0', 'slope_ratio_L0', 'qrs_symmetry_L0',
+ALL_FEATURE_NAMES = [
+    'pre_rr','post_rr','rr_ratio','rr_asymmetry','compensatory_ratio','rr_std_10','rr_std_20',
+    'qrs_width_L0','qrs_width_L1','qrs_area_L0','qrs_area_L1','max_slope_L0','max_slope_L1',
+    'peak_amp_L0','peak_amp_L1','qrs_energy_L0','qrs_energy_L1','slope_ratio_L0','slope_ratio_L1',
+    'rel_area_L0','rel_area_L1','rel_width_L0','rel_width_L1','rel_peak_L0','rel_peak_L1',
+    'templ_corr_L0','templ_corr_L1','area_ratio_L0L1','width_diff_L0L1','corr_L0L1',
+    'pwave_energy_L0','pwave_energy_L1','st_discordance_L0','st_discordance_L1',
+    'qrs_symmetry_L0','qrs_symmetry_L1','interlead_divergence',
+    'beat_instability_L0','beat_instability_L1',
 ]
-N_FEATURES = 8
-N_CLASSES = 5
-CLASS_NAMES = ['N', 'S', 'V', 'F', 'Q']
-
-# PDK-validated energy constants
+FEATURE_NAMES_8 = [
+    'rr_ratio','beat_instability_L1','rr_asymmetry','pwave_energy_L1',
+    'qrs_width_L0','beat_instability_L0','slope_ratio_L0','qrs_symmetry_L0',
+]
+FEAT_IDX = [ALL_FEATURE_NAMES.index(f) for f in FEATURE_NAMES_8]
+N_CLASSES = 5; CLASS_NAMES = ['N','S','V','F','Q']
 E_PER_MAC_PJ_NOM = 1.2679
 
-# Architecture groups for parallel execution
-ARCH_GROUPS = {
-    'small': [
-        # 1 hidden layer, tiny
-        (8,),
-        (10,),
-        (12,),
-        (16,),
-        (20,),
-        (24,),
-    ],
-    'medium': [
-        # 1 hidden layer, moderate
-        (32,),
-        (48,),
-        (64,),
-        # 2 hidden layers, tiny
-        (8, 4),
-        (10, 5),
-        (12, 6),
-    ],
-    'large': [
-        # 2 hidden layers, moderate
-        (16, 8),
-        (20, 10),
-        (24, 12),
-        (32, 16),
-        (48, 24),
-        (64, 32),
-    ],
-    'xlarge': [
-        # 2 hidden layers, large
-        (96, 48),
-        (128, 64),
-        # 3 hidden layers
-        (32, 16, 8),
-        (64, 32, 16),
-        (128, 64, 32),
-    ],
-}
+def build_cache():
+    """Extract features from MIT-BIH and cache to disk."""
+    import wfdb
+    from scipy.signal import butter, filtfilt
 
-NUM_SEEDS = 10
-NUM_EPOCHS = 300
-BATCH_SIZE = 128
-LR_INIT = 2e-3
-WEIGHT_DECAY = 1e-4
+    aami_map = {}
+    for s in ['N','L','R','e','j']: aami_map[s]=0
+    for s in ['A','a','J','S']:     aami_map[s]=1
+    for s in ['V','E']:             aami_map[s]=2
+    for s in ['F']:                 aami_map[s]=3
+    for s in ['/','f','Q']:         aami_map[s]=4
 
-# ================================================================
-# DATA
-# ================================================================
+    DS1 = ['101','106','108','109','112','114','115','116','118','119',
+           '122','124','201','203','205','207','208','209','215','220','223','230']
+    DS2 = ['100','103','105','111','113','117','121','200','202','210',
+           '212','213','214','219','221','222','228','231','232','233','234']
+
+    FS=360; WIN_L=90; WIN_R=108; QRS_S=70; QRS_E=130; PW_S=16; PW_E=QRS_S
+    ST_S=144; ST_E=min(173,WIN_L+WIN_R); N_TEMPLATE=6
+    EWMA_ALPHA=0.015; EWMA_GATE=0.85; EWMA_INIT=10; N_FEAT=39
+    b,a = butter(2,[3.0/(FS/2),8.0/(FS/2)],btype='band')
+
+    def extract(rec_list):
+        labels, feats = [], []
+        for rec_id in rec_list:
+            path = os.path.join('./mitdb_data', rec_id)
+            try:
+                rec=wfdb.rdrecord(path); ann=wfdb.rdann(path,'atr')
+                sig=rec.p_signal; fs=rec.fs; nl=min(sig.shape[1],2)
+                pwf=np.zeros_like(sig)
+                for ld in range(nl):
+                    try: pwf[:,ld]=filtfilt(b,a,sig[:,ld])
+                    except: pass
+                valid=[(i,s) for i,s in zip(ann.sample,ann.symbol) if i-WIN_L>=0 and i+WIN_R<len(sig) and s in aami_map]
+                ewa=[None]*nl;eww=[None]*nl;ewp=[None]*nl;ewt=[None]*nl
+                ia=[[] for _ in range(nl)];iw=[[] for _ in range(nl)];ip_=[[] for _ in range(nl)];it_=[[] for _ in range(nl)]
+                rrh=[];pp=[None]*nl
+                for vi,(idx,sym) in enumerate(valid):
+                    bt=sig[idx-WIN_L:idx+WIN_R,:];bpw=pwf[idx-WIN_L:idx+WIN_R,:]
+                    prr=(idx-valid[vi-1][0])/fs if vi>0 else 0.833
+                    porr=(valid[vi+1][0]-idx)/fs if vi<len(valid)-1 else 0.833
+                    lrrs=[(valid[j][0]-valid[j-1][0])/fs for j in range(max(1,vi-20),vi+1)]
+                    lrr=np.mean(lrrs) if lrrs else 0.833
+                    rrh.append(prr)
+                    if len(rrh)>20: rrh.pop(0)
+                    f=np.zeros(N_FEAT,dtype=np.float32)
+                    f[0]=prr;f[1]=porr;f[2]=prr/(lrr+1e-8);f[3]=prr/(porr+1e-8)
+                    f[4]=(prr+porr)/(2*lrr+1e-8)
+                    f[5]=np.std(rrh[-10:]) if len(rrh)>=2 else 0.0
+                    f[6]=np.std(rrh) if len(rrh)>=2 else 0.0
+                    qs=[];ws=[];ars=[];pas_=[]
+                    for ld in range(nl):
+                        q=bt[QRS_S:QRS_E,ld];aq=np.abs(q)
+                        pk=np.max(aq) if len(aq)>0 else 0.0;ar=np.sum(aq)/fs
+                        w=0.0
+                        if pk>1e-6:
+                            th=0.3*pk;ab=aq>th
+                            if np.any(ab): w=(len(ab)-1-np.argmax(ab[::-1])-np.argmax(ab))*1000.0/fs
+                        dq=np.diff(q)*fs;ms=np.max(np.abs(dq)) if len(dq)>0 else 0.0
+                        en=np.sum(q**2)/fs
+                        if len(dq)>0: sr=max(np.max(dq),1e-8)/(max(abs(np.min(dq)),1e-8)+1e-8)
+                        else: sr=1.0
+                        ti=np.linspace(0,len(q)-1,N_TEMPLATE).astype(int);qd=q[ti]
+                        if vi<EWMA_INIT:
+                            ia[ld].append(max(ar,1e-6));iw[ld].append(max(w,1e-6))
+                            ip_[ld].append(max(pk,1e-6));it_[ld].append(qd.copy())
+                        if ewa[ld] is None:
+                            if vi>=EWMA_INIT-1 and len(ia[ld])>=EWMA_INIT:
+                                ewa[ld]=np.median(ia[ld]);eww[ld]=np.median(iw[ld])
+                                ewp[ld]=np.median(ip_[ld]);ewt[ld]=np.median(it_[ld],axis=0)
+                            else:
+                                ewa[ld]=max(ar,1e-6);eww[ld]=max(w,1e-6)
+                                ewp[ld]=max(pk,1e-6);ewt[ld]=qd.copy()
+                        nc=np.linalg.norm(qd);nt=np.linalg.norm(ewt[ld])
+                        tc=np.dot(qd,ewt[ld])/(nc*nt+1e-8) if nc>1e-8 and nt>1e-8 else 1.0
+                        if tc>EWMA_GATE:
+                            al=EWMA_ALPHA
+                            ewa[ld]=al*max(ar,1e-6)+(1-al)*ewa[ld];eww[ld]=al*max(w,1e-6)+(1-al)*eww[ld]
+                            ewp[ld]=al*max(pk,1e-6)+(1-al)*ewp[ld];ewt[ld]=al*qd+(1-al)*ewt[ld]
+                        f[7+ld]=w;f[9+ld]=ar;f[11+ld]=ms;f[13+ld]=pk;f[15+ld]=en;f[17+ld]=sr
+                        f[19+ld]=ar/(ewa[ld]+1e-8);f[21+ld]=w/(eww[ld]+1e-8)
+                        f[23+ld]=pk/(ewp[ld]+1e-8);f[25+ld]=tc
+                        qs.append(q);ws.append(w);ars.append(ar);pas_.append(pk)
+                        pw=bpw[PW_S:PW_E,ld];f[30+ld]=np.sum(pw**2)/fs
+                        qi=np.sum(q)/fs;se=min(ST_E,bt.shape[0]);ss_=bt[ST_S:se,ld]
+                        si=np.sum(ss_)/fs if len(ss_)>0 else 0.0
+                        f[32+ld]=(1.0 if qi>=0 else -1.0)*si
+                        if pk>1e-6:
+                            pi=np.argmax(aq);th=0.3*pk;ab=aq>th
+                            if np.any(ab):
+                                on=np.argmax(ab);qw=max(w,1e-6)*fs/1000.0
+                                sy=np.clip((pi-on)/(qw+1e-8),0.0,1.0)
+                            else: sy=0.5
+                        else: sy=0.5
+                        f[34+ld]=sy
+                        if pp[ld] is not None and pp[ld]>1e-6: ins=abs(pk-pp[ld])/(pp[ld]+1e-8)
+                        else: ins=0.0
+                        f[37+ld]=ins;pp[ld]=pk
+                    if nl==2:
+                        f[27]=ars[0]/(ars[1]+1e-8);f[28]=abs(ws[0]-ws[1])
+                        n0=np.linalg.norm(qs[0]);n1=np.linalg.norm(qs[1])
+                        f[29]=np.dot(qs[0],qs[1])/(n0*n1+1e-8) if n0>1e-8 and n1>1e-8 else 0.0
+                        f[36]=(ars[0]-ars[1])**2/(ars[0]**2+ars[1]**2+1e-8)
+                    labels.append(aami_map[sym]);feats.append(f)
+            except Exception as e:
+                print(f"  Skip {rec_id}: {e}")
+        return np.array(labels), np.array(feats)
+
+    print("Extracting DS1 (train)...")
+    y_tr, X_tr_all = extract(DS1)
+    print(f"  {len(y_tr)} beats")
+    print("Extracting DS2 (test)...")
+    y_te, X_te_all = extract(DS2)
+    print(f"  {len(y_te)} beats")
+
+    X_tr = X_tr_all[:, FEAT_IDX]; X_te = X_te_all[:, FEAT_IDX]
+    mu, sd = X_tr.mean(0), X_tr.std(0)+1e-8
+    X_tr = (X_tr-mu)/sd; X_te = (X_te-mu)/sd
+
+    np.savez(CACHE_FILE, X_tr=X_tr, y_tr=y_tr, X_te=X_te, y_te=y_te)
+    print(f"Cached to {CACHE_FILE}")
+    return X_tr, y_tr, X_te, y_te
 
 def load_data():
-    from frontend_optimization import (
-        extract_all_features, ALL_FEATURE_NAMES, DS1, DS2
-    )
-
-    print("Extracting 8 features from MIT-BIH...")
-    train_labels, train_features, _ = extract_all_features(DS1)
-    test_labels, test_features, _ = extract_all_features(DS2)
-
-    feat_indices = [ALL_FEATURE_NAMES.index(f) for f in FEATURE_NAMES_8]
-    X_train = train_features[:, feat_indices]
-    X_test = test_features[:, feat_indices]
-
-    tr_mean = X_train.mean(axis=0)
-    tr_std = X_train.std(axis=0) + 1e-8
-    X_train_norm = (X_train - tr_mean) / tr_std
-    X_test_norm = (X_test - tr_mean) / tr_std
-
-    return X_train_norm, train_labels, X_test_norm, test_labels
-
-# ================================================================
-# RF BASELINE (exact reproduction of frontend_optimization.py)
-# ================================================================
-
-def run_rf_baseline(X_train, y_train, X_test, y_test):
-    print("\n" + "=" * 80)
-    print("RANDOM FOREST BASELINE (n_estimators=300, max_depth=15, balanced)")
-    print("=" * 80)
-
-    rf = RandomForestClassifier(
-        n_estimators=300, max_depth=15, random_state=42,
-        n_jobs=-1, class_weight='balanced'
-    )
-    rf.fit(X_train, y_train)
-    preds = rf.predict(X_test)
-    acc = np.mean(preds == y_test) * 100
-    f1s = f1_score(y_test, preds, average=None, zero_division=0)
-    cm = confusion_matrix(y_test, preds)
-
-    print(f"  Accuracy: {acc:.2f}%")
-    print(f"  F1 scores: N={f1s[0]:.3f} S={f1s[1]:.3f} V={f1s[2]:.3f} F={f1s[3]:.3f} Q={f1s[4]:.3f}")
-    print(f"  Confusion matrix:")
-    print(f"  {'':>5} {'N':>6} {'S':>6} {'V':>6} {'F':>6} {'Q':>6}")
-    for i, lbl in enumerate(CLASS_NAMES):
-        print(f"  {lbl:>5} {' '.join(f'{v:>6}' for v in cm[i])}")
-
-    recalls = cm.diagonal() / cm.sum(axis=1)
-    print(f"  Per-class recall: N={recalls[0]:.3f} S={recalls[1]:.3f} V={recalls[2]:.3f} F={recalls[3]:.3f} Q={recalls[4]:.3f}")
-
-    return acc, f1s, cm
-
-# ================================================================
-# SMOTE
-# ================================================================
-
-def smote_oversample(X, y, ratio=0.33):
-    counts = Counter(y)
-    majority_count = max(counts.values())
-    target = int(majority_count * ratio)
-
-    X_new, y_new = [X.copy()], [y.copy()]
-    for cls, cnt in counts.items():
-        if cnt >= target:
-            continue
-        n_syn = target - cnt
-        cls_idx = np.where(y == cls)[0]
-        for _ in range(n_syn):
-            i, j = np.random.choice(cls_idx, 2, replace=True)
-            lam = np.random.rand()
-            X_new.append((X[i] * lam + X[j] * (1 - lam)).reshape(1, -1))
-            y_new.append(np.array([cls]))
-
-    return np.vstack(X_new), np.concatenate(y_new)
-
-# ================================================================
-# MLP MODEL
-# ================================================================
-
-class MLP(nn.Module):
-    def __init__(self, hidden_sizes):
-        super().__init__()
-        layers = []
-        prev = N_FEATURES
-        for h in hidden_sizes:
-            layers.append(nn.Linear(prev, h))
-            layers.append(nn.BatchNorm1d(h))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(0.1))
-            prev = h
-        layers.append(nn.Linear(prev, N_CLASSES))
-        self.net = nn.Sequential(*layers)
-
-        self.macs = 0
-        prev = N_FEATURES
-        for h in hidden_sizes:
-            self.macs += prev * h
-            prev = h
-        self.macs += prev * N_CLASSES
-
-        self.n_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
-        self.n_layers = len(hidden_sizes) + 1
-
-    def forward(self, x):
-        return self.net(x)
-
-# ================================================================
-# FOCAL LOSS
-# ================================================================
-
-class FocalLoss(nn.Module):
-    def __init__(self, weight, gamma=2.0):
-        super().__init__()
-        self.weight = weight
-        self.gamma = gamma
-
-    def forward(self, logits, targets):
-        ce = nn.functional.cross_entropy(logits, targets, weight=self.weight, reduction='none')
-        pt = torch.exp(-ce)
-        return ((1 - pt) ** self.gamma * ce).mean()
-
-# ================================================================
-# TRAIN ONE CONFIG
-# ================================================================
-
-def train_eval_one(X_train, y_train, X_test, y_test, hidden_sizes, seed):
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-
-    X_tr_s, y_tr_s = smote_oversample(X_train, y_train)
-
-    X_tr = torch.tensor(X_tr_s, dtype=torch.float32)
-    y_tr = torch.tensor(y_tr_s, dtype=torch.long)
-    X_te = torch.tensor(X_test, dtype=torch.float32)
-    y_te = torch.tensor(y_test, dtype=torch.long)
-
-    counts = Counter(y_tr_s)
-    cls_weights = torch.tensor([1.0 / (counts.get(i, 1) ** 0.65) for i in range(N_CLASSES)])
-    cls_weights = cls_weights / cls_weights.sum() * N_CLASSES
-
-    sample_w = torch.tensor([cls_weights[c] for c in y_tr_s])
-    sampler = torch.utils.data.WeightedRandomSampler(sample_w, len(sample_w))
-    ds = torch.utils.data.TensorDataset(X_tr, y_tr)
-    loader = torch.utils.data.DataLoader(ds, batch_size=BATCH_SIZE, sampler=sampler)
-
-    model = MLP(hidden_sizes)
-    optimizer = torch.optim.Adam(model.parameters(), lr=LR_INIT, weight_decay=WEIGHT_DECAY)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=NUM_EPOCHS, eta_min=LR_INIT * 0.01)
-    criterion = FocalLoss(cls_weights, gamma=2.0)
-
-    best_acc = 0
-    best_state = None
-
-    for epoch in range(NUM_EPOCHS):
-        model.train()
-        for xb, yb in loader:
-            optimizer.zero_grad()
-            loss = criterion(model(xb), yb)
-            loss.backward()
-            optimizer.step()
-        scheduler.step()
-
-        if (epoch + 1) % 10 == 0:
-            model.eval()
-            with torch.no_grad():
-                preds = model(X_te).argmax(1).numpy()
-            acc = (preds == y_test).mean() * 100
-            if acc > best_acc:
-                best_acc = acc
-                best_state = copy.deepcopy(model.state_dict())
-
-    model.load_state_dict(best_state)
-    model.eval()
-    with torch.no_grad():
-        preds = model(X_te).argmax(1).numpy()
-
-    acc = (preds == y_test).mean() * 100
-    f1s = f1_score(y_test, preds, average=None, zero_division=0)
-    cm = confusion_matrix(y_test, preds)
-
-    return acc, f1s, cm, model.macs, model.n_params
-
-# ================================================================
-# MAIN
-# ================================================================
+    if os.path.exists(CACHE_FILE):
+        print(f"Loading cached features from {CACHE_FILE}")
+        d = np.load(CACHE_FILE)
+        return d['X_tr'], d['y_tr'], d['X_te'], d['y_te']
+    else:
+        print("No cache found, extracting features...")
+        return build_cache()
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--group', type=str, default='all',
-                        choices=['small', 'medium', 'large', 'xlarge', 'all'])
-    parser.add_argument('--seeds', type=int, default=NUM_SEEDS)
-    args = parser.parse_args()
+    from collections import Counter
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.metrics import f1_score
 
-    X_train, y_train, X_test, y_test = load_data()
-    print(f"Train: {len(y_train)} beats, Test: {len(y_test)} beats")
-    print(f"Train dist: {dict(sorted(Counter(y_train).items()))}")
-    print(f"Test dist:  {dict(sorted(Counter(y_test).items()))}")
+    X_tr, y_tr, X_te, y_te = load_data()
+    print(f"Train: {len(y_tr)}, Test: {len(y_te)}")
+    print(f"Train dist: {dict(sorted(Counter(y_tr).items()))}")
 
-    rf_acc, rf_f1s, rf_cm = run_rf_baseline(X_train, y_train, X_test, y_test)
+    # RF baseline
+    rf = RandomForestClassifier(n_estimators=300, max_depth=15, random_state=42,
+                                n_jobs=-1, class_weight='balanced')
+    rf.fit(X_tr, y_tr); rf_pred = rf.predict(X_te)
+    rf_acc = (rf_pred==y_te).mean()*100
+    rf_f1 = f1_score(y_te, rf_pred, average=None, zero_division=0)
+    print(f"\nRF BASELINE: {rf_acc:.2f}%  F1: N={rf_f1[0]:.3f} S={rf_f1[1]:.3f} V={rf_f1[2]:.3f} F={rf_f1[3]:.3f} Q={rf_f1[4]:.3f}")
 
-    if args.group == 'all':
-        architectures = []
-        for g in ['small', 'medium', 'large', 'xlarge']:
-            architectures.extend(ARCH_GROUPS[g])
-    else:
-        architectures = ARCH_GROUPS[args.group]
+    # MLP sweep
+    configs = [
+        (8,),(10,),(12,),(16,),(20,),(24,),(32,),(48,),(64,),(96,),(128,),
+        (8,4),(10,5),(12,6),(16,8),(20,10),(24,12),(32,16),(48,24),(64,32),
+        (32,16,8),(64,32,16),
+    ]
 
-    print(f"\n{'=' * 80}")
-    print(f"MLP SWEEP — group={args.group}, {len(architectures)} architectures, {args.seeds} seeds each")
-    print(f"RF baseline: {rf_acc:.2f}%")
-    print(f"{'=' * 80}")
+    print(f"\n{'='*90}")
+    print(f"MLP SWEEP: {len(configs)} configs x 5 seeds  |  RF={rf_acc:.2f}%")
+    print(f"{'='*90}")
 
     results = []
+    for hs in configs:
+        arch = "8-"+"-".join(str(h) for h in hs)+"-5"
+        macs=0;prev=8
+        for h in hs: macs+=prev*h;prev=h
+        macs+=prev*5
+        e_nj = macs*E_PER_MAC_PJ_NOM*1e-3
 
-    for hidden_sizes in architectures:
-        arch_str = "8-" + "-".join(str(h) for h in hidden_sizes) + "-5"
-        macs = 0
-        prev = N_FEATURES
-        for h in hidden_sizes:
-            macs += prev * h
-            prev = h
-        macs += prev * N_CLASSES
-
-        e_cells_nj = macs * E_PER_MAC_PJ_NOM * 1e-3
-
-        accs = []
-        all_f1s = {c: [] for c in CLASS_NAMES}
-        best_run = None
-
-        t0 = time.time()
-        for seed in range(args.seeds):
-            acc, f1s, cm, _, n_params = train_eval_one(
-                X_train, y_train, X_test, y_test, list(hidden_sizes), seed + 42
-            )
+        accs=[];f1a={c:[] for c in CLASS_NAMES}
+        t0=time.time()
+        for seed in range(5):
+            mlp = MLPClassifier(hidden_layer_sizes=hs, max_iter=500, random_state=seed+42,
+                                early_stopping=True, validation_fraction=0.1,
+                                learning_rate='adaptive', learning_rate_init=1e-3,
+                                alpha=1e-4, batch_size=128)
+            mlp.fit(X_tr, y_tr); pred=mlp.predict(X_te)
+            acc=(pred==y_te).mean()*100
+            f1=f1_score(y_te, pred, average=None, zero_division=0)
             accs.append(acc)
-            for ci, c in enumerate(CLASS_NAMES):
-                all_f1s[c].append(f1s[ci])
-            if best_run is None or acc > best_run[0]:
-                best_run = (acc, f1s, cm, n_params)
+            for ci,c in enumerate(CLASS_NAMES): f1a[c].append(f1[ci])
 
-        elapsed = time.time() - t0
-        mean_acc = np.mean(accs)
-        std_acc = np.std(accs)
-        max_acc = np.max(accs)
-        min_acc = np.min(accs)
+        el=time.time()-t0;mu=np.mean(accs);sd=np.std(accs);gap=mu-rf_acc
+        tag=">>>" if mu>=rf_acc else "   "
+        print(f"{tag} {arch:>18s}  MACs={macs:5d}  acc={mu:.2f}+/-{sd:.2f}  max={max(accs):.2f}  "
+              f"gap={gap:+.2f}%  S={np.mean(f1a['S']):.3f} V={np.mean(f1a['V']):.3f}  ({el:.1f}s)")
 
-        gap = mean_acc - rf_acc
-        marker = ">>>" if mean_acc >= rf_acc else "   "
+        results.append({'arch':arch,'hidden':list(hs),'macs':macs,'e_nj':round(e_nj,4),
+            'acc_mean':round(mu,3),'acc_std':round(sd,3),'acc_max':round(max(accs),3),'gap':round(gap,3),
+            'f1':{c:round(np.mean(f1a[c]),4) for c in CLASS_NAMES},'accs':[round(a,3) for a in accs]})
 
-        print(f"\n{marker} {arch_str:>22s}  MACs={macs:5d}  E_cells={e_cells_nj:.3f}nJ  "
-              f"params={best_run[3]:5d}")
-        print(f"    acc: {mean_acc:.2f} +/- {std_acc:.2f}%  "
-              f"[min={min_acc:.2f}, max={max_acc:.2f}]  "
-              f"gap={gap:+.2f}%  ({elapsed:.1f}s)")
-        f1_str = " ".join(f"{c}={np.mean(all_f1s[c]):.3f}" for c in CLASS_NAMES)
-        print(f"    F1: {f1_str}")
-
-        if mean_acc >= rf_acc:
-            print(f"    *** MATCHES OR EXCEEDS RF BASELINE ***")
-
-        results.append({
-            'arch': arch_str,
-            'hidden_sizes': list(hidden_sizes),
-            'macs': macs,
-            'params': best_run[3],
-            'n_layers': len(hidden_sizes) + 1,
-            'e_cells_nj': round(e_cells_nj, 4),
-            'acc_mean': round(mean_acc, 3),
-            'acc_std': round(std_acc, 3),
-            'acc_max': round(max_acc, 3),
-            'acc_min': round(min_acc, 3),
-            'gap_vs_rf': round(gap, 3),
-            'f1_mean': {c: round(np.mean(all_f1s[c]), 4) for c in CLASS_NAMES},
-            'all_accs': [round(a, 3) for a in accs],
-        })
-
-    # ── Summary ──
-    print("\n" + "=" * 80)
-    print("SUMMARY — sorted by accuracy (descending)")
-    print("=" * 80)
-    results.sort(key=lambda x: -x['acc_mean'])
-
-    print(f"{'Arch':>22} {'MACs':>6} {'Params':>6} {'Mean%':>7} {'Std':>5} "
-          f"{'Max%':>6} {'Gap':>7} {'E_cell':>7} "
-          f"{'N':>5} {'S':>5} {'V':>5}")
-    print("-" * 95)
+    results.sort(key=lambda x:-x['acc_mean'])
+    print(f"\n{'='*90}")
+    print(f"RANKED  |  RF = {rf_acc:.2f}%")
+    print(f"{'='*90}")
+    print(f"{'Arch':>18} {'MACs':>6} {'E(nJ)':>7} {'Mean%':>7} {'Max%':>6} {'Gap':>7} {'S':>5} {'V':>5}")
+    print("-"*75)
     for r in results:
-        gap_str = f"{r['gap_vs_rf']:+.2f}%"
-        marker = "*" if r['gap_vs_rf'] >= 0 else " "
-        print(f"{marker}{r['arch']:>21} {r['macs']:6d} {r['params']:6d} "
-              f"{r['acc_mean']:6.2f}% {r['acc_std']:5.2f} "
-              f"{r['acc_max']:5.2f}% {gap_str:>7} {r['e_cells_nj']:6.3f}nJ "
-              f"{r['f1_mean']['N']:5.3f} {r['f1_mean']['S']:5.3f} {r['f1_mean']['V']:5.3f}")
+        m="*" if r['gap']>=0 else " "
+        print(f"{m}{r['arch']:>17} {r['macs']:6d} {r['e_nj']:6.3f} {r['acc_mean']:6.2f}% "
+              f"{r['acc_max']:5.2f}% {r['gap']:+6.2f}% {r['f1']['S']:5.3f} {r['f1']['V']:5.3f}")
 
-    print(f"\nRF baseline: {rf_acc:.2f}%")
-
-    matches = [r for r in results if r['gap_vs_rf'] >= 0]
+    matches=[r for r in results if r['gap']>=0]
     if matches:
-        best = min(matches, key=lambda x: x['macs'])
-        print(f"\n>>> SMALLEST MLP matching RF: {best['arch']}")
-        print(f"    MACs: {best['macs']}, Params: {best['params']}")
-        print(f"    Accuracy: {best['acc_mean']:.2f}% +/- {best['acc_std']:.2f}%")
-        print(f"    E_cells: {best['e_cells_nj']:.3f} nJ (nominal, crossbar read only)")
+        best=min(matches,key=lambda x:x['macs'])
+        print(f"\n>>> SMALLEST MLP >= RF: {best['arch']}  MACs={best['macs']}  acc={best['acc_mean']:.2f}%  E={best['e_nj']:.3f}nJ")
     else:
-        print(f"\n>>> No MLP matched RF accuracy in this group. Try --group large or xlarge.")
-        closest = max(results, key=lambda x: x['acc_mean'])
-        print(f"    Closest: {closest['arch']} at {closest['acc_mean']:.2f}% (gap={closest['gap_vs_rf']:+.2f}%)")
+        c=results[0]
+        print(f"\n>>> No match. Closest: {c['arch']} at {c['acc_mean']:.2f}% (gap={c['gap']:+.2f}%)")
 
-    # ── Save ──
-    out_path = os.path.join(os.path.dirname(__file__), f'mlp_sweep_{args.group}.json')
-    export = {
-        'rf_baseline_acc': round(rf_acc, 3),
-        'rf_baseline_f1': {c: round(float(rf_f1s[i]), 4) for i, c in enumerate(CLASS_NAMES)},
-        'group': args.group,
-        'n_seeds': args.seeds,
-        'results': results,
-    }
-    with open(out_path, 'w') as f:
-        json.dump(export, f, indent=2)
-    print(f"\nResults saved to {out_path}")
+    out=os.path.join(SCRIPT_DIR,'mlp_sweep_results.json')
+    with open(out,'w') as f: json.dump({'rf_acc':round(rf_acc,3),'results':results},f,indent=2)
+    print(f"Saved to {out}")
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     main()

@@ -1,0 +1,48 @@
+* ============================================================
+* RISING-EDGE PULSE GENERATOR — Level to Pulse Converter
+* ============================================================
+*
+* Converts a step (level going HIGH and staying HIGH) into a
+* brief ~0.5ms pulse on the rising edge.
+*
+* Used between delay_timer/pwave_predictor comparator outputs
+* (which produce levels) and feature circuit S&H trigger inputs
+* (which need short pulses).
+*
+* Topology: AC coupling cap + subthreshold bleeder + inverter buffer
+*   1. Coupling cap (0.2pF) differentiates the level transition
+*   2. Bleeder NFET (vbias-controlled, ~150pA) discharges the
+*      coupled node back to 0V with τ ≈ C×ΔV/I ≈ 0.5ms
+*   3. Clamp NFET body diode prevents negative excursion on
+*      falling edge (timer reset)
+*   4. Inverter pair buffers the analog spike to a clean
+*      rail-to-rail pulse for the S&H gate
+*
+* Pulse width: set by C_couple and I_bleed
+*   t_pulse ≈ C_couple × (V_spike - V_inv_th) / I_bleed
+*         ≈ 0.25pF × (0.72V - 0.45V) / 150pA ≈ 0.45ms
+*
+* Pin: level_in pulse_out vdd vss vbias
+* ============================================================
+
+.subckt pulse_gen level_in pulse_out vdd vss vbias
+
+* AC coupling cap: 0.2pF (differentiates rising edge)
+XCac level_in pulse_raw sky130_fd_pr__cap_mim_m3_1 W=10 L=10
+
+* Bleeder: subthreshold NFET, ~150pA discharge current
+XMbleed pulse_raw vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Negative clamp: NFET body diode prevents pulse_raw < -0.6V
+* On falling edge (timer reset), coupling cap kicks pulse_raw negative.
+* Body diode clamps it, and bleeder NFET quickly recovers to 0V.
+XMclamp vss vss pulse_raw vss sky130_fd_pr__nfet_01v8 L=0.5 W=0.42 nf=1
+
+* Inverter buffer: converts analog spike to rail-to-rail pulse
+* Switching threshold ≈ VDD/2 ≈ 0.45V defines pulse width
+XMinv1_n inv1_out pulse_raw vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMinv1_p inv1_out pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMinv2_n pulse_out inv1_out vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMinv2_p pulse_out inv1_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+
+.ends pulse_gen

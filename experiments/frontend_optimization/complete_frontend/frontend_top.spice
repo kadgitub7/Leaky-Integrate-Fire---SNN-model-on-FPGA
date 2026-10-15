@@ -47,6 +47,7 @@
 .include "rpeak_detector.spice"
 .include "delay_timer.spice"
 .include "pwave_predictor.spice"
+.include "pulse_gen.spice"
 .include "inverter.spice"
 .include "rr_timing.spice"
 .include "beat_instability.spice"
@@ -95,43 +96,56 @@ Xia_l0 elec_l0_p elec_l0_n ecg_amp_l0 vdd vss vbias vref ia
 Xia_l1 elec_l1_p elec_l1_n ecg_amp_l1 vdd vss vbias vref ia
 
 * === 3. R-PEAK DETECTOR ===
-Xrpeak ecg_amp_l0 rpeak_threshold rpeak_pulse vdd vss vbias rpeak_detector
+* Comparator output is a level (HIGH during QRS); pulse_gen converts to brief pulse
+Xrpeak ecg_amp_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector
+Xpg_rpk rpeak_level rpeak_pulse vdd vss vbias pulse_gen
 
 * === 4. POST-R DELAY TIMER ===
 * Generates: trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
-Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
+Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy sf_delay_out
 + vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
 
-* === 5. FEATURE EXTRACTION — F1 & F2: RR Timing ===
-* Must be instantiated before P-wave predictor (provides timer/EWMA nodes)
-* trig_rr_cap comes from P-wave predictor's rr_capture comparator (~R-5ms)
-* rpeak_pulse serves as trig_rr_rpeak (precharge at R-peak)
-* trig_rr_copy from delay timer (R+10ms, EWMA charge-sharing)
-Xrr ecg_amp_l0 trig_rr_cap rpeak_pulse trig_rr_copy
+* === 5. PULSE GENERATORS ===
+* Convert delay_timer level outputs to brief S&H trigger pulses
+* Delay timer outputs go HIGH and stay HIGH; feature S&H gates need brief pulses
+Xpg_s14 trig_s14 pulse_s14 vdd vss vbias pulse_gen
+Xpg_s69 trig_s69 pulse_s69 vdd vss vbias pulse_gen
+Xpg_wid trig_wid pulse_wid vdd vss vbias pulse_gen
+Xpg_bi  trig_bi_copy pulse_bi vdd vss vbias pulse_gen
+Xpg_rr  trig_rr_copy pulse_rr_copy vdd vss vbias pulse_gen
+
+* === 6. FEATURE EXTRACTION — F1 & F2: RR Timing ===
+* trig_rr_cap comes from P-wave predictor (pulsed via pulse_gen)
+* rpeak_pulse serves as timer precharge (already a natural pulse)
+* pulse_rr_copy from delay timer (R+10ms, EWMA charge-sharing)
+Xrr ecg_amp_l0 pulse_rr_cap rpeak_pulse pulse_rr_copy
 +   f1_rr_ratio f2_rr_asym rr_timer_node rr_ewma_node vdd vss vbias rr_timing
 
-* === 6. P-WAVE PREDICTOR ===
+* === 7. P-WAVE PREDICTOR ===
 * Uses SF-shifted timer/EWMA nodes exposed by rr_timing
-* Thresholds vth_pw_base/peak set externally (SF-domain: ewma + offset)
-* Generates: trig_pw_base, trig_pw_peak, trig_rr_cap
 Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap vth_pw_base vth_pw_peak vdd vss vbias pwave_predictor
 
-* === 7. REMAINING FEATURE EXTRACTION CIRCUITS ===
+* Pulse generators for pwave predictor outputs
+Xpg_pwb trig_pw_base pulse_pw_base vdd vss vbias pulse_gen
+Xpg_pwp trig_pw_peak pulse_pw_peak vdd vss vbias pulse_gen
+Xpg_rrc trig_rr_cap pulse_rr_cap vdd vss vbias pulse_gen
+
+* === 8. REMAINING FEATURE EXTRACTION CIRCUITS ===
 
 * F3: Beat Instability — Lead 0
-Xbi_l0 ecg_amp_l0 rpeak_pulse trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
+Xbi_l0 ecg_amp_l0 rpeak_pulse pulse_bi f3_bi_l0 vdd vss vbias beat_instability
 
 * F4: Beat Instability — Lead 1
-Xbi_l1 ecg_amp_l1 rpeak_pulse trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
+Xbi_l1 ecg_amp_l1 rpeak_pulse pulse_bi f4_bi_l1 vdd vss vbias beat_instability
 
 * F5: P-wave Signed Difference (Lead 0)
-Xpwave ecg_amp_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
+Xpwave ecg_amp_l0 pulse_pw_base pulse_pw_peak f5_pwave vdd vss vbias pwave_diff
 
 * F6: QRS Width (Lead 0)
-Xwidth ecg_amp_l0 trig_wid f6_width vdd vss qrs_width
+Xwidth ecg_amp_l0 pulse_wid f6_width vdd vss qrs_width
 
 * F7: QRS Slope (Lead 0)
-Xslope ecg_amp_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
+Xslope ecg_amp_l0 pulse_s14 pulse_s69 f7_slope vdd vss vbias qrs_slope
 
 * F8: QRS Symmetry (Lead 0)
 Xsym ecg_amp_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry

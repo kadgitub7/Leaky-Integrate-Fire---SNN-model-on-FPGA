@@ -33,16 +33,16 @@ XCin_n inn ni_n sky130_fd_pr__cap_mim_m3_1 W=71 L=71
 * Pseudo-resistors for DC bias (>1 TΩ)
 * Back-to-back subthreshold PMOS diodes
 * Set DC of OTA inputs to VREF
-XMpr1a ni_p vdd vref vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
-XMpr1b vref vdd ni_p vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
-XMpr2a ni_n vdd out vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
-XMpr2b out vdd ni_n vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr1a ni_p ni_p vref vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr1b vref vref ni_p vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr2a ni_n ni_n out vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
+XMpr2b out out ni_n vdd sky130_fd_pr__pfet_01v8 L=10 W=0.42 nf=1
 
-* 5T OTA (subthreshold)
-XM1 net1 ni_p tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
-XM2 out ni_n tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
-XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* 5T OTA (subthreshold) — L=8 for higher ro and gain
+XM1 net1 ni_p tail vss sky130_fd_pr__nfet_01v8 L=8 W=2 nf=1
+XM2 out ni_n tail vss sky130_fd_pr__nfet_01v8 L=8 W=2 nf=1
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=8 W=2 nf=1
+XM4 out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=8 W=2 nf=1
 XM5 tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
 * Feedback capacitor (~0.1 pF) — sets gain = C_in/C_fb = 100
