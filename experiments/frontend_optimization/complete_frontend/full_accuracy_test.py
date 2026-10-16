@@ -3,7 +3,7 @@ Full inter-patient RF accuracy test — ALL 8 features from analog circuits.
 NO Python feature computation — everything from SKY130 SPICE circuits.
 
 Feature circuits (all SKY130 PDK analog):
-  F1/F2: rr_timing.spice    — EWMA alpha=0.50, real RR intervals
+  F1/F2: rr_timing.spice    — EWMA alpha=0.10, real RR intervals
   F3/F4: beat_instability.spice — TG S&H, diode diff pair (per lead)
   F5:    pwave_diff.spice    — diode diff pair
   F6:    qrs_width.spice     — NFET S&H
@@ -38,7 +38,7 @@ WIN_L, WIN_R = 90, 108
 QRS_S, QRS_E = 70, 130; RPEAK_IDX = 20
 PW_S = 16; PW_MID = 43
 BATCH_SIZE = 40
-EWMA_ALPHA = 0.50
+EWMA_ALPHA = 0.10
 
 DS1 = ['101','106','108','109','112','114','115','116','118','119',
        '122','124','201','203','205','207','208','209','215','220','223','230']
@@ -84,8 +84,8 @@ def load_all_beats(record_id):
             ewma_rr_before = ewma_rr
             ewma_rr = EWMA_ALPHA * pre_rr + (1 - EWMA_ALPHA) * ewma_rr
 
-        py_f1 = pre_rr / ewma_rr_before if ewma_rr_before > 0 else 1.0
-        py_f2 = pre_rr / post_rr if post_rr > 0 else 1.0
+        py_f1 = pre_rr - ewma_rr_before
+        py_f2 = pre_rr - post_rr
 
         prev_bs = valid[i-1][0] - WIN_L
         prev_be = valid[i-1][0] + WIN_R
@@ -395,8 +395,8 @@ print("=" * 70)
 print("FULL INTER-PATIENT ACCURACY TEST — ALL ANALOG FRONTEND")
 print("=" * 70)
 print("  ALL 8 features from SKY130 analog circuits:")
-print("    F1: RR ratio (EWMA, alpha=0.50)     — rr_timing.spice")
-print("    F2: RR asymmetry (curr/prev)         — rr_timing.spice")
+print("    F1: RR diff (rr-ewma, alpha=0.10)    — rr_timing.spice")
+print("    F2: RR asym (pre-post)               — rr_timing.spice")
 print("    F3: Beat instability L0              — beat_instability.spice")
 print("    F4: Beat instability L1              — beat_instability.spice")
 print("    F5: P-wave diff (diode loads)        — pwave_diff.spice")
@@ -407,7 +407,7 @@ print(f"  Classifier: RandomForest(n=300, depth=15, balanced)")
 print(f"  Dataset:    MIT-BIH, DS1 train ({len(DS1)} rec) / DS2 test ({len(DS2)} rec)")
 print()
 
-print("Running Python-proxy baseline (EWMA F1, alpha=0.50)...")
+print("Running Python-proxy baseline (diff-based F1/F2, alpha=0.10)...")
 t0 = time.time()
 py_acc, n_tr, n_te = run_python_baseline()
 print(f"  Python baseline: {py_acc*100:.2f}% (train={n_tr}, test={n_te}, {time.time()-t0:.1f}s)")

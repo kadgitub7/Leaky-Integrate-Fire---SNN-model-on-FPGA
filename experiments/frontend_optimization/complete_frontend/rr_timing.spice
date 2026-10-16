@@ -14,11 +14,12 @@
 *     PMOS precharges timer to VDD. sf_out jumps to ~0.5V.
 *   copy_trig: 2ms pulse, 10ms after rpeak
 *     Charge-shares esamp (5pF) ↔ ewma (45pF)
-*     ewma_new = 0.1*sf_val + 0.9*ewma_old
+*     ewma_new = 0.1*sf_val + 0.9*ewma_old  (alpha=0.10)
 *
 * Diff pair readout (valid just before capture_trig):
 *   rr_ratio: sf_out (current) vs ewma_node (average)
 *   rr_asym: sf_out (current) vs prev_node (previous beat)
+*   Diode-connected loads (gain ~1) for linear output
 *
 * Pin: ecg_unused capture_trig rpeak_trigger copy_trig
 *      rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
