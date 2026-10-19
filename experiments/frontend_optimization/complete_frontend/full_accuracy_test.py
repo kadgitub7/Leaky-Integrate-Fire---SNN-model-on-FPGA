@@ -129,12 +129,14 @@ def make_trig(rpeak_times, offset_s, pulse_w, total_time):
     return make_pwl(pts)
 
 
-def generate_batch_testbench(beats_batch, gain, batch_id, record_id):
+def generate_batch_testbench(beats_batch, gain, batch_id, record_id, ic_vals=None):
+    if ic_vals is None:
+        ic_vals = {}
     n = len(beats_batch)
     dt = 1.0 / FS
     PW = 0.0005
 
-    rpeak_times = [2.0]
+    rpeak_times = [max(beats_batch[0]['pre_rr'], 0.5)]
     for i in range(1, n):
         rpeak_times.append(rpeak_times[-1] + beats_batch[i]['pre_rr'])
     total_time = rpeak_times[-1] + 0.5
@@ -212,14 +214,19 @@ Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
 Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
 Xsym ecg_l0 trig_rpeak_sh f8_symmetry vdd vss qrs_symmetry
 
-.ic V(xrr.ewma_node)=0.40 V(xrr.esamp_node)=0.40 V(xrr.prev_node)=0.40
-.ic V(xbi0.prev_node)=0.30 V(xbi0.esamp_node)=0.30
-.ic V(xbi1.prev_node)=0.30 V(xbi1.esamp_node)=0.30
+.ic V(xrr.net_timer)={ic_vals.get('rr_timer', VDD):.6f}
+.ic V(xrr.ewma_node)={ic_vals.get('rr_ewma', 0.40):.6f}
+.ic V(xrr.esamp_node)={ic_vals.get('rr_esamp', 0.40):.6f}
+.ic V(xrr.prev_node)={ic_vals.get('rr_prev', 0.40):.6f}
+.ic V(xbi0.prev_node)={ic_vals.get('bi0_prev', 0.30):.6f}
+.ic V(xbi0.esamp_node)={ic_vals.get('bi0_esamp', 0.30):.6f}
+.ic V(xbi1.prev_node)={ic_vals.get('bi1_prev', 0.30):.6f}
+.ic V(xbi1.esamp_node)={ic_vals.get('bi1_esamp', 0.30):.6f}
 
 .tran 0.5m {total_time:.4f}
 
 """
-    f12_skip = 5
+    f12_skip = 2
     f38_skip = 2
     skip = max(f12_skip, f38_skip)
 
@@ -242,6 +249,17 @@ Xsym ecg_l0 trig_rpeak_sh f8_symmetry vdd vss qrs_symmetry
             sp += f".meas tran f6_{j} FIND V(f6_width) AT={t_f38:.7f}\n"
             sp += f".meas tran f7_{j} FIND V(f7_slope) AT={t_f38:.7f}\n"
             sp += f".meas tran f8_{j} FIND V(f8_symmetry) AT={t_f38:.7f}\n"
+
+    t_ic = rpeak_times[-1] + 0.100
+    if t_ic < total_time - 0.01:
+        sp += f"\n* IC propagation measurements\n"
+        sp += f".meas tran ic_rr_ewma FIND V(xrr.ewma_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_rr_esamp FIND V(xrr.esamp_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_rr_prev FIND V(xrr.prev_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_bi0_prev FIND V(xbi0.prev_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_bi0_esamp FIND V(xbi0.esamp_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_bi1_prev FIND V(xbi1.prev_node) AT={t_ic:.7f}\n"
+        sp += f".meas tran ic_bi1_esamp FIND V(xbi1.esamp_node) AT={t_ic:.7f}\n"
 
     sp += "\n.end\n"
 
@@ -292,6 +310,7 @@ def process_record(record_id):
     n_circuit = 0
     n_fallback = 0
 
+    ic_vals = None
     for b_idx in range(n_batches):
         start = b_idx * BATCH_SIZE
         end = min((b_idx + 1) * BATCH_SIZE, len(beats))
@@ -299,8 +318,21 @@ def process_record(record_id):
         if len(batch) < 6:
             continue
 
-        tb, skip = generate_batch_testbench(batch, gain, b_idx, record_id)
+        tb, skip = generate_batch_testbench(batch, gain, b_idx, record_id, ic_vals)
         results = run_ngspice(tb)
+
+        if results is not None:
+            next_ic = {}
+            for key, meas_name in [('rr_ewma', 'ic_rr_ewma'), ('rr_esamp', 'ic_rr_esamp'),
+                                   ('rr_prev', 'ic_rr_prev'), ('bi0_prev', 'ic_bi0_prev'),
+                                   ('bi0_esamp', 'ic_bi0_esamp'), ('bi1_prev', 'ic_bi1_prev'),
+                                   ('bi1_esamp', 'ic_bi1_esamp')]:
+                v = results.get(meas_name)
+                if v is not None:
+                    next_ic[key] = v
+            next_ic['rr_timer'] = VDD
+            if next_ic:
+                ic_vals = next_ic
 
         if results is None:
             n_fallback += len(batch) - skip
