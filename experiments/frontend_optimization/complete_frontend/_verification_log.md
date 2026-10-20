@@ -39,15 +39,42 @@
 | F7:slope    | >= 0.995 | 12/16 | Very strong; failures at 0.992-0.994. |
 | F8:symmetry | >= 0.995 | 16/16 | Perfect — all records pass. |
 
-### Finding: F1/F2 thresholds not achievable with current rr_timing.spice
+### NOTE: Above results are PRE-FIX (no IC propagation, 0.5ms capture, F2 measured during capture overwrite)
 
-The rr_timing circuit's charge-sharing RR ratio computation produces output voltages in a very narrow range (~0.28-0.33V). For records with regular rhythm (e.g., 101), the RR variations are so small that the circuit output is nearly constant (CV=1.5%), making rank correlation unreliable. Records with more arrhythmia (106, 119, 203) show higher |rho| (0.82-0.89) but still below the 0.97 threshold.
+### F1/F2 Fixes Applied (2026-10-19)
+1. IC propagation between simulation batches (ewma, esamp, prev nodes)
+2. 55ms capture pulse (was 0.5ms) for source follower settling
+3. F2 measurement moved to rpeak-65ms (before capture window opens)
 
-This is inherent to the circuit design, not a regression. The v3 threshold values for F1/F2 may need to be revisited.
+### Post-Fix Baseline (16-record all-8 test, IN PROGRESS)
+| Rec | F1     | F2     | F3     | F4     | F5     | F6     | F7     | F8     |
+|-----|--------|--------|--------|--------|--------|--------|--------|--------|
+| 100 | 0.995  | 0.999  | 0.988  | 0.994  | 0.996  | 0.998  | 0.998  | 0.996  |
+(Remaining 15 records still running)
 
-### Conclusion
+---
 
-- **F6, F7, F8**: BASELINE CEMENTED — consistently meet or nearly meet thresholds across all records
-- **F3, F4**: Strong but threshold may be slightly aggressive for some records
-- **F5**: Good (0.95-0.99) but threshold of 0.995 is only met by 1/16 records
-- **F1, F2**: Threshold not achievable with current circuit — needs investigation
+## Phase 2: Supplementary Circuit Isolation (2026-10-19)
+
+### bias_gen
+- [PASS] vbias=0.2915V (spec 0.29±0.01V), 67pA supply, stable by 1ms
+
+### rpeak_detector
+- [KNOWN OFFSET] Fires 1-5ms early on QRS upslope at 90% avg peak threshold
+- Mean offset=-2.7ms, std=1.4ms across 5 beats (record 100)
+- Accepted: systematic offset preserves Spearman ranking
+
+### pulse_gen
+- [FIX → PASS] Bleeder NFET W: 0.42→1.5 (3.6× more discharge current)
+- Result: 0.41ms pulse (spec 0.5±0.2ms), 0.90V amplitude, clean quiescent
+
+### delay_timer (5 triggers, 4 iterations of threshold calibration)
+- [PASS] All within ±0.5ms of target
+- Thresholds: vth_10=0.2905V, vth_14_fast=0.2100V, vth_83=0.4714V, vth_69=0.4496V, vth_300=0.3323V
+- Final: rr_copy=-0.003ms, s14=+0.206ms, wid=-0.33ms, s69=+0.46ms, bi_copy=-0.18ms
+
+### pwave_predictor
+- [FUNCTIONAL] pw_base: 207.7ms before next R (target 206ms, err -1.7ms)
+- pw_peak: 134.7ms before next R (target 131ms, err -3.7ms)
+- rr_cap: 30ms before next R (target 5ms) — larger offset required for comparator to resolve before timer reset
+- Thresholds for RR=800ms: vth_base=0.1902V, vth_peak=0.1580V, ewma_offset=+30mV

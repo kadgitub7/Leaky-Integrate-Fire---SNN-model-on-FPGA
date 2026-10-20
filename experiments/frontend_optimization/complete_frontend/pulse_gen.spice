@@ -31,7 +31,7 @@
 XCac level_in pulse_raw sky130_fd_pr__cap_mim_m3_1 W=10 L=10
 
 * Bleeder: subthreshold NFET, ~150pA discharge current
-XMbleed pulse_raw vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMbleed pulse_raw vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=1.5 nf=1
 
 * Negative clamp: NFET body diode prevents pulse_raw < -0.6V
 * On falling edge (timer reset), coupling cap kicks pulse_raw negative.

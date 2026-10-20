@@ -162,7 +162,7 @@ def generate_batch_testbench(beats_batch, gain, batch_id, record_id, ic_vals=Non
     ecg_l1_pts.append((total_time, VBASE))
 
     trig_rpeak = make_trig(rpeak_times, 0, PW, total_time)
-    trig_rr_cap = make_trig(rpeak_times, -0.005, PW, total_time)
+    trig_rr_cap = make_trig(rpeak_times, -0.060, 0.055, total_time)
     trig_rr_copy = make_trig(rpeak_times, 0.010, 0.002, total_time)
     trig_pw_base = make_trig(rpeak_times, -(WIN_L - PW_S) / FS, PW, total_time)
     trig_pw_peak = make_trig(rpeak_times, -(WIN_L - PW_MID) / FS, PW, total_time)
@@ -236,10 +236,11 @@ Xsym ecg_l0 trig_rpeak_sh f8_symmetry vdd vss qrs_symmetry
         if t_f1 > 0.5:
             sp += f".meas tran f1_{j} FIND V(f1_rr_ratio) AT={t_f1:.7f}\n"
 
-        # F2 for beat j: measure at rpeak[j+1]-10ms (circuit needs next rpeak)
+        # F2 for beat j: measure BEFORE next capture window (next_rpeak-65ms)
         if j + 1 < n:
-            t_f2 = rpeak_times[j + 1] - 0.010
-            sp += f".meas tran f2_{j} FIND V(f2_rr_asym) AT={t_f2:.7f}\n"
+            t_f2 = rpeak_times[j + 1] - 0.065
+            if t_f2 > 0.5:
+                sp += f".meas tran f2_{j} FIND V(f2_rr_asym) AT={t_f2:.7f}\n"
 
         t_f38 = rpeak_times[j] + 0.100
         if t_f38 < total_time - 0.01:

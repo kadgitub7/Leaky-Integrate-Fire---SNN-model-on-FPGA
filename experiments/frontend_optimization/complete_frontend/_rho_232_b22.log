@@ -1,0 +1,119 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: rho_232_b22
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+ecg_l0                                     0.3
+ecg_l1                                     0.3
+trig_rpeak                                   0
+trig_rr_cap                                  0
+trig_rr_copy                                 0
+trig_pw_base                                 0
+trig_pw_peak                                 0
+trig_rpeak_sh                                0
+trig_s14                                     0
+trig_s69                                     0
+trig_wid                                     0
+trig_bi_copy                                 0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                              0.9
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                            0.483229
+xrr.prev_node                         0.270048
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                        0.360314
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                         0.360748
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.24211
+xrr.net_r1                            0.270341
+f1_rr_ratio                           0.379539
+xrr.tail_a                            0.240807
+xrr.net_a1                            0.268787
+f2_rr_asym                            0.462984
+rr_timer                              0.483229
+rr_ewma                               0.360748
+xbi0.curr_node                       0.0711868
+xbi0.xccurr.a                                0
+xbi0.xccurr.b1                               0
+xbi0.esamp_node                       0.365802
+xbi0.xcesamp.a                               0
+xbi0.xcesamp.b1                              0
+xbi0.prev_node                        0.337099
+xbi0.xcprev.a                                0
+xbi0.xcprev.b1                               0
+xbi0.tail_i                           0.136456
+xbi0.net_i1                           0.520622
+f3_bi_l0                              0.269304
+xbi1.curr_node                       0.0711868
+xbi1.xccurr.a                                0
+xbi1.xccurr.b1                               0
+xbi1.esamp_node                       0.250983
+xbi1.xcesamp.a                               0
+xbi1.xcesamp.b1                              0
+xbi1.prev_node                        0.246629
+xbi1.xcprev.a                                0
+xbi1.xcprev.b1                               0
+xbi1.tail_i                          0.0681459
+xbi1.net_i1                           0.438108
+f4_bi_l1                              0.271264
+xpw.shb                              0.0711868
+xpw.xcsb.a                                   0
+xpw.xcsb.b1                                  0
+xpw.shp                              0.0711868
+xpw.xcsp.a                                   0
+xpw.xcsp.b1                                  0
+xpw.dtail                           0.00413651
+xpw.dnet                              0.361353
+f5_pwave                              0.361353
+f6_width                             0.0711868
+xwid.xcsh.a                                  0
+xwid.xcsh.b1                                 0
+xslp.sh14                            0.0711868
+xslp.xcs14.a                                 0
+xslp.xcs14.b1                                0
+xslp.sh69                            0.0711868
+xslp.xcs69.a                                 0
+xslp.xcs69.b1                                0
+xslp.dtail                          0.00418137
+xslp.dnet                             0.421156
+f7_slope                              0.421156
+f8_symmetry                           0.448967
+xsym.trig_inv                              0.9
+xsym.xcsr.a                                  0
+xsym.xcsr.b1                                 0
+vbco#branch                                  0
+vwid#branch                                  0
+vs69#branch                                  0
+vs14#branch                                  0
+vrsh#branch                                  0
+vpwp#branch                                  0
+vpwb#branch                                  0
+vrry#branch                                  0
+vrrc#branch                                  0
+vrpk#branch                                  0
+vecg1#branch                      -2.94896e-14
+vecg0#branch                      -1.25075e-13
+vbias#branch                                 0
+vss#branch                          2.6228e-10
+vdd#branch                        -2.17925e-10
+
