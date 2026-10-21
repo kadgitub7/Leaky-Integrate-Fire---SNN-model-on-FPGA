@@ -30,7 +30,7 @@ XMp2 vbias iref vdd vdd sky130_fd_pr__pfet_01v8 L=8 W=0.42 nf=1
 XMn1 iref iref vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
 * NFET output: diode-connected, generates vbias
-XMn2 vbias vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMn2 vbias vbias vss vss sky130_fd_pr__nfet_01v8 L=12 W=0.42 nf=1
 
 * VREF = VBIAS (same operating point for IA)
 R_ref vbias vref 0

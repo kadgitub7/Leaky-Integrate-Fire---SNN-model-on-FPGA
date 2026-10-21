@@ -46,35 +46,113 @@
 2. 55ms capture pulse (was 0.5ms) for source follower settling
 3. F2 measurement moved to rpeak-65ms (before capture window opens)
 
-### Post-Fix Baseline (16-record all-8 test, IN PROGRESS)
-| Rec | F1     | F2     | F3     | F4     | F5     | F6     | F7     | F8     |
-|-----|--------|--------|--------|--------|--------|--------|--------|--------|
-| 100 | 0.995  | 0.999  | 0.988  | 0.994  | 0.996  | 0.998  | 0.998  | 0.996  |
-(Remaining 15 records still running)
+### Post-Fix Baseline (16-record all-8 test, COMPLETE 2026-10-20)
+| Rec | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 | Pass |
+|-----|------|------|------|------|------|------|------|------|------|
+| 100 | 0.995 | 0.999 | 0.988 | 0.994 | 0.996 | 0.998 | 0.998 | 0.996 | 8/8 |
+| 103 | 0.992 | 0.999 | 0.989 | 0.981 | 0.994 | 0.999 | 0.998 | 0.998 | 6/8 |
+| 107 | 0.996 | 0.999 | 0.965 | 0.991 | 0.990 | 1.000 | 1.000 | 1.000 | 6/8 |
+| 109 | 0.993 | 0.999 | 0.971 | 0.961 | 0.998 | 0.999 | 0.999 | 1.000 | 6/8 |
+| 112 | 0.998 | 0.998 | 0.985 | 0.987 | 0.985 | 0.998 | 0.993 | 0.998 | 6/8 |
+| 117 | 0.992 | 0.999 | 0.993 | 0.998 | 0.991 | 0.999 | 0.982 | 0.999 | 6/8 |
+| 119 | 0.999 | 1.000 | 0.986 | 0.978 | 0.999 | 1.000 | 1.000 | 0.999 | 7/8 |
+| 123 | 0.980 | 0.999 | 0.993 | 0.994 | 0.990 | 0.997 | 0.998 | 0.997 | 6/8 |
+| 200 | 1.000 | 1.000 | 0.987 | 0.985 | 0.989 | 0.999 | 0.996 | 1.000 | 6/8 |
+| 205 | 0.984 | 0.994 | 0.943 | 0.980 | 0.988 | 0.998 | 0.994 | 0.996 | 3/8 |
+| 208 | 0.996 | 1.000 | 0.993 | 0.991 | 0.989 | 0.999 | 0.998 | 0.996 | 7/8 |
+| 212 | 0.997 | 0.998 | 0.988 | 0.992 | 0.985 | 0.999 | 0.998 | 0.999 | 7/8 |
+| 217 | 0.998 | 1.000 | 0.987 | 0.976 | 0.985 | 0.999 | 0.999 | 1.000 | 6/8 |
+| 221 | 1.000 | 1.000 | 0.986 | 0.971 | 0.985 | 0.999 | 0.981 | 0.999 | 5/8 |
+| 228 | 1.000 | 1.000 | 0.987 | 0.991 | 0.993 | 0.999 | 0.998 | 1.000 | 7/8 |
+| 232 | 0.992 | 0.999 | 0.985 | 0.981 | 0.989 | 0.999 | 0.997 | 1.000 | 6/8 |
+
+Summary: F1 0/16 fail, F2 1/16 fail, F3 3/16, F4 8/16, F5 13/16, F6 2/16, F7 4/16, F8 0/16
 
 ---
 
-## Phase 2: Supplementary Circuit Isolation (2026-10-19)
+## Phase 2: Supplementary Circuit Isolation — ±0.5% Tolerance (2026-10-20)
 
-### bias_gen
-- [PASS] vbias=0.2915V (spec 0.29±0.01V), 67pA supply, stable by 1ms
+### bias_gen (XMn2 L=8→L=12)
+- [PASS ±0.5%] vbias=0.30031V (target 0.300V, error +0.10%), 67pA supply, stable by 1ms
+
+### pulse_gen (XMbleed W=0.42→W=1.34)
+- [PASS ±0.5%] Pulse width=0.498ms (target 0.500ms, error -0.38%), 0.90V amplitude, clean quiescent
+- Test condition: 0.4ms input ramp (matching comparator output rise time)
+
+### delay_timer — recalibrated thresholds for real bias_gen (vbias=0.30031V)
+- [PASS ±0.5%] All 5 triggers within ±0.3%
+- Thresholds: vth_10=0.2892V, vth_14_fast=0.2117V, vth_83=0.47093V, vth_69=0.44934V, vth_300=0.3303V
+- Results: rr_copy=9.978ms(-0.22%), s14=13.903ms(+0.02%), wid=27.778ms(-0.08%), s69=69.381ms(-0.03%), bi_copy=300.915ms(+0.30%)
 
 ### rpeak_detector
-- [KNOWN OFFSET] Fires 1-5ms early on QRS upslope at 90% avg peak threshold
-- Mean offset=-2.7ms, std=1.4ms across 5 beats (record 100)
-- Accepted: systematic offset preserves Spearman ranking
+- [MARGINAL] Fires 1-5ms early on QRS upslope (mean -2.7ms, std 1.4ms)
+- At RR=800ms: mean error -0.34%, worst case -0.51% (at boundary)
+- Systematic offset cancels for most features (triggers are relative to detected R-peak)
+- Needs evaluation in Phase 3 integration
 
-### pulse_gen
-- [FIX → PASS] Bleeder NFET W: 0.42→1.5 (3.6× more discharge current)
-- Result: 0.41ms pulse (spec 0.5±0.2ms), 0.90V amplitude, clean quiescent
+### pwave_predictor — calibrated thresholds for real bias_gen
+- [PASS ±0.5%] pw_base: 206.57ms before next R (target 206ms, +0.28%)
+  - vth_base = 0.1874V
+- [PASS ±0.5%] pw_peak: 130.55ms before next R (target 131ms, -0.34%)
+  - vth_peak = 0.1538V
+- [FUNDAMENTAL ISSUE] rr_cap: fires 34.5ms before next R (target 5ms)
+  - SF rate at 800ms is only 0.47 mV/ms → comparator cannot resolve within 5ms
+  - Consistent offset should preserve Spearman ranking; to be verified in Phase 3
 
-### delay_timer (5 triggers, 4 iterations of threshold calibration)
-- [PASS] All within ±0.5ms of target
-- Thresholds: vth_10=0.2905V, vth_14_fast=0.2100V, vth_83=0.4714V, vth_69=0.4496V, vth_300=0.3323V
-- Final: rr_copy=-0.003ms, s14=+0.206ms, wid=-0.33ms, s69=+0.46ms, bi_copy=-0.18ms
+### Comprehensive Integration Test v1 (2026-10-20)
+- [FAIL] 3-beat test (rpeak at 10/810/1610ms): pulse_gen fails for slow-transitioning signals
+- Root cause: Main timer comparator output transitions ~0.4ms; coupling current (0.49nA) ≈ bleeder current (0.48nA) → pulse_raw never reaches inverter threshold
+- Affected: wid, s69, bi_copy (main timer), pw_base, pw_peak, rr_cap (pwave predictor)
+- Not affected: s14, rr_copy (fast timer — edges naturally fast enough)
 
-### pwave_predictor
-- [FUNCTIONAL] pw_base: 207.7ms before next R (target 206ms, err -1.7ms)
-- pw_peak: 134.7ms before next R (target 131ms, err -3.7ms)
-- rr_cap: 30ms before next R (target 5ms) — larger offset required for comparator to resolve before timer reset
-- Thresholds for RR=800ms: vth_base=0.1902V, vth_peak=0.1580V, ewma_offset=+30mV
+### edge_buffer.spice — Fix for slow comparator transitions
+- Two cascaded inverter_sub instances sharpen ~0.4ms transition to ~10ns
+- Applied between delay_timer main timer outputs / pwave outputs and pulse_gen inputs
+- New file: `complete_frontend/edge_buffer.spice`
+
+### Comprehensive Integration Test v2 (2026-10-20)
+- [PASS] ALL 8 pulse generators fire correctly (0.9V amplitude, 0.6-0.7ms width)
+- Beat 1 timing: rr_copy -0.39%*, s14 -0.24%, wid -0.15%, s69 -0.07%, bi_copy +0.28%, pw_base -0.13%, pw_peak -0.02%
+- Beat 2 timing: rr_copy 0%, s14 +0.29%, wid +0.18%, s69 +0.07%, bi_copy +0.32%
+- Pwave levels beat 2 consistent with beat 1 (pw_base -0.11%, pw_peak -0.006% from rpeak 3)
+- Bias stable: 0.30031V across full 2.5s simulation
+- (*rr_copy beat 1: 0.1ms timestep gives -0.85%, but 0.01ms timestep gives -0.39%; measurement resolution artifact)
+- Pulse widths: 0.6-0.7ms (slightly wider than 0.5ms target due to sharper buffered edge; acceptable for S&H settling)
+
+---
+
+## Phase 4: Full Analog Integration (2026-10-20)
+
+### Round 1: All triggers use standard pulse_gen (0.7ms pulse)
+- [PARTIAL] F1,F2,F5,F6,F7,F8: all within ±0.005 of ideal baseline
+- [FAIL] F3:bi_L0 degraded: 0.895 vs 0.956 ideal (-0.061)
+- [FAIL] F4:bi_L1 degraded: 0.870 vs 0.988 ideal (-0.118)
+- Root cause isolated: analog bi_copy trigger (0.7ms pulse from edge_buffer+pulse_gen)
+- Isolation test (3 modes on rec 100, 36 beats):
+  - ideal: F3=0.956, F4=0.988
+  - all analog: F3=0.895, F4=0.870
+  - analog+ideal_bi: F3=0.956, F4=0.988 (matches ideal exactly)
+
+### long_pulse_gen.spice — Fix for bi_copy EWMA charge-sharing
+- Same topology as pulse_gen but bleeder W=0.41 (vs W=1.34) for ~2ms pulse width
+- [PASS ±0.5%] Pulse width=1.990ms (target 2.000ms, error -0.5%), 0.90V amplitude
+- New file: `complete_frontend/long_pulse_gen.spice`
+
+### Round 2: bi_copy uses long_pulse_gen (1.99ms pulse), all others use pulse_gen (0.7ms)
+- [PASS] Record 100 (36 beats): F3=0.9560, F4=0.9884 — exact match with ideal baseline
+- All 8 features within ±0.005 of ideal (F1 actually improved: 0.857 vs 0.829)
+- Full 5-record test COMPLETE (9887 beats, ~9 hours):
+
+| Rec | Beats | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |
+|-----|-------|------|------|------|------|------|------|------|------|
+| 100 | 1929 | 0.991 | 0.999 | 0.985 | 0.992 | 0.996 | 0.998 | 0.997 | 0.996 |
+| 119 | 1683 | 0.996 | 1.000 | 0.983 | 0.974 | 0.999 | 1.000 | 0.994 | 0.999 |
+| 208 | 2509 | 0.994 | 1.000 | 0.982 | 0.985 | 0.989 | 0.999 | 0.998 | 0.996 |
+| 232 | 1511 | 0.982 | 0.999 | 0.980 | 0.982 | 0.989 | 0.999 | 0.994 | 1.000 |
+| 205 | 2255 | 0.980 | 0.994 | 0.942 | 0.979 | 0.989 | 0.998 | 0.990 | 0.996 |
+
+- Comparison vs ideal baseline (delta from post-fix Phase 0):
+  - Most features within ±0.005 of ideal
+  - Largest deltas: rec 208 F3 (-0.011), rec 232 F1 (-0.010)
+  - Record 205 F3=0.942 matches ideal baseline (0.943) — inherent to record
+  - F3/F4 degradation from Round 1 (0.7ms bi_copy) fully resolved by long_pulse_gen

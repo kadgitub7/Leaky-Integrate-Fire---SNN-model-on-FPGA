@@ -1,0 +1,94 @@
+* =================================================================
+* 5-Input Winner-Take-All (WTA) -- Analog Argmax
+* Architecture: 8 -> 64 -> 5 MLP Classifier (output stage)
+* Technology: SKY130 sky130_fd_pr__nfet_01v8 / sky130_fd_pr__pfet_01v8
+* =================================================================
+*
+* This circuit takes 5 input currents (or voltages proportional to
+* Layer 2 output scores) and produces a one-hot output indicating
+* which input is largest -- the analog equivalent of argmax().
+*
+* Topology: Lazzaro current-mode WTA
+*   - 5 NMOS input transistors share a common inhibitory node
+*   - Current mirror bias sets the total current budget
+*   - The cell with the largest input current wins the competition
+*   - Winner draws most of the bias current; losers are suppressed
+*
+*   Vin_k ---[M_in_k]---+---[M_fb_k]--- Vout_k
+*                       |
+*                   common_inhibit
+*                       |
+*                   [M_bias] --- Ibias
+*
+* Inputs:  Vin0..Vin4 (class scores from Layer 2 crossbar + bias)
+* Outputs: Vout0..Vout4 (winner is HIGH, losers are LOW)
+* =================================================================
+
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
+
+* --- Supply ---
+VDD vdd 0 1.8
+
+* --- Bias current source (sets competition strength) ---
+Ibias vdd nbias 10u
+Mbias nbias nbias 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+
+* --- 5 WTA cells ---
+* Cell 0 (N)
+Min0 comm0 in0 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mfb0 comm0 comm0 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mload0 out0 comm0 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Mpd0 out0 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+
+* Cell 1 (S)
+Min1 comm1 in1 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mfb1 comm1 comm1 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mload1 out1 comm1 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Mpd1 out1 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+
+* Cell 2 (V)
+Min2 comm2 in2 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mfb2 comm2 comm2 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mload2 out2 comm2 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Mpd2 out2 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+
+* Cell 3 (F)
+Min3 comm3 in3 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mfb3 comm3 comm3 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mload3 out3 comm3 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Mpd3 out3 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+
+* Cell 4 (Q)
+Min4 comm4 in4 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mfb4 comm4 comm4 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Mload4 out4 comm4 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Mpd4 out4 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+
+* --- Common inhibition node bias ---
+Minh inhib nbias 0 0 sky130_fd_pr__nfet_01v8 W=10.0u L=0.5u
+
+* --- Inputs (set to Layer 2 output scores, shifted to positive range) ---
+* In practice these come from TIA outputs of Layer 2 crossbar
+Vin0 in0 0 0.9  $ class N score
+Vin1 in1 0 0.9  $ class S score
+Vin2 in2 0 0.9  $ class V score
+Vin3 in3 0 0.9  $ class F score
+Vin4 in4 0 0.9  $ class Q score
+
+* --- Analysis ---
+.op
+
+.control
+run
+print v(out0)
+print v(out1)
+print v(out2)
+print v(out3)
+print v(out4)
+quit
+.endc
+
+.end
