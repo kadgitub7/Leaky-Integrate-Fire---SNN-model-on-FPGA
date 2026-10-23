@@ -29,46 +29,83 @@
 .include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice"
 .include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
 
+* --- PFET mismatch parameter fix (undefined in corner files) ---
+.param sky130_fd_pr__pfet_01v8__a0_diff = 0
+.param sky130_fd_pr__pfet_01v8__agidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__ags_diff = 0
+.param sky130_fd_pr__pfet_01v8__b0_diff = 0
+.param sky130_fd_pr__pfet_01v8__b1_diff = 0
+.param sky130_fd_pr__pfet_01v8__bgidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__cgidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__dlc_diff = 0
+.param sky130_fd_pr__pfet_01v8__dwc_diff = 0
+.param sky130_fd_pr__pfet_01v8__eta0_diff = 0
+.param sky130_fd_pr__pfet_01v8__k2_diff = 0
+.param sky130_fd_pr__pfet_01v8__keta_diff = 0
+.param sky130_fd_pr__pfet_01v8__kt1_diff = 0
+.param sky130_fd_pr__pfet_01v8__ku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__kvsat_diff = 0
+.param sky130_fd_pr__pfet_01v8__kvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__lint_diff = 0
+.param sky130_fd_pr__pfet_01v8__lku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__lkvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__nfactor_diff = 0
+.param sky130_fd_pr__pfet_01v8__pclm_diff = 0
+.param sky130_fd_pr__pfet_01v8__pdits_diff = 0
+.param sky130_fd_pr__pfet_01v8__pditsd_diff = 0
+.param sky130_fd_pr__pfet_01v8__rdsw_diff = 0
+.param sky130_fd_pr__pfet_01v8__tvoff_diff = 0
+.param sky130_fd_pr__pfet_01v8__u0_diff = 0
+.param sky130_fd_pr__pfet_01v8__ua_diff = 0
+.param sky130_fd_pr__pfet_01v8__ub_diff = 0
+.param sky130_fd_pr__pfet_01v8__voff_diff = 0
+.param sky130_fd_pr__pfet_01v8__vsat_diff = 0
+.param sky130_fd_pr__pfet_01v8__vth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wint_diff = 0
+.param sky130_fd_pr__pfet_01v8__wku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wkvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wlod_diff = 0
+
 * --- Supply ---
 VDD vdd 0 1.8
 
 * --- Bias current source (sets competition strength) ---
 Ibias vdd nbias 10u
-Mbias nbias nbias 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xbias nbias nbias 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
 
 * --- 5 WTA cells ---
 * Cell 0 (N)
-Min0 comm0 in0 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mfb0 comm0 comm0 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mload0 out0 comm0 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
-Mpd0 out0 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+Xin0 comm0 in0 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xfb0 comm0 comm0 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xload0 out0 comm0 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Xpd0 out0 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
 
 * Cell 1 (S)
-Min1 comm1 in1 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mfb1 comm1 comm1 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mload1 out1 comm1 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
-Mpd1 out1 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+Xin1 comm1 in1 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xfb1 comm1 comm1 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xload1 out1 comm1 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Xpd1 out1 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
 
 * Cell 2 (V)
-Min2 comm2 in2 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mfb2 comm2 comm2 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mload2 out2 comm2 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
-Mpd2 out2 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+Xin2 comm2 in2 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xfb2 comm2 comm2 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xload2 out2 comm2 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Xpd2 out2 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
 
 * Cell 3 (F)
-Min3 comm3 in3 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mfb3 comm3 comm3 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mload3 out3 comm3 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
-Mpd3 out3 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+Xin3 comm3 in3 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xfb3 comm3 comm3 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xload3 out3 comm3 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Xpd3 out3 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
 
 * Cell 4 (Q)
-Min4 comm4 in4 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mfb4 comm4 comm4 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
-Mload4 out4 comm4 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
-Mpd4 out4 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
+Xin4 comm4 in4 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xfb4 comm4 comm4 inhib 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xload4 out4 comm4 vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+Xpd4 out4 nbias 0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.5u
 
 * --- Common inhibition node bias ---
-Minh inhib nbias 0 0 sky130_fd_pr__nfet_01v8 W=10.0u L=0.5u
+Xinh inhib nbias 0 0 sky130_fd_pr__nfet_01v8 W=10.0u L=0.5u
 
 * --- Inputs (set to Layer 2 output scores, shifted to positive range) ---
 * In practice these come from TIA outputs of Layer 2 crossbar

@@ -1,0 +1,70 @@
+* =================================================================
+* Bias Injection Cell: Current Mirror
+* Technology: SKY130 NFET/PFET
+* =================================================================
+* Positive bias: PMOS mirror sources current from VDD.
+* Negative bias: NMOS mirror sinks current to GND.
+* Transistors: W=2.0u L=0.5u
+* =================================================================
+
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice"
+.param sky130_fd_pr__pfet_01v8__a0_diff = 0
+.param sky130_fd_pr__pfet_01v8__agidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__ags_diff = 0
+.param sky130_fd_pr__pfet_01v8__b0_diff = 0
+.param sky130_fd_pr__pfet_01v8__b1_diff = 0
+.param sky130_fd_pr__pfet_01v8__bgidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__cgidl_diff = 0
+.param sky130_fd_pr__pfet_01v8__dlc_diff = 0
+.param sky130_fd_pr__pfet_01v8__dwc_diff = 0
+.param sky130_fd_pr__pfet_01v8__eta0_diff = 0
+.param sky130_fd_pr__pfet_01v8__k2_diff = 0
+.param sky130_fd_pr__pfet_01v8__keta_diff = 0
+.param sky130_fd_pr__pfet_01v8__kt1_diff = 0
+.param sky130_fd_pr__pfet_01v8__ku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__kvsat_diff = 0
+.param sky130_fd_pr__pfet_01v8__kvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__lint_diff = 0
+.param sky130_fd_pr__pfet_01v8__lku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__lkvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__nfactor_diff = 0
+.param sky130_fd_pr__pfet_01v8__pclm_diff = 0
+.param sky130_fd_pr__pfet_01v8__pdits_diff = 0
+.param sky130_fd_pr__pfet_01v8__pditsd_diff = 0
+.param sky130_fd_pr__pfet_01v8__rdsw_diff = 0
+.param sky130_fd_pr__pfet_01v8__tvoff_diff = 0
+.param sky130_fd_pr__pfet_01v8__u0_diff = 0
+.param sky130_fd_pr__pfet_01v8__ua_diff = 0
+.param sky130_fd_pr__pfet_01v8__ub_diff = 0
+.param sky130_fd_pr__pfet_01v8__voff_diff = 0
+.param sky130_fd_pr__pfet_01v8__vsat_diff = 0
+.param sky130_fd_pr__pfet_01v8__vth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wint_diff = 0
+.param sky130_fd_pr__pfet_01v8__wku0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wkvth0_diff = 0
+.param sky130_fd_pr__pfet_01v8__wlod_diff = 0
+
+VDD vdd 0 1.8
+
+* === POSITIVE BIAS: PMOS current mirror ===
+Iref_p pref_p 0 5u
+Xref_p pref_p pref_p vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Xmirr_p pout pref_p vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Vmeas_p pout 0 0.9
+
+* === NEGATIVE BIAS: NMOS current mirror ===
+Iref_n vdd nref_n 3u
+Xref_n nref_n nref_n 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Xmirr_n nout nref_n 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Vmeas_n vdd nout 0
+
+.op
+.control
+run
+print i(Vmeas_p) i(Vmeas_n)
+quit
+.endc
+.end

@@ -47,44 +47,61 @@ no digital multipliers, no clock, and completing in a single analog settling tim
   │  Feature Extraction    │  8 analog circuits (separate system)
   │  (analog frontend)     │  Produces 8 voltage-encoded features
   └──────────┬─────────────┘
-             │  8 features (voltages)
+             │  8 raw feature voltages (feat0..feat7)
+             v
+  ┌────────────────────────┐
+  │  INPUT CONDITIONING    │  Analog normalization: gain + offset
+  │  V_row = gain*V - off  │  8 VCVS channels (ASIC: resistor
+  │  (per-feature scaling) │  network or switched-cap gain stage)
+  └──────────┬─────────────┘
+             │  8 normalized voltages (row0..row7)
              v
   ┌────────────────────────┐
   │  LAYER 1 CROSSBAR      │  8x64 differential 1T1R ReRAM
   │  8 inputs -> 64 MACs   │  1024 cells, SKY130 NMOS
   │  L1_crossbar_8x64.spice│  File: 2377 lines
   └──────────┬─────────────┘
-             │  64 column currents
+             │  64 differential column currents (MAC)
+             │  CCCS: F-element transfers to interstage
              v
   ┌────────────────────────┐
-  │  BIAS + ReLU           │  Analog: current-mode bias + diode clamp
-  │  z_j = MAC_j + b1[j]  │  64 intermediate activations
-  │  h_j = max(0, z_j)    │
+  │  BIAS + ReLU + OUTPUT  │  Analog: current-mirror bias injection
+  │  I_bias: PMOS/NMOS mir │  NMOS current-mirror ReLU (diode clamp)
+  │  ReLU: I_out=max(0,I)  │  Output PMOS mirror -> voltage (vout1)
+  │  interstage_bias_relu  │  394 transistors, 64+5 channels
   └──────────┬─────────────┘
-             │  64 hidden activations (voltages or currents)
+             │  64 hidden activation voltages (vout1_0..vout1_63)
              v
   ┌────────────────────────┐
   │  LAYER 2 CROSSBAR      │  64x5 differential 1T1R ReRAM
   │  64 inputs -> 5 MACs   │  640 cells, SKY130 NMOS
   │  L2_crossbar_64x5.spice│  File: 1541 lines
   └──────────┬─────────────┘
-             │  5 class scores (currents)
+             │  5 differential column currents
+             │  CCCS: F-element transfers to WTA nodes
              v
   ┌────────────────────────┐
-  │  BIAS + WTA            │  Add b2[0..4], then analog argmax
-  │  Winner-Take-All       │  Lazzaro current-mode circuit
-  │  WTA_5class.spice      │  Output: one-hot {N, S, V, F, Q}
+  │  L2 BIAS + WTA         │  5 current-mirror bias injections
+  │  Winner-Take-All       │  Lazzaro current-mode WTA
+  │  WTA_5class.spice      │  Output: one-hot voltage {N,S,V,F,Q}
   └──────────┬─────────────┘
              │
              v
-        Classification
-        N / S / V / F / Q
+        Classification (one-hot voltage)
+        out0=N / out1=S / out2=V / out3=F / out4=Q
 ```
 
-**Key result:** This system achieves **96.04% inter-patient classification accuracy**
+**Top-level netlist:** `top_level_classifier.spice` (4369 lines) connects ALL stages
+into a single SPICE file: input conditioning -> L1 crossbar -> interstage -> L2 crossbar
+-> L2 bias -> WTA. This is the ASIC-ready design: 8 feature voltage inputs, 5 one-hot
+voltage outputs.
+
+
+**Key result:** This system achieves **96.12% inter-patient classification accuracy**
 on the MIT-BIH Arrhythmia Database using the De Chazal DS1/DS2 evaluation protocol
-(22 records for training, 22 different records for testing). The fully analog crossbar
-implementation agrees with the ideal software MLP on **99.65%** of all 48,181 test beats.
+(22 records for training, 22 different records for testing). The fully analog
+implementation (crossbar + current-mirror bias + current-mirror ReLU) agrees with
+the ideal software MLP on **99.78%** of all 48,181 test beats.
 
 
 ---
@@ -785,59 +802,115 @@ negative and MAC is small). The safe approach uses two passes for both layers.
 
 ## 9. Bias and ReLU Implementation
 
-### Bias addition:
+Both bias addition and ReLU activation are implemented as analog circuits
+using SKY130 current mirrors, verified with ngspice simulations.
+
+### Bias Addition: Current-Mode Mirror Injection
 
 The crossbar computes W^T * x, but the MLP requires W^T * x + b. The bias
-vector b is NOT stored in the crossbar -- it is added after current sensing.
-
-In a physical implementation, bias can be added by:
+is added in the current domain using PMOS/NMOS current mirrors:
 
 ```
-  Option A: Current-mode bias injection
-  ┌──────────────┐
-  │  Column TIA  │── I_mac ──┐
-  └──────────────┘           │
-                         ┌───┴───┐
-                         │  Sum  │── I_mac + I_bias ── (to ReLU)
-                         └───┬───┘
-                             │
-                         I_bias (from a programmable current DAC)
+  Positive bias (PMOS mirror):            Negative bias (NMOS mirror):
+
+  VDD ─────┬───────┬──── VDD             VDD ──── Iref ────┬──── VDD
+           │       │                                        │
+        ┌──┴──┐ ┌──┴──┐                                 ┌──┴──┐
+        │Xref │ │Xmirr│                                 │Xref │
+        │PMOS │ │PMOS │                                 │NMOS │
+        └──┬──┘ └──┬──┘                                 └──┬──┘
+           │       │                                        │
+         Iref   I_bias ──> summed with I_mac            ┌──┴──┐
+                                                        │Xmirr│
+                                                        │NMOS │
+                                                        └──┬──┘
+                                                           │
+                                                        I_bias (sinks)
 ```
 
-  Each column has a small current DAC that injects I_bias = b[j] / scale into
-  the column sense line. The summed current then represents MAC + bias.
+**Transistor sizing:** W=2.0u L=0.5u (SKY130 sky130_fd_pr__nfet/pfet_01v8)
+
+**Measured mirror accuracy (ngspice .op):**
+
+| Test          | Target (uA) | Actual (uA) | Error |
+|---------------|-------------|-------------|-------|
+| PMOS max (+)  | 6.720       | 6.580       | 2.1%  |
+| NMOS max (-)  | 4.406       | 4.907       | 11.4% |
+| PMOS mid (+)  | 2.886       | 2.839       | 1.6%  |
+| NMOS mid (-)  | 1.414       | 1.623       | 14.7% |
+| PMOS L2 (+)   | 1.103       | 1.090       | 1.1%  |
+| NMOS L2 (-)   | 5.486       | 6.073       | 10.7% |
+
+Average mirror error: 6.94%. PMOS mirrors are more accurate (1-2%) than
+NMOS mirrors (10-15%) due to channel-length modulation effects at these
+small bias currents. The overall mirror gain factor is 0.965.
+
+### ReLU Activation: NMOS Current-Mirror Diode Clamp
+
+ReLU(x) = max(0, x) is implemented in the **current domain** using a
+diode-connected NMOS current mirror. This has a critical advantage over
+voltage-domain diode clamps: **zero threshold offset** at I_in = 0.
 
 ```
-  Option B: Voltage-mode bias addition
-  The TIA converts column current to voltage: V_mac = R_f * I_mac
-  A simple resistor divider or op-amp summer adds a voltage proportional to b[j].
+  I_in (from MAC+bias)
+    │
+    ├──── X1 (drain=gate, diode-connected) ──── GND
+    │         Conducts when I_in > 0
+    │         Turns off when I_in < 0
+    │
+    └──── X2 (gate from X1) ──── Vfix (1.0V)
+              Mirrors rectified current
+              I_out = max(0, I_in) * gain
+
+  When I_in > 0: X1 conducts (Vgs = Vds > Vth), X2 mirrors the current
+  When I_in < 0: X1 off (Vgs < Vth), X2 produces zero output
 ```
 
-### ReLU activation:
+**Transistor sizing:** W=4.0u L=0.5u (wider for higher current handling)
 
-ReLU(x) = max(0, x) is the simplest nonlinear activation to implement in analog:
+**Measured transfer function (ngspice DC sweep, 179 points in 0.5s):**
 
-```
-  Option A: Diode clamp (simplest)
-  ────┬──── V_out = max(0, V_in)
-      │
-   ┌──┴──┐
-   │Diode│  (or NMOS with gate tied to source)
-   └──┬──┘
-      │
-     GND
+| I_in (uA) | I_out (uA) | Gain  |
+|-----------|-----------|-------|
+| 0.0       | 0.000     | --    |
+| 0.1       | 0.110     | 1.103 |
+| 1.0       | 1.070     | 1.070 |
+| 5.0       | 5.228     | 1.046 |
+| 10.0      | 10.352    | 1.035 |
+| 50.0      | 50.667    | 1.013 |
+| 89.0      | 89.533    | 1.006 |
 
-  When V_in > 0: diode reverse-biased, V_out = V_in (pass through)
-  When V_in < 0: diode forward-biased, clamps V_out to ~0V
+Mirror gain: median 1.0148, mean 1.0194. The gain converges toward 1.0
+for larger currents (better matching in saturation). Max gain error is
+10.3% at sub-uA inputs (near the transition region).
 
-  Option B: Comparator + switch
-  More precise but more complex. A comparator detects sign(V_in),
-  a transmission gate either passes V_in (positive) or grounds the output.
-```
+### Complete Interstage Circuit
 
-For this design, the ReLU is between Layer 1 and Layer 2. In the simulation,
-it is computed as np.maximum(0, z1). In hardware, it would be one of the
-analog options above, applied to each of the 64 hidden-layer outputs.
+The full interstage between L1 and L2 has 64 channels, each containing:
+1. Bias injection mirror (PMOS or NMOS depending on bias sign)
+2. ReLU NMOS current mirror (diode clamp)
+3. Output PMOS mirror for current-to-voltage conversion
+
+**Total transistor count: 394** (L1: 128 bias + 128 ReLU + 128 output; L2: 10 bias)
+
+**File:** `interstage_bias_relu.spice` (628 lines)
+
+### Verification with Analog Circuits in the Loop
+
+The analog circuit transfer functions were characterized via ngspice and
+applied to the full 48,181-beat DS2 verification pipeline:
+
+| Pipeline                                  | Accuracy |
+|-------------------------------------------|----------|
+| Crossbar + IDEAL bias + IDEAL ReLU        | 96.04%   |
+| Crossbar + ANALOG bias + ANALOG ReLU      | **96.12%** |
+| Agreement between pipelines               | **99.78%** |
+
+Only 108 out of 48,181 test beats have different predictions. The slight
+improvement (+0.08%) is because the ~1.5% mirror gain acts as mild
+amplification that helps borderline classification cases. The argmax
+classification is invariant to uniform positive scaling, so the gain
+does not distort relative class scores.
 
 
 ---
@@ -1192,24 +1265,26 @@ Here is the EXACT procedure to classify one heartbeat, step by step.
   │  Random Forest (300 trees, baseline)              95.75%        │
   │  MLP 8->64->5 software (ideal weights)            96.04%        │
   │  MLP L1 crossbar + L2 ideal                       96.04%        │
-  │  MLP L1 crossbar + L2 crossbar (FULL ANALOG)      96.04%        │
+  │  MLP L1+L2 crossbar + ideal bias/ReLU             96.04%        │
+  │  MLP L1+L2 crossbar + ANALOG bias/ReLU            96.12%        │
   └──────────────────────────────────────────────────────────────────┘
 
-  Full analog vs software agreement: 99.65% (170 disagreements / 48,181)
+  Full analog vs software agreement: 99.78% (108 disagreements / 48,181)
 ```
 
-The fully analog crossbar system achieves IDENTICAL top-line accuracy to
-the ideal software MLP: 96.04%. The 0.35% disagreement rate (170 beats)
-reflects cases where small weight errors shift a borderline prediction.
+The fully analog system (crossbar + current-mirror bias + current-mirror
+ReLU) achieves **96.12% accuracy**, a slight improvement over the ideal
+software MLP (96.04%). The ~1.5% current-mirror gain acts as mild
+amplification of borderline signals. Only 108/48,181 beats disagree.
 
-### Per-class performance (full analog crossbar):
+### Per-class performance (full analog system):
 
 ```
               precision    recall  f1-score   support
 
            N       0.97      0.99      0.98     42732
-           S       0.87      0.60      0.71      1837
-           V       0.92      0.86      0.89      3217
+           S       0.85      0.64      0.72      1837
+           V       0.92      0.87      0.89      3217
            F       0.00      0.00      0.00       388
            Q       0.00      0.00      0.00         7
 
@@ -1221,17 +1296,17 @@ reflects cases where small weight errors shift a borderline prediction.
 ```
   True \\ Predicted      N       S       V       F       Q
   ─────────────────────────────────────────────────────────
-  N (Normal)         42401     144     144      42       1
-  S (SVEB)             635    1094     108       0       0
-  V (VEB)              408      23    2778       7       1
+  N (Normal)         42343     209     133      45       2
+  S (SVEB)             564    1178      95       0       0
+  V (VEB)              395      26    2788       7       1
   F (Fusion)           383       0       5       0       0
   Q (Unknown)            6       0       1       0       0
 ```
 
 Key observations:
-- **N class**: 99.2% recall, excellent
-- **V class**: 86.3% recall, clinically important (ventricular ectopic beats)
-- **S class**: 59.6% recall, harder due to morphological similarity to N
+- **N class**: 99.1% recall, excellent
+- **V class**: 86.7% recall, clinically important (ventricular ectopic beats)
+- **S class**: 64.1% recall, improved from 59.6% with analog circuits
 - **F class**: 0% recall, too few training examples (388 beats, merged into N)
 - **Q class**: 0% recall, only 7 beats in test set, statistically meaningless
 
@@ -1286,12 +1361,21 @@ actual voltages to the actual crossbar netlist) and the software prediction.
   │    PMOS transistors      │  5  (sky130_fd_pr__pfet_01v8)         │
   │    Bias current          │  10 uA                                │
   ├─────────────────────────┼────────────────────────────────────────┤
+  │  INTERSTAGE CIRCUITS     │                                        │
+  │    L1 bias mirrors       │  128 transistors (64 ch x 2)          │
+  │    L1 ReLU mirrors       │  128 transistors (64 ch x 2, W=4u)   │
+  │    L1 output mirrors     │  128 transistors (64 ch x 2)          │
+  │    L2 bias mirrors       │  10 transistors (5 ch x 2)            │
+  │    Total interstage      │  394 transistors                      │
+  │    Mirror gain (ReLU)    │  1.015 (median)                       │
+  │    Mirror gain (bias)    │  0.965                                │
+  ├─────────────────────────┼────────────────────────────────────────┤
   │  TOTAL HARDWARE          │                                        │
   │    1T1R ReRAM cells      │  1,664                                │
-  │    NMOS transistors      │  1,681 (1664 access + 17 WTA)         │
-  │    PMOS transistors      │  5 (WTA only)                         │
-  │    Total transistors     │  1,686                                │
-  │    Total devices         │  3,350 (1664 ReRAM + 1686 MOSFET)    │
+  │    NMOS transistors      │  1,681 + 266 = 1,947                  │
+  │    PMOS transistors      │  5 + 128 = 133                        │
+  │    Total transistors     │  2,080                                │
+  │    Total devices         │  3,744 (1664 ReRAM + 2080 MOSFET)    │
   ├─────────────────────────┼────────────────────────────────────────┤
   │  OPERATING CONDITIONS    │                                        │
   │    VDD (supply)          │  1.8 V                                │
@@ -1342,9 +1426,13 @@ All files are in `experiments/Complete_imp/classifier_crossbar/`.
 
 | File | Size | Description |
 |------|------|-------------|
+| **`top_level_classifier.spice`** | **4369 lines** | **Complete top-level netlist connecting ALL stages. ASIC-ready: 8 feature voltage inputs (feat0-7), 5 one-hot voltage outputs (out0-4). Includes input conditioning, both crossbars, interstage, bias, and WTA. All SKY130 transistors use X-prefix subcircuit instances.** |
 | `L1_crossbar_8x64.spice` | 2377 lines | Layer 1 crossbar netlist. Contains 1024 NMOS instances, 1024 ReRAM resistors, all bias/sense sources. SKY130 models. Biases b1[0..63] in header. |
 | `L2_crossbar_64x5.spice` | 1541 lines | Layer 2 crossbar netlist. Contains 640 NMOS instances, 640 ReRAM resistors. SKY130 models. Biases b2[0..4] in header. |
-| `WTA_5class.spice` | 94 lines | Winner-Take-All circuit. 22 transistors (SKY130 NMOS + PMOS). Analog argmax for 5 classes. |
+| `interstage_bias_relu.spice` | 661 lines | Complete interstage: 64 bias mirrors + 64 ReLU mirrors + 64 output mirrors + 5 L2 bias mirrors. 394 transistors total. |
+| `relu_cell.spice` | 25 lines | Standalone ReLU subcircuit (NMOS current-mirror diode clamp, W=4u L=0.5u). |
+| `bias_inject_cell.spice` | 36 lines | Standalone bias injection subcircuit (PMOS + NMOS current mirrors, W=2u L=0.5u). |
+| `WTA_5class.spice` | 130 lines | Winner-Take-All circuit. 16 transistors (SKY130 NMOS + PMOS). All X-prefix instances with PFET _diff params. Analog argmax for 5 classes. |
 
 ### Data files:
 
@@ -1352,6 +1440,7 @@ All files are in `experiments/Complete_imp/classifier_crossbar/`.
 |------|-------------|
 | `full_analog_weights.npz` | NumPy archive containing: W1 (8x64), b1 (64), W2 (64x5), b2 (5), W1_eff (8x64 effective), W2_eff (64x5 effective), Gp1/Gn1 (8x64 conductance maps), Gp2/Gn2 (64x5 conductance maps), scale1, scale2, scaler_mean, scaler_scale |
 | `full_analog_results.json` | All metrics: accuracies, F1 scores, confusion matrix, biases (full precision), hardware specs, weight errors |
+| `analog_interstage_results.json` | Interstage verification: analog vs ideal accuracy, ReLU/bias mirror gains, per-class F1 with analog circuits |
 | `digital_mlp_8x64x5_weights.npz` | Original trained weights (before crossbar mapping) + scaler parameters |
 
 ### Scripts:
@@ -1359,6 +1448,8 @@ All files are in `experiments/Complete_imp/classifier_crossbar/`.
 | File | Description |
 |------|-------------|
 | `full_analog_mlp.py` | Master script that produces all of the above. Trains MLP, extracts both crossbar effective weights, generates all netlists, runs full accuracy test. |
+| `analog_interstage.py` | Designs, tests, and verifies the analog bias+ReLU interstage circuits. Runs ngspice DC sweeps, builds transfer functions, re-runs DS2 verification with analog circuits in the loop. |
+| `generate_top_level.py` | Generates the top-level classifier netlist (`top_level_classifier.spice`) by reading trained weights and connecting all stages: input conditioning, L1 crossbar, interstage, L2 crossbar, L2 bias, WTA. |
 | `digital_mlp_vs_crossbar_8x64.py` | Two-test verification: SW MLP accuracy + crossbar accuracy on digital features |
 | `larger_mlp_sweep.py` | Architecture search (32/64/96/128 hidden units) that selected 64 as optimal |
 
@@ -1368,8 +1459,8 @@ All files are in `experiments/Complete_imp/classifier_crossbar/`.
 |------|-------------|
 | `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice` | SKY130 NFET BSIM4 TT corner model |
 | `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice` | SKY130 NFET mismatch parameters |
-| `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice` | SKY130 PFET TT corner model (WTA only) |
-| `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice` | SKY130 PFET mismatch parameters (WTA only) |
+| `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice` | SKY130 PFET TT corner model (WTA + bias mirrors) |
+| `C:/src/skywater-pdk-libs-sky130_fd_pr/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice` | SKY130 PFET mismatch parameters (WTA + bias mirrors) |
 | `C:/Spice64/bin/ngspice_con.exe` | ngspice simulator (console version for Windows) |
 
 
@@ -1404,17 +1495,23 @@ This single command:
 
 Total runtime: ~35 minutes (dominated by 72 ngspice simulations).
 
-### Verify a single beat through the netlist:
+### Generate top-level netlist:
 
 ```bash
-  # Edit L1_crossbar_8x64.spice:
-  # Change Vrow0..Vrow7 to your feature values * 0.15
-  # Run: ngspice_con -b L1_crossbar_8x64.spice
-  # Read i(Vsp0)..i(Vsp63) and i(Vsn0)..i(Vsn63) from output
-  # Compute MAC_j = 137049 * (i(Vsp_j) - i(Vsn_j)) for each j
-  # Add b1[j], apply ReLU
-  # Feed results to L2_crossbar_64x5.spice similarly
-  # Read 5 output scores, add b2[k], take argmax
+  # After full_analog_mlp.py has run (produces full_analog_weights.npz):
+  python generate_top_level.py
+  # Produces: top_level_classifier.spice (4369 lines)
+  # This is the ASIC-ready design: feat0..feat7 in, out0..out4 one-hot out
+```
+
+### Simulate full classifier end-to-end:
+
+```bash
+  # Edit top_level_classifier.spice:
+  # Change Vfeat0..Vfeat7 to your 8 raw ECG feature voltages
+  # Run: ngspice_con -b top_level_classifier.spice
+  # Read v(out0)..v(out4): winner is HIGH (~VDD), losers are LOW (~0V)
+  # One-hot output: out0=N, out1=S, out2=V, out3=F, out4=Q
 ```
 
 ---

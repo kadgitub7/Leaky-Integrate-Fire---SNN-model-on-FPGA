@@ -1,0 +1,16 @@
+* ReLU test point 2148: I_in = -621.45 uA
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+
+M1 nref nref 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+M2 nout nref 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+Vfix nout 0 1.0
+Iin 0 nref -6.214490e-04
+
+.op
+.control
+run
+print i(Vfix)
+quit
+.endc
+.end

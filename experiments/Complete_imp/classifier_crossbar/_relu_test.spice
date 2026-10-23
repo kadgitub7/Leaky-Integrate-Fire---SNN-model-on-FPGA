@@ -1,0 +1,36 @@
+* ReLU Cell: NMOS Current Mirror Rectifier
+* Diode-connected M1 + mirror M2
+* NMOS: W=2.0u L=0.5u
+
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+
+* Diode-connected reference NMOS (M1) - the 'diode clamp'
+M1 nref nref 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+
+* Mirror NMOS (M2) - copies rectified current
+M2 nout nref 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u
+
+* Fixed drain voltage for M2 (keeps it in saturation)
+Vfix nout 0 1.0
+
+* Input current source (swept by .dc)
+Iin 0 nref dc 0
+
+.dc Iin -1695.4490391604968u 793.5447047796581u 0.5u
+
+.control
+run
+echo "@@RELU_START@@"
+let npts = length(i(Vfix))
+let idx = 0
+repeat $&npts
+  let iin_val = Iin#branch[idx]
+  let iout_val = i(Vfix)[idx]
+  echo "$&iin_val $&iout_val"
+  let idx = idx + 1
+end
+echo "@@RELU_END@@"
+quit
+.endc
+.end
