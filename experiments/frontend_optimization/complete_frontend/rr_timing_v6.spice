@@ -1,0 +1,78 @@
+* ============================================================
+* FEATURES 1 & 2: RR Timing v6 — Hold-and-Copy Architecture
+*
+* Identical to rr_timing (v5) except for the capture mechanism:
+*   v5: capture_trig samples sf_out directly to prev/esamp
+*        (requires capture BEFORE rpeak precharges the timer)
+*   v6: hold_node tracks sf_out continuously, latches at rpeak
+*        capture_trig copies hold_node to prev/esamp AFTER rpeak
+*        (backward-looking — no prediction needed)
+*
+* The hold pass gate uses rpeak_bar (already computed for precharge):
+*   Between beats: rpeak_bar=HIGH → hold tracks sf_out
+*   At rpeak: rpeak_bar=LOW → hold latches sf_out at R-peak
+*   After rpeak: capture_trig copies hold to prev/esamp
+*
+* All other components (timer, SF, EWMA, diff pairs) are unchanged.
+*
+* Pin: ecg_unused capture_trig rpeak_trigger copy_trig
+*      rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
+* ============================================================
+
+.subckt rr_timing_v6 ecg_unused capture_trig rpeak_trigger copy_trig rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
+
+* inverter_sub must be included by the top-level netlist
+Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
+
+* Delayed rpeak_bar for precharge — gives hold gate time to close first
+Xinv_d1 rpeak_bar rpeak_bar_d1 vdd vss inverter_sub
+Xinv_d2 rpeak_bar_d1 rpeak_bar_delayed vdd vss inverter_sub
+
+* === TIMER ===
+* Precharge uses DELAYED rpeak_bar so hold latches before timer resets
+XMrr_charge net_timer rpeak_bar_delayed vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+
+* === SOURCE FOLLOWER ===
+XMsf vdd net_timer sf_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMsf_bias sf_out vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* === HOLD NODE (new in v6) ===
+* Tracks sf_out when rpeak_bar=HIGH, latches when rpeak fires
+XMhold sf_out rpeak_bar hold_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XChold hold_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === PREV CAPTURE from hold_node at capture_trig (changed in v6) ===
+XMprev hold_node capture_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA SAMPLE from hold_node at capture_trig (changed in v6) ===
+XMesamp hold_node capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA CHARGE-SHARE at copy_trig ===
+XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === DIFF PAIR: rr_ratio ===
+* sf_out (current live timer) vs ewma_node (smoothed average)
+XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_r net_r1 sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2_r rr_ratio_out ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMl2_r rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* === DIFF PAIR: rr_asym ===
+* sf_out (current live timer) vs prev_node (previous beat's hold)
+XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1_a net_a1 sf_out tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2_a rr_asym_out prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMl2_a rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+* Expose internal nodes for prediction comparators
+R_timer_out sf_out timer_out 0
+R_ewma_out ewma_node ewma_out 0
+
+.ends rr_timing_v6

@@ -1,0 +1,369 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: diag_D_pred_pwave
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+ecg_l0                                     0.3
+ecg_l1                                     0.3
+xbias.iref                                 0.3
+vbias                                 0.292541
+vref                                  0.292541
+rpeak_pulse_dt                               0
+rpeak_raw                                    0
+trig_rpeak_sh                                0
+xdt.sf_timer                       1.41685e-05
+dt_sf_out                          1.41685e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     5.55805e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483696
+xdt.ct2                            0.000125399
+xdt.stg1_s69                       0.000125639
+vth_69                                0.449144
+dt_s69_lev                                 0.9
+xdt.cn3                               0.483696
+xdt.ct3                            0.000125399
+xdt.stg1_wid                       0.000125547
+vth_28                                0.470738
+dt_wid_lev                                 0.9
+xdt.cn4                               0.483696
+xdt.ct4                            0.000125398
+xdt.stg1_bi                        0.000129882
+vth_300                               0.330657
+dt_bi_lev                                  0.9
+xdt.timer2                         5.55805e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.41686e-05
+xdt.cn5                               0.483696
+xdt.ct5                            0.000125396
+xdt.stg1_rr                        0.000141858
+vth_10                                0.280922
+dt_rr_lev                                  0.9
+xdt.cn6                               0.483696
+xdt.ct6                            0.000125377
+xdt.stg1_s14                       0.000226629
+vth_14_fast                           0.212493
+dt_s14_lev                                 0.9
+xpg_s14.xcac.a                               0
+xpg_s14.xcac.b1                              0
+xpg_s14.pulse_raw                            0
+xpg_s14.inv1_out                           0.9
+trig_s14                           1.73955e-07
+xeb_wid.mid                         9.0827e-11
+wid_sharp                                  0.9
+xpg_wid.xcac.a                               0
+xpg_wid.xcac.b1                              0
+xpg_wid.pulse_raw                            0
+xpg_wid.inv1_out                           0.9
+trig_wid                           1.73955e-07
+xeb_s69.mid                         9.0827e-11
+s69_sharp                                  0.9
+xpg_s69.xcac.a                               0
+xpg_s69.xcac.b1                              0
+xpg_s69.pulse_raw                            0
+xpg_s69.inv1_out                           0.9
+trig_s69                           1.73955e-07
+xeb_bi.mid                          9.0827e-11
+bi_sharp                                   0.9
+xpg_bi.xcac.a                                0
+xpg_bi.xcac.b1                               0
+xpg_bi.pulse_raw                             0
+xpg_bi.inv1_out                            0.9
+trig_bi_copy                       1.73955e-07
+xpg_rr.xcac.a                                0
+xpg_rr.xcac.b1                               0
+xpg_rr.pulse_raw                             0
+xpg_rr.inv1_out                            0.9
+trig_rr_copy                       1.73955e-07
+rpk_bar_pt                                 0.9
+pt_cap                             7.93511e-06
+xcpt.a                                       0
+xcpt.b1                                      0
+pt_sf_out                          1.41695e-05
+vth_pw_base                                0.3
+vth_pw_peak                                0.3
+cnpwb                                 0.483696
+ctpwb                              0.000125397
+stg1_pwb                           0.000135367
+pw_base_lev                                0.9
+xeb_pwb.mid                         9.0827e-11
+pwb_sharp                                  0.9
+xpg_pwb.xcac.a                               0
+xpg_pwb.xcac.b1                              0
+xpg_pwb.pulse_raw                            0
+xpg_pwb.inv1_out                           0.9
+trig_pw_base                       1.73955e-07
+cnpwp                                 0.483696
+ctpwp                              0.000125397
+stg1_pwp                           0.000135367
+pw_peak_lev                                0.9
+xeb_pwp.mid                         9.0827e-11
+pwp_sharp                                  0.9
+xpg_pwp.xcac.a                               0
+xpg_pwp.xcac.b1                              0
+xpg_pwp.pulse_raw                            0
+xpg_pwp.inv1_out                           0.9
+trig_pw_peak                       1.73955e-07
+trig_rr_cap                                  0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                              0.9
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                            0.488967
+xrr.prev_node                         0.390948
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                        0.390948
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                         0.390948
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                            0.252265
+xrr.net_r1                            0.278987
+f1_rr_ratio                           0.363312
+xrr.tail_a                            0.252265
+xrr.net_a1                            0.278987
+f2_rr_asym                            0.363312
+rr_timer                              0.488967
+rr_ewma                               0.390948
+xbi0.curr_node                       0.0711868
+xbi0.xccurr.a                                0
+xbi0.xccurr.b1                               0
+xbi0.esamp_node                            0.3
+xbi0.xcesamp.a                               0
+xbi0.xcesamp.b1                              0
+xbi0.prev_node                             0.3
+xbi0.xcprev.a                                0
+xbi0.xcprev.b1                               0
+xbi0.tail_i                           0.113309
+xbi0.net_i1                           0.492752
+f3_bi_l0                              0.276671
+xbi1.curr_node                       0.0711868
+xbi1.xccurr.a                                0
+xbi1.xccurr.b1                               0
+xbi1.esamp_node                            0.3
+xbi1.xcesamp.a                               0
+xbi1.xcesamp.b1                              0
+xbi1.prev_node                             0.3
+xbi1.xcprev.a                                0
+xbi1.xcprev.b1                               0
+xbi1.tail_i                           0.113309
+xbi1.net_i1                           0.492752
+f4_bi_l1                              0.276671
+xpw.shb                              0.0711869
+xpw.xcsb.a                                   0
+xpw.xcsb.b1                                  0
+xpw.shp                              0.0711869
+xpw.xcsp.a                                   0
+xpw.xcsp.b1                                  0
+xpw.dtail                           0.00490706
+xpw.dnet                              0.362287
+f5_pwave                              0.362287
+f6_width                             0.0711869
+xwid.xcsh.a                                  0
+xwid.xcsh.b1                                 0
+xslp.sh14                            0.0711869
+xslp.xcs14.a                                 0
+xslp.xcs14.b1                                0
+xslp.sh69                            0.0711869
+xslp.xcs69.a                                 0
+xslp.xcs69.b1                                0
+xslp.dtail                          0.00495949
+xslp.dnet                             0.422082
+f7_slope                              0.422082
+f8_symmetry                           0.448967
+xsym.trig_inv                              0.9
+xsym.xcsr.a                                  0
+xsym.xcsr.b1                                 0
+vrrc#branch                                  0
+vth_pwp#branch                               0
+vth_pwb#branch                               0
+vth10#branch                                 0
+vth300#branch                                0
+vth28#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vrsh#branch                                  0
+vrpk_rr#branch                               0
+vrpk_dt#branch                               0
+vecg1#branch                      -2.94791e-14
+vecg0#branch                      -1.25077e-13
+vss#branch                         5.92132e-10
+vdd#branch                        -5.41354e-10
+
+
+No. of Data Rows : 48448
+
+  Measurements for Transient Analysis
+
+f1_2                =  2.970306e-01
+f2_2                =  2.980920e-01
+f3_2                =  2.930900e-01
+f4_2                =  2.938982e-01
+f5_2                =  2.958922e-01
+f6_2                =  2.760659e-01
+f7_2                =  3.623302e-01
+f8_2                =  3.482394e-01
+f1_3                =  2.966627e-01
+f2_3                =  2.984289e-01
+f3_3                =  2.948001e-01
+f4_3                =  2.851245e-01
+f5_3                =  2.954978e-01
+f6_3                =  2.756726e-01
+f7_3                =  3.592180e-01
+f8_3                =  3.477550e-01
+f1_4                =  2.966603e-01
+f2_4                =  2.966195e-01
+f3_4                =  2.968219e-01
+f4_4                =  2.945387e-01
+f5_4                =  2.953554e-01
+f6_4                =  2.759730e-01
+f7_4                =  3.596883e-01
+f8_4                =  3.510016e-01
+f1_5                =  2.949043e-01
+f2_5                =  3.089469e-01
+f3_5                =  2.975581e-01
+f4_5                =  3.096722e-01
+f5_5                =  3.010836e-01
+f6_5                =  2.780414e-01
+f7_5                =  3.622078e-01
+f8_5                =  3.552951e-01
+f1_6                =  3.051558e-01
+f2_6                =  2.822304e-01
+f3_6                =  2.926703e-01
+f4_6                =  2.937856e-01
+f5_6                =  3.004182e-01
+f6_6                =  2.773546e-01
+f7_6                =  3.613173e-01
+f8_6                =  3.500837e-01
+f1_7                =  2.854183e-01
+f2_7                =  3.084082e-01
+f3_7                =  2.952185e-01
+f4_7                =  2.941696e-01
+f5_7                =  2.983594e-01
+f6_7                =  2.683468e-01
+f7_7                =  3.704708e-01
+f8_7                =  3.501597e-01
+f1_8                =  2.937891e-01
+f2_8                =  3.003850e-01
+f3_8                =  2.960550e-01
+f4_8                =  2.896775e-01
+f5_8                =  3.002717e-01
+f6_8                =  2.746385e-01
+f7_8                =  3.589023e-01
+f8_8                =  3.516443e-01
+f1_9                =  2.958678e-01
+f2_9                =  2.996258e-01
+f3_9                =  2.959152e-01
+f4_9                =  2.929570e-01
+f5_9                =  2.993860e-01
+f6_9                =  2.772373e-01
+f7_9                =  3.583860e-01
+f8_9                =  3.528938e-01
+f1_10               =  2.970966e-01
+f2_10               =  2.992498e-01
+f3_10               =  2.930975e-01
+f4_10               =  3.034460e-01
+f5_10               =  2.957530e-01
+f6_10               =  2.779304e-01
+f7_10               =  3.612883e-01
+f8_10               =  3.487495e-01
+f1_11               =  2.978726e-01
+f2_11               =  2.944357e-01
+f3_11               =  2.945300e-01
+f4_11               =  2.841282e-01
+f5_11               =  2.952960e-01
+f6_11               =  2.772407e-01
+f7_11               =  3.591950e-01
+f8_11               =  3.477605e-01
+f1_12               =  2.937406e-01
+f2_12               =  2.973708e-01
+f3_12               =  2.976365e-01
+f4_12               =  3.119491e-01
+f5_12               =  3.013232e-01
+f6_12               =  2.779423e-01
+f7_12               =  3.634672e-01
+f8_12               =  3.526405e-01
+f1_13               =  2.930553e-01
+f2_13               =  3.004067e-01
+f3_13               =  2.946534e-01
+f4_13               =  2.954180e-01
+f5_13               =  3.009853e-01
+f6_13               =  2.770408e-01
+f7_13               =  3.616992e-01
+f8_13               =  3.509216e-01
+f1_14               =  2.951970e-01
+f2_14               =  2.979854e-01
+f3_14               =  2.926105e-01
+f4_14               =  2.847668e-01
+f5_14               =  2.990118e-01
+f6_14               =  2.743117e-01
+f7_14               =  3.606302e-01
+f8_14               =  3.456356e-01
+f1_15               =  2.949119e-01
+f2_15               =  2.986620e-01
+f3_15               =  2.962991e-01
+f4_15               =  3.027961e-01
+f5_15               =  2.998766e-01
+f6_15               =  2.731901e-01
+f7_15               =  3.648736e-01
+f8_15               =  3.483483e-01
+f1_16               =  2.952894e-01
+f2_16               =  2.999930e-01
+f3_16               =  2.975496e-01
+f4_16               =  3.001830e-01
+f5_16               =  2.986901e-01
+f6_16               =  2.766546e-01
+f7_16               =  3.620658e-01
+f8_16               =  3.525211e-01
+f1_17               =  2.969109e-01
+f2_17               =  2.980864e-01
+f3_17               =  2.933348e-01
+f4_17               =  2.944413e-01
+f5_17               =  2.956319e-01
+f6_17               =  2.771504e-01
+f7_17               =  3.605415e-01
+f8_17               =  3.482958e-01
+f1_18               =  2.965499e-01
+f2_18               =  2.986053e-01
+f3_18               =  2.985206e-01
+f4_18               =  2.984994e-01
+f5_18               =  3.458574e-01
+f6_18               =  2.729824e-01
+f7_18               =  3.743923e-01
+f8_18               =  3.549299e-01
+f1_19               =  2.967310e-01
+f3_19               =  2.943794e-01
+f4_19               =  2.892939e-01
+f5_19               =  2.955017e-01
+f6_19               =  2.753925e-01
+f7_19               =  3.610655e-01
+f8_19               =  3.526589e-01
+
+
+Total analysis time (seconds) = 59.787
+
+Total elapsed time (seconds) = 87.750 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1603.035 MB.
+Maximum ngspice program size =  180.562 MB.
+Current ngspice program size =  180.562 MB.
+

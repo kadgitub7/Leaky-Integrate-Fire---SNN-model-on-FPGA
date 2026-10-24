@@ -1,0 +1,210 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning: singular matrix:  check node 0.471270
+
+Note: Starting dynamic gmin stepping
+Warning: singular matrix:  check node 0.471270
+
+Warning: Dynamic gmin stepping failed
+Note: Starting true gmin stepping
+Warning: singular matrix:  check node 0.471270
+
+Warning: singular matrix:  check node 0.471270
+
+Warning: singular matrix:  check node 0.471270
+
+Warning: singular matrix:  check node 0.471270
+
+Warning: True gmin stepping failed
+Note: Starting source stepping
+Warning: source stepping failed
+Note: Transient op started
+Note: Transient op finished successfully
+
+Note: No compatibility mode selected!
+
+
+Circuit: config_C_hold_copy
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+ecg_l0                                     0.3
+ecg_l1                                     0.3
+xbias.iref                            0.332443
+vbias                               0.00120381
+vref                                0.00120381
+rpeak_threshold                         0.3281
+xrpeak.net1                           0.873648
+xrpeak.tail1                           0.18323
+xrpeak.stg1_out                       0.496844
+rpeak_raw                          5.70841e-07
+xpg_rpk.xcac.a                      0.00811863
+xpg_rpk.xcac.b1                     0.00811863
+xpg_rpk.pulse_raw                   0.00811863
+xpg_rpk.inv1_out                           0.9
+rpeak_pulse                        1.73955e-07
+xdelay.sf_timer                      0.0264947
+dt_sf_out                            0.0264947
+xdelay.rpeak_bar                           0.9
+xdelay.timer_node                   6.0343e-06
+xdelay.xctimer.a                   2.20806e-15
+xdelay.xctimer.b1                  1.00103e-18
+xdelay.cn2                            0.882486
+xdelay.ct2                          0.00121199
+xdelay.stg1_s69                       0.492744
+0.457657                             0.0169038
+dt_s69_lev                         8.19603e-07
+xdelay.cn3                            0.882486
+xdelay.ct3                          0.00121199
+xdelay.stg1_wid                       0.492744
+0.471270                             0.0169038
+dt_wid_lev                         8.19603e-07
+xdelay.cn4                            0.882486
+xdelay.ct4                          0.00121199
+xdelay.stg1_bi                        0.492744
+0.377285                             0.0169038
+dt_bi_lev                          8.19603e-07
+xdelay.timer2                      0.000291377
+xdelay.xct2.a                      2.21668e-15
+xdelay.xct2.b1                     4.82564e-17
+xdelay.sf_timer2                     0.0259543
+xdelay.cn5                            0.882476
+xdelay.ct5                          0.00108781
+xdelay.stg1_rr                        0.492747
+0.303178                             0.0168931
+dt_rr_copy_lev                     8.19413e-07
+xdelay.cn6                            0.882476
+xdelay.ct6                          0.00108781
+xdelay.stg1_s14                       0.492747
+0.231510                             0.0168931
+dt_s14_lev                         8.19413e-07
+xeb_wid.mid                                0.9
+wid_sharp                           2.0298e-10
+xpg_wid.xcac.a                      0.00811728
+xpg_wid.xcac.b1                     0.00811728
+xpg_wid.pulse_raw                   0.00811728
+xpg_wid.inv1_out                           0.9
+trig_wid                           1.73955e-07
+xeb_s69.mid                                0.9
+s69_sharp                          2.02936e-10
+xpg_s69.xcac.a                      0.00811728
+xpg_s69.xcac.b1                     0.00811728
+xpg_s69.pulse_raw                   0.00811728
+xpg_s69.inv1_out                           0.9
+trig_s69                           1.73955e-07
+xeb_bi.mid                                 0.9
+bi_sharp                          -6.79177e-12
+xpg_bi.xcac.a                       0.00822308
+xpg_bi.xcac.b1                      0.00822308
+xpg_bi.pulse_raw                    0.00822308
+xpg_bi.inv1_out                            0.9
+trig_bi_raw                        1.73955e-07
+xeb_rrc.mid                                0.9
+rrc_sharp                         -7.00994e-12
+xpg_rrc.xcac.a                      0.00822308
+xpg_rrc.xcac.b1                     0.00822308
+xpg_rrc.pulse_raw                   0.00822308
+xpg_rrc.inv1_out                           0.9
+trig_rr_copy                       1.73955e-07
+xeb_s14.mid                                0.9
+s14_sharp                          2.02428e-10
+xpg_s14.xcac.a                      0.00811729
+xpg_s14.xcac.b1                     0.00811729
+xpg_s14.pulse_raw                   0.00811729
+xpg_s14.inv1_out                           0.9
+trig_s14                           1.73955e-07
+trig_cap_post                                0
+trig_pw_base                                 0
+trig_pw_peak                                 0
+xrr.rpeak_bar                              0.9
+xrr.rpeak_bar_d1                    9.0827e-11
+xrr.rpeak_bar_delayed                      0.9
+xrr.net_timer                      1.95826e-06
+xrr.xctimer.a                      1.49016e-15
+xrr.xctimer.b1                     2.11903e-19
+xrr.sf_out                          0.00134987
+xrr.hold_node                       0.00134987
+xrr.xchold.a                       3.33103e-14
+xrr.xchold.b1                      3.00723e-16
+xrr.prev_node                      0.000310041
+xrr.xcprev.a                       1.64086e-14
+xrr.xcprev.b1                      1.48136e-16
+xrr.esamp_node                    -1.56943e-07
+xrr.xcesamp.a                      2.66649e-16
+xrr.xcesamp.b1                     2.40729e-18
+xrr.ewma_node                       3.4718e-05
+xrr.xcewma.a                       1.61207e-14
+xrr.xcewma.b1                      1.62907e-17
+xrr.tail_r                         -0.00237026
+xrr.net_r1                            0.777959
+f1_rr_ratio                           0.777841
+xrr.tail_a                         -0.00228963
+xrr.net_a1                            0.777958
+f2_rr_asym                            0.777865
+rr_timer                            0.00134987
+rr_ewma                             3.4718e-05
+xbi0.curr_node                     0.000310041
+xbi0.xccurr.a                      2.15822e-14
+xbi0.xccurr.b1                     1.94843e-16
+xbi0.esamp_node                     1.5564e-08
+xbi0.xcesamp.a                     5.57732e-15
+xbi0.xcesamp.b1                    5.63613e-18
+xbi0.prev_node                     0.000309876
+xbi0.xcprev.a                      1.60448e-14
+xbi0.xcprev.b1                     1.44852e-16
+xbi0.tail_i                        -0.00259978
+xbi0.net_i1                           0.777868
+f3_bi_l0                              0.777868
+xbi1.curr_node                     0.000310041
+xbi1.xccurr.a                      2.15822e-14
+xbi1.xccurr.b1                     1.94843e-16
+xbi1.esamp_node                     1.5564e-08
+xbi1.xcesamp.a                     5.57732e-15
+xbi1.xcesamp.b1                    5.63613e-18
+xbi1.prev_node                     0.000309876
+xbi1.xcprev.a                      1.60448e-14
+xbi1.xcprev.b1                     1.44852e-16
+xbi1.tail_i                        -0.00259978
+xbi1.net_i1                           0.777868
+f4_bi_l1                              0.777868
+xpw.shb                            0.000807408
+xpw.xcsb.a                         2.33636e-14
+xpw.xcsb.b1                        5.08619e-16
+xpw.shp                            0.000807408
+xpw.xcsp.a                         2.33636e-14
+xpw.xcsp.b1                        5.08619e-16
+xpw.dtail                          -0.00229409
+xpw.dnet                              0.839657
+f5_pwave                              0.839657
+f6_width                          -2.06508e-07
+xwid.xcsh.a                        5.63229e-15
+xwid.xcsh.b1                       1.22613e-16
+xslp.sh14                          0.000665805
+xslp.xcs14.a                       1.94383e-14
+xslp.xcs14.b1                      4.23167e-16
+xslp.sh69                          0.000665828
+xslp.xcs69.a                       1.94383e-14
+xslp.xcs69.b1                      4.23167e-16
+xslp.dtail                         -0.00241151
+xslp.dnet                             0.689516
+f7_slope                              0.689516
+f8_symmetry                        0.000450863
+xsym.trig_inv                              0.9
+xsym.xcsr.a                         6.0556e-15
+xsym.xcsr.b1                       1.31829e-16
+vpwp#branch                        1.31032e-16
+vpwb#branch                        1.31032e-16
+vcap_post#branch                   2.21028e-16
+vrpk_thresh#branch                 1.58733e-12
+vecg1#branch                      -2.53858e-13
+vecg0#branch                       3.45931e-13
+vss#branch                          3.5919e-10
+vdd#branch                        -3.61066e-10
+
