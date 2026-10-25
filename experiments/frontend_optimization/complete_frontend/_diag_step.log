@@ -1,29 +1,11 @@
 Using SPARSE 1.3 as Direct Linear Solver
-Warning: singular matrix:  check node 0.471270
-
 Note: Starting dynamic gmin stepping
-Warning: singular matrix:  check node 0.471270
-
-Warning: Dynamic gmin stepping failed
-Note: Starting true gmin stepping
-Warning: singular matrix:  check node 0.471270
-
-Warning: singular matrix:  check node 0.471270
-
-Warning: singular matrix:  check node 0.471270
-
-Warning: singular matrix:  check node 0.471270
-
-Warning: True gmin stepping failed
-Note: Starting source stepping
-Warning: source stepping failed
-Note: Transient op started
-Note: Transient op finished successfully
+Note: Dynamic gmin stepping completed
 
 Note: No compatibility mode selected!
 
 
-Circuit: config_C_hold_copy
+Circuit: config_F_peak_delay
 
 Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
 
@@ -37,174 +19,337 @@ vdd                                        0.9
 vss                                          0
 ecg_l0                                     0.3
 ecg_l1                                     0.3
-xbias.iref                            0.332443
-vbias                               0.00120381
-vref                                0.00120381
-rpeak_threshold                         0.3281
-xrpeak.net1                           0.873648
-xrpeak.tail1                           0.18323
-xrpeak.stg1_out                       0.496844
-rpeak_raw                          5.70841e-07
-xpg_rpk.xcac.a                      0.00811863
-xpg_rpk.xcac.b1                     0.00811863
-xpg_rpk.pulse_raw                   0.00811863
+xbias.iref                                 0.3
+vbias                                 0.292548
+vref                                  0.292548
+rpeak_threshold                          0.348
+xrpeak.net1                           0.312992
+xrpeak.tail1                          0.132569
+xrpeak.stg1_out                       0.890894
+rpeak_raw                          2.06129e-11
+xpg_rpk.xcac.a                               0
+xpg_rpk.xcac.b1                              0
+xpg_rpk.pulse_raw                            0
 xpg_rpk.inv1_out                           0.9
 rpeak_pulse                        1.73955e-07
-xdelay.sf_timer                      0.0264947
-dt_sf_out                            0.0264947
-xdelay.rpeak_bar                           0.9
-xdelay.timer_node                   6.0343e-06
-xdelay.xctimer.a                   2.20806e-15
-xdelay.xctimer.b1                  1.00103e-18
-xdelay.cn2                            0.882486
-xdelay.ct2                          0.00121199
-xdelay.stg1_s69                       0.492744
-0.457657                             0.0169038
-dt_s69_lev                         8.19603e-07
-xdelay.cn3                            0.882486
-xdelay.ct3                          0.00121199
-xdelay.stg1_wid                       0.492744
-0.471270                             0.0169038
-dt_wid_lev                         8.19603e-07
-xdelay.cn4                            0.882486
-xdelay.ct4                          0.00121199
-xdelay.stg1_bi                        0.492744
-0.377285                             0.0169038
-dt_bi_lev                          8.19603e-07
-xdelay.timer2                      0.000291377
-xdelay.xct2.a                      2.21668e-15
-xdelay.xct2.b1                     4.82564e-17
-xdelay.sf_timer2                     0.0259543
-xdelay.cn5                            0.882476
-xdelay.ct5                          0.00108781
-xdelay.stg1_rr                        0.492747
-0.303178                             0.0168931
-dt_rr_copy_lev                     8.19413e-07
-xdelay.cn6                            0.882476
-xdelay.ct6                          0.00108781
-xdelay.stg1_s14                       0.492747
-0.231510                             0.0168931
-dt_s14_lev                         8.19413e-07
-xeb_wid.mid                                0.9
-wid_sharp                           2.0298e-10
-xpg_wid.xcac.a                      0.00811728
-xpg_wid.xcac.b1                     0.00811728
-xpg_wid.pulse_raw                   0.00811728
-xpg_wid.inv1_out                           0.9
-trig_wid                           1.73955e-07
-xeb_s69.mid                                0.9
-s69_sharp                          2.02936e-10
-xpg_s69.xcac.a                      0.00811728
-xpg_s69.xcac.b1                     0.00811728
-xpg_s69.pulse_raw                   0.00811728
-xpg_s69.inv1_out                           0.9
-trig_s69                           1.73955e-07
-xeb_bi.mid                                 0.9
-bi_sharp                          -6.79177e-12
-xpg_bi.xcac.a                       0.00822308
-xpg_bi.xcac.b1                      0.00822308
-xpg_bi.pulse_raw                    0.00822308
-xpg_bi.inv1_out                            0.9
-trig_bi_raw                        1.73955e-07
-xeb_rrc.mid                                0.9
-rrc_sharp                         -7.00994e-12
-xpg_rrc.xcac.a                      0.00822308
-xpg_rrc.xcac.b1                     0.00822308
-xpg_rrc.pulse_raw                   0.00822308
-xpg_rrc.inv1_out                           0.9
-trig_rr_copy                       1.73955e-07
-xeb_s14.mid                                0.9
-s14_sharp                          2.02428e-10
-xpg_s14.xcac.a                      0.00811729
-xpg_s14.xcac.b1                     0.00811729
-xpg_s14.pulse_raw                   0.00811729
-xpg_s14.inv1_out                           0.9
-trig_s14                           1.73955e-07
-trig_cap_post                                0
+pk_timer_node                      5.55698e-06
+xcpk_timer.a                                 0
+xcpk_timer.b1                                0
+rpk_pulse_bar                              0.9
+pk_timer_inv                               0.9
+pk_timer_lev                        9.0827e-11
+xeb_rpk.mid                                0.9
+rpk_refined_sharp                   9.0827e-11
+xpg_rpk_ref.xcac.a                           0
+xpg_rpk_ref.xcac.b1                          0
+xpg_rpk_ref.pulse_raw                        0
+xpg_rpk_ref.inv1_out                       0.9
+refined_rpeak                      1.73955e-07
+trig_s14                                     0
+trig_s69                                     0
+trig_wid                                     0
+trig_bi_raw                                  0
+trig_rr_copy                                 0
+trig_rr_cap                                  0
 trig_pw_base                                 0
 trig_pw_peak                                 0
 xrr.rpeak_bar                              0.9
-xrr.rpeak_bar_d1                    9.0827e-11
-xrr.rpeak_bar_delayed                      0.9
-xrr.net_timer                      1.95826e-06
-xrr.xctimer.a                      1.49016e-15
-xrr.xctimer.b1                     2.11903e-19
-xrr.sf_out                          0.00134987
-xrr.hold_node                       0.00134987
-xrr.xchold.a                       3.33103e-14
-xrr.xchold.b1                      3.00723e-16
-xrr.prev_node                      0.000310041
-xrr.xcprev.a                       1.64086e-14
-xrr.xcprev.b1                      1.48136e-16
-xrr.esamp_node                    -1.56943e-07
-xrr.xcesamp.a                      2.66649e-16
-xrr.xcesamp.b1                     2.40729e-18
-xrr.ewma_node                       3.4718e-05
-xrr.xcewma.a                       1.61207e-14
-xrr.xcewma.b1                      1.62907e-17
-xrr.tail_r                         -0.00237026
-xrr.net_r1                            0.777959
-f1_rr_ratio                           0.777841
-xrr.tail_a                         -0.00228963
-xrr.net_a1                            0.777958
-f2_rr_asym                            0.777865
-rr_timer                            0.00134987
-rr_ewma                             3.4718e-05
-xbi0.curr_node                     0.000310041
-xbi0.xccurr.a                      2.15822e-14
-xbi0.xccurr.b1                     1.94843e-16
-xbi0.esamp_node                     1.5564e-08
-xbi0.xcesamp.a                     5.57732e-15
-xbi0.xcesamp.b1                    5.63613e-18
-xbi0.prev_node                     0.000309876
-xbi0.xcprev.a                      1.60448e-14
-xbi0.xcprev.b1                     1.44852e-16
-xbi0.tail_i                        -0.00259978
-xbi0.net_i1                           0.777868
-f3_bi_l0                              0.777868
-xbi1.curr_node                     0.000310041
-xbi1.xccurr.a                      2.15822e-14
-xbi1.xccurr.b1                     1.94843e-16
-xbi1.esamp_node                     1.5564e-08
-xbi1.xcesamp.a                     5.57732e-15
-xbi1.xcesamp.b1                    5.63613e-18
-xbi1.prev_node                     0.000309876
-xbi1.xcprev.a                      1.60448e-14
-xbi1.xcprev.b1                     1.44852e-16
-xbi1.tail_i                        -0.00259978
-xbi1.net_i1                           0.777868
-f4_bi_l1                              0.777868
-xpw.shb                            0.000807408
-xpw.xcsb.a                         2.33636e-14
-xpw.xcsb.b1                        5.08619e-16
-xpw.shp                            0.000807408
-xpw.xcsp.a                         2.33636e-14
-xpw.xcsp.b1                        5.08619e-16
-xpw.dtail                          -0.00229409
-xpw.dnet                              0.839657
-f5_pwave                              0.839657
-f6_width                          -2.06508e-07
-xwid.xcsh.a                        5.63229e-15
-xwid.xcsh.b1                       1.22613e-16
-xslp.sh14                          0.000665805
-xslp.xcs14.a                       1.94383e-14
-xslp.xcs14.b1                      4.23167e-16
-xslp.sh69                          0.000665828
-xslp.xcs69.a                       1.94383e-14
-xslp.xcs69.b1                      4.23167e-16
-xslp.dtail                         -0.00241151
-xslp.dnet                             0.689516
-f7_slope                              0.689516
-f8_symmetry                        0.000450863
+xrr.net_timer                      7.93362e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         0.000187448
+xrr.prev_node                         0.390944
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                        0.390944
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                         0.390944
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.18304
+xrr.net_r1                            0.627895
+f1_rr_ratio                           0.276001
+xrr.tail_a                             0.18304
+xrr.net_a1                            0.627895
+f2_rr_asym                            0.276001
+rr_timer                           0.000187448
+rr_ewma                               0.390944
+xbi0.curr_node                       0.0711869
+xbi0.xccurr.a                                0
+xbi0.xccurr.b1                               0
+xbi0.esamp_node                            0.3
+xbi0.xcesamp.a                               0
+xbi0.xcesamp.b1                              0
+xbi0.prev_node                             0.3
+xbi0.xcprev.a                                0
+xbi0.xcprev.b1                               0
+xbi0.tail_i                           0.113304
+xbi0.net_i1                           0.492746
+f3_bi_l0                              0.276664
+xbi1.curr_node                       0.0711869
+xbi1.xccurr.a                                0
+xbi1.xccurr.b1                               0
+xbi1.esamp_node                            0.3
+xbi1.xcesamp.a                               0
+xbi1.xcesamp.b1                              0
+xbi1.prev_node                             0.3
+xbi1.xcprev.a                                0
+xbi1.xcprev.b1                               0
+xbi1.tail_i                           0.113304
+xbi1.net_i1                           0.492746
+f4_bi_l1                              0.276664
+xpw.shb                              0.0711868
+xpw.xcsb.a                                   0
+xpw.xcsb.b1                                  0
+xpw.shp                              0.0711868
+xpw.xcsp.a                                   0
+xpw.xcsp.b1                                  0
+xpw.dtail                           0.00490622
+xpw.dnet                              0.362286
+f5_pwave                              0.362286
+f6_width                             0.0711868
+xwid.xcsh.a                                  0
+xwid.xcsh.b1                                 0
+xslp.sh14                            0.0711868
+xslp.xcs14.a                                 0
+xslp.xcs14.b1                                0
+xslp.sh69                            0.0711868
+xslp.xcs69.a                                 0
+xslp.xcs69.b1                                0
+xslp.dtail                          0.00495863
+xslp.dnet                             0.422081
+f7_slope                              0.422081
+f8_symmetry                           0.448967
 xsym.trig_inv                              0.9
-xsym.xcsr.a                         6.0556e-15
-xsym.xcsr.b1                       1.31829e-16
-vpwp#branch                        1.31032e-16
-vpwb#branch                        1.31032e-16
-vcap_post#branch                   2.21028e-16
-vrpk_thresh#branch                 1.58733e-12
-vecg1#branch                      -2.53858e-13
-vecg0#branch                       3.45931e-13
-vss#branch                          3.5919e-10
-vdd#branch                        -3.61066e-10
+xsym.xcsr.a                                  0
+xsym.xcsr.b1                                 0
+vpwp#branch                                  0
+vpwb#branch                                  0
+vcap#branch                                  0
+vrrc#branch                                  0
+vbi#branch                                   0
+vwid#branch                                  0
+vs69#branch                                  0
+vs14#branch                                  0
+vrpk_thresh#branch                           0
+vecg1#branch                      -2.94791e-14
+vecg0#branch                      -1.25077e-13
+vss#branch                         3.36866e-10
+vdd#branch                        -3.22424e-10
+
+
+No. of Data Rows : 73200
+
+  Measurements for Transient Analysis
+
+f1_5                =  2.780327e-01
+f2_5                =  2.762467e-01
+f3_5                =  2.953523e-01
+f4_5                =  3.246743e-01
+f5_5                =  2.971182e-01
+f6_5                =  2.392093e-01
+f7_5                =  3.661175e-01
+f8_5                =  3.850627e-01
+f1_6                =  2.789292e-01
+f2_6                =  2.715568e-01
+f3_6                =  2.957098e-01
+f4_6                =  2.914136e-01
+f5_6                =  2.949410e-01
+f6_6                =  2.376025e-01
+f7_6                =  3.638522e-01
+f8_6                =  3.849592e-01
+f1_7                =  2.726487e-01
+f2_7                =  2.730570e-01
+f3_7                =  2.963630e-01
+f4_7                =  2.836528e-01
+f5_7                =  3.014940e-01
+f6_7                =  2.113040e-01
+f7_7                =  3.939043e-01
+f8_7                =  3.851841e-01
+f1_8                =  2.735229e-01
+f2_8                =  2.740790e-01
+f3_8                =  2.952776e-01
+f4_8                =  2.993302e-01
+f5_8                =  2.998299e-01
+f6_8                =  2.300017e-01
+f7_8                =  3.570551e-01
+f8_8                =  3.838746e-01
+f1_9                =  2.754422e-01
+f2_9                =  2.741706e-01
+f3_9                =  2.973368e-01
+f4_9                =  3.059620e-01
+f5_9                =  3.087182e-01
+f6_9                =  2.377950e-01
+f7_9                =  3.562080e-01
+f8_9                =  3.851825e-01
+f1_10               =  2.745165e-01
+f2_10               =  2.744544e-01
+f3_10               =  2.971575e-01
+f4_10               =  2.875275e-01
+f5_10               =  3.109880e-01
+f6_10               =  2.387564e-01
+f7_10               =  3.631219e-01
+f8_10               =  3.863750e-01
+f1_11               =  2.745321e-01
+f2_11               =  2.737891e-01
+f3_11               =  2.948736e-01
+f4_11               =  2.827206e-01
+f5_11               =  3.018303e-01
+f6_11               =  2.368906e-01
+f7_11               =  3.577126e-01
+f8_11               =  3.829799e-01
+f1_12               =  2.742117e-01
+f2_12               =  2.731512e-01
+f3_12               =  2.966664e-01
+f4_12               =  3.258352e-01
+f5_12               =  2.957474e-01
+f6_12               =  2.390173e-01
+f7_12               =  3.690093e-01
+f8_12               =  3.826458e-01
+f1_13               =  2.727399e-01
+f2_13               =  2.737764e-01
+f3_13               =  2.976363e-01
+f4_13               =  2.946095e-01
+f5_13               =  2.951192e-01
+f6_13               =  2.362462e-01
+f7_13               =  3.643365e-01
+f8_13               =  3.853228e-01
+f1_14               =  2.734136e-01
+f2_14               =  2.736497e-01
+f3_14               =  2.957159e-01
+f4_14               =  2.806113e-01
+f5_14               =  2.981095e-01
+f6_14               =  2.289113e-01
+f7_14               =  3.614790e-01
+f8_14               =  3.842117e-01
+f1_15               =  2.731352e-01
+f2_15               =  2.734251e-01
+f3_15               =  2.956770e-01
+f4_15               =  2.963901e-01
+f5_15               =  3.001979e-01
+f6_15               =  2.251193e-01
+f7_15               =  3.742390e-01
+f8_15               =  3.823351e-01
+f1_16               =  2.722985e-01
+f2_16               =  2.739562e-01
+f3_16               =  2.973985e-01
+f4_16               =  3.234774e-01
+f5_16               =  2.978058e-01
+f6_16               =  2.358609e-01
+f7_16               =  3.653847e-01
+f8_16               =  3.854829e-01
+f1_17               =  2.730017e-01
+f2_17               =  2.738826e-01
+f3_17               =  2.949647e-01
+f4_17               =  2.921707e-01
+f5_17               =  3.026652e-01
+f6_17               =  2.366983e-01
+f7_17               =  3.609895e-01
+f8_17               =  3.830470e-01
+f1_18               =  2.728514e-01
+f2_18               =  2.739237e-01
+f3_18               =  2.961600e-01
+f4_18               =  2.826887e-01
+f5_18               =  3.051953e-01
+f6_18               =  2.244791e-01
+f7_18               =  4.084119e-01
+f8_18               =  3.840280e-01
+f1_19               =  2.727907e-01
+f2_19               =  2.733586e-01
+f3_19               =  2.970074e-01
+f4_19               =  3.032450e-01
+f5_19               =  3.029193e-01
+f6_19               =  2.320635e-01
+f7_19               =  3.629023e-01
+f8_19               =  3.856862e-01
+f1_20               =  2.721231e-01
+f2_20               =  2.726853e-01
+f3_20               =  2.955662e-01
+f4_20               =  3.127787e-01
+f5_20               =  2.960039e-01
+f6_20               =  2.366983e-01
+f7_20               =  3.668001e-01
+f8_20               =  3.847881e-01
+f1_21               =  2.715280e-01
+f2_21               =  2.743054e-01
+f3_21               =  2.965382e-01
+f4_21               =  2.904709e-01
+f5_21               =  2.949135e-01
+f6_21               =  2.359274e-01
+f7_21               =  3.587252e-01
+f8_21               =  3.857762e-01
+f1_22               =  2.745407e-01
+f2_22               =  2.738860e-01
+f3_22               =  2.942433e-01
+f4_22               =  2.837014e-01
+f5_22               =  2.948719e-01
+f6_22               =  2.284634e-01
+f7_22               =  3.679901e-01
+f8_22               =  3.817157e-01
+f1_23               =  2.724244e-01
+f2_23               =  2.754979e-01
+f3_23               =  2.993797e-01
+f4_23               =  3.099328e-01
+f5_23               =  2.967037e-01
+f6_23               =  2.350236e-01
+f7_23               =  3.588970e-01
+f8_23               =  3.888591e-01
+f1_24               =  2.809472e-01
+f2_24               =  2.741629e-01
+f3_24               =  2.914011e-01
+f4_24               =  2.920285e-01
+f5_24               =  3.018351e-01
+f6_24               =  2.398548e-01
+f7_24               =  4.047834e-01
+f8_24               =  3.777873e-01
+f1_25               =  2.726373e-01
+f2_25               =  2.739749e-01
+f3_25               =  3.006588e-01
+f4_25               =  2.921681e-01
+f5_25               =  3.018279e-01
+f6_25               =  2.331565e-01
+f7_25               =  3.580515e-01
+f8_25               =  3.868868e-01
+f1_26               =  2.724783e-01
+f2_26               =  2.739647e-01
+f3_26               =  2.960996e-01
+f4_26               =  2.873364e-01
+f5_26               =  2.976039e-01
+f6_26               =  2.308390e-01
+f7_26               =  3.613239e-01
+f8_26               =  3.862126e-01
+f1_27               =  2.731333e-01
+f2_27               =  2.734830e-01
+f3_27               =  2.969642e-01
+f4_27               =  3.276916e-01
+f5_27               =  3.022456e-01
+f6_27               =  2.262636e-01
+f7_27               =  3.792451e-01
+f8_27               =  3.864810e-01
+f1_28               =  2.720709e-01
+f2_28               =  2.735146e-01
+f3_28               =  2.978783e-01
+f4_28               =  2.954807e-01
+f5_28               =  2.999484e-01
+f6_28               =  2.205993e-01
+f7_28               =  3.577192e-01
+f8_28               =  3.899356e-01
+f1_29               =  2.724772e-01
+f3_29               =  2.919803e-01
+f4_29               =  2.797592e-01
+f5_29               =  2.990977e-01
+f6_29               =  2.099148e-01
+f7_29               =  3.641167e-01
+f8_29               =  3.805125e-01
+
+
+Total analysis time (seconds) = 28.946
+
+Total elapsed time (seconds) = 45.750 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1172.738 MB.
+Maximum ngspice program size =  111.797 MB.
+Current ngspice program size =  111.797 MB.
 

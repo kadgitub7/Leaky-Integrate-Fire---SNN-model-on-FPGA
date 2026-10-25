@@ -41,17 +41,11 @@ def load_all_beats(record_id, max_beats=200):
     sig = record.p_signal
     n_leads = sig.shape[1]
     valid = [(idx, sym) for idx, sym in zip(ann.sample, ann.symbol) if sym in aami_map]
-    all_peaks = []
-    for i in range(1, len(valid) - 1):
-        idx = valid[i][0]
-        bs = idx - WIN_L; be = idx + WIN_R
-        if bs >= 0 and be < len(sig):
-            all_peaks.append(abs(sig[idx, 0]))
-    gain = 0.16 / max(all_peaks) if all_peaks else 0.16
-    beats = []
+    # First pass: collect raw beat data (gain computed after from ONLY these beats)
+    raw_beats = []
     ewma_rr = None
     for i in range(1, len(valid) - 1):
-        if len(beats) >= max_beats: break
+        if len(raw_beats) >= max_beats: break
         idx, sym = valid[i]
         pre_rr = (idx - valid[i-1][0]) / FS
         post_rr = (valid[i+1][0] - idx) / FS
@@ -72,16 +66,29 @@ def load_all_beats(record_id, max_beats=200):
             py_bi_l1 = beat[WIN_L, min(1,n_leads-1)] - prev_beat_data[WIN_L, min(1,n_leads-1)]
         else:
             py_bi_l0 = py_bi_l1 = 0.0
-        beats.append({
+        raw_beats.append({
             'pre_rr': pre_rr, 'post_rr': post_rr, 'ewma_rr': ewma_rr,
+            'ewma_rr_before': ewma_rr_before,
             'ecg_l0': beat[:, 0].copy(), 'ecg_l1': beat[:, min(1, n_leads-1)].copy(),
-            'py_f1': pre_rr / ewma_rr_before if ewma_rr_before > 0 else 1.0,
-            'py_f2': pre_rr / post_rr if post_rr > 0 else 1.0,
             'py_bi_l0': py_bi_l0, 'py_bi_l1': py_bi_l1,
-            'py_pw': beat[PW_MID, 0] - beat[PW_S, 0],
-            'py_wid': beat[WIN_L + 10, 0],
-            'py_slp': beat[WIN_L + 5, 0] - beat[WIN_L + 25, 0],
-            'py_sym': beat[WIN_L, 0],
+            'rpeak_raw': abs(beat[WIN_L, 0]),
+        })
+    # Compute gain from only the beats we loaded
+    max_peak = max(b['rpeak_raw'] for b in raw_beats) if raw_beats else 1.0
+    gain = 0.16 / max_peak
+    # Second pass: compute Python references (don't depend on gain)
+    beats = []
+    for b in raw_beats:
+        beats.append({
+            'pre_rr': b['pre_rr'], 'post_rr': b['post_rr'], 'ewma_rr': b['ewma_rr'],
+            'ecg_l0': b['ecg_l0'], 'ecg_l1': b['ecg_l1'],
+            'py_f1': b['pre_rr'] / b['ewma_rr_before'] if b['ewma_rr_before'] > 0 else 1.0,
+            'py_f2': b['pre_rr'] / b['post_rr'] if b['post_rr'] > 0 else 1.0,
+            'py_bi_l0': b['py_bi_l0'], 'py_bi_l1': b['py_bi_l1'],
+            'py_pw': b['ecg_l0'][PW_MID] - b['ecg_l0'][PW_S],
+            'py_wid': b['ecg_l0'][WIN_L + 10],
+            'py_slp': b['ecg_l0'][WIN_L + 5] - b['ecg_l0'][WIN_L + 25],
+            'py_sym': b['ecg_l0'][WIN_L],
         })
     return beats, gain
 
@@ -160,7 +167,7 @@ def fmt_rhos(rhos):
 beats, gain = load_all_beats('100', 30)
 n = len(beats)
 max_r_v = max(VBASE + gain * b['ecg_l0'][WIN_L] for b in beats)
-rpeak_thresh = VBASE + 0.5 * (max_r_v - VBASE)
+rpeak_thresh = VBASE + 0.30 * (max_r_v - VBASE)
 print("Loaded {} beats, gain={:.4f}, rpeak_thresh={:.4f}V".format(n, gain, rpeak_thresh))
 
 rpeak_times = [max(beats[0]['pre_rr'], 0.5)]
@@ -320,22 +327,25 @@ print("  Sim time: {:.0f}s, {} measurements".format(t_a, len(res_a)))
 print("  Abs rho: " + fmt_rhos(rho_a))
 
 
-# ===== CONFIG B: All rpeak-derived triggers analog =====
+# ===== CONFIG D: Analog DT only (ideal rpeak) — isolates delay_timer =====
 print("\n" + "="*60)
-print("CONFIG B: All rpeak-derived analog (rpeak + DT + s14/s69/wid/bi/rr_copy)")
+print("CONFIG D: Analog delay_timer ONLY (ideal rpeak drives DT)")
+print("  Tests F6(wid), F7(s14/s69), F3/F4(bi_copy), F1/F2(rr_copy)")
 print("="*60)
-sp_b = common_header()
-sp_b += '.include "{fp}/rr_timing.spice"\n'.format(fp=fp)
-sp_b += '.include "{fp}/rpeak_detector.spice"\n'.format(fp=fp)
-sp_b += '.include "{fp}/delay_timer.spice"\n'.format(fp=fp)
-sp_b += """
-* Analog rpeak detector
-Vrpk_thresh rpeak_threshold 0 {thresh:.4f}
-Xrpeak ecg_l0 rpeak_threshold rpeak_raw vdd vss vbias rpeak_detector
-Xpg_rpk rpeak_raw rpeak_pulse vdd vss vbias pulse_gen
+sp_d = common_header()
+sp_d += '.include "{fp}/rr_timing.spice"\n'.format(fp=fp)
+sp_d += '.include "{fp}/delay_timer.spice"\n'.format(fp=fp)
+sp_d += """
+* Ideal rpeak pulse drives analog delay timer
+Vrpk rpk_ideal 0 PWL({rpk})
 
-* Analog delay timer — driven by analog rpeak
-Xdelay rpeak_pulse dt_s14_lev dt_s69_lev dt_wid_lev dt_bi_lev dt_rr_copy_lev dt_sf_out vdd vss vbias {vth14:.6f} {vth69:.6f} {vth28:.6f} {vth300:.6f} {vth10:.6f} delay_timer
+* Threshold voltage sources for delay_timer
+Vth14_d vth_14_d 0 {vth14:.6f}
+Vth69_d vth_69_d 0 {vth69:.6f}
+Vth28_d vth_28_d 0 {vth28:.6f}
+Vth300_d vth_300_d 0 {vth300:.6f}
+Vth10_d vth_10_d 0 {vth10:.6f}
+Xdelay rpk_ideal dt_s14_lev dt_s69_lev dt_wid_lev dt_bi_lev dt_rr_copy_lev dt_sf_out vdd vss vbias vth_14_d vth_69_d vth_28_d vth_300_d vth_10_d delay_timer
 Xeb_wid dt_wid_lev wid_sharp vdd vss edge_buffer
 Xpg_wid wid_sharp trig_wid vdd vss vbias pulse_gen
 Xeb_s69 dt_s69_lev s69_sharp vdd vss edge_buffer
@@ -352,6 +362,63 @@ Vcap trig_rr_cap 0 PWL({cap})
 Vpwb trig_pw_base 0 PWL({pwb})
 Vpwp trig_pw_peak 0 PWL({pwp})
 
+* All feature circuits use ideal rpeak, analog DT triggers
+Xrr ecg_l0 trig_rr_cap rpk_ideal trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
+Xbi0 ecg_l0 rpk_ideal trig_bi_raw f3_bi_l0 vdd vss vbias beat_instability
+Xbi1 ecg_l1 rpk_ideal trig_bi_raw f4_bi_l1 vdd vss vbias beat_instability
+Xpw ecg_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
+Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
+Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
+Xsym ecg_l0 rpk_ideal f8_symmetry vdd vss qrs_symmetry
+
+.ic V(xrr.ewma_node)={ic:.6f}
+.ic V(xrr.esamp_node)={ic:.6f}
+.ic V(xrr.prev_node)={ic:.6f}
+.ic V(xbi0.prev_node)=0.30
+.ic V(xbi0.esamp_node)=0.30
+.ic V(xbi1.prev_node)=0.30
+.ic V(xbi1.esamp_node)=0.30
+
+.tran 0.5m {ttot:.4f}
+""".format(rpk=ideal_rpk, cap=ideal_rr_cap, pwb=ideal_pw_base, pwp=ideal_pw_peak,
+           vth14=vth_14, vth69=vth_69, vth28=vth_28, vth300=vth_300, vth10=vth_10,
+           ic=ic_ewma, ttot=total_time)
+sp_d += meas_block(SKIP, n, rpeak_times, total_time)
+
+res_d, t_d = run_sim("config_D_analog_dt_only", sp_d)
+feat_d = get_feature_values(res_d, SKIP, n)
+rho_d = compute_rho_vs_python(feat_d, beats)
+xrho_d = compute_cross_rho(feat_a, feat_d)
+print("  Sim time: {:.0f}s, {} measurements".format(t_d, len(res_d)))
+print("  Abs rho: " + fmt_rhos(rho_d))
+print("  vs A:    " + fmt_rhos(xrho_d))
+
+
+# ===== CONFIG E: Analog rpeak only (ideal DT) — isolates rpeak timing =====
+print("\n" + "="*60)
+print("CONFIG E: Analog rpeak ONLY (ideal DT triggers)")
+print("  Tests rpeak timing effect on F3/F4(bi), F8(sym)")
+print("="*60)
+sp_e = common_header()
+sp_e += '.include "{fp}/rr_timing.spice"\n'.format(fp=fp)
+sp_e += '.include "{fp}/rpeak_detector.spice"\n'.format(fp=fp)
+sp_e += """
+* Analog rpeak detector
+Vrpk_thresh rpeak_threshold 0 {thresh:.4f}
+Xrpeak ecg_l0 rpeak_threshold rpeak_raw vdd vss vbias rpeak_detector
+Xpg_rpk rpeak_raw rpeak_pulse vdd vss vbias pulse_gen
+
+* All DT-derived triggers still ideal
+Vs14 trig_s14 0 PWL({s14})
+Vs69 trig_s69 0 PWL({s69})
+Vwid trig_wid 0 PWL({wid})
+Vbi  trig_bi_raw 0 PWL({bi})
+Vrrc trig_rr_copy 0 PWL({rrc})
+Vcap trig_rr_cap 0 PWL({cap})
+Vpwb trig_pw_base 0 PWL({pwb})
+Vpwp trig_pw_peak 0 PWL({pwp})
+
+* rpeak_pulse used for: F3/F4 S&H capture, F8 S&H, rr_timing rpeak_trigger
 Xrr ecg_l0 trig_rr_cap rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
 Xbi0 ecg_l0 rpeak_pulse trig_bi_raw f3_bi_l0 vdd vss vbias beat_instability
 Xbi1 ecg_l1 rpeak_pulse trig_bi_raw f4_bi_l1 vdd vss vbias beat_instability
@@ -369,124 +436,134 @@ Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
 .ic V(xbi1.esamp_node)=0.30
 
 .tran 0.5m {ttot:.4f}
-""".format(thresh=rpeak_thresh, cap=ideal_rr_cap, pwb=ideal_pw_base, pwp=ideal_pw_peak,
-           vth14=vth_14, vth69=vth_69, vth28=vth_28, vth300=vth_300, vth10=vth_10,
+""".format(thresh=rpeak_thresh, s14=ideal_s14, s69=ideal_s69, wid=ideal_wid,
+           bi=ideal_bi_copy, rrc=ideal_rr_copy, cap=ideal_rr_cap,
+           pwb=ideal_pw_base, pwp=ideal_pw_peak,
            ic=ic_ewma, ttot=total_time)
-sp_b += meas_block(SKIP, n, rpeak_times, total_time)
+sp_e += meas_block(SKIP, n, rpeak_times, total_time)
 
-res_b, t_b = run_sim("config_B_analog_rpeak_dt", sp_b)
-feat_b = get_feature_values(res_b, SKIP, n)
-rho_b = compute_rho_vs_python(feat_b, beats)
-xrho_b = compute_cross_rho(feat_a, feat_b)
-print("  Sim time: {:.0f}s, {} measurements".format(t_b, len(res_b)))
-print("  Abs rho: " + fmt_rhos(rho_b))
-print("  vs A:    " + fmt_rhos(xrho_b))
+res_e, t_e = run_sim("config_E_analog_rpeak_only", sp_e)
+feat_e = get_feature_values(res_e, SKIP, n)
+rho_e = compute_rho_vs_python(feat_e, beats)
+xrho_e = compute_cross_rho(feat_a, feat_e)
+print("  Sim time: {:.0f}s, {} measurements".format(t_e, len(res_e)))
+print("  Abs rho: " + fmt_rhos(rho_e))
+print("  vs A:    " + fmt_rhos(xrho_e))
 
 
-# ===== CONFIG C: B + hold-and-copy rr_cap =====
+# ===== CONFIG F: Analog rpeak + peak delay compensator =====
 print("\n" + "="*60)
-print("CONFIG C: B + hold-copy rr_cap (rr_timing_v6)")
-print("  capture=ideal R+5ms, copy=analog rr_copy R+10ms")
+print("CONFIG F: Analog rpeak + peak delay timer (~6ms compensation)")
+print("  rpeak_pulse -> rr_timing precharge")
+print("  refined_rpeak -> F3/F4/F8 S&H captures")
 print("="*60)
-sp_c = common_header()
-sp_c += '.include "{fp}/rr_timing_v6.spice"\n'.format(fp=fp)
-sp_c += '.include "{fp}/rpeak_detector.spice"\n'.format(fp=fp)
-sp_c += '.include "{fp}/delay_timer.spice"\n'.format(fp=fp)
-sp_c += """
+sp_f = common_header()
+sp_f += '.include "{fp}/rr_timing.spice"\n'.format(fp=fp)
+sp_f += '.include "{fp}/rpeak_detector.spice"\n'.format(fp=fp)
+sp_f += """
 * Analog rpeak detector
 Vrpk_thresh rpeak_threshold 0 {thresh:.4f}
 Xrpeak ecg_l0 rpeak_threshold rpeak_raw vdd vss vbias rpeak_detector
 Xpg_rpk rpeak_raw rpeak_pulse vdd vss vbias pulse_gen
 
-* Analog delay timer
-Xdelay rpeak_pulse dt_s14_lev dt_s69_lev dt_wid_lev dt_bi_lev dt_rr_copy_lev dt_sf_out vdd vss vbias {vth14:.6f} {vth69:.6f} {vth28:.6f} {vth300:.6f} {vth10:.6f} delay_timer
-Xeb_wid dt_wid_lev wid_sharp vdd vss edge_buffer
-Xpg_wid wid_sharp trig_wid vdd vss vbias pulse_gen
-Xeb_s69 dt_s69_lev s69_sharp vdd vss edge_buffer
-Xpg_s69 s69_sharp trig_s69 vdd vss vbias pulse_gen
-Xeb_bi dt_bi_lev bi_sharp vdd vss edge_buffer
-Xpg_bi bi_sharp trig_bi_raw vdd vss vbias long_pulse_gen
-Xeb_rrc dt_rr_copy_lev rrc_sharp vdd vss edge_buffer
-Xpg_rrc rrc_sharp trig_rr_copy vdd vss vbias long_pulse_gen
-Xeb_s14 dt_s14_lev s14_sharp vdd vss edge_buffer
-Xpg_s14 s14_sharp trig_s14 vdd vss vbias pulse_gen
+* Peak delay timer: 1pF cap discharges from VDD after rpeak
+* Delay ~ C*dV/I = 1pF * 0.45V / 80pA ~ 5.6ms
+* Inverter switches at VDD/2, fires ~6ms after rpeak_pulse
+XCpk_timer pk_timer_node vss sky130_fd_pr__cap_mim_m3_1 W=23 L=23
+Xinv_rpk rpeak_pulse rpk_pulse_bar vdd vss inverter_sub
+XMpk_charge pk_timer_node rpk_pulse_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMpk_drain pk_timer_node vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.84 nf=1
+* Single inverter: timer HIGH -> LOW, timer falls past VDD/2 -> HIGH (triggers edge_buffer)
+Xinv_pk1 pk_timer_node pk_timer_lev vdd vss inverter_sub
+Xeb_rpk pk_timer_lev rpk_refined_sharp vdd vss edge_buffer
+Xpg_rpk_ref rpk_refined_sharp refined_rpeak vdd vss vbias pulse_gen
 
-* Capture at R+5ms (ideal — in ASIC: fast-timer comparator)
-Vcap_post trig_cap_post 0 PWL({cap_post})
-* Pwave still ideal
+* DT triggers still ideal
+Vs14 trig_s14 0 PWL({s14})
+Vs69 trig_s69 0 PWL({s69})
+Vwid trig_wid 0 PWL({wid})
+Vbi  trig_bi_raw 0 PWL({bi})
+Vrrc trig_rr_copy 0 PWL({rrc})
+Vcap trig_rr_cap 0 PWL({cap})
 Vpwb trig_pw_base 0 PWL({pwb})
 Vpwp trig_pw_peak 0 PWL({pwp})
 
-* rr_timing_v6: hold latches at rpeak, capture copies hold at R+5ms, EWMA at R+10ms
-Xrr ecg_l0 trig_cap_post rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing_v6
-Xbi0 ecg_l0 rpeak_pulse trig_bi_raw f3_bi_l0 vdd vss vbias beat_instability
-Xbi1 ecg_l1 rpeak_pulse trig_bi_raw f4_bi_l1 vdd vss vbias beat_instability
+* rpeak_pulse for rr_timing precharge; refined_rpeak for F3/F4/F8 S&H
+Xrr ecg_l0 trig_rr_cap rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
+Xbi0 ecg_l0 refined_rpeak trig_bi_raw f3_bi_l0 vdd vss vbias beat_instability
+Xbi1 ecg_l1 refined_rpeak trig_bi_raw f4_bi_l1 vdd vss vbias beat_instability
 Xpw ecg_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
 Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
 Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
-Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
+Xsym ecg_l0 refined_rpeak f8_symmetry vdd vss qrs_symmetry
 
 .ic V(xrr.ewma_node)={ic:.6f}
 .ic V(xrr.esamp_node)={ic:.6f}
 .ic V(xrr.prev_node)={ic:.6f}
-.ic V(xrr.hold_node)={ic:.6f}
 .ic V(xbi0.prev_node)=0.30
 .ic V(xbi0.esamp_node)=0.30
 .ic V(xbi1.prev_node)=0.30
 .ic V(xbi1.esamp_node)=0.30
 
 .tran 0.5m {ttot:.4f}
-""".format(thresh=rpeak_thresh, cap_post=ideal_cap_post, pwb=ideal_pw_base, pwp=ideal_pw_peak,
-           vth14=vth_14, vth69=vth_69, vth28=vth_28, vth300=vth_300, vth10=vth_10,
+""".format(thresh=rpeak_thresh, s14=ideal_s14, s69=ideal_s69, wid=ideal_wid,
+           bi=ideal_bi_copy, rrc=ideal_rr_copy, cap=ideal_rr_cap,
+           pwb=ideal_pw_base, pwp=ideal_pw_peak,
            ic=ic_ewma, ttot=total_time)
-sp_c += meas_block(SKIP, n, rpeak_times, total_time)
+sp_f += meas_block(SKIP, n, rpeak_times, total_time)
 
-res_c, t_c = run_sim("config_C_hold_copy", sp_c)
-feat_c = get_feature_values(res_c, SKIP, n)
-rho_c = compute_rho_vs_python(feat_c, beats)
-xrho_c = compute_cross_rho(feat_a, feat_c)
-xrho_cb = compute_cross_rho(feat_b, feat_c)
-print("  Sim time: {:.0f}s, {} measurements".format(t_c, len(res_c)))
-print("  Abs rho: " + fmt_rhos(rho_c))
-print("  vs A:    " + fmt_rhos(xrho_c))
-print("  vs B:    " + fmt_rhos(xrho_cb))
+res_f, t_f = run_sim("config_F_peak_delay", sp_f)
+feat_f = get_feature_values(res_f, SKIP, n)
+rho_f = compute_rho_vs_python(feat_f, beats)
+xrho_f = compute_cross_rho(feat_a, feat_f)
+print("  Sim time: {:.0f}s, {} measurements".format(t_f, len(res_f)))
+print("  Abs rho: " + fmt_rhos(rho_f))
+print("  vs A:    " + fmt_rhos(xrho_f))
+
+# Debug: F8 with peak delay
+print("\nDebug: F8(sym) raw — A vs E(no delay) vs F(peak delay), first 8 beats:")
+for j in range(SKIP, min(SKIP+8, n)):
+    va = res_a.get('f8_{}'.format(j), float('nan'))
+    ve = res_e.get('f8_{}'.format(j), float('nan'))
+    vf = res_f.get('f8_{}'.format(j), float('nan'))
+    print("  beat {:2d}: A={:.5f}  E={:.5f}  F={:.5f}  py={:.6f}".format(
+        j, va, ve, vf, beats[j]['py_sym']))
 
 
 # ===== SUMMARY =====
 print("\n" + "="*78)
-print("SUMMARY")
+print("SUMMARY — ISOLATION TESTS")
 print("="*78)
 print("\nAbsolute rho (vs Python):")
 print("  {:>42s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s}".format(
     "", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"))
-for name, rhos in [("A: all ideal", rho_a),
-                   ("B: analog rpeak+DT (ideal rr_cap/pw)", rho_b),
-                   ("C: B + hold-copy rr_cap (ideal pw)", rho_c)]:
+for name, rhos in [("A: all ideal (baseline)", rho_a),
+                   ("D: analog DT only (ideal rpeak)", rho_d),
+                   ("E: analog rpeak only (ideal DT)", rho_e),
+                   ("F: rpeak + peak delay (~6ms)", rho_f)]:
     print("  {:>42s} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}".format(
         name, *[rhos.get(k,0) for k in range(1,9)]))
 
-print("\nCross-config rho (1.000 = identical to reference):")
-for name, xrhos in [("B vs A (rpeak+DT effect)", xrho_b),
-                    ("C vs A (rpeak+DT+rr_cap effect)", xrho_c),
-                    ("C vs B (rr_cap-only effect)", xrho_cb)]:
+print("\nCross-config rho vs A (1.000 = identical to baseline):")
+print("  {:>42s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s}".format(
+    "", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"))
+for name, xrhos in [("D vs A (DT-only effect)", xrho_d),
+                    ("E vs A (rpeak-only effect)", xrho_e),
+                    ("F vs A (rpeak+delay effect)", xrho_f)]:
     print("  {:>42s} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}".format(
         name, *[xrhos.get(k,0) for k in range(1,9)]))
 
-# Debug: raw values
-print("\nDebug: F1 raw values (A vs B vs C), first 8 beats:")
+# Debug: F6/F7 raw (DT test)
+print("\nDebug: F6(wid) raw values — A vs D, first 8 beats:")
 for j in range(SKIP, min(SKIP+8, n)):
-    va = res_a.get('f1_{}'.format(j), float('nan'))
-    vb = res_b.get('f1_{}'.format(j), float('nan'))
-    vc = res_c.get('f1_{}'.format(j), float('nan'))
-    print("  beat {:2d}: A={:.5f}  B={:.5f}  C={:.5f}  py={:.4f}".format(
-        j, va, vb, vc, beats[j]['py_f1']))
+    va = res_a.get('f6_{}'.format(j), float('nan'))
+    vd = res_d.get('f6_{}'.format(j), float('nan'))
+    print("  beat {:2d}: A={:.5f}  D={:.5f}  py={:.6f}".format(
+        j, va, vd, beats[j]['py_wid']))
 
-print("\nDebug: F8 raw values (A vs B), first 8 beats:")
+print("\nDebug: F8(sym) raw values — A vs E, first 8 beats:")
 for j in range(SKIP, min(SKIP+8, n)):
     va = res_a.get('f8_{}'.format(j), float('nan'))
-    vb = res_b.get('f8_{}'.format(j), float('nan'))
-    print("  beat {:2d}: A={:.5f}  B={:.5f}  py={:.6f}".format(
-        j, va, vb, beats[j]['py_sym']))
-
-print("\nIdeal remaining: pwave triggers (F5)")
-print("Ideal in C: capture_trig R+5ms (needs fast-timer comparator in ASIC)")
+    ve = res_e.get('f8_{}'.format(j), float('nan'))
+    print("  beat {:2d}: A={:.5f}  E={:.5f}  py={:.6f}".format(
+        j, va, ve, beats[j]['py_sym']))
