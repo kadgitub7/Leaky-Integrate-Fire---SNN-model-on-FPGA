@@ -1,0 +1,66 @@
+.title delay_timer_calibration
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/delay_timer.spice"
+
+* rpeak pulse at t=10ms
+Vrpk rpeak_pulse 0 PWL(0 0 9.5e-3 0 10.0e-3 0.9 10.5e-3 0.9 11.0e-3 0)
+
+* Dummy thresholds (set very low so comparators don't fire and interfere)
+Vth14 vth_14_node 0 0.05
+Vth69 vth_69_node 0 0.05
+Vth28 vth_28_node 0 0.05
+Vth300 vth_300_node 0 0.05
+Vth10 vth_10_node 0 0.05
+
+Xdt rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node delay_timer
+
+.tran 0.1m 900m
+.meas tran sf_main_10 FIND V(sf_out) AT=0.0115000
+.meas tran sf_main_20 FIND V(sf_out) AT=0.0125000
+.meas tran sf_main_30 FIND V(sf_out) AT=0.0135000
+.meas tran sf_main_40 FIND V(sf_out) AT=0.0145000
+.meas tran sf_main_50 FIND V(sf_out) AT=0.0155000
+.meas tran sf_main_100 FIND V(sf_out) AT=0.0205000
+.meas tran sf_main_150 FIND V(sf_out) AT=0.0255000
+.meas tran sf_main_200 FIND V(sf_out) AT=0.0305000
+.meas tran sf_main_300 FIND V(sf_out) AT=0.0405000
+.meas tran sf_main_400 FIND V(sf_out) AT=0.0505000
+.meas tran sf_main_500 FIND V(sf_out) AT=0.0605000
+.meas tran sf_main_600 FIND V(sf_out) AT=0.0705000
+.meas tran sf_main_700 FIND V(sf_out) AT=0.0805000
+.meas tran sf_main_800 FIND V(sf_out) AT=0.0905000
+.meas tran sf_main_900 FIND V(sf_out) AT=0.1005000
+.meas tran sf_main_1000 FIND V(sf_out) AT=0.1105000
+.meas tran sf_main_1500 FIND V(sf_out) AT=0.1605000
+.meas tran sf_main_2000 FIND V(sf_out) AT=0.2105000
+.meas tran sf_main_2500 FIND V(sf_out) AT=0.2605000
+.meas tran sf_main_3000 FIND V(sf_out) AT=0.3105000
+.meas tran sf_main_3500 FIND V(sf_out) AT=0.3605000
+.meas tran sf_main_4000 FIND V(sf_out) AT=0.4105000
+.meas tran sf_main_5000 FIND V(sf_out) AT=0.5105000
+.meas tran sf_main_6000 FIND V(sf_out) AT=0.6105000
+.meas tran sf_main_7000 FIND V(sf_out) AT=0.7105000
+.meas tran sf_main_8000 FIND V(sf_out) AT=0.8105000
+.meas tran sf_fast_5 FIND V(xdt.sf_timer2) AT=0.0110000
+.meas tran sf_fast_10 FIND V(xdt.sf_timer2) AT=0.0115000
+.meas tran sf_fast_20 FIND V(xdt.sf_timer2) AT=0.0125000
+.meas tran sf_fast_30 FIND V(xdt.sf_timer2) AT=0.0135000
+.meas tran sf_fast_40 FIND V(xdt.sf_timer2) AT=0.0145000
+.meas tran sf_fast_50 FIND V(xdt.sf_timer2) AT=0.0155000
+.meas tran sf_fast_70 FIND V(xdt.sf_timer2) AT=0.0175000
+.meas tran sf_fast_100 FIND V(xdt.sf_timer2) AT=0.0205000
+.meas tran sf_fast_140 FIND V(xdt.sf_timer2) AT=0.0245000
+.meas tran sf_fast_200 FIND V(xdt.sf_timer2) AT=0.0305000
+.meas tran sf_fast_250 FIND V(xdt.sf_timer2) AT=0.0355000
+.meas tran sf_fast_300 FIND V(xdt.sf_timer2) AT=0.0405000
+.meas tran sf_fast_350 FIND V(xdt.sf_timer2) AT=0.0455000
+.meas tran sf_fast_400 FIND V(xdt.sf_timer2) AT=0.0505000
+
+.end

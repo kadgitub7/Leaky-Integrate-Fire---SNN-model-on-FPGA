@@ -1,0 +1,50 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: pulse_gen
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+level_in                                     0
+xpg.xcac.a                        -2.80857e-12
+xpg.xcac.b1                       -2.80857e-12
+xpg.pulse_raw                     -2.80857e-12
+xpg.inv1_out                               0.9
+pulse_out                          1.73955e-07
+vstep#branch                                 0
+vbias#branch                                 0
+vss#branch                         4.25756e-11
+vdd#branch                        -4.25756e-11
+
+
+No. of Data Rows : 2014
+
+  Measurements for Transient Analysis
+
+pg_rise             =   4.95999e-03
+pg_fall             =   5.66066e-03
+pg_peak             =  9.014566e-01 at=  4.965000e-03
+pg_quiescent        =  1.739548e-07
+pg_post             =  1.739548e-07
+
+
+Total analysis time (seconds) = 0.281
+
+Total elapsed time (seconds) = 15.771 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2711.590 MB.
+Maximum ngspice program size =   42.594 MB.
+Current ngspice program size =   42.320 MB.
+

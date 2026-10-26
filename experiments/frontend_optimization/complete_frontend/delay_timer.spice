@@ -96,7 +96,7 @@ XMc4_7 trig_bi_copy stg1_bi vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 * Separate small cap with faster discharge
 XMch2 timer2 rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XMdis2 timer2 vbias_delay vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.84 nf=1
-XCt2 timer2 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+XCt2 timer2 vss sky130_fd_pr__cap_mim_m3_1 W=45 L=45
 
 * Source follower for fast timer
 XMsf2 vdd timer2 sf_timer2 vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1

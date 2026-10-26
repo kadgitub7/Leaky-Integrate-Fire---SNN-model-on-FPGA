@@ -1,0 +1,120 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: delay_timer_calibration
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpeak_pulse                                  0
+vth_14_node                               0.05
+vth_69_node                               0.05
+vth_28_node                               0.05
+vth_300_node                              0.05
+vth_10_node                               0.05
+xdt.sf_timer                       1.17518e-05
+sf_out                             1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483671
+xdt.ct2                            0.000102657
+xdt.stg1_s69                        0.00883282
+trig_s69                                   0.9
+xdt.cn3                               0.483671
+xdt.ct3                            0.000102657
+xdt.stg1_wid                        0.00883282
+trig_wid                                   0.9
+xdt.cn4                               0.483671
+xdt.ct4                            0.000102657
+xdt.stg1_bi                         0.00883282
+trig_bi_copy                               0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483671
+xdt.ct5                            0.000102657
+xdt.stg1_rr                         0.00883282
+trig_rr_copy                               0.9
+xdt.cn6                               0.483671
+xdt.ct6                            0.000102657
+xdt.stg1_s14                        0.00883282
+trig_s14                                   0.9
+vth10#branch                                 0
+vth300#branch                                0
+vth28#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         3.00892e-12
+vdd#branch                        -3.00905e-12
+
+
+No. of Data Rows : 9020
+
+  Measurements for Transient Analysis
+
+sf_main_10          =  4.829078e-01
+sf_main_20          =  4.823815e-01
+sf_main_30          =  4.818610e-01
+sf_main_40          =  4.813419e-01
+sf_main_50          =  4.808188e-01
+sf_main_100         =  4.781952e-01
+sf_main_150         =  4.755774e-01
+sf_main_200         =  4.729665e-01
+sf_main_300         =  4.677655e-01
+sf_main_400         =  4.625441e-01
+sf_main_500         =  4.573462e-01
+sf_main_600         =  4.521241e-01
+sf_main_700         =  4.469443e-01
+sf_main_800         =  4.417593e-01
+sf_main_900         =  4.365619e-01
+sf_main_1000        =  4.313968e-01
+sf_main_1500        =  4.056110e-01
+sf_main_2000        =  3.799861e-01
+sf_main_2500        =  3.545230e-01
+sf_main_3000        =  3.292083e-01
+sf_main_3500        =  3.040584e-01
+sf_main_4000        =  2.790586e-01
+sf_main_5000        =  2.295633e-01
+sf_main_6000        =  1.807363e-01
+sf_main_7000        =  1.326419e-01
+sf_main_8000        =  8.559583e-02
+sf_fast_5           =  4.809954e-01
+sf_fast_10          =  4.745611e-01
+sf_fast_20          =  4.617302e-01
+sf_fast_30          =  4.489378e-01
+sf_fast_40          =  4.361835e-01
+sf_fast_50          =  4.234671e-01
+sf_fast_70          =  3.981477e-01
+sf_fast_100         =  3.604531e-01
+sf_fast_140         =  3.107318e-01
+sf_fast_200         =  2.373475e-01
+sf_fast_250         =  1.772804e-01
+sf_fast_300         =  1.183361e-01
+sf_fast_350         =  6.162645e-02
+sf_fast_400         =  1.921293e-02
+
+
+Total analysis time (seconds) = 1.553
+
+Total elapsed time (seconds) = 10.137 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2488.379 MB.
+Maximum ngspice program size =   71.992 MB.
+Current ngspice program size =   71.992 MB.
+

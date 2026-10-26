@@ -1,0 +1,41 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: bias_gen
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+xbias.iref                                 0.3
+vbias                                 0.292537
+vref                                  0.292537
+vss#branch                         6.92091e-11
+vdd#branch                        -5.52709e-11
+
+
+No. of Data Rows : 59
+
+  Measurements for Transient Analysis
+
+vbias_dc            =  3.003012e-01
+vref_dc             =  3.003012e-01
+
+
+Total analysis time (seconds) = 0.016
+
+Total elapsed time (seconds) = 17.022 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2713.746 MB.
+Maximum ngspice program size =   42.230 MB.
+Current ngspice program size =   40.273 MB.
+

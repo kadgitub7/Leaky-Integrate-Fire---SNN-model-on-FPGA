@@ -1,0 +1,24 @@
+.title pulse_gen
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/pulse_gen.spice"
+
+* Step input at t=5ms
+Vstep level_in 0 PWL(0 0 4.9e-3 0 5.0e-3 0.9 50e-3 0.9)
+Xpg level_in pulse_out vdd vss vbias pulse_gen
+
+.tran 0.01m 20m
+
+.meas tran pg_rise WHEN V(pulse_out)=0.45 RISE=1
+.meas tran pg_fall WHEN V(pulse_out)=0.45 FALL=1
+.meas tran pg_peak MAX V(pulse_out) FROM=4.5e-3 TO=15e-3
+.meas tran pg_quiescent FIND V(pulse_out) AT=3.0e-3
+.meas tran pg_post FIND V(pulse_out) AT=18.0e-3
+
+.end

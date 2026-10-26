@@ -1,0 +1,63 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: rpeak_det
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+ecg_l0                                     0.3
+rpeak_threshold                       0.346763
+xrpk.net1                             0.306968
+xrpk.tail1                            0.126529
+xrpk.stg1_out                         0.890502
+rpeak_out                          2.06459e-11
+vthresh#branch                               0
+vecg#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.05566e-11
+vdd#branch                        -4.05567e-11
+
+
+No. of Data Rows : 47217
+
+  Measurements for Transient Analysis
+
+rpk_rise_3          =   3.19972e+00
+rpk_rise_4          =   3.98750e+00
+rpk_rise_5          =   4.80428e+00
+rpk_rise_6          =   5.45755e+00
+rpk_rise_7          =   6.45246e+00
+rpk_rise_8          =   7.29544e+00
+rpk_rise_9          =   8.10578e+00
+rpk_rise_10         =   8.89777e+00
+rpk_rise_11         =   9.66766e+00
+rpk_rise_12         =   1.05076e+01
+rpk_rise_13         =   1.13626e+01
+rpk_rise_14         =   1.21843e+01
+rpk_rise_15         =   1.30139e+01
+rpk_rise_16         =   1.38353e+01
+rpk_rise_17         =   1.46305e+01
+rpk_rise_18         =   1.54247e+01
+rpk_rise_19         =   1.62192e+01
+
+
+Total analysis time (seconds) = 6.062
+
+Total elapsed time (seconds) = 26.270 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2727.234 MB.
+Maximum ngspice program size =   44.648 MB.
+Current ngspice program size =   44.648 MB.
+

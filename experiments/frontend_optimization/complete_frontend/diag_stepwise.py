@@ -118,10 +118,10 @@ def interp_sf(times_ms, voltages, target_ms):
 
 rr_t = [10,20,50,100,200,300,400,500,600,700,800,900,1000]
 rr_v = [0.4819, 0.4807, 0.4772, 0.4715, 0.4602, 0.4488, 0.4375, 0.4262, 0.4150, 0.4037, 0.3925, 0.3813, 0.3702]
-dt_t = [1,2,3,4,5,10,15,20,50,100,200,300,400,500,600,700,800]
-dt_v = [0.4823, 0.4817, 0.4812, 0.4807, 0.4802, 0.4776, 0.4749, 0.4723, 0.4620, 0.4466, 0.4107, 0.3750, 0.3396, 0.3044, 0.2696, 0.2350, 0.2008]
-ft_t = [1,2,3,5,10,20]
-ft_v = [0.4740, 0.4478, 0.4218, 0.3703, 0.2460, 0.0045]
+dt_t = [1,2,3,4,5,10,15,20,30,40,50,60,70,80,90,100,150,200,250,300,350,400,500,600,700,800]
+dt_v = [0.4829,0.4824,0.4819,0.4813,0.4808,0.4782,0.4756,0.4730,0.4677,0.4625,0.4573,0.4521,0.4469,0.4417,0.4366,0.4314,0.4056,0.3800,0.3545,0.3292,0.3041,0.2791,0.2296,0.1807,0.1326,0.0856]
+ft_t = [0.5,1,2,3,4,5,7,10,14,20]
+ft_v = [0.4788,0.4662,0.4410,0.4160,0.3911,0.3663,0.3173,0.2450,0.1507,0.0249]
 
 # ---- Analysis functions ----
 def get_feature_values(results, skip, n):
@@ -469,7 +469,7 @@ Xpg_rpk rpeak_raw rpeak_pulse vdd vss vbias pulse_gen
 * Peak delay timer: 1pF cap discharges from VDD after rpeak
 * Delay ~ C*dV/I = 1pF * 0.45V / 80pA ~ 5.6ms
 * Inverter switches at VDD/2, fires ~6ms after rpeak_pulse
-XCpk_timer pk_timer_node vss sky130_fd_pr__cap_mim_m3_1 W=23 L=23
+XCpk_timer pk_timer_node vss sky130_fd_pr__cap_mim_m3_1 W=16 L=16
 Xinv_rpk rpeak_pulse rpk_pulse_bar vdd vss inverter_sub
 XMpk_charge pk_timer_node rpk_pulse_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XMpk_drain pk_timer_node vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.84 nf=1
@@ -511,6 +511,15 @@ Xsym ecg_l0 refined_rpeak f8_symmetry vdd vss qrs_symmetry
            pwb=ideal_pw_base, pwp=ideal_pw_peak,
            ic=ic_ewma, ttot=total_time)
 sp_f += meas_block(SKIP, n, rpeak_times, total_time)
+# Add timing measurements: when does rpeak_pulse rise and refined_rpeak rise?
+for j in range(SKIP, n):
+    t_start = rpeak_times[j] - 0.020
+    t_end = rpeak_times[j] + 0.020
+    if t_start > 0.1 and t_end < total_time - 0.01:
+        sp_f += ".meas tran rpk_t_{j} WHEN V(rpeak_pulse)=0.45 RISE=1 TD={ts:.7f}\n".format(
+            j=j, ts=t_start)
+        sp_f += ".meas tran ref_t_{j} WHEN V(refined_rpeak)=0.45 RISE=1 TD={ts:.7f}\n".format(
+            j=j, ts=t_start)
 
 res_f, t_f = run_sim("config_F_peak_delay", sp_f)
 feat_f = get_feature_values(res_f, SKIP, n)
@@ -520,14 +529,26 @@ print("  Sim time: {:.0f}s, {} measurements".format(t_f, len(res_f)))
 print("  Abs rho: " + fmt_rhos(rho_f))
 print("  vs A:    " + fmt_rhos(xrho_f))
 
-# Debug: F8 with peak delay
-print("\nDebug: F8(sym) raw — A vs E(no delay) vs F(peak delay), first 8 beats:")
-for j in range(SKIP, min(SKIP+8, n)):
+# Debug: ALL F8 beats for A vs F, with timing
+print("\nDebug: F8(sym) + timing — ALL beats — A vs F:")
+print("  beat: A_val   F_val   A-F(mV)  ideal_t   rpk_t    ref_t    rpk_err  ref_err  py")
+for j in range(SKIP, n):
     va = res_a.get('f8_{}'.format(j), float('nan'))
-    ve = res_e.get('f8_{}'.format(j), float('nan'))
     vf = res_f.get('f8_{}'.format(j), float('nan'))
-    print("  beat {:2d}: A={:.5f}  E={:.5f}  F={:.5f}  py={:.6f}".format(
-        j, va, ve, vf, beats[j]['py_sym']))
+    diff_af = (vf - va)*1000 if not (va != va or vf != vf) else float('nan')
+    ideal_t = rpeak_times[j]
+    rpk_t = res_f.get('rpk_t_{}'.format(j), float('nan'))
+    ref_t = res_f.get('ref_t_{}'.format(j), float('nan'))
+    rpk_err = (rpk_t - ideal_t)*1000 if not (rpk_t != rpk_t) else float('nan')
+    ref_err = (ref_t - ideal_t)*1000 if not (ref_t != ref_t) else float('nan')
+    print("  {:2d}: {:.5f} {:.5f} {:+6.1f}  {:.4f} {:.4f} {:.4f} {:+5.1f}ms {:+5.1f}ms {:.3f}".format(
+        j, va, vf, diff_af, ideal_t, rpk_t, ref_t, rpk_err, ref_err, beats[j]['py_sym']))
+
+
+
+# Skip Config G (PFET peak detector failed - body effect kills signal)
+rho_g = {k: 0.0 for k in range(1,9)}
+xrho_g = {k: 0.0 for k in range(1,9)}
 
 
 # ===== SUMMARY =====
@@ -540,7 +561,8 @@ print("  {:>42s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s}".format
 for name, rhos in [("A: all ideal (baseline)", rho_a),
                    ("D: analog DT only (ideal rpeak)", rho_d),
                    ("E: analog rpeak only (ideal DT)", rho_e),
-                   ("F: rpeak + peak delay (~6ms)", rho_f)]:
+                   ("F: rpeak + peak delay (~4ms)", rho_f),
+                   ("G: rpeak + PFET peak detector", rho_g)]:
     print("  {:>42s} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}".format(
         name, *[rhos.get(k,0) for k in range(1,9)]))
 
@@ -549,7 +571,8 @@ print("  {:>42s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s} {:>5s}".format
     "", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"))
 for name, xrhos in [("D vs A (DT-only effect)", xrho_d),
                     ("E vs A (rpeak-only effect)", xrho_e),
-                    ("F vs A (rpeak+delay effect)", xrho_f)]:
+                    ("F vs A (rpeak+delay effect)", xrho_f),
+                    ("G vs A (PFET peak det)", xrho_g)]:
     print("  {:>42s} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}".format(
         name, *[xrhos.get(k,0) for k in range(1,9)]))
 
