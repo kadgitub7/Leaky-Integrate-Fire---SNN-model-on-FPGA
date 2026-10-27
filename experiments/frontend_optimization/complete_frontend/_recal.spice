@@ -4,10 +4,14 @@
 .temp 27
 Vdd vdd 0 0.9
 Vss vss 0 0
-Vbias vbias 0 0.300
 
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/delay_timer.spice"
+
+* Use analog bias_gen instead of ideal Vbias
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
 
 * rpeak pulse at t=10ms
 Vrpk rpeak_pulse 0 PWL(0 0 9.5e-3 0 10.0e-3 0.9 10.5e-3 0.9 11.0e-3 0)
@@ -62,5 +66,6 @@ Xdt rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy sf_out vdd 
 .meas tran sf_fast_300 FIND V(xdt.sf_timer2) AT=0.0405000
 .meas tran sf_fast_350 FIND V(xdt.sf_timer2) AT=0.0455000
 .meas tran sf_fast_400 FIND V(xdt.sf_timer2) AT=0.0505000
+.meas tran vbias_actual FIND V(vbias) AT=5e-3
 
 .end

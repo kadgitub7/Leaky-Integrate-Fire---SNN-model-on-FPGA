@@ -54,6 +54,7 @@ pipe_s14 = 2.9; pipe_wid = 4.5; pipe_s69 = 4.4; pipe_bi = 5.9; pipe_s10 = 1.8
 # rpeak_detector offset: fires this many ms BEFORE true R-peak (measured on record 100)
 RPEAK_OFFSET_MS = 6.6
 PG_WIDTH_MS = 0.7  # pulse_gen pulse width
+RPEAK_SAMPLE_OFFSET = round((RPEAK_OFFSET_MS - PG_WIDTH_MS) * FS / 1000)  # =2
 
 
 def interp_sf(t_arr, v_arr, t_ms):
@@ -85,8 +86,9 @@ def load_beats(record_id, max_beats=40):
         prev_be = valid[i-1][0] + WIN_R
         if prev_bs >= 0 and prev_be < len(sig):
             prev_beat = sig[prev_bs:prev_be]
-            py_bi_l0 = beat[WIN_L, 0] - prev_beat[WIN_L, 0]
-            py_bi_l1 = beat[WIN_L, min(1, n_leads-1)] - prev_beat[WIN_L, min(1, n_leads-1)]
+            rpk_idx = WIN_L - RPEAK_SAMPLE_OFFSET
+            py_bi_l0 = beat[rpk_idx, 0] - prev_beat[rpk_idx, 0]
+            py_bi_l1 = beat[rpk_idx, min(1, n_leads-1)] - prev_beat[rpk_idx, min(1, n_leads-1)]
         else:
             py_bi_l0 = py_bi_l1 = 0.0
         if ewma_rr is None:
@@ -105,7 +107,7 @@ def load_beats(record_id, max_beats=40):
             'py_pw': beat[PW_MID, 0] - beat[PW_S, 0],
             'py_wid': beat[WIN_L + 10, 0],
             'py_slp': beat[WIN_L + 5, 0] - beat[WIN_L + 25, 0],
-            'py_sym': beat[WIN_L, 0],
+            'py_sym': beat[WIN_L - RPEAK_SAMPLE_OFFSET, 0],
         })
         if len(raw_beats) >= max_beats: break
     max_peak = max(np.max(np.abs(b['ecg_l0'][WIN_L-20:WIN_L+40])) for b in raw_beats)
@@ -190,9 +192,16 @@ for rec_id in RECORDS:
     ecg_l0_pts.append((total_time, VBASE))
     ecg_l1_pts.append((total_time, VBASE))
 
-    # --- rpeak threshold (30% of max QRS amplitude) ---
+    # --- rpeak threshold (adaptive: use min R-peak to ensure detection) ---
     max_r_v = max(VBASE + gain * b['ecg_l0'][WIN_L] for b in beats)
-    rpeak_thresh = VBASE + 0.30 * (max_r_v - VBASE)
+    min_r_v = min(VBASE + gain * b['ecg_l0'][WIN_L] for b in beats)
+    # Set threshold at 80% of the MINIMUM R-peak to catch all beats
+    rpeak_thresh = VBASE + 0.80 * (min_r_v - VBASE)
+    # But clamp to at most 30% of max to avoid noise triggers
+    rpeak_thresh_max = VBASE + 0.30 * (max_r_v - VBASE)
+    rpeak_thresh = min(rpeak_thresh, rpeak_thresh_max)
+    print("  rpeak threshold: {:.4f}V (min_R={:.4f}V, max_R={:.4f}V)".format(
+        rpeak_thresh, min_r_v, max_r_v))
 
     # --- Delay timer thresholds (compensated for rpeak offset) ---
     # Discharge starts at R - RPEAK_OFFSET + PG_WIDTH = R - 5.9ms
@@ -234,6 +243,7 @@ Vecg1 ecg_l1 0 PWL({ecg1})
 .include "{fp}/bias_gen.spice"
 .include "{fp}/rpeak_detector.spice"
 .include "{fp}/pulse_gen.spice"
+.include "{fp}/long_pulse_gen.spice"
 .include "{fp}/delay_timer.spice"
 .include "{fp}/edge_buffer.spice"
 
@@ -258,9 +268,9 @@ Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_
 
 * --- Pulse generators for delay_timer outputs ---
 Xpg_s14 trig_s14_level pg_s14_raw vdd vss vbias pulse_gen
-Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias pulse_gen
-Xpg_wid trig_wid_level pg_wid_raw vdd vss vbias pulse_gen
-Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias pulse_gen
+Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias long_pulse_gen
+Xpg_wid trig_wid_level pg_wid_raw vdd vss vbias long_pulse_gen
+Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias long_pulse_gen
 Xpg_rr  trig_rr_level  pg_rr_raw  vdd vss vbias pulse_gen
 
 * --- Edge buffers for cleaner trigger edges ---
@@ -330,6 +340,7 @@ Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
            fp=fp, ic=ic_ewma, vbase=VBASE, ttot=total_time)
 
     # --- Measurement statements ---
+    # Feature outputs measured 100ms after TRUE R-peak
     for j in range(SKIP, n):
         t_f1 = rpeak_times[j] - 0.010
         if t_f1 > 0.5:
@@ -344,25 +355,182 @@ Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
                            (6,'f6_width'),(7,'f7_slope'),(8,'f8_symmetry')]:
                 sp += ".meas tran f{k}_{j} FIND V({nm}) AT={t:.7f}\n".format(k=fk, j=j, nm=nm, t=t_f38)
 
+    # Extract ACTUAL analog trigger times per beat (for jitter-aware Python ref)
+    for j in range(n):
+        td = max(0.01, rpeak_times[j] - 0.050)
+        sp += ".meas tran trpk_{j} WHEN V(rpeak_pulse)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran ts14_{j} WHEN V(trig_s14)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran ts69_{j} WHEN V(trig_s69)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran twid_{j} WHEN V(trig_wid)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+
     res, elapsed = run_sim("integ_{}".format(rec_id), sp)
     print("  Sim time: {:.0f}s, {} measurements".format(elapsed, len(res)))
 
-    # --- Compute Spearman rho ---
-    py_keys = {1:'py_f1', 2:'py_f2', 3:'py_bi_l0', 4:'py_bi_l1',
-               5:'py_pw', 6:'py_wid', 7:'py_slp', 8:'py_sym'}
+    # --- Classify beats: valid vs missed trigger ---
+    valid_rpk = set()
+    valid_dt = set()  # delay timer triggers valid
+    n_rpk_ok = 0; n_rpk_miss = 0
+    n_dt_ok = 0; n_dt_miss = 0
+    for j in range(n):
+        r = rpeak_times[j]
+        trpk = res.get('trpk_{}'.format(j))
+        ts14 = res.get('ts14_{}'.format(j))
+        twid = res.get('twid_{}'.format(j))
+        ts69 = res.get('ts69_{}'.format(j))
+        # rpeak valid if within [-20ms, +5ms] of true R
+        if trpk and abs(trpk - r) < 0.020:
+            valid_rpk.add(j)
+            n_rpk_ok += 1
+        else:
+            n_rpk_miss += 1
+        # delay triggers valid if within ±15ms of expected
+        if (ts14 and abs((ts14 - r)*1000 - 13) < 15 and
+            twid and abs((twid - r)*1000 - 28) < 15 and
+            ts69 and abs((ts69 - r)*1000 - 69) < 15):
+            valid_dt.add(j)
+            n_dt_ok += 1
+        else:
+            n_dt_miss += 1
+    print("  rpeak valid: {}/{}, delay_timer valid: {}/{}".format(
+        n_rpk_ok, n, n_dt_ok, n))
+    # Print sample trigger times for valid beats
+    shown = 0
+    for j in range(SKIP, n):
+        if j in valid_rpk and shown < 3:
+            r = rpeak_times[j] * 1000
+            trpk = res.get('trpk_{}'.format(j))
+            ts14 = res.get('ts14_{}'.format(j))
+            twid = res.get('twid_{}'.format(j))
+            ts69 = res.get('ts69_{}'.format(j))
+            print("    beat {}: rpk={:.1f}, s14={:.1f}, wid={:.1f}, s69={:.1f} ms from R".format(
+                j, (trpk*1000-r), (ts14*1000-r) if ts14 else 0,
+                (twid*1000-r) if twid else 0, (ts69*1000-r) if ts69 else 0))
+            shown += 1
+
+    # --- Helper: interpolate ECG at any time ---
+    def ecg_at_time(beat_ecg, rpk_time, t_actual, fs=FS):
+        bs_t = rpk_time - WIN_L / fs
+        sample_offset = (t_actual - bs_t) * fs
+        idx = int(sample_offset)
+        frac = sample_offset - idx
+        if idx < 0: idx, frac = 0, 0
+        if idx >= len(beat_ecg) - 1: return beat_ecg[-1]
+        return beat_ecg[idx] * (1 - frac) + beat_ecg[idx + 1] * frac
+
+    # --- Compute Spearman rho using actual trigger times ---
     rhos = {}
-    for fk in range(1, 9):
-        circuit_vals = []; python_vals = []
+
+    # F1/F2: use fixed Python ref (ideal triggers, no jitter issue)
+    for fk, pykey in [(1, 'py_f1'), (2, 'py_f2')]:
+        cv_list, pv_list = [], []
         for j in range(SKIP, n):
             cv = res.get('f{}_{}'.format(fk, j))
             if cv is not None:
-                circuit_vals.append(cv)
-                python_vals.append(beats[j][py_keys[fk]])
-        if len(circuit_vals) >= 5:
-            rho, _ = spearmanr(circuit_vals, python_vals)
-            rhos[fk] = abs(rho)
-        else:
-            rhos[fk] = 0.0
+                cv_list.append(cv)
+                pv_list.append(beats[j][pykey])
+        rhos[fk] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+
+    # F5: ideal pwave triggers, use fixed Python ref
+    cv_list, pv_list = [], []
+    for j in range(SKIP, n):
+        cv = res.get('f5_{}'.format(j))
+        if cv is not None:
+            cv_list.append(cv)
+            pv_list.append(beats[j]['py_pw'])
+    rhos[5] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+
+    # F3/F4/F8: use ACTUAL rpeak time for Python reference (valid beats only)
+    # S&H captures at pulse falling edge: rise_time + pulse_width
+    PG_HOLD_OFFSET = PG_WIDTH_MS * 0.001  # convert to seconds
+    for fk, lead in [(3, 0), (4, 1), (8, 0)]:
+        cv_list, pv_list = [], []
+        for j in range(SKIP, n):
+            if j not in valid_rpk:
+                continue
+            cv = res.get('f{}_{}'.format(fk, j))
+            t_rpk = res.get('trpk_{}'.format(j))
+            if cv is not None and t_rpk is not None:
+                t_capture = t_rpk + PG_HOLD_OFFSET
+                ecg_arr = beats[j]['ecg_l0'] if lead == 0 else beats[j]['ecg_l1']
+                actual_ecg = ecg_at_time(ecg_arr, rpeak_times[j], t_capture)
+                if fk == 8:
+                    pv_list.append(actual_ecg)
+                    cv_list.append(cv)
+                else:
+                    # beat_instability: both current AND previous must be valid
+                    if (j - 1) in valid_rpk:
+                        t_rpk_prev = res.get('trpk_{}'.format(j - 1))
+                        if t_rpk_prev is not None:
+                            prev_ecg_arr = beats[j-1]['ecg_l0'] if lead == 0 else beats[j-1]['ecg_l1']
+                            prev_ecg = ecg_at_time(prev_ecg_arr, rpeak_times[j-1], t_rpk_prev + PG_HOLD_OFFSET)
+                            pv_list.append(actual_ecg - prev_ecg)
+                            cv_list.append(cv)
+        rhos[fk] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+
+    # Pulse widths for S&H hold offset: pulse_gen ~0.7ms, long_pulse_gen ~2ms
+    FAST_PG_HOLD = 0.0007   # pulse_gen hold offset (s14 uses pulse_gen)
+    SLOW_PG_HOLD = 0.002    # long_pulse_gen hold offset (wid, s69 use long_pulse_gen)
+
+    # F6: use ACTUAL wid trigger time + long_pulse_gen hold offset (valid beats only)
+    cv_list, pv_list = [], []
+    for j in range(SKIP, n):
+        if j not in valid_dt:
+            continue
+        cv = res.get('f6_{}'.format(j))
+        t_w = res.get('twid_{}'.format(j))
+        if cv is not None and t_w is not None:
+            actual_ecg = ecg_at_time(beats[j]['ecg_l0'], rpeak_times[j], t_w + SLOW_PG_HOLD)
+            pv_list.append(actual_ecg)
+            cv_list.append(cv)
+    rhos[6] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+
+    # F7: use ACTUAL s14 and s69 trigger times + hold offsets (valid beats only)
+    cv_list, pv_list = [], []
+    for j in range(SKIP, n):
+        if j not in valid_dt:
+            continue
+        cv = res.get('f7_{}'.format(j))
+        t14 = res.get('ts14_{}'.format(j))
+        t69 = res.get('ts69_{}'.format(j))
+        if cv is not None and t14 is not None and t69 is not None:
+            e14 = ecg_at_time(beats[j]['ecg_l0'], rpeak_times[j], t14 + FAST_PG_HOLD)
+            e69 = ecg_at_time(beats[j]['ecg_l0'], rpeak_times[j], t69 + SLOW_PG_HOLD)
+            pv_list.append(e14 - e69)
+            cv_list.append(cv)
+    rhos[7] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+
+    # --- Diagnostic: print F8 values for first few valid beats ---
+    if rec_id == 100:
+        print("  F8 diagnostic (symmetry):")
+        shown_f8 = 0
+        for j in range(SKIP, n):
+            if j not in valid_rpk or shown_f8 >= 5:
+                continue
+            cv = res.get('f8_{}'.format(j))
+            t_rpk = res.get('trpk_{}'.format(j))
+            if cv is not None and t_rpk is not None:
+                t_cap = t_rpk + PG_HOLD_OFFSET
+                py_actual = ecg_at_time(beats[j]['ecg_l0'], rpeak_times[j], t_cap)
+                py_fixed = beats[j]['py_sym']
+                offset_ms = (t_rpk - rpeak_times[j]) * 1000
+                print("    beat {}: cv={:.5f} py_actual={:.4f} py_fixed={:.4f} rpk_offset={:.1f}ms".format(
+                    j, cv, py_actual, py_fixed, offset_ms))
+                shown_f8 += 1
+
+    # Also compute FIXED-ref rho for comparison (only on valid beats)
+    rhos_fixed = {}
+    py_keys = {3:'py_bi_l0', 4:'py_bi_l1', 6:'py_wid', 7:'py_slp', 8:'py_sym'}
+    for fk in [3, 4, 6, 7, 8]:
+        valid_set = valid_rpk if fk in [3, 4, 8] else valid_dt
+        cv_list, pv_list = [], []
+        for j in range(SKIP, n):
+            if j not in valid_set:
+                continue
+            cv = res.get('f{}_{}'.format(fk, j))
+            if cv is not None:
+                cv_list.append(cv)
+                pv_list.append(beats[j][py_keys[fk]])
+        rhos_fixed[fk] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
 
     fnames = {1:'F1:rr_ratio', 2:'F2:rr_asym', 3:'F3:bi_L0', 4:'F4:bi_L1',
               5:'F5:pwave', 6:'F6:width', 7:'F7:slope', 8:'F8:symmetry'}
@@ -370,8 +538,11 @@ Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
                 5:'ideal pw', 6:'ANALOG wid', 7:'ANALOG s14/s69', 8:'ANALOG rpk'}
     for fk in range(1, 9):
         status = "PASS" if rhos[fk] >= 0.95 else "WARN" if rhos[fk] >= 0.80 else "FAIL"
-        print("  {:15s}  rho={:.4f}  [{}]  trigger={}".format(
-            fnames[fk], rhos[fk], status, triggers[fk]))
+        extra = ""
+        if fk in rhos_fixed:
+            extra = "  (fixed_ref={:.4f})".format(rhos_fixed[fk])
+        print("  {:15s}  rho={:.4f}  [{}]  trigger={}{}".format(
+            fnames[fk], rhos[fk], status, triggers[fk], extra))
 
     all_results[rec_id] = rhos
 

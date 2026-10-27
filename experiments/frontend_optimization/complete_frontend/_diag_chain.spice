@@ -1,0 +1,122 @@
+.title diag_trigger_chain
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/delay_timer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/pulse_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/long_pulse_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/edge_buffer.spice"
+
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
+
+* rpeak pulse at t=500ms (0.7ms wide, like analog pulse_gen)
+Vrpk rpeak_pulse 0 PWL(0 0 499.5e-3 0 500.0e-3 0.9 500.7e-3 0.9 501.2e-3 0)
+
+* Thresholds (from integration test for 6.6ms offset compensation)
+Vth14 vth_14_node 0 0.274
+Vth69 vth_69_node 0 0.4466
+Vth28 vth_28_node 0 0.4681
+Vth300 vth_300_node 0 0.3292
+Vth10 vth_10_node 0 0.3095
+
+Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node delay_timer
+
+* Pulse generators for delay_timer outputs
+Xpg_s14 trig_s14_level pg_s14_raw vdd vss vbias pulse_gen
+Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias long_pulse_gen
+Xpg_wid trig_wid_level pg_wid_raw vdd vss vbias long_pulse_gen
+Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias long_pulse_gen
+Xpg_rr  trig_rr_level  pg_rr_raw  vdd vss vbias pulse_gen
+
+* Edge buffers
+Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
+Xeb_s69 pg_s69_raw trig_s69 vdd vss edge_buffer
+Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
+Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
+Xeb_rr  pg_rr_raw  trig_rr_copy vdd vss edge_buffer
+
+.tran 0.1m 900m
+
+* --- Check if delay_timer levels fire ---
+* All levels should start HIGH (timer=0), go LOW at rpeak (500ms), then go HIGH at target delay
+
+* Check levels before rpeak
+.meas tran lev_s14_before FIND V(trig_s14_level) AT=499e-3
+.meas tran lev_wid_before FIND V(trig_wid_level) AT=499e-3
+.meas tran lev_s69_before FIND V(trig_s69_level) AT=499e-3
+.meas tran lev_rr_before  FIND V(trig_rr_level)  AT=499e-3
+
+* Check levels just after rpeak precharge (should be LOW)
+.meas tran lev_s14_after_rpk FIND V(trig_s14_level) AT=502e-3
+.meas tran lev_wid_after_rpk FIND V(trig_wid_level) AT=502e-3
+.meas tran lev_s69_after_rpk FIND V(trig_s69_level) AT=502e-3
+.meas tran lev_rr_after_rpk  FIND V(trig_rr_level)  AT=502e-3
+
+* Check SF at various times after discharge starts (~500.7ms)
+.meas tran sf_main_5ms FIND V(dt_sf_out) AT=505.7e-3
+.meas tran sf_main_10ms FIND V(dt_sf_out) AT=510.7e-3
+.meas tran sf_main_30ms FIND V(dt_sf_out) AT=530.7e-3
+.meas tran sf_main_70ms FIND V(dt_sf_out) AT=570.7e-3
+.meas tran sf_fast_5ms FIND V(xdt.sf_timer2) AT=505.7e-3
+.meas tran sf_fast_10ms FIND V(xdt.sf_timer2) AT=510.7e-3
+.meas tran sf_fast_17ms FIND V(xdt.sf_timer2) AT=517.7e-3
+
+* Check when levels go HIGH (comparator fires)
+.meas tran t_s14_fire WHEN V(trig_s14_level)=0.45 RISE=1 TD=501e-3
+.meas tran t_wid_fire WHEN V(trig_wid_level)=0.45 RISE=1 TD=501e-3
+.meas tran t_s69_fire WHEN V(trig_s69_level)=0.45 RISE=1 TD=501e-3
+.meas tran t_rr_fire  WHEN V(trig_rr_level)=0.45  RISE=1 TD=501e-3
+.meas tran t_bi_fire   WHEN V(trig_bi_level)=0.45  RISE=1 TD=501e-3
+
+* Check if pulse_gen outputs fire
+.meas tran t_pg_s14 WHEN V(pg_s14_raw)=0.45 RISE=1 TD=501e-3
+.meas tran t_pg_wid WHEN V(pg_wid_raw)=0.45 RISE=1 TD=501e-3
+.meas tran t_pg_s69 WHEN V(pg_s69_raw)=0.45 RISE=1 TD=501e-3
+.meas tran t_pg_rr  WHEN V(pg_rr_raw)=0.45  RISE=1 TD=501e-3
+.meas tran t_pg_bi  WHEN V(pg_bi_raw)=0.45  RISE=1 TD=501e-3
+
+* Check if edge_buffer outputs fire
+.meas tran t_eb_s14 WHEN V(trig_s14)=0.45 RISE=1 TD=501e-3
+.meas tran t_eb_wid WHEN V(trig_wid)=0.45 RISE=1 TD=501e-3
+.meas tran t_eb_s69 WHEN V(trig_s69)=0.45 RISE=1 TD=501e-3
+.meas tran t_eb_rr  WHEN V(trig_rr_copy)=0.45 RISE=1 TD=501e-3
+.meas tran t_eb_bi  WHEN V(trig_bi_copy)=0.45 RISE=1 TD=501e-3
+
+* --- Detailed pulse_gen internals for wid ---
+* Check pulse_raw at various times
+.meas tran wid_praw_490 FIND V(xpg_wid.pulse_raw) AT=490e-3
+.meas tran wid_praw_499 FIND V(xpg_wid.pulse_raw) AT=499e-3
+.meas tran wid_praw_501 FIND V(xpg_wid.pulse_raw) AT=501e-3
+.meas tran wid_praw_505 FIND V(xpg_wid.pulse_raw) AT=505e-3
+.meas tran wid_praw_510 FIND V(xpg_wid.pulse_raw) AT=510e-3
+.meas tran wid_praw_530 FIND V(xpg_wid.pulse_raw) AT=530e-3
+.meas tran wid_praw_533 FIND V(xpg_wid.pulse_raw) AT=533e-3
+.meas tran wid_praw_534 FIND V(xpg_wid.pulse_raw) AT=534e-3
+.meas tran wid_praw_535 FIND V(xpg_wid.pulse_raw) AT=535e-3
+
+* Also check s14 pulse_gen for comparison (this one works)
+.meas tran s14_praw_499 FIND V(xpg_s14.pulse_raw) AT=499e-3
+.meas tran s14_praw_505 FIND V(xpg_s14.pulse_raw) AT=505e-3
+.meas tran s14_praw_519 FIND V(xpg_s14.pulse_raw) AT=519e-3
+.meas tran s14_praw_520 FIND V(xpg_s14.pulse_raw) AT=520e-3
+
+* Check the main timer sf closely around wid threshold crossing
+.meas tran sf_main_at530 FIND V(dt_sf_out) AT=530e-3
+.meas tran sf_main_at533 FIND V(dt_sf_out) AT=533e-3
+.meas tran sf_main_at535 FIND V(dt_sf_out) AT=535e-3
+.meas tran sf_main_at540 FIND V(dt_sf_out) AT=540e-3
+
+* Check trig_wid_level around the transition
+.meas tran wid_lev_530 FIND V(trig_wid_level) AT=530e-3
+.meas tran wid_lev_533 FIND V(trig_wid_level) AT=533e-3
+.meas tran wid_lev_534 FIND V(trig_wid_level) AT=534e-3
+.meas tran wid_lev_535 FIND V(trig_wid_level) AT=535e-3
+.meas tran wid_lev_540 FIND V(trig_wid_level) AT=540e-3
+
+.end
