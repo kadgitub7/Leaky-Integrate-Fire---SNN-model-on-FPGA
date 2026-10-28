@@ -35,7 +35,7 @@
 *   sf_out exposes main timer SF for pwave prediction comparators.
 * ============================================================
 
-.subckt delay_timer rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy sf_out vdd vss vbias_delay vth_14_fast vth_69 vth_83 vth_300 vth_10
+.subckt delay_timer rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy trig_rpk_delayed sf_out vdd vss vbias_delay vth_14_fast vth_69 vth_83 vth_300 vth_10 vth_rpk_del
 
 * Expose main timer SF for external pwave prediction comparators
 R_sf_out sf_timer sf_out 0
@@ -123,5 +123,16 @@ XMc6_4 stg1_s14 cn6 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMc6_5 ct6 vbias_delay vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMc6_6 trig_s14 stg1_s14 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
 XMc6_7 trig_s14 stg1_s14 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
+
+* Two-stage comparator for delayed rpeak (~7ms) on fast timer
+* Fires ~6.6ms after rpeak_pulse so S&H captures near true R-peak
+* instead of on the QRS upslope where inter-beat variation is minimal.
+XMc7_1 cn7 sf_timer2 ct7 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMc7_2 stg1_rpk vth_rpk_del ct7 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMc7_3 cn7 cn7 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMc7_4 stg1_rpk cn7 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMc7_5 ct7 vbias_delay vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMc7_6 trig_rpk_delayed stg1_rpk vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMc7_7 trig_rpk_delayed stg1_rpk vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
 
 .ends delay_timer

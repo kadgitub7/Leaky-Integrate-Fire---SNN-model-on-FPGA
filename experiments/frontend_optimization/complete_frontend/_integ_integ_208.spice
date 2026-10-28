@@ -37,8 +37,9 @@ Vth69 vth_69_node 0 0.446645
 Vth28 vth_28_node 0 0.468112
 Vth300 vth_300_node 0 0.329200
 Vth10 vth_10_node 0 0.309477
+Vth_rpk_del vth_rpk_del_node 0 0.437470
 
-Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node delay_timer
+Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level trig_rpk_del_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node vth_rpk_del_node delay_timer
 
 * --- Pulse generators for delay_timer outputs ---
 Xpg_s14 trig_s14_level pg_s14_raw vdd vss vbias pulse_gen
@@ -46,6 +47,7 @@ Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias long_pulse_gen
 Xpg_wid trig_wid_level pg_wid_raw vdd vss vbias long_pulse_gen
 Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias long_pulse_gen
 Xpg_rr  trig_rr_level  pg_rr_raw  vdd vss vbias pulse_gen
+Xpg_rpk_del trig_rpk_del_level pg_rpk_del_raw vdd vss vbias pulse_gen
 
 * --- Edge buffers for cleaner trigger edges ---
 Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
@@ -53,6 +55,7 @@ Xeb_s69 pg_s69_raw trig_s69 vdd vss edge_buffer
 Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
 Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
 Xeb_rr  pg_rr_raw  trig_rr_copy vdd vss edge_buffer
+Xeb_rpk_del pg_rpk_del_raw rpeak_pulse_delayed vdd vss edge_buffer
 
 * ============================================================
 * IDEAL TRIGGERS (kept for rr_timing + pwave)
@@ -75,9 +78,9 @@ Vpwp trig_pw_peak 0 PWL(0.0000000 0.000000 0.3690444 0.000000 0.3694444 0.900000
 * F1/F2: rr_timing (ideal rpeak + ideal rr_cap, analog rr_copy)
 Xrr ecg_l0 trig_rr_cap trig_rpeak_ideal trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
 
-* F3/F4: beat_instability (ANALOG rpeak, ANALOG bi_copy)
-Xbi0 ecg_l0 rpeak_pulse trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
-Xbi1 ecg_l1 rpeak_pulse trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
+* F3/F4: beat_instability (DELAYED rpeak, ANALOG bi_copy)
+Xbi0 ecg_l0 rpeak_pulse_delayed trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
+Xbi1 ecg_l1 rpeak_pulse_delayed trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
 
 * F5: pwave_diff (IDEAL pw triggers)
 Xpw ecg_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
@@ -88,8 +91,8 @@ Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
 * F7: qrs_slope (ANALOG s14, s69 triggers)
 Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
 
-* F8: qrs_symmetry (ANALOG rpeak pulse)
-Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
+* F8: qrs_symmetry (DELAYED rpeak pulse — captures near true R-peak)
+Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
 * ============================================================
 * INITIAL CONDITIONS
@@ -348,141 +351,586 @@ Xsym ecg_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
 .meas tran ts14_0 WHEN V(trig_s14)=0.45 RISE=1 TD=0.4500000
 .meas tran ts69_0 WHEN V(trig_s69)=0.45 RISE=1 TD=0.4500000
 .meas tran twid_0 WHEN V(trig_wid)=0.45 RISE=1 TD=0.4500000
+.meas tran trpk_del_0 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=0.4500000
+.meas tran ts14_fall_0 WHEN V(trig_s14)=0.45 FALL=1 TD=0.4500000
+.meas tran ts69_fall_0 WHEN V(trig_s69)=0.45 FALL=1 TD=0.4500000
+.meas tran twid_fall_0 WHEN V(trig_wid)=0.45 FALL=1 TD=0.4500000
+.meas tran trpk_del_fall_0 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=0.4500000
+.meas tran sh14_0 FIND V(xslp.sh14) AT=0.6000000
+.meas tran sh69_0 FIND V(xslp.sh69) AT=0.6000000
+.meas tran bi0_curr_0 FIND V(xbi0.curr_node) AT=0.6000000
+.meas tran bi0_prev_0 FIND V(xbi0.prev_node) AT=0.6000000
+.meas tran bi1_curr_0 FIND V(xbi1.curr_node) AT=0.6000000
+.meas tran bi1_prev_0 FIND V(xbi1.prev_node) AT=0.6000000
 .meas tran trpk_1 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=1.2111111
 .meas tran ts14_1 WHEN V(trig_s14)=0.45 RISE=1 TD=1.2111111
 .meas tran ts69_1 WHEN V(trig_s69)=0.45 RISE=1 TD=1.2111111
 .meas tran twid_1 WHEN V(trig_wid)=0.45 RISE=1 TD=1.2111111
+.meas tran trpk_del_1 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=1.2111111
+.meas tran ts14_fall_1 WHEN V(trig_s14)=0.45 FALL=1 TD=1.2111111
+.meas tran ts69_fall_1 WHEN V(trig_s69)=0.45 FALL=1 TD=1.2111111
+.meas tran twid_fall_1 WHEN V(trig_wid)=0.45 FALL=1 TD=1.2111111
+.meas tran trpk_del_fall_1 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=1.2111111
+.meas tran sh14_1 FIND V(xslp.sh14) AT=1.3611111
+.meas tran sh69_1 FIND V(xslp.sh69) AT=1.3611111
+.meas tran bi0_curr_1 FIND V(xbi0.curr_node) AT=1.3611111
+.meas tran bi0_prev_1 FIND V(xbi0.prev_node) AT=1.3611111
+.meas tran bi1_curr_1 FIND V(xbi1.curr_node) AT=1.3611111
+.meas tran bi1_prev_1 FIND V(xbi1.prev_node) AT=1.3611111
 .meas tran trpk_2 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=1.8055556
 .meas tran ts14_2 WHEN V(trig_s14)=0.45 RISE=1 TD=1.8055556
 .meas tran ts69_2 WHEN V(trig_s69)=0.45 RISE=1 TD=1.8055556
 .meas tran twid_2 WHEN V(trig_wid)=0.45 RISE=1 TD=1.8055556
+.meas tran trpk_del_2 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=1.8055556
+.meas tran ts14_fall_2 WHEN V(trig_s14)=0.45 FALL=1 TD=1.8055556
+.meas tran ts69_fall_2 WHEN V(trig_s69)=0.45 FALL=1 TD=1.8055556
+.meas tran twid_fall_2 WHEN V(trig_wid)=0.45 FALL=1 TD=1.8055556
+.meas tran trpk_del_fall_2 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=1.8055556
+.meas tran sh14_2 FIND V(xslp.sh14) AT=1.9555556
+.meas tran sh69_2 FIND V(xslp.sh69) AT=1.9555556
+.meas tran bi0_curr_2 FIND V(xbi0.curr_node) AT=1.9555556
+.meas tran bi0_prev_2 FIND V(xbi0.prev_node) AT=1.9555556
+.meas tran bi1_curr_2 FIND V(xbi1.curr_node) AT=1.9555556
+.meas tran bi1_prev_2 FIND V(xbi1.prev_node) AT=1.9555556
 .meas tran trpk_3 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=2.2388889
 .meas tran ts14_3 WHEN V(trig_s14)=0.45 RISE=1 TD=2.2388889
 .meas tran ts69_3 WHEN V(trig_s69)=0.45 RISE=1 TD=2.2388889
 .meas tran twid_3 WHEN V(trig_wid)=0.45 RISE=1 TD=2.2388889
+.meas tran trpk_del_3 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=2.2388889
+.meas tran ts14_fall_3 WHEN V(trig_s14)=0.45 FALL=1 TD=2.2388889
+.meas tran ts69_fall_3 WHEN V(trig_s69)=0.45 FALL=1 TD=2.2388889
+.meas tran twid_fall_3 WHEN V(trig_wid)=0.45 FALL=1 TD=2.2388889
+.meas tran trpk_del_fall_3 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=2.2388889
+.meas tran sh14_3 FIND V(xslp.sh14) AT=2.3888889
+.meas tran sh69_3 FIND V(xslp.sh69) AT=2.3888889
+.meas tran bi0_curr_3 FIND V(xbi0.curr_node) AT=2.3888889
+.meas tran bi0_prev_3 FIND V(xbi0.prev_node) AT=2.3888889
+.meas tran bi1_curr_3 FIND V(xbi1.curr_node) AT=2.3888889
+.meas tran bi1_prev_3 FIND V(xbi1.prev_node) AT=2.3888889
 .meas tran trpk_4 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=3.1500000
 .meas tran ts14_4 WHEN V(trig_s14)=0.45 RISE=1 TD=3.1500000
 .meas tran ts69_4 WHEN V(trig_s69)=0.45 RISE=1 TD=3.1500000
 .meas tran twid_4 WHEN V(trig_wid)=0.45 RISE=1 TD=3.1500000
+.meas tran trpk_del_4 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=3.1500000
+.meas tran ts14_fall_4 WHEN V(trig_s14)=0.45 FALL=1 TD=3.1500000
+.meas tran ts69_fall_4 WHEN V(trig_s69)=0.45 FALL=1 TD=3.1500000
+.meas tran twid_fall_4 WHEN V(trig_wid)=0.45 FALL=1 TD=3.1500000
+.meas tran trpk_del_fall_4 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=3.1500000
+.meas tran sh14_4 FIND V(xslp.sh14) AT=3.3000000
+.meas tran sh69_4 FIND V(xslp.sh69) AT=3.3000000
+.meas tran bi0_curr_4 FIND V(xbi0.curr_node) AT=3.3000000
+.meas tran bi0_prev_4 FIND V(xbi0.prev_node) AT=3.3000000
+.meas tran bi1_curr_4 FIND V(xbi1.curr_node) AT=3.3000000
+.meas tran bi1_prev_4 FIND V(xbi1.prev_node) AT=3.3000000
 .meas tran trpk_5 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=3.6972222
 .meas tran ts14_5 WHEN V(trig_s14)=0.45 RISE=1 TD=3.6972222
 .meas tran ts69_5 WHEN V(trig_s69)=0.45 RISE=1 TD=3.6972222
 .meas tran twid_5 WHEN V(trig_wid)=0.45 RISE=1 TD=3.6972222
+.meas tran trpk_del_5 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=3.6972222
+.meas tran ts14_fall_5 WHEN V(trig_s14)=0.45 FALL=1 TD=3.6972222
+.meas tran ts69_fall_5 WHEN V(trig_s69)=0.45 FALL=1 TD=3.6972222
+.meas tran twid_fall_5 WHEN V(trig_wid)=0.45 FALL=1 TD=3.6972222
+.meas tran trpk_del_fall_5 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=3.6972222
+.meas tran sh14_5 FIND V(xslp.sh14) AT=3.8472222
+.meas tran sh69_5 FIND V(xslp.sh69) AT=3.8472222
+.meas tran bi0_curr_5 FIND V(xbi0.curr_node) AT=3.8472222
+.meas tran bi0_prev_5 FIND V(xbi0.prev_node) AT=3.8472222
+.meas tran bi1_curr_5 FIND V(xbi1.curr_node) AT=3.8472222
+.meas tran bi1_prev_5 FIND V(xbi1.prev_node) AT=3.8472222
 .meas tran trpk_6 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=4.2555556
 .meas tran ts14_6 WHEN V(trig_s14)=0.45 RISE=1 TD=4.2555556
 .meas tran ts69_6 WHEN V(trig_s69)=0.45 RISE=1 TD=4.2555556
 .meas tran twid_6 WHEN V(trig_wid)=0.45 RISE=1 TD=4.2555556
+.meas tran trpk_del_6 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=4.2555556
+.meas tran ts14_fall_6 WHEN V(trig_s14)=0.45 FALL=1 TD=4.2555556
+.meas tran ts69_fall_6 WHEN V(trig_s69)=0.45 FALL=1 TD=4.2555556
+.meas tran twid_fall_6 WHEN V(trig_wid)=0.45 FALL=1 TD=4.2555556
+.meas tran trpk_del_fall_6 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=4.2555556
+.meas tran sh14_6 FIND V(xslp.sh14) AT=4.4055556
+.meas tran sh69_6 FIND V(xslp.sh69) AT=4.4055556
+.meas tran bi0_curr_6 FIND V(xbi0.curr_node) AT=4.4055556
+.meas tran bi0_prev_6 FIND V(xbi0.prev_node) AT=4.4055556
+.meas tran bi1_curr_6 FIND V(xbi1.curr_node) AT=4.4055556
+.meas tran bi1_prev_6 FIND V(xbi1.prev_node) AT=4.4055556
 .meas tran trpk_7 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=5.0361111
 .meas tran ts14_7 WHEN V(trig_s14)=0.45 RISE=1 TD=5.0361111
 .meas tran ts69_7 WHEN V(trig_s69)=0.45 RISE=1 TD=5.0361111
 .meas tran twid_7 WHEN V(trig_wid)=0.45 RISE=1 TD=5.0361111
+.meas tran trpk_del_7 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=5.0361111
+.meas tran ts14_fall_7 WHEN V(trig_s14)=0.45 FALL=1 TD=5.0361111
+.meas tran ts69_fall_7 WHEN V(trig_s69)=0.45 FALL=1 TD=5.0361111
+.meas tran twid_fall_7 WHEN V(trig_wid)=0.45 FALL=1 TD=5.0361111
+.meas tran trpk_del_fall_7 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=5.0361111
+.meas tran sh14_7 FIND V(xslp.sh14) AT=5.1861111
+.meas tran sh69_7 FIND V(xslp.sh69) AT=5.1861111
+.meas tran bi0_curr_7 FIND V(xbi0.curr_node) AT=5.1861111
+.meas tran bi0_prev_7 FIND V(xbi0.prev_node) AT=5.1861111
+.meas tran bi1_curr_7 FIND V(xbi1.curr_node) AT=5.1861111
+.meas tran bi1_prev_7 FIND V(xbi1.prev_node) AT=5.1861111
 .meas tran trpk_8 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=5.5861111
 .meas tran ts14_8 WHEN V(trig_s14)=0.45 RISE=1 TD=5.5861111
 .meas tran ts69_8 WHEN V(trig_s69)=0.45 RISE=1 TD=5.5861111
 .meas tran twid_8 WHEN V(trig_wid)=0.45 RISE=1 TD=5.5861111
+.meas tran trpk_del_8 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=5.5861111
+.meas tran ts14_fall_8 WHEN V(trig_s14)=0.45 FALL=1 TD=5.5861111
+.meas tran ts69_fall_8 WHEN V(trig_s69)=0.45 FALL=1 TD=5.5861111
+.meas tran twid_fall_8 WHEN V(trig_wid)=0.45 FALL=1 TD=5.5861111
+.meas tran trpk_del_fall_8 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=5.5861111
+.meas tran sh14_8 FIND V(xslp.sh14) AT=5.7361111
+.meas tran sh69_8 FIND V(xslp.sh69) AT=5.7361111
+.meas tran bi0_curr_8 FIND V(xbi0.curr_node) AT=5.7361111
+.meas tran bi0_prev_8 FIND V(xbi0.prev_node) AT=5.7361111
+.meas tran bi1_curr_8 FIND V(xbi1.curr_node) AT=5.7361111
+.meas tran bi1_prev_8 FIND V(xbi1.prev_node) AT=5.7361111
 .meas tran trpk_9 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=6.0972222
 .meas tran ts14_9 WHEN V(trig_s14)=0.45 RISE=1 TD=6.0972222
 .meas tran ts69_9 WHEN V(trig_s69)=0.45 RISE=1 TD=6.0972222
 .meas tran twid_9 WHEN V(trig_wid)=0.45 RISE=1 TD=6.0972222
+.meas tran trpk_del_9 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=6.0972222
+.meas tran ts14_fall_9 WHEN V(trig_s14)=0.45 FALL=1 TD=6.0972222
+.meas tran ts69_fall_9 WHEN V(trig_s69)=0.45 FALL=1 TD=6.0972222
+.meas tran twid_fall_9 WHEN V(trig_wid)=0.45 FALL=1 TD=6.0972222
+.meas tran trpk_del_fall_9 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=6.0972222
+.meas tran sh14_9 FIND V(xslp.sh14) AT=6.2472222
+.meas tran sh69_9 FIND V(xslp.sh69) AT=6.2472222
+.meas tran bi0_curr_9 FIND V(xbi0.curr_node) AT=6.2472222
+.meas tran bi0_prev_9 FIND V(xbi0.prev_node) AT=6.2472222
+.meas tran bi1_curr_9 FIND V(xbi1.curr_node) AT=6.2472222
+.meas tran bi1_prev_9 FIND V(xbi1.prev_node) AT=6.2472222
 .meas tran trpk_10 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=6.9750000
 .meas tran ts14_10 WHEN V(trig_s14)=0.45 RISE=1 TD=6.9750000
 .meas tran ts69_10 WHEN V(trig_s69)=0.45 RISE=1 TD=6.9750000
 .meas tran twid_10 WHEN V(trig_wid)=0.45 RISE=1 TD=6.9750000
+.meas tran trpk_del_10 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=6.9750000
+.meas tran ts14_fall_10 WHEN V(trig_s14)=0.45 FALL=1 TD=6.9750000
+.meas tran ts69_fall_10 WHEN V(trig_s69)=0.45 FALL=1 TD=6.9750000
+.meas tran twid_fall_10 WHEN V(trig_wid)=0.45 FALL=1 TD=6.9750000
+.meas tran trpk_del_fall_10 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=6.9750000
+.meas tran sh14_10 FIND V(xslp.sh14) AT=7.1250000
+.meas tran sh69_10 FIND V(xslp.sh69) AT=7.1250000
+.meas tran bi0_curr_10 FIND V(xbi0.curr_node) AT=7.1250000
+.meas tran bi0_prev_10 FIND V(xbi0.prev_node) AT=7.1250000
+.meas tran bi1_curr_10 FIND V(xbi1.curr_node) AT=7.1250000
+.meas tran bi1_prev_10 FIND V(xbi1.prev_node) AT=7.1250000
 .meas tran trpk_11 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=7.5000000
 .meas tran ts14_11 WHEN V(trig_s14)=0.45 RISE=1 TD=7.5000000
 .meas tran ts69_11 WHEN V(trig_s69)=0.45 RISE=1 TD=7.5000000
 .meas tran twid_11 WHEN V(trig_wid)=0.45 RISE=1 TD=7.5000000
+.meas tran trpk_del_11 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=7.5000000
+.meas tran ts14_fall_11 WHEN V(trig_s14)=0.45 FALL=1 TD=7.5000000
+.meas tran ts69_fall_11 WHEN V(trig_s69)=0.45 FALL=1 TD=7.5000000
+.meas tran twid_fall_11 WHEN V(trig_wid)=0.45 FALL=1 TD=7.5000000
+.meas tran trpk_del_fall_11 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=7.5000000
+.meas tran sh14_11 FIND V(xslp.sh14) AT=7.6500000
+.meas tran sh69_11 FIND V(xslp.sh69) AT=7.6500000
+.meas tran bi0_curr_11 FIND V(xbi0.curr_node) AT=7.6500000
+.meas tran bi0_prev_11 FIND V(xbi0.prev_node) AT=7.6500000
+.meas tran bi1_curr_11 FIND V(xbi1.curr_node) AT=7.6500000
+.meas tran bi1_prev_11 FIND V(xbi1.prev_node) AT=7.6500000
 .meas tran trpk_12 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=8.0083333
 .meas tran ts14_12 WHEN V(trig_s14)=0.45 RISE=1 TD=8.0083333
 .meas tran ts69_12 WHEN V(trig_s69)=0.45 RISE=1 TD=8.0083333
 .meas tran twid_12 WHEN V(trig_wid)=0.45 RISE=1 TD=8.0083333
+.meas tran trpk_del_12 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=8.0083333
+.meas tran ts14_fall_12 WHEN V(trig_s14)=0.45 FALL=1 TD=8.0083333
+.meas tran ts69_fall_12 WHEN V(trig_s69)=0.45 FALL=1 TD=8.0083333
+.meas tran twid_fall_12 WHEN V(trig_wid)=0.45 FALL=1 TD=8.0083333
+.meas tran trpk_del_fall_12 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=8.0083333
+.meas tran sh14_12 FIND V(xslp.sh14) AT=8.1583333
+.meas tran sh69_12 FIND V(xslp.sh69) AT=8.1583333
+.meas tran bi0_curr_12 FIND V(xbi0.curr_node) AT=8.1583333
+.meas tran bi0_prev_12 FIND V(xbi0.prev_node) AT=8.1583333
+.meas tran bi1_curr_12 FIND V(xbi1.curr_node) AT=8.1583333
+.meas tran bi1_prev_12 FIND V(xbi1.prev_node) AT=8.1583333
 .meas tran trpk_13 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=8.7611111
 .meas tran ts14_13 WHEN V(trig_s14)=0.45 RISE=1 TD=8.7611111
 .meas tran ts69_13 WHEN V(trig_s69)=0.45 RISE=1 TD=8.7611111
 .meas tran twid_13 WHEN V(trig_wid)=0.45 RISE=1 TD=8.7611111
+.meas tran trpk_del_13 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=8.7611111
+.meas tran ts14_fall_13 WHEN V(trig_s14)=0.45 FALL=1 TD=8.7611111
+.meas tran ts69_fall_13 WHEN V(trig_s69)=0.45 FALL=1 TD=8.7611111
+.meas tran twid_fall_13 WHEN V(trig_wid)=0.45 FALL=1 TD=8.7611111
+.meas tran trpk_del_fall_13 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=8.7611111
+.meas tran sh14_13 FIND V(xslp.sh14) AT=8.9111111
+.meas tran sh69_13 FIND V(xslp.sh69) AT=8.9111111
+.meas tran bi0_curr_13 FIND V(xbi0.curr_node) AT=8.9111111
+.meas tran bi0_prev_13 FIND V(xbi0.prev_node) AT=8.9111111
+.meas tran bi1_curr_13 FIND V(xbi1.curr_node) AT=8.9111111
+.meas tran bi1_prev_13 FIND V(xbi1.prev_node) AT=8.9111111
 .meas tran trpk_14 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=9.3444444
 .meas tran ts14_14 WHEN V(trig_s14)=0.45 RISE=1 TD=9.3444444
 .meas tran ts69_14 WHEN V(trig_s69)=0.45 RISE=1 TD=9.3444444
 .meas tran twid_14 WHEN V(trig_wid)=0.45 RISE=1 TD=9.3444444
+.meas tran trpk_del_14 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=9.3444444
+.meas tran ts14_fall_14 WHEN V(trig_s14)=0.45 FALL=1 TD=9.3444444
+.meas tran ts69_fall_14 WHEN V(trig_s69)=0.45 FALL=1 TD=9.3444444
+.meas tran twid_fall_14 WHEN V(trig_wid)=0.45 FALL=1 TD=9.3444444
+.meas tran trpk_del_fall_14 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=9.3444444
+.meas tran sh14_14 FIND V(xslp.sh14) AT=9.4944444
+.meas tran sh69_14 FIND V(xslp.sh69) AT=9.4944444
+.meas tran bi0_curr_14 FIND V(xbi0.curr_node) AT=9.4944444
+.meas tran bi0_prev_14 FIND V(xbi0.prev_node) AT=9.4944444
+.meas tran bi1_curr_14 FIND V(xbi1.curr_node) AT=9.4944444
+.meas tran bi1_prev_14 FIND V(xbi1.prev_node) AT=9.4944444
 .meas tran trpk_15 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=9.8861111
 .meas tran ts14_15 WHEN V(trig_s14)=0.45 RISE=1 TD=9.8861111
 .meas tran ts69_15 WHEN V(trig_s69)=0.45 RISE=1 TD=9.8861111
 .meas tran twid_15 WHEN V(trig_wid)=0.45 RISE=1 TD=9.8861111
+.meas tran trpk_del_15 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=9.8861111
+.meas tran ts14_fall_15 WHEN V(trig_s14)=0.45 FALL=1 TD=9.8861111
+.meas tran ts69_fall_15 WHEN V(trig_s69)=0.45 FALL=1 TD=9.8861111
+.meas tran twid_fall_15 WHEN V(trig_wid)=0.45 FALL=1 TD=9.8861111
+.meas tran trpk_del_fall_15 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=9.8861111
+.meas tran sh14_15 FIND V(xslp.sh14) AT=10.0361111
+.meas tran sh69_15 FIND V(xslp.sh69) AT=10.0361111
+.meas tran bi0_curr_15 FIND V(xbi0.curr_node) AT=10.0361111
+.meas tran bi0_prev_15 FIND V(xbi0.prev_node) AT=10.0361111
+.meas tran bi1_curr_15 FIND V(xbi1.curr_node) AT=10.0361111
+.meas tran bi1_prev_15 FIND V(xbi1.prev_node) AT=10.0361111
 .meas tran trpk_16 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=10.6638889
 .meas tran ts14_16 WHEN V(trig_s14)=0.45 RISE=1 TD=10.6638889
 .meas tran ts69_16 WHEN V(trig_s69)=0.45 RISE=1 TD=10.6638889
 .meas tran twid_16 WHEN V(trig_wid)=0.45 RISE=1 TD=10.6638889
+.meas tran trpk_del_16 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=10.6638889
+.meas tran ts14_fall_16 WHEN V(trig_s14)=0.45 FALL=1 TD=10.6638889
+.meas tran ts69_fall_16 WHEN V(trig_s69)=0.45 FALL=1 TD=10.6638889
+.meas tran twid_fall_16 WHEN V(trig_wid)=0.45 FALL=1 TD=10.6638889
+.meas tran trpk_del_fall_16 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=10.6638889
+.meas tran sh14_16 FIND V(xslp.sh14) AT=10.8138889
+.meas tran sh69_16 FIND V(xslp.sh69) AT=10.8138889
+.meas tran bi0_curr_16 FIND V(xbi0.curr_node) AT=10.8138889
+.meas tran bi0_prev_16 FIND V(xbi0.prev_node) AT=10.8138889
+.meas tran bi1_curr_16 FIND V(xbi1.curr_node) AT=10.8138889
+.meas tran bi1_prev_16 FIND V(xbi1.prev_node) AT=10.8138889
 .meas tran trpk_17 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=11.2500000
 .meas tran ts14_17 WHEN V(trig_s14)=0.45 RISE=1 TD=11.2500000
 .meas tran ts69_17 WHEN V(trig_s69)=0.45 RISE=1 TD=11.2500000
 .meas tran twid_17 WHEN V(trig_wid)=0.45 RISE=1 TD=11.2500000
+.meas tran trpk_del_17 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=11.2500000
+.meas tran ts14_fall_17 WHEN V(trig_s14)=0.45 FALL=1 TD=11.2500000
+.meas tran ts69_fall_17 WHEN V(trig_s69)=0.45 FALL=1 TD=11.2500000
+.meas tran twid_fall_17 WHEN V(trig_wid)=0.45 FALL=1 TD=11.2500000
+.meas tran trpk_del_fall_17 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=11.2500000
+.meas tran sh14_17 FIND V(xslp.sh14) AT=11.4000000
+.meas tran sh69_17 FIND V(xslp.sh69) AT=11.4000000
+.meas tran bi0_curr_17 FIND V(xbi0.curr_node) AT=11.4000000
+.meas tran bi0_prev_17 FIND V(xbi0.prev_node) AT=11.4000000
+.meas tran bi1_curr_17 FIND V(xbi1.curr_node) AT=11.4000000
+.meas tran bi1_prev_17 FIND V(xbi1.prev_node) AT=11.4000000
 .meas tran trpk_18 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=11.7083333
 .meas tran ts14_18 WHEN V(trig_s14)=0.45 RISE=1 TD=11.7083333
 .meas tran ts69_18 WHEN V(trig_s69)=0.45 RISE=1 TD=11.7083333
 .meas tran twid_18 WHEN V(trig_wid)=0.45 RISE=1 TD=11.7083333
+.meas tran trpk_del_18 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=11.7083333
+.meas tran ts14_fall_18 WHEN V(trig_s14)=0.45 FALL=1 TD=11.7083333
+.meas tran ts69_fall_18 WHEN V(trig_s69)=0.45 FALL=1 TD=11.7083333
+.meas tran twid_fall_18 WHEN V(trig_wid)=0.45 FALL=1 TD=11.7083333
+.meas tran trpk_del_fall_18 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=11.7083333
+.meas tran sh14_18 FIND V(xslp.sh14) AT=11.8583333
+.meas tran sh69_18 FIND V(xslp.sh69) AT=11.8583333
+.meas tran bi0_curr_18 FIND V(xbi0.curr_node) AT=11.8583333
+.meas tran bi0_prev_18 FIND V(xbi0.prev_node) AT=11.8583333
+.meas tran bi1_curr_18 FIND V(xbi1.curr_node) AT=11.8583333
+.meas tran bi1_prev_18 FIND V(xbi1.prev_node) AT=11.8583333
 .meas tran trpk_19 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=12.5500000
 .meas tran ts14_19 WHEN V(trig_s14)=0.45 RISE=1 TD=12.5500000
 .meas tran ts69_19 WHEN V(trig_s69)=0.45 RISE=1 TD=12.5500000
 .meas tran twid_19 WHEN V(trig_wid)=0.45 RISE=1 TD=12.5500000
+.meas tran trpk_del_19 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=12.5500000
+.meas tran ts14_fall_19 WHEN V(trig_s14)=0.45 FALL=1 TD=12.5500000
+.meas tran ts69_fall_19 WHEN V(trig_s69)=0.45 FALL=1 TD=12.5500000
+.meas tran twid_fall_19 WHEN V(trig_wid)=0.45 FALL=1 TD=12.5500000
+.meas tran trpk_del_fall_19 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=12.5500000
+.meas tran sh14_19 FIND V(xslp.sh14) AT=12.7000000
+.meas tran sh69_19 FIND V(xslp.sh69) AT=12.7000000
+.meas tran bi0_curr_19 FIND V(xbi0.curr_node) AT=12.7000000
+.meas tran bi0_prev_19 FIND V(xbi0.prev_node) AT=12.7000000
+.meas tran bi1_curr_19 FIND V(xbi1.curr_node) AT=12.7000000
+.meas tran bi1_prev_19 FIND V(xbi1.prev_node) AT=12.7000000
 .meas tran trpk_20 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=13.1083333
 .meas tran ts14_20 WHEN V(trig_s14)=0.45 RISE=1 TD=13.1083333
 .meas tran ts69_20 WHEN V(trig_s69)=0.45 RISE=1 TD=13.1083333
 .meas tran twid_20 WHEN V(trig_wid)=0.45 RISE=1 TD=13.1083333
+.meas tran trpk_del_20 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=13.1083333
+.meas tran ts14_fall_20 WHEN V(trig_s14)=0.45 FALL=1 TD=13.1083333
+.meas tran ts69_fall_20 WHEN V(trig_s69)=0.45 FALL=1 TD=13.1083333
+.meas tran twid_fall_20 WHEN V(trig_wid)=0.45 FALL=1 TD=13.1083333
+.meas tran trpk_del_fall_20 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=13.1083333
+.meas tran sh14_20 FIND V(xslp.sh14) AT=13.2583333
+.meas tran sh69_20 FIND V(xslp.sh69) AT=13.2583333
+.meas tran bi0_curr_20 FIND V(xbi0.curr_node) AT=13.2583333
+.meas tran bi0_prev_20 FIND V(xbi0.prev_node) AT=13.2583333
+.meas tran bi1_curr_20 FIND V(xbi1.curr_node) AT=13.2583333
+.meas tran bi1_prev_20 FIND V(xbi1.prev_node) AT=13.2583333
 .meas tran trpk_21 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=13.6027778
 .meas tran ts14_21 WHEN V(trig_s14)=0.45 RISE=1 TD=13.6027778
 .meas tran ts69_21 WHEN V(trig_s69)=0.45 RISE=1 TD=13.6027778
 .meas tran twid_21 WHEN V(trig_wid)=0.45 RISE=1 TD=13.6027778
+.meas tran trpk_del_21 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=13.6027778
+.meas tran ts14_fall_21 WHEN V(trig_s14)=0.45 FALL=1 TD=13.6027778
+.meas tran ts69_fall_21 WHEN V(trig_s69)=0.45 FALL=1 TD=13.6027778
+.meas tran twid_fall_21 WHEN V(trig_wid)=0.45 FALL=1 TD=13.6027778
+.meas tran trpk_del_fall_21 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=13.6027778
+.meas tran sh14_21 FIND V(xslp.sh14) AT=13.7527778
+.meas tran sh69_21 FIND V(xslp.sh69) AT=13.7527778
+.meas tran bi0_curr_21 FIND V(xbi0.curr_node) AT=13.7527778
+.meas tran bi0_prev_21 FIND V(xbi0.prev_node) AT=13.7527778
+.meas tran bi1_curr_21 FIND V(xbi1.curr_node) AT=13.7527778
+.meas tran bi1_prev_21 FIND V(xbi1.prev_node) AT=13.7527778
 .meas tran trpk_22 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=14.3027778
 .meas tran ts14_22 WHEN V(trig_s14)=0.45 RISE=1 TD=14.3027778
 .meas tran ts69_22 WHEN V(trig_s69)=0.45 RISE=1 TD=14.3027778
 .meas tran twid_22 WHEN V(trig_wid)=0.45 RISE=1 TD=14.3027778
+.meas tran trpk_del_22 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=14.3027778
+.meas tran ts14_fall_22 WHEN V(trig_s14)=0.45 FALL=1 TD=14.3027778
+.meas tran ts69_fall_22 WHEN V(trig_s69)=0.45 FALL=1 TD=14.3027778
+.meas tran twid_fall_22 WHEN V(trig_wid)=0.45 FALL=1 TD=14.3027778
+.meas tran trpk_del_fall_22 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=14.3027778
+.meas tran sh14_22 FIND V(xslp.sh14) AT=14.4527778
+.meas tran sh69_22 FIND V(xslp.sh69) AT=14.4527778
+.meas tran bi0_curr_22 FIND V(xbi0.curr_node) AT=14.4527778
+.meas tran bi0_prev_22 FIND V(xbi0.prev_node) AT=14.4527778
+.meas tran bi1_curr_22 FIND V(xbi1.curr_node) AT=14.4527778
+.meas tran bi1_prev_22 FIND V(xbi1.prev_node) AT=14.4527778
 .meas tran trpk_23 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=14.9083333
 .meas tran ts14_23 WHEN V(trig_s14)=0.45 RISE=1 TD=14.9083333
 .meas tran ts69_23 WHEN V(trig_s69)=0.45 RISE=1 TD=14.9083333
 .meas tran twid_23 WHEN V(trig_wid)=0.45 RISE=1 TD=14.9083333
+.meas tran trpk_del_23 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=14.9083333
+.meas tran ts14_fall_23 WHEN V(trig_s14)=0.45 FALL=1 TD=14.9083333
+.meas tran ts69_fall_23 WHEN V(trig_s69)=0.45 FALL=1 TD=14.9083333
+.meas tran twid_fall_23 WHEN V(trig_wid)=0.45 FALL=1 TD=14.9083333
+.meas tran trpk_del_fall_23 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=14.9083333
+.meas tran sh14_23 FIND V(xslp.sh14) AT=15.0583333
+.meas tran sh69_23 FIND V(xslp.sh69) AT=15.0583333
+.meas tran bi0_curr_23 FIND V(xbi0.curr_node) AT=15.0583333
+.meas tran bi0_prev_23 FIND V(xbi0.prev_node) AT=15.0583333
+.meas tran bi1_curr_23 FIND V(xbi1.curr_node) AT=15.0583333
+.meas tran bi1_prev_23 FIND V(xbi1.prev_node) AT=15.0583333
 .meas tran trpk_24 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=15.3361111
 .meas tran ts14_24 WHEN V(trig_s14)=0.45 RISE=1 TD=15.3361111
 .meas tran ts69_24 WHEN V(trig_s69)=0.45 RISE=1 TD=15.3361111
 .meas tran twid_24 WHEN V(trig_wid)=0.45 RISE=1 TD=15.3361111
+.meas tran trpk_del_24 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=15.3361111
+.meas tran ts14_fall_24 WHEN V(trig_s14)=0.45 FALL=1 TD=15.3361111
+.meas tran ts69_fall_24 WHEN V(trig_s69)=0.45 FALL=1 TD=15.3361111
+.meas tran twid_fall_24 WHEN V(trig_wid)=0.45 FALL=1 TD=15.3361111
+.meas tran trpk_del_fall_24 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=15.3361111
+.meas tran sh14_24 FIND V(xslp.sh14) AT=15.4861111
+.meas tran sh69_24 FIND V(xslp.sh69) AT=15.4861111
+.meas tran bi0_curr_24 FIND V(xbi0.curr_node) AT=15.4861111
+.meas tran bi0_prev_24 FIND V(xbi0.prev_node) AT=15.4861111
+.meas tran bi1_curr_24 FIND V(xbi1.curr_node) AT=15.4861111
+.meas tran bi1_prev_24 FIND V(xbi1.prev_node) AT=15.4861111
 .meas tran trpk_25 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=16.2555556
 .meas tran ts14_25 WHEN V(trig_s14)=0.45 RISE=1 TD=16.2555556
 .meas tran ts69_25 WHEN V(trig_s69)=0.45 RISE=1 TD=16.2555556
 .meas tran twid_25 WHEN V(trig_wid)=0.45 RISE=1 TD=16.2555556
+.meas tran trpk_del_25 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=16.2555556
+.meas tran ts14_fall_25 WHEN V(trig_s14)=0.45 FALL=1 TD=16.2555556
+.meas tran ts69_fall_25 WHEN V(trig_s69)=0.45 FALL=1 TD=16.2555556
+.meas tran twid_fall_25 WHEN V(trig_wid)=0.45 FALL=1 TD=16.2555556
+.meas tran trpk_del_fall_25 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=16.2555556
+.meas tran sh14_25 FIND V(xslp.sh14) AT=16.4055556
+.meas tran sh69_25 FIND V(xslp.sh69) AT=16.4055556
+.meas tran bi0_curr_25 FIND V(xbi0.curr_node) AT=16.4055556
+.meas tran bi0_prev_25 FIND V(xbi0.prev_node) AT=16.4055556
+.meas tran bi1_curr_25 FIND V(xbi1.curr_node) AT=16.4055556
+.meas tran bi1_prev_25 FIND V(xbi1.prev_node) AT=16.4055556
 .meas tran trpk_26 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=16.8277778
 .meas tran ts14_26 WHEN V(trig_s14)=0.45 RISE=1 TD=16.8277778
 .meas tran ts69_26 WHEN V(trig_s69)=0.45 RISE=1 TD=16.8277778
 .meas tran twid_26 WHEN V(trig_wid)=0.45 RISE=1 TD=16.8277778
+.meas tran trpk_del_26 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=16.8277778
+.meas tran ts14_fall_26 WHEN V(trig_s14)=0.45 FALL=1 TD=16.8277778
+.meas tran ts69_fall_26 WHEN V(trig_s69)=0.45 FALL=1 TD=16.8277778
+.meas tran twid_fall_26 WHEN V(trig_wid)=0.45 FALL=1 TD=16.8277778
+.meas tran trpk_del_fall_26 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=16.8277778
+.meas tran sh14_26 FIND V(xslp.sh14) AT=16.9777778
+.meas tran sh69_26 FIND V(xslp.sh69) AT=16.9777778
+.meas tran bi0_curr_26 FIND V(xbi0.curr_node) AT=16.9777778
+.meas tran bi0_prev_26 FIND V(xbi0.prev_node) AT=16.9777778
+.meas tran bi1_curr_26 FIND V(xbi1.curr_node) AT=16.9777778
+.meas tran bi1_prev_26 FIND V(xbi1.prev_node) AT=16.9777778
 .meas tran trpk_27 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=17.3805556
 .meas tran ts14_27 WHEN V(trig_s14)=0.45 RISE=1 TD=17.3805556
 .meas tran ts69_27 WHEN V(trig_s69)=0.45 RISE=1 TD=17.3805556
 .meas tran twid_27 WHEN V(trig_wid)=0.45 RISE=1 TD=17.3805556
+.meas tran trpk_del_27 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=17.3805556
+.meas tran ts14_fall_27 WHEN V(trig_s14)=0.45 FALL=1 TD=17.3805556
+.meas tran ts69_fall_27 WHEN V(trig_s69)=0.45 FALL=1 TD=17.3805556
+.meas tran twid_fall_27 WHEN V(trig_wid)=0.45 FALL=1 TD=17.3805556
+.meas tran trpk_del_fall_27 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=17.3805556
+.meas tran sh14_27 FIND V(xslp.sh14) AT=17.5305556
+.meas tran sh69_27 FIND V(xslp.sh69) AT=17.5305556
+.meas tran bi0_curr_27 FIND V(xbi0.curr_node) AT=17.5305556
+.meas tran bi0_prev_27 FIND V(xbi0.prev_node) AT=17.5305556
+.meas tran bi1_curr_27 FIND V(xbi1.curr_node) AT=17.5305556
+.meas tran bi1_prev_27 FIND V(xbi1.prev_node) AT=17.5305556
 .meas tran trpk_28 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=18.1444444
 .meas tran ts14_28 WHEN V(trig_s14)=0.45 RISE=1 TD=18.1444444
 .meas tran ts69_28 WHEN V(trig_s69)=0.45 RISE=1 TD=18.1444444
 .meas tran twid_28 WHEN V(trig_wid)=0.45 RISE=1 TD=18.1444444
+.meas tran trpk_del_28 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=18.1444444
+.meas tran ts14_fall_28 WHEN V(trig_s14)=0.45 FALL=1 TD=18.1444444
+.meas tran ts69_fall_28 WHEN V(trig_s69)=0.45 FALL=1 TD=18.1444444
+.meas tran twid_fall_28 WHEN V(trig_wid)=0.45 FALL=1 TD=18.1444444
+.meas tran trpk_del_fall_28 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=18.1444444
+.meas tran sh14_28 FIND V(xslp.sh14) AT=18.2944444
+.meas tran sh69_28 FIND V(xslp.sh69) AT=18.2944444
+.meas tran bi0_curr_28 FIND V(xbi0.curr_node) AT=18.2944444
+.meas tran bi0_prev_28 FIND V(xbi0.prev_node) AT=18.2944444
+.meas tran bi1_curr_28 FIND V(xbi1.curr_node) AT=18.2944444
+.meas tran bi1_prev_28 FIND V(xbi1.prev_node) AT=18.2944444
 .meas tran trpk_29 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=18.6916667
 .meas tran ts14_29 WHEN V(trig_s14)=0.45 RISE=1 TD=18.6916667
 .meas tran ts69_29 WHEN V(trig_s69)=0.45 RISE=1 TD=18.6916667
 .meas tran twid_29 WHEN V(trig_wid)=0.45 RISE=1 TD=18.6916667
+.meas tran trpk_del_29 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=18.6916667
+.meas tran ts14_fall_29 WHEN V(trig_s14)=0.45 FALL=1 TD=18.6916667
+.meas tran ts69_fall_29 WHEN V(trig_s69)=0.45 FALL=1 TD=18.6916667
+.meas tran twid_fall_29 WHEN V(trig_wid)=0.45 FALL=1 TD=18.6916667
+.meas tran trpk_del_fall_29 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=18.6916667
+.meas tran sh14_29 FIND V(xslp.sh14) AT=18.8416667
+.meas tran sh69_29 FIND V(xslp.sh69) AT=18.8416667
+.meas tran bi0_curr_29 FIND V(xbi0.curr_node) AT=18.8416667
+.meas tran bi0_prev_29 FIND V(xbi0.prev_node) AT=18.8416667
+.meas tran bi1_curr_29 FIND V(xbi1.curr_node) AT=18.8416667
+.meas tran bi1_prev_29 FIND V(xbi1.prev_node) AT=18.8416667
 .meas tran trpk_30 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=19.1500000
 .meas tran ts14_30 WHEN V(trig_s14)=0.45 RISE=1 TD=19.1500000
 .meas tran ts69_30 WHEN V(trig_s69)=0.45 RISE=1 TD=19.1500000
 .meas tran twid_30 WHEN V(trig_wid)=0.45 RISE=1 TD=19.1500000
+.meas tran trpk_del_30 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=19.1500000
+.meas tran ts14_fall_30 WHEN V(trig_s14)=0.45 FALL=1 TD=19.1500000
+.meas tran ts69_fall_30 WHEN V(trig_s69)=0.45 FALL=1 TD=19.1500000
+.meas tran twid_fall_30 WHEN V(trig_wid)=0.45 FALL=1 TD=19.1500000
+.meas tran trpk_del_fall_30 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=19.1500000
+.meas tran sh14_30 FIND V(xslp.sh14) AT=19.3000000
+.meas tran sh69_30 FIND V(xslp.sh69) AT=19.3000000
+.meas tran bi0_curr_30 FIND V(xbi0.curr_node) AT=19.3000000
+.meas tran bi0_prev_30 FIND V(xbi0.prev_node) AT=19.3000000
+.meas tran bi1_curr_30 FIND V(xbi1.curr_node) AT=19.3000000
+.meas tran bi1_prev_30 FIND V(xbi1.prev_node) AT=19.3000000
 .meas tran trpk_31 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=19.7833333
 .meas tran ts14_31 WHEN V(trig_s14)=0.45 RISE=1 TD=19.7833333
 .meas tran ts69_31 WHEN V(trig_s69)=0.45 RISE=1 TD=19.7833333
 .meas tran twid_31 WHEN V(trig_wid)=0.45 RISE=1 TD=19.7833333
+.meas tran trpk_del_31 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=19.7833333
+.meas tran ts14_fall_31 WHEN V(trig_s14)=0.45 FALL=1 TD=19.7833333
+.meas tran ts69_fall_31 WHEN V(trig_s69)=0.45 FALL=1 TD=19.7833333
+.meas tran twid_fall_31 WHEN V(trig_wid)=0.45 FALL=1 TD=19.7833333
+.meas tran trpk_del_fall_31 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=19.7833333
+.meas tran sh14_31 FIND V(xslp.sh14) AT=19.9333333
+.meas tran sh69_31 FIND V(xslp.sh69) AT=19.9333333
+.meas tran bi0_curr_31 FIND V(xbi0.curr_node) AT=19.9333333
+.meas tran bi0_prev_31 FIND V(xbi0.prev_node) AT=19.9333333
+.meas tran bi1_curr_31 FIND V(xbi1.curr_node) AT=19.9333333
+.meas tran bi1_prev_31 FIND V(xbi1.prev_node) AT=19.9333333
 .meas tran trpk_32 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=20.2833333
 .meas tran ts14_32 WHEN V(trig_s14)=0.45 RISE=1 TD=20.2833333
 .meas tran ts69_32 WHEN V(trig_s69)=0.45 RISE=1 TD=20.2833333
 .meas tran twid_32 WHEN V(trig_wid)=0.45 RISE=1 TD=20.2833333
+.meas tran trpk_del_32 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=20.2833333
+.meas tran ts14_fall_32 WHEN V(trig_s14)=0.45 FALL=1 TD=20.2833333
+.meas tran ts69_fall_32 WHEN V(trig_s69)=0.45 FALL=1 TD=20.2833333
+.meas tran twid_fall_32 WHEN V(trig_wid)=0.45 FALL=1 TD=20.2833333
+.meas tran trpk_del_fall_32 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=20.2833333
+.meas tran sh14_32 FIND V(xslp.sh14) AT=20.4333333
+.meas tran sh69_32 FIND V(xslp.sh69) AT=20.4333333
+.meas tran bi0_curr_32 FIND V(xbi0.curr_node) AT=20.4333333
+.meas tran bi0_prev_32 FIND V(xbi0.prev_node) AT=20.4333333
+.meas tran bi1_curr_32 FIND V(xbi1.curr_node) AT=20.4333333
+.meas tran bi1_prev_32 FIND V(xbi1.prev_node) AT=20.4333333
 .meas tran trpk_33 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=20.8333333
 .meas tran ts14_33 WHEN V(trig_s14)=0.45 RISE=1 TD=20.8333333
 .meas tran ts69_33 WHEN V(trig_s69)=0.45 RISE=1 TD=20.8333333
 .meas tran twid_33 WHEN V(trig_wid)=0.45 RISE=1 TD=20.8333333
+.meas tran trpk_del_33 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=20.8333333
+.meas tran ts14_fall_33 WHEN V(trig_s14)=0.45 FALL=1 TD=20.8333333
+.meas tran ts69_fall_33 WHEN V(trig_s69)=0.45 FALL=1 TD=20.8333333
+.meas tran twid_fall_33 WHEN V(trig_wid)=0.45 FALL=1 TD=20.8333333
+.meas tran trpk_del_fall_33 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=20.8333333
+.meas tran sh14_33 FIND V(xslp.sh14) AT=20.9833333
+.meas tran sh69_33 FIND V(xslp.sh69) AT=20.9833333
+.meas tran bi0_curr_33 FIND V(xbi0.curr_node) AT=20.9833333
+.meas tran bi0_prev_33 FIND V(xbi0.prev_node) AT=20.9833333
+.meas tran bi1_curr_33 FIND V(xbi1.curr_node) AT=20.9833333
+.meas tran bi1_prev_33 FIND V(xbi1.prev_node) AT=20.9833333
 .meas tran trpk_34 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=21.3972222
 .meas tran ts14_34 WHEN V(trig_s14)=0.45 RISE=1 TD=21.3972222
 .meas tran ts69_34 WHEN V(trig_s69)=0.45 RISE=1 TD=21.3972222
 .meas tran twid_34 WHEN V(trig_wid)=0.45 RISE=1 TD=21.3972222
+.meas tran trpk_del_34 WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD=21.3972222
+.meas tran ts14_fall_34 WHEN V(trig_s14)=0.45 FALL=1 TD=21.3972222
+.meas tran ts69_fall_34 WHEN V(trig_s69)=0.45 FALL=1 TD=21.3972222
+.meas tran twid_fall_34 WHEN V(trig_wid)=0.45 FALL=1 TD=21.3972222
+.meas tran trpk_del_fall_34 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=21.3972222
+.meas tran sh14_34 FIND V(xslp.sh14) AT=21.5472222
+.meas tran sh69_34 FIND V(xslp.sh69) AT=21.5472222
+.meas tran bi0_curr_34 FIND V(xbi0.curr_node) AT=21.5472222
+.meas tran bi0_prev_34 FIND V(xbi0.prev_node) AT=21.5472222
+.meas tran bi1_curr_34 FIND V(xbi1.curr_node) AT=21.5472222
+.meas tran bi1_prev_34 FIND V(xbi1.prev_node) AT=21.5472222
+.meas tran rpk_amp_5 MAX V(rpeak_pulse) FROM=3.7384222 TO=3.7454222
+.meas tran rpk_raw_5 MAX V(rpeak_pulse_raw) FROM=3.7384222 TO=3.7454222
+.meas tran ecg_at_rpk_5 FIND V(ecg_l0) AT=3.7407222
+.meas tran sh_sym_5 FIND V(f8_symmetry) AT=3.7454222
+.meas tran bi_out_5 FIND V(f3_bi_l0) AT=3.8472222
+.meas tran ecg_at_s14_5 FIND V(ecg_l0) AT=3.7612222
+.meas tran rpk_amp_6 MAX V(rpeak_pulse) FROM=4.2967556 TO=4.3037556
+.meas tran rpk_raw_6 MAX V(rpeak_pulse_raw) FROM=4.2967556 TO=4.3037556
+.meas tran ecg_at_rpk_6 FIND V(ecg_l0) AT=4.2990556
+.meas tran sh_sym_6 FIND V(f8_symmetry) AT=4.3037556
+.meas tran bi_out_6 FIND V(f3_bi_l0) AT=4.4055556
+.meas tran ecg_at_s14_6 FIND V(ecg_l0) AT=4.3195556
+.meas tran rpk_amp_7 MAX V(rpeak_pulse) FROM=5.0773111 TO=5.0843111
+.meas tran rpk_raw_7 MAX V(rpeak_pulse_raw) FROM=5.0773111 TO=5.0843111
+.meas tran ecg_at_rpk_7 FIND V(ecg_l0) AT=5.0796111
+.meas tran sh_sym_7 FIND V(f8_symmetry) AT=5.0843111
+.meas tran bi_out_7 FIND V(f3_bi_l0) AT=5.1861111
+.meas tran ecg_at_s14_7 FIND V(ecg_l0) AT=5.1001111
+.meas tran rpk_amp_8 MAX V(rpeak_pulse) FROM=5.6273111 TO=5.6343111
+.meas tran rpk_raw_8 MAX V(rpeak_pulse_raw) FROM=5.6273111 TO=5.6343111
+.meas tran ecg_at_rpk_8 FIND V(ecg_l0) AT=5.6296111
+.meas tran sh_sym_8 FIND V(f8_symmetry) AT=5.6343111
+.meas tran bi_out_8 FIND V(f3_bi_l0) AT=5.7361111
+.meas tran ecg_at_s14_8 FIND V(ecg_l0) AT=5.6501111
+.meas tran rpk_amp_9 MAX V(rpeak_pulse) FROM=6.1384222 TO=6.1454222
+.meas tran rpk_raw_9 MAX V(rpeak_pulse_raw) FROM=6.1384222 TO=6.1454222
+.meas tran ecg_at_rpk_9 FIND V(ecg_l0) AT=6.1407222
+.meas tran sh_sym_9 FIND V(f8_symmetry) AT=6.1454222
+.meas tran bi_out_9 FIND V(f3_bi_l0) AT=6.2472222
+.meas tran ecg_at_s14_9 FIND V(ecg_l0) AT=6.1612222
+.meas tran rpk_amp_10 MAX V(rpeak_pulse) FROM=7.0162000 TO=7.0232000
+.meas tran rpk_raw_10 MAX V(rpeak_pulse_raw) FROM=7.0162000 TO=7.0232000
+.meas tran ecg_at_rpk_10 FIND V(ecg_l0) AT=7.0185000
+.meas tran sh_sym_10 FIND V(f8_symmetry) AT=7.0232000
+.meas tran bi_out_10 FIND V(f3_bi_l0) AT=7.1250000
+.meas tran ecg_at_s14_10 FIND V(ecg_l0) AT=7.0390000
+.meas tran rpk_amp_11 MAX V(rpeak_pulse) FROM=7.5412000 TO=7.5482000
+.meas tran rpk_raw_11 MAX V(rpeak_pulse_raw) FROM=7.5412000 TO=7.5482000
+.meas tran ecg_at_rpk_11 FIND V(ecg_l0) AT=7.5435000
+.meas tran sh_sym_11 FIND V(f8_symmetry) AT=7.5482000
+.meas tran bi_out_11 FIND V(f3_bi_l0) AT=7.6500000
+.meas tran ecg_at_s14_11 FIND V(ecg_l0) AT=7.5640000
+.meas tran rpk_amp_12 MAX V(rpeak_pulse) FROM=8.0495333 TO=8.0565333
+.meas tran rpk_raw_12 MAX V(rpeak_pulse_raw) FROM=8.0495333 TO=8.0565333
+.meas tran ecg_at_rpk_12 FIND V(ecg_l0) AT=8.0518333
+.meas tran sh_sym_12 FIND V(f8_symmetry) AT=8.0565333
+.meas tran bi_out_12 FIND V(f3_bi_l0) AT=8.1583333
+.meas tran ecg_at_s14_12 FIND V(ecg_l0) AT=8.0723333
+.meas tran rpk_amp_13 MAX V(rpeak_pulse) FROM=8.8023111 TO=8.8093111
+.meas tran rpk_raw_13 MAX V(rpeak_pulse_raw) FROM=8.8023111 TO=8.8093111
+.meas tran ecg_at_rpk_13 FIND V(ecg_l0) AT=8.8046111
+.meas tran sh_sym_13 FIND V(f8_symmetry) AT=8.8093111
+.meas tran bi_out_13 FIND V(f3_bi_l0) AT=8.9111111
+.meas tran ecg_at_s14_13 FIND V(ecg_l0) AT=8.8251111
+.meas tran rpk_amp_14 MAX V(rpeak_pulse) FROM=9.3856444 TO=9.3926444
+.meas tran rpk_raw_14 MAX V(rpeak_pulse_raw) FROM=9.3856444 TO=9.3926444
+.meas tran ecg_at_rpk_14 FIND V(ecg_l0) AT=9.3879444
+.meas tran sh_sym_14 FIND V(f8_symmetry) AT=9.3926444
+.meas tran bi_out_14 FIND V(f3_bi_l0) AT=9.4944444
+.meas tran ecg_at_s14_14 FIND V(ecg_l0) AT=9.4084444
 
 .end
