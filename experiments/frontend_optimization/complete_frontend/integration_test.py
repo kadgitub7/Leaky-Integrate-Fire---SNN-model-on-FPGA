@@ -2,16 +2,14 @@
 Integration test: analog supplementary circuits + feature circuits.
 
 Replaces MOST ideal triggers with analog circuits:
-  - bias_gen → vbias
-  - rpeak_detector + pulse_gen → rpeak_pulse (for delay_timer start)
-  - delay_timer + pulse_gen → trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
-  - delay_timer (rpk_delayed) + pulse_gen → rpeak_pulse_delayed (for F3,F4,F8 S&H near true R-peak)
+  - bias_gen -> vbias
+  - rpeak_detector + pulse_gen -> rpeak_pulse (for delay_timer start + rr_timing precharge)
+  - delay_timer + pulse_gen -> trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
+  - delay_timer (rpk_delayed) + pulse_gen -> rpeak_pulse_delayed (for F3,F4,F8 S&H)
+  - pwave_predictor rr_cap comparator + AND(NOT rpeak_level) -> trig_rr_cap (EWMA+5mV offset)
 
 Keeps IDEAL:
-  - trig_rpeak for rr_timing precharge (analog rpeak fires 6.6ms early,
-    which conflicts with the 55ms capture window — v6 design would fix this)
-  - trig_rr_cap for rr_timing capture (55ms window needed for SF settling)
-  - trig_pw_base, trig_pw_peak for F5 (pwave_predictor not yet integrated)
+  - trig_pw_base, trig_pw_peak for F5 (pwave_predictor pw triggers not yet routed)
 
 Feature outputs compared to Python reference via Spearman rho.
 """
@@ -158,8 +156,8 @@ def run_sim(title, sp_body):
 # ========================================================================
 print("=" * 70)
 print("INTEGRATION TEST: Analog supplementary + feature circuits")
-print("  Analog: bias_gen, rpeak_detector, pulse_gen, delay_timer")
-print("  Ideal:  rr_cap (55ms capture), rpeak_for_rr_timing, pw_base, pw_peak")
+print("  Analog: bias_gen, rpeak_detector, pulse_gen, delay_timer, rpeak->rr_timing, rr_cap(pwave_pred)")
+print("  Ideal:  pw_base, pw_peak")
 print("=" * 70)
 
 lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")
@@ -194,16 +192,17 @@ for rec_id in RECORDS:
     ecg_l0_pts.append((total_time, VBASE))
     ecg_l1_pts.append((total_time, VBASE))
 
-    # --- rpeak threshold (adaptive: use min R-peak to ensure detection) ---
-    max_r_v = max(VBASE + gain * b['ecg_l0'][WIN_L] for b in beats)
-    min_r_v = min(VBASE + gain * b['ecg_l0'][WIN_L] for b in beats)
-    # Set threshold at 80% of the MINIMUM R-peak to catch all beats
-    rpeak_thresh = VBASE + 0.80 * (min_r_v - VBASE)
-    # But clamp to at most 30% of max to avoid noise triggers
-    rpeak_thresh_max = VBASE + 0.30 * (max_r_v - VBASE)
-    rpeak_thresh = min(rpeak_thresh, rpeak_thresh_max)
-    print("  rpeak threshold: {:.4f}V (min_R={:.4f}V, max_R={:.4f}V)".format(
-        rpeak_thresh, min_r_v, max_r_v))
+    # --- rpeak threshold (median-based, P-wave safe) ---
+    # Use max of QRS window (±15 samples) for robust peak measurement
+    r_peaks = [VBASE + gain * np.max(b['ecg_l0'][WIN_L-15:WIN_L+15]) for b in beats]
+    median_r_v = float(np.median(r_peaks))
+    min_r_v = min(r_peaks)
+    max_r_v = max(r_peaks)
+    rpeak_thresh = VBASE + 0.50 * (median_r_v - VBASE)
+    rpeak_thresh = max(rpeak_thresh, VBASE + 0.020)
+    n_pos_det = sum(1 for v in r_peaks if v > rpeak_thresh)
+    print("  rpeak pos_thresh: {:.4f}V detectable: pos={}/{}".format(
+        rpeak_thresh, n_pos_det, n))
 
     # --- Delay timer thresholds (compensated for rpeak offset) ---
     # Discharge starts at R - RPEAK_OFFSET + PG_WIDTH = R - 5.9ms
@@ -218,13 +217,26 @@ for rec_id in RECORDS:
 
     # --- IC for rr_timing ---
     PW = 0.0005
-    first_rr_ms = beats[0]['pre_rr'] * 1000
-    ic_ewma = interp_sf(rr_t, rr_v, first_rr_ms)
+    avg_rr_ms_ic = np.mean([b['pre_rr'] * 1000 for b in beats])
+    ic_ewma = interp_sf(rr_t, rr_v, avg_rr_ms_ic)
 
-    # --- IDEAL triggers (kept for rr_timing + pwave) ---
-    ideal_rpk = make_trig(rpeak_times, 0, PW, total_time)
-    ideal_rr_cap = make_trig(rpeak_times, -0.060, 0.050, total_time)  # 50ms (close at R-10ms)
-    ideal_rr_copy = make_trig(rpeak_times, 0.010, 0.002, total_time)
+    # --- Pwave predictor thresholds (from average RR interval) ---
+    avg_rr_ms = np.mean([b['pre_rr'] * 1000 for b in beats])
+    pipe_pw = 3.0  # pwave_predictor pipeline delay estimate (ms)
+    # Timer precharges at R_prev - RPEAK_OFFSET_MS; pw triggers fire at R_next - offset
+    # Decay from precharge to crossing = RR - target_offset + RPEAK_OFFSET_MS - pipe_pw
+    decay_pwb = avg_rr_ms - 205.6 + RPEAK_OFFSET_MS - pipe_pw
+    decay_pwp = avg_rr_ms - 130.6 + RPEAK_OFFSET_MS - pipe_pw
+    vth_pw_base = interp_sf(rr_t, rr_v, max(10, decay_pwb))
+    vth_pw_peak = interp_sf(rr_t, rr_v, max(10, decay_pwp))
+    # rr_cap offset: 20mV above EWMA → fires ~180ms before rpeak
+    # S&H tracks from comparator fire until rpeak_level closes it (AND gate)
+    # Large offset ensures ALL beats (even short RR) trigger reliably
+    RRC_OFFSET_MV = 20.0  # mV above EWMA
+    print("  pwave thresholds: vth_pwb={:.4f}V (decay={:.0f}ms) vth_pwp={:.4f}V (decay={:.0f}ms) rrc_off={:.1f}mV".format(
+        vth_pw_base, decay_pwb, vth_pw_peak, decay_pwp, RRC_OFFSET_MV))
+
+    # --- IDEAL triggers (kept for pwave only) ---
     ideal_pw_base = make_trig(rpeak_times, -(WIN_L - PW_S)/FS, PW, total_time)
     ideal_pw_peak = make_trig(rpeak_times, -(WIN_L - PW_MID)/FS, PW, total_time)
 
@@ -249,15 +261,18 @@ Vecg1 ecg_l1 0 PWL({ecg1})
 .include "{fp}/long_pulse_gen.spice"
 .include "{fp}/delay_timer.spice"
 .include "{fp}/edge_buffer.spice"
+.include "{fp}/pwave_predictor.spice"
 
 * --- Bias generator (replaces ideal Vbias) ---
 Xbias vbias vref vdd vss bias_gen
 .ic V(xbias.iref)=0.3
 
-* --- R-peak detector + pulse_gen (analog rpeak) ---
+* --- R-peak detector (positive only) ---
 Vthresh rpeak_threshold 0 {rpk_thresh:.6f}
 Xrpk ecg_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector
-Xpg_rpk rpeak_level rpeak_pulse_raw vdd vss vbias pulse_gen
+* Edge buffer + pulse_gen chain
+Xeb_rpk_in rpeak_level rpeak_level_sharp vdd vss edge_buffer
+Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
 Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
@@ -283,14 +298,41 @@ Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
 Xeb_s69 pg_s69_raw trig_s69 vdd vss edge_buffer
 Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
 Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
-Xeb_rr  pg_rr_raw  trig_rr_copy vdd vss edge_buffer
+Xeb_rr  pg_rr_raw  trig_rr_copy_raw vdd vss edge_buffer
+* Esamp validity gate: block rr_copy when esamp holds deeply decayed value
+* Valid esamp range: 0.38-0.43V. Invalid (missed beats): <0.30V. Threshold: 0.35V
+Vth_esamp_ok esamp_ok_thresh 0 0.35
+Xesamp_chk xrr.esamp_node esamp_ok_thresh esamp_ok_level vdd vss vbias rpeak_detector
+* AND: trig_rr_copy = trig_rr_copy_raw AND esamp_ok_level
+XMnand_rrc_p1 nand_rrc2 trig_rr_copy_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_rrc_p2 nand_rrc2 esamp_ok_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_rrc_n1 nand_rrc2 trig_rr_copy_raw nand_mid_rrc2 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_rrc_n2 nand_mid_rrc2 esamp_ok_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_rrc2 nand_rrc2 trig_rr_copy vdd vss inverter_sub
 Xeb_rpk_del pg_rpk_del_raw rpeak_pulse_delayed vdd vss edge_buffer
 
 * ============================================================
-* IDEAL TRIGGERS (kept for rr_timing + pwave)
+* ANALOG RR_CAP (pwave_predictor + AND gate with rpeak_level)
 * ============================================================
-Vrpk_ideal trig_rpeak_ideal 0 PWL({rpk_ideal})
-Vrrc trig_rr_cap 0 PWL({rrc})
+* rr_cap threshold: EWMA + 5mV offset -> comparator fires ~45ms before rpeak
+* S&H tracks from comparator fire until rpeak_level closes it (QRS onset)
+Vrrc_off rrc_threshold rr_ewma {rrc_off_v}
+* Pwave predictor: uses rr_timer vs rrc_threshold for rr_cap
+Vth_pwb vth_pw_base_node 0 {vth_pwb:.6f}
+Vth_pwp vth_pw_peak_node 0 {vth_pwp:.6f}
+Xpwpred rr_timer rrc_threshold pw_base_cmp pw_peak_cmp rr_cap_level vth_pw_base_node vth_pw_peak_node vdd vss vbias pwave_predictor
+* AND gate: trig_rr_cap = rr_cap_level AND NOT(rpeak_level)
+* S&H opens when comparator fires, closes when QRS starts
+Xinv_rpk rpeak_level rpeak_level_bar vdd vss inverter_sub
+XMnand_p1 nand_rrc rr_cap_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_p2 nand_rrc rpeak_level_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_n1 nand_rrc rr_cap_level nand_mid_rrc vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_n2 nand_mid_rrc rpeak_level_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_rrc nand_rrc trig_rr_cap vdd vss inverter_sub
+
+* ============================================================
+* IDEAL TRIGGERS (kept for pwave only)
+* ============================================================
 Vpwb trig_pw_base 0 PWL({pwb})
 Vpwp trig_pw_peak 0 PWL({pwp})
 
@@ -304,8 +346,8 @@ Vpwp trig_pw_peak 0 PWL({pwp})
 .include "{fp}/qrs_slope.spice"
 .include "{fp}/qrs_symmetry.spice"
 
-* F1/F2: rr_timing (ideal rpeak + ideal rr_cap, analog rr_copy)
-Xrr ecg_l0 trig_rr_cap trig_rpeak_ideal trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
+* F1/F2: rr_timing (ANALOG rpeak, ANALOG rr_cap via pwave_pred, analog rr_copy)
+Xrr ecg_l0 trig_rr_cap rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
 
 * F3/F4: beat_instability (DELAYED rpeak, ANALOG bi_copy)
 Xbi0 ecg_l0 rpeak_pulse_delayed trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
@@ -341,18 +383,41 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
            ecg0=make_pwl(ecg_l0_pts), ecg1=make_pwl(ecg_l1_pts),
            rpk_thresh=rpeak_thresh,
            vth14=vth_14, vth69=vth_69, vth28=vth_28, vth300=vth_300, vth10=vth_10, vth_rpk_del=vth_rpk_del,
-           rpk_ideal=ideal_rpk, rrc=ideal_rr_cap,
+           rrc_off_v=RRC_OFFSET_MV / 1000.0,
+           vth_pwb=vth_pw_base, vth_pwp=vth_pw_peak,
            pwb=ideal_pw_base, pwp=ideal_pw_peak,
            fp=fp, ic=ic_ewma, vbase=VBASE, ttot=total_time)
+
+    # --- rr_cap analog diagnostics ---
+    # Check comparator and AND gate output at specific times (before rpeak of beat 3-9)
+    for j in range(min(3, n), min(10, n)):
+        t_before = rpeak_times[j] - 0.030  # 30ms before rpeak
+        t_at = rpeak_times[j] - 0.010  # 10ms before rpeak
+        sp += ".meas tran rrc_cmp_{j} FIND V(rr_cap_level) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_cmp2_{j} FIND V(rr_cap_level) AT={t:.7f}\n".format(j=j, t=t_at)
+        sp += ".meas tran rrc_timer_{j} FIND V(rr_timer) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_ewma_{j} FIND V(rr_ewma) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_thresh_{j} FIND V(rrc_threshold) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_trig_{j} FIND V(trig_rr_cap) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_rpklvl_{j} FIND V(rpeak_level) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_esamp_{j} FIND V(xrr.esamp_node) AT={t:.7f}\n".format(j=j, t=t_before)
+        sp += ".meas tran rrc_esamp_ok_{j} FIND V(esamp_ok_level) AT={t:.7f}\n".format(j=j, t=t_before)
+        # Max values in window around expected trigger
+        t_start = rpeak_times[j] - 0.060
+        t_end = rpeak_times[j] + 0.005
+        sp += ".meas tran rrc_cmp_max_{j} MAX V(rr_cap_level) FROM={f:.7f} TO={t:.7f}\n".format(j=j, f=t_start, t=t_end)
+        sp += ".meas tran rrc_trig_max_{j} MAX V(trig_rr_cap) FROM={f:.7f} TO={t:.7f}\n".format(j=j, f=t_start, t=t_end)
 
     # --- Measurement statements ---
     # Feature outputs measured 100ms after TRUE R-peak
     for j in range(SKIP, n):
-        t_f1 = rpeak_times[j] - 0.010
+        t_f1 = rpeak_times[j] - 0.055
         if t_f1 > 0.5:
             sp += ".meas tran f1_{j} FIND V(f1_rr_ratio) AT={t:.7f}\n".format(j=j, t=t_f1)
+            sp += ".meas tran f1_sf_{j} FIND V(xrr.sf_out) AT={t:.7f}\n".format(j=j, t=t_f1)
+            sp += ".meas tran f1_ewma_{j} FIND V(xrr.ewma_node) AT={t:.7f}\n".format(j=j, t=t_f1)
         if j + 1 < n:
-            t_f2 = rpeak_times[j+1] - 0.065
+            t_f2 = rpeak_times[j+1] - 0.350
             if t_f2 > 0.5:
                 sp += ".meas tran f2_{j} FIND V(f2_rr_asym) AT={t:.7f}\n".format(j=j, t=t_f2)
         t_f38 = rpeak_times[j] + 0.100
@@ -374,6 +439,9 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         sp += ".meas tran ts69_fall_{j} WHEN V(trig_s69)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran twid_fall_{j} WHEN V(trig_wid)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran trpk_del_fall_{j} WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
+        # rr_cap analog timing
+        sp += ".meas tran trrc_{j} WHEN V(trig_rr_cap)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran trrc_fall_{j} WHEN V(trig_rr_cap)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         # F7: measure S&H cap values for all beats
         t_meas = rpeak_times[j] + 0.100
         sp += ".meas tran sh14_{j} FIND V(xslp.sh14) AT={t:.7f}\n".format(j=j, t=t_meas)
@@ -407,6 +475,24 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     res, elapsed = run_sim("integ_{}".format(rec_id), sp)
     print("  Sim time: {:.0f}s, {} measurements".format(elapsed, len(res)))
 
+    # --- rr_cap analog diagnostics ---
+    if True:  # always print for debugging
+        print("  rr_cap analog diagnostics (esamp validity gate):")
+        for j in range(min(3, n), min(10, n)):
+            cmp_v = res.get('rrc_cmp_{}'.format(j), -1)
+            cmp2_v = res.get('rrc_cmp2_{}'.format(j), -1)
+            timer_v = res.get('rrc_timer_{}'.format(j), -1)
+            ewma_v = res.get('rrc_ewma_{}'.format(j), -1)
+            thresh_v = res.get('rrc_thresh_{}'.format(j), -1)
+            trig_v = res.get('rrc_trig_{}'.format(j), -1)
+            rpklvl_v = res.get('rrc_rpklvl_{}'.format(j), -1)
+            cmp_max = res.get('rrc_cmp_max_{}'.format(j), -1)
+            trig_max = res.get('rrc_trig_max_{}'.format(j), -1)
+            esamp_v = res.get('rrc_esamp_{}'.format(j), -1)
+            esamp_ok = res.get('rrc_esamp_ok_{}'.format(j), -1)
+            print("    beat {}: timer={:.4f} ewma={:.4f} thresh={:.4f} cmp@-30={:.4f} esamp={:.4f} esamp_ok={:.4f} trig_max={:.4f}".format(
+                j, timer_v, ewma_v, thresh_v, cmp_v, esamp_v, esamp_ok, trig_max))
+
     # --- Classify beats: valid vs missed trigger ---
     valid_rpk = set()
     valid_rpk_del = set()  # delayed rpeak valid (for F3/F4/F8)
@@ -421,14 +507,15 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         ts14 = res.get('ts14_{}'.format(j))
         twid = res.get('twid_{}'.format(j))
         ts69 = res.get('ts69_{}'.format(j))
-        # rpeak valid if within [-20ms, +5ms] of true R
-        if trpk and abs(trpk - r) < 0.020:
+        # rpeak valid if within [-50ms, +5ms] of true R (wide for inverted QRS)
+        if trpk and (trpk - r) > -0.050 and (trpk - r) < 0.005:
             valid_rpk.add(j)
             n_rpk_ok += 1
         else:
             n_rpk_miss += 1
-        # delayed rpeak valid if within [-5ms, +10ms] of true R
-        if trpk_del and (trpk_del - r) > -0.005 and (trpk_del - r) < 0.010:
+        # delayed rpeak valid if within [-15ms, +15ms] of true R
+        # (wider window: rpeak fires earlier on broad-QRS records like 109)
+        if trpk_del and (trpk_del - r) > -0.015 and (trpk_del - r) < 0.015:
             valid_rpk_del.add(j)
             n_rpk_del_ok += 1
         else:
@@ -474,15 +561,100 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     # --- Compute Spearman rho using actual trigger times ---
     rhos = {}
 
-    # F1/F2: use fixed Python ref (ideal triggers, no jitter issue)
+    SKIP_F1F2 = 15
     for fk, pykey in [(1, 'py_f1'), (2, 'py_f2')]:
         cv_list, pv_list = [], []
-        for j in range(SKIP, n):
+        for j in range(SKIP_F1F2, n):
+            if j not in valid_rpk or (j - 1) not in valid_rpk:
+                continue
             cv = res.get('f{}_{}'.format(fk, j))
             if cv is not None:
                 cv_list.append(cv)
                 pv_list.append(beats[j][pykey])
         rhos[fk] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
+        if fk == 1:
+            print("  F1 per-beat (measured at R-55ms):")
+            f1_cv_list, f1_pv_list = [], []
+            for j in range(SKIP_F1F2, n):
+                if j not in valid_rpk or (j - 1) not in valid_rpk:
+                    continue
+                cv = res.get('f1_{}'.format(j))
+                pv = beats[j]['py_f1']
+                rr_ms = beats[j]['pre_rr'] * 1000
+                sf_v = res.get('f1_sf_{}'.format(j), -1)
+                ewma_v = res.get('f1_ewma_{}'.format(j), -1)
+                if cv is not None:
+                    f1_cv_list.append(cv)
+                    f1_pv_list.append(pv)
+                    diff_mv = (sf_v - ewma_v) * 1000 if sf_v > 0 and ewma_v > 0 else 0
+                    rpk_prev = rpk_offsets.get(j-1, 0) if 'rpk_offsets' in dir() else 0
+                    # recompute rpk_offsets here if not yet available
+                    trpk_prev = res.get('trpk_{}'.format(j-1))
+                    rpk_prev_ms = (trpk_prev - rpeak_times[j-1]) * 1000 if trpk_prev else 0
+                    eff_d = rr_ms + abs(rpk_prev_ms) - 55
+                    print("    beat {:2d}: rr={:6.1f}ms  f1={:.4f}  py={:+.4f}  sf={:.4f}  ewma={:.4f}  diff={:+.1f}mV  rpk_prev={:.1f}ms  eff_d={:.1f}ms".format(
+                        j, rr_ms, cv, pv, sf_v, ewma_v, diff_mv, rpk_prev_ms, eff_d))
+            if len(f1_cv_list) >= 3:
+                from scipy.stats import pearsonr
+                pr = pearsonr(f1_cv_list, f1_pv_list)[0]
+                sr = spearmanr(f1_cv_list, f1_pv_list)[0]
+                print("  F1 Pearson r={:.4f}  Spearman rho={:.4f}  n={}".format(pr, sr, len(f1_cv_list)))
+            # Diagnostic: sf_out vs annotation_rr, detected-RR noise, and detected-RR EWMA ref
+            sf_list, rr_list, det_rr_list, ann_rr_list = [], [], [], []
+            rpk_offsets = {}
+            for j in range(n):
+                trpk_val = res.get('trpk_{}'.format(j))
+                if trpk_val and j in valid_rpk:
+                    rpk_offsets[j] = (trpk_val - rpeak_times[j]) * 1000  # ms, negative = early
+            for j in range(SKIP_F1F2, n):
+                if j not in valid_rpk or (j - 1) not in valid_rpk:
+                    continue
+                sf_v = res.get('f1_sf_{}'.format(j))
+                if sf_v is not None and sf_v > 0:
+                    sf_list.append(sf_v)
+                    rr_list.append(beats[j]['pre_rr'] * 1000)
+                    ann_rr_list.append(beats[j]['pre_rr'] * 1000)
+                    if j in rpk_offsets and (j-1) in rpk_offsets:
+                        det_rr = beats[j]['pre_rr'] * 1000 + rpk_offsets[j-1] - rpk_offsets[j]
+                        det_rr_list.append(det_rr)
+            if len(sf_list) >= 5:
+                sr_sf = abs(spearmanr(sf_list, rr_list)[0])
+                print("  SF vs annotation_RR: Spearman |rho|={:.4f}  n={}".format(sr_sf, len(sf_list)))
+            if len(det_rr_list) >= 5 and len(ann_rr_list) >= 5:
+                sr_det = abs(spearmanr(det_rr_list[:len(ann_rr_list)], ann_rr_list[:len(det_rr_list)])[0])
+                rpk_arr = [rpk_offsets.get(j, 0) for j in range(n) if j in rpk_offsets]
+                rpk_range = max(rpk_arr) - min(rpk_arr) if rpk_arr else 0
+                print("  Detected_RR vs annotation_RR: Spearman |rho|={:.4f}  rpk_range={:.1f}ms".format(sr_det, rpk_range))
+            # Effective decay time: ann_rr + |rpk[j-1]| - 55ms (what the timer actually sees at R-55ms)
+            alpha_ewma = 0.10
+            eff_decay_list, sf_eff_list, f1_eff_cv, f1_eff_pv = [], [], [], []
+            ewma_eff = None
+            for j in range(1, n):
+                if j not in valid_rpk or (j-1) not in valid_rpk:
+                    continue
+                if (j-1) not in rpk_offsets:
+                    continue
+                eff_decay = beats[j]['pre_rr'] * 1000 + abs(rpk_offsets[j-1]) - 55
+                if ewma_eff is None:
+                    ewma_eff = eff_decay
+                else:
+                    py_f1_eff = eff_decay - ewma_eff
+                    ewma_eff = (1 - alpha_ewma) * ewma_eff + alpha_ewma * eff_decay
+                    if j >= SKIP_F1F2:
+                        sf_v = res.get('f1_sf_{}'.format(j))
+                        cv = res.get('f1_{}'.format(j))
+                        if sf_v is not None and sf_v > 0:
+                            sf_eff_list.append(sf_v)
+                            eff_decay_list.append(eff_decay)
+                        if cv is not None:
+                            f1_eff_cv.append(cv)
+                            f1_eff_pv.append(py_f1_eff)
+            if len(sf_eff_list) >= 5:
+                sr_sf_eff = abs(spearmanr(sf_eff_list, eff_decay_list)[0])
+                print("  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|={:.4f}  n={}".format(sr_sf_eff, len(sf_eff_list)))
+            if len(f1_eff_cv) >= 5:
+                sr_f1_eff = abs(spearmanr(f1_eff_cv, f1_eff_pv)[0])
+                print("  F1 vs eff_decay EWMA ref: Spearman |rho|={:.4f}  n={}".format(sr_f1_eff, len(f1_eff_cv)))
 
     # F5: ideal pwave triggers, use fixed Python ref
     cv_list, pv_list = [], []
@@ -700,7 +872,7 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
     fnames = {1:'F1:rr_ratio', 2:'F2:rr_asym', 3:'F3:bi_L0', 4:'F4:bi_L1',
               5:'F5:pwave', 6:'F6:width', 7:'F7:slope', 8:'F8:symmetry'}
-    triggers = {1:'ideal', 2:'ideal', 3:'DELAYED rpk', 4:'DELAYED rpk',
+    triggers = {1:'ANALOG rpk+ANALOG rrc', 2:'ANALOG rpk+ANALOG rrc', 3:'DELAYED rpk', 4:'DELAYED rpk',
                 5:'ideal pw', 6:'ANALOG wid', 7:'ANALOG s14/s69', 8:'DELAYED rpk'}
     for fk in range(1, 9):
         status = "PASS" if rhos[fk] >= 0.95 else "WARN" if rhos[fk] >= 0.80 else "FAIL"

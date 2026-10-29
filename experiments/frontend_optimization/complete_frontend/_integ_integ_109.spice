@@ -20,15 +20,18 @@ Vecg1 ecg_l1 0 PWL(0.0000000 0.300000 0.3914444 0.300000 0.3944444 0.316709 0.39
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/long_pulse_gen.spice"
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/delay_timer.spice"
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/edge_buffer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/pwave_predictor.spice"
 
 * --- Bias generator (replaces ideal Vbias) ---
 Xbias vbias vref vdd vss bias_gen
 .ic V(xbias.iref)=0.3
 
-* --- R-peak detector + pulse_gen (analog rpeak) ---
-Vthresh rpeak_threshold 0 0.309316
+* --- R-peak detector (positive only) ---
+Vthresh rpeak_threshold 0 0.341519
 Xrpk ecg_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector
-Xpg_rpk rpeak_level rpeak_pulse_raw vdd vss vbias pulse_gen
+* Edge buffer + pulse_gen chain
+Xeb_rpk_in rpeak_level rpeak_level_sharp vdd vss edge_buffer
+Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
 Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
@@ -54,14 +57,41 @@ Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
 Xeb_s69 pg_s69_raw trig_s69 vdd vss edge_buffer
 Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
 Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
-Xeb_rr  pg_rr_raw  trig_rr_copy vdd vss edge_buffer
+Xeb_rr  pg_rr_raw  trig_rr_copy_raw vdd vss edge_buffer
+* Esamp validity gate: block rr_copy when esamp holds deeply decayed value
+* Valid esamp range: 0.38-0.43V. Invalid (missed beats): <0.30V. Threshold: 0.35V
+Vth_esamp_ok esamp_ok_thresh 0 0.35
+Xesamp_chk xrr.esamp_node esamp_ok_thresh esamp_ok_level vdd vss vbias rpeak_detector
+* AND: trig_rr_copy = trig_rr_copy_raw AND esamp_ok_level
+XMnand_rrc_p1 nand_rrc2 trig_rr_copy_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_rrc_p2 nand_rrc2 esamp_ok_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_rrc_n1 nand_rrc2 trig_rr_copy_raw nand_mid_rrc2 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_rrc_n2 nand_mid_rrc2 esamp_ok_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_rrc2 nand_rrc2 trig_rr_copy vdd vss inverter_sub
 Xeb_rpk_del pg_rpk_del_raw rpeak_pulse_delayed vdd vss edge_buffer
 
 * ============================================================
-* IDEAL TRIGGERS (kept for rr_timing + pwave)
+* ANALOG RR_CAP (pwave_predictor + AND gate with rpeak_level)
 * ============================================================
-Vrpk_ideal trig_rpeak_ideal 0 PWL(0.0000000 0.000000 0.6440444 0.000000 0.6444444 0.900000 0.6449444 0.900000 0.6453444 0.000000 1.2773778 0.000000 1.2777778 0.900000 1.2782778 0.900000 1.2786778 0.000000 1.9329333 0.000000 1.9333333 0.900000 1.9338333 0.900000 1.9342333 0.000000 2.6023778 0.000000 2.6027778 0.900000 2.6032778 0.900000 2.6036778 0.000000 3.2662667 0.000000 3.2666667 0.900000 3.2671667 0.900000 3.2675667 0.000000 3.9218222 0.000000 3.9222222 0.900000 3.9227222 0.900000 3.9231222 0.000000 4.5940444 0.000000 4.5944444 0.900000 4.5949444 0.900000 4.5953444 0.000000 5.2301556 0.000000 5.2305556 0.900000 5.2310556 0.900000 5.2314556 0.000000 5.8551556 0.000000 5.8555556 0.900000 5.8560556 0.900000 5.8564556 0.000000 6.4551556 0.000000 6.4555556 0.900000 6.4560556 0.900000 6.4564556 0.000000 7.0829333 0.000000 7.0833333 0.900000 7.0838333 0.900000 7.0842333 0.000000 7.6996000 0.000000 7.7000000 0.900000 7.7005000 0.900000 7.7009000 0.000000 8.3468222 0.000000 8.3472222 0.900000 8.3477222 0.900000 8.3481222 0.000000 9.0023778 0.000000 9.0027778 0.900000 9.0032778 0.900000 9.0036778 0.000000 9.6523778 0.000000 9.6527778 0.900000 9.6532778 0.900000 9.6536778 0.000000 10.2829333 0.000000 10.2833333 0.900000 10.2838333 0.900000 10.2842333 0.000000 10.9162667 0.000000 10.9166667 0.900000 10.9171667 0.900000 10.9175667 0.000000 11.5357111 0.000000 11.5361111 0.900000 11.5366111 0.900000 11.5370111 0.000000 12.1357111 0.000000 12.1361111 0.900000 12.1366111 0.900000 12.1370111 0.000000 12.7190444 0.000000 12.7194444 0.900000 12.7199444 0.900000 12.7203444 0.000000 13.3246000 0.000000 13.3250000 0.900000 13.3255000 0.900000 13.3259000 0.000000 13.9357111 0.000000 13.9361111 0.900000 13.9366111 0.900000 13.9370111 0.000000 14.5746000 0.000000 14.5750000 0.900000 14.5755000 0.900000 14.5759000 0.000000 15.2246000 0.000000 15.2250000 0.900000 15.2255000 0.900000 15.2259000 0.000000 15.8579333 0.000000 15.8583333 0.900000 15.8588333 0.900000 15.8592333 0.000000 16.4884889 0.000000 16.4888889 0.900000 16.4893889 0.900000 16.4897889 0.000000 17.0773778 0.000000 17.0777778 0.900000 17.0782778 0.900000 17.0786778 0.000000 17.6968222 0.000000 17.6972222 0.900000 17.6977222 0.900000 17.6981222 0.000000 18.2912667 0.000000 18.2916667 0.900000 18.2921667 0.900000 18.2925667 0.000000 18.9079333 0.000000 18.9083333 0.900000 18.9088333 0.900000 18.9092333 0.000000 19.5079333 0.000000 19.5083333 0.900000 19.5088333 0.900000 19.5092333 0.000000 20.1273778 0.000000 20.1277778 0.900000 20.1282778 0.900000 20.1286778 0.000000 20.7579333 0.000000 20.7583333 0.900000 20.7588333 0.900000 20.7592333 0.000000 21.4246000 0.000000 21.4250000 0.900000 21.4255000 0.900000 21.4259000 0.000000 22.0996000 0.000000 22.1000000 0.900000 22.1005000 0.900000 22.1009000 0.000000 22.6000000 0.000000)
-Vrrc trig_rr_cap 0 PWL(0.0000000 0.000000 0.5840444 0.000000 0.5844444 0.900000 0.6344444 0.900000 0.6348444 0.000000 1.2173778 0.000000 1.2177778 0.900000 1.2677778 0.900000 1.2681778 0.000000 1.8729333 0.000000 1.8733333 0.900000 1.9233333 0.900000 1.9237333 0.000000 2.5423778 0.000000 2.5427778 0.900000 2.5927778 0.900000 2.5931778 0.000000 3.2062667 0.000000 3.2066667 0.900000 3.2566667 0.900000 3.2570667 0.000000 3.8618222 0.000000 3.8622222 0.900000 3.9122222 0.900000 3.9126222 0.000000 4.5340444 0.000000 4.5344444 0.900000 4.5844444 0.900000 4.5848444 0.000000 5.1701556 0.000000 5.1705556 0.900000 5.2205556 0.900000 5.2209556 0.000000 5.7951556 0.000000 5.7955556 0.900000 5.8455556 0.900000 5.8459556 0.000000 6.3951556 0.000000 6.3955556 0.900000 6.4455556 0.900000 6.4459556 0.000000 7.0229333 0.000000 7.0233333 0.900000 7.0733333 0.900000 7.0737333 0.000000 7.6396000 0.000000 7.6400000 0.900000 7.6900000 0.900000 7.6904000 0.000000 8.2868222 0.000000 8.2872222 0.900000 8.3372222 0.900000 8.3376222 0.000000 8.9423778 0.000000 8.9427778 0.900000 8.9927778 0.900000 8.9931778 0.000000 9.5923778 0.000000 9.5927778 0.900000 9.6427778 0.900000 9.6431778 0.000000 10.2229333 0.000000 10.2233333 0.900000 10.2733333 0.900000 10.2737333 0.000000 10.8562667 0.000000 10.8566667 0.900000 10.9066667 0.900000 10.9070667 0.000000 11.4757111 0.000000 11.4761111 0.900000 11.5261111 0.900000 11.5265111 0.000000 12.0757111 0.000000 12.0761111 0.900000 12.1261111 0.900000 12.1265111 0.000000 12.6590444 0.000000 12.6594444 0.900000 12.7094444 0.900000 12.7098444 0.000000 13.2646000 0.000000 13.2650000 0.900000 13.3150000 0.900000 13.3154000 0.000000 13.8757111 0.000000 13.8761111 0.900000 13.9261111 0.900000 13.9265111 0.000000 14.5146000 0.000000 14.5150000 0.900000 14.5650000 0.900000 14.5654000 0.000000 15.1646000 0.000000 15.1650000 0.900000 15.2150000 0.900000 15.2154000 0.000000 15.7979333 0.000000 15.7983333 0.900000 15.8483333 0.900000 15.8487333 0.000000 16.4284889 0.000000 16.4288889 0.900000 16.4788889 0.900000 16.4792889 0.000000 17.0173778 0.000000 17.0177778 0.900000 17.0677778 0.900000 17.0681778 0.000000 17.6368222 0.000000 17.6372222 0.900000 17.6872222 0.900000 17.6876222 0.000000 18.2312667 0.000000 18.2316667 0.900000 18.2816667 0.900000 18.2820667 0.000000 18.8479333 0.000000 18.8483333 0.900000 18.8983333 0.900000 18.8987333 0.000000 19.4479333 0.000000 19.4483333 0.900000 19.4983333 0.900000 19.4987333 0.000000 20.0673778 0.000000 20.0677778 0.900000 20.1177778 0.900000 20.1181778 0.000000 20.6979333 0.000000 20.6983333 0.900000 20.7483333 0.900000 20.7487333 0.000000 21.3646000 0.000000 21.3650000 0.900000 21.4150000 0.900000 21.4154000 0.000000 22.0396000 0.000000 22.0400000 0.900000 22.0900000 0.900000 22.0904000 0.000000 22.6000000 0.000000)
+* rr_cap threshold: EWMA + 5mV offset -> comparator fires ~45ms before rpeak
+* S&H tracks from comparator fire until rpeak_level closes it (QRS onset)
+Vrrc_off rrc_threshold rr_ewma 0.02
+* Pwave predictor: uses rr_timer vs rrc_threshold for rr_cap
+Vth_pwb vth_pw_base_node 0 0.434175
+Vth_pwp vth_pw_peak_node 0 0.425704
+Xpwpred rr_timer rrc_threshold pw_base_cmp pw_peak_cmp rr_cap_level vth_pw_base_node vth_pw_peak_node vdd vss vbias pwave_predictor
+* AND gate: trig_rr_cap = rr_cap_level AND NOT(rpeak_level)
+* S&H opens when comparator fires, closes when QRS starts
+Xinv_rpk rpeak_level rpeak_level_bar vdd vss inverter_sub
+XMnand_p1 nand_rrc rr_cap_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_p2 nand_rrc rpeak_level_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_n1 nand_rrc rr_cap_level nand_mid_rrc vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_n2 nand_mid_rrc rpeak_level_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_rrc nand_rrc trig_rr_cap vdd vss inverter_sub
+
+* ============================================================
+* IDEAL TRIGGERS (kept for pwave only)
+* ============================================================
 Vpwb trig_pw_base 0 PWL(0.0000000 0.000000 0.4384889 0.000000 0.4388889 0.900000 0.4393889 0.900000 0.4397889 0.000000 1.0718222 0.000000 1.0722222 0.900000 1.0727222 0.900000 1.0731222 0.000000 1.7273778 0.000000 1.7277778 0.900000 1.7282778 0.900000 1.7286778 0.000000 2.3968222 0.000000 2.3972222 0.900000 2.3977222 0.900000 2.3981222 0.000000 3.0607111 0.000000 3.0611111 0.900000 3.0616111 0.900000 3.0620111 0.000000 3.7162667 0.000000 3.7166667 0.900000 3.7171667 0.900000 3.7175667 0.000000 4.3884889 0.000000 4.3888889 0.900000 4.3893889 0.900000 4.3897889 0.000000 5.0246000 0.000000 5.0250000 0.900000 5.0255000 0.900000 5.0259000 0.000000 5.6496000 0.000000 5.6500000 0.900000 5.6505000 0.900000 5.6509000 0.000000 6.2496000 0.000000 6.2500000 0.900000 6.2505000 0.900000 6.2509000 0.000000 6.8773778 0.000000 6.8777778 0.900000 6.8782778 0.900000 6.8786778 0.000000 7.4940444 0.000000 7.4944444 0.900000 7.4949444 0.900000 7.4953444 0.000000 8.1412667 0.000000 8.1416667 0.900000 8.1421667 0.900000 8.1425667 0.000000 8.7968222 0.000000 8.7972222 0.900000 8.7977222 0.900000 8.7981222 0.000000 9.4468222 0.000000 9.4472222 0.900000 9.4477222 0.900000 9.4481222 0.000000 10.0773778 0.000000 10.0777778 0.900000 10.0782778 0.900000 10.0786778 0.000000 10.7107111 0.000000 10.7111111 0.900000 10.7116111 0.900000 10.7120111 0.000000 11.3301556 0.000000 11.3305556 0.900000 11.3310556 0.900000 11.3314556 0.000000 11.9301556 0.000000 11.9305556 0.900000 11.9310556 0.900000 11.9314556 0.000000 12.5134889 0.000000 12.5138889 0.900000 12.5143889 0.900000 12.5147889 0.000000 13.1190444 0.000000 13.1194444 0.900000 13.1199444 0.900000 13.1203444 0.000000 13.7301556 0.000000 13.7305556 0.900000 13.7310556 0.900000 13.7314556 0.000000 14.3690444 0.000000 14.3694444 0.900000 14.3699444 0.900000 14.3703444 0.000000 15.0190444 0.000000 15.0194444 0.900000 15.0199444 0.900000 15.0203444 0.000000 15.6523778 0.000000 15.6527778 0.900000 15.6532778 0.900000 15.6536778 0.000000 16.2829333 0.000000 16.2833333 0.900000 16.2838333 0.900000 16.2842333 0.000000 16.8718222 0.000000 16.8722222 0.900000 16.8727222 0.900000 16.8731222 0.000000 17.4912667 0.000000 17.4916667 0.900000 17.4921667 0.900000 17.4925667 0.000000 18.0857111 0.000000 18.0861111 0.900000 18.0866111 0.900000 18.0870111 0.000000 18.7023778 0.000000 18.7027778 0.900000 18.7032778 0.900000 18.7036778 0.000000 19.3023778 0.000000 19.3027778 0.900000 19.3032778 0.900000 19.3036778 0.000000 19.9218222 0.000000 19.9222222 0.900000 19.9227222 0.900000 19.9231222 0.000000 20.5523778 0.000000 20.5527778 0.900000 20.5532778 0.900000 20.5536778 0.000000 21.2190444 0.000000 21.2194444 0.900000 21.2199444 0.900000 21.2203444 0.000000 21.8940444 0.000000 21.8944444 0.900000 21.8949444 0.900000 21.8953444 0.000000 22.6000000 0.000000)
 Vpwp trig_pw_peak 0 PWL(0.0000000 0.000000 0.5134889 0.000000 0.5138889 0.900000 0.5143889 0.900000 0.5147889 0.000000 1.1468222 0.000000 1.1472222 0.900000 1.1477222 0.900000 1.1481222 0.000000 1.8023778 0.000000 1.8027778 0.900000 1.8032778 0.900000 1.8036778 0.000000 2.4718222 0.000000 2.4722222 0.900000 2.4727222 0.900000 2.4731222 0.000000 3.1357111 0.000000 3.1361111 0.900000 3.1366111 0.900000 3.1370111 0.000000 3.7912667 0.000000 3.7916667 0.900000 3.7921667 0.900000 3.7925667 0.000000 4.4634889 0.000000 4.4638889 0.900000 4.4643889 0.900000 4.4647889 0.000000 5.0996000 0.000000 5.1000000 0.900000 5.1005000 0.900000 5.1009000 0.000000 5.7246000 0.000000 5.7250000 0.900000 5.7255000 0.900000 5.7259000 0.000000 6.3246000 0.000000 6.3250000 0.900000 6.3255000 0.900000 6.3259000 0.000000 6.9523778 0.000000 6.9527778 0.900000 6.9532778 0.900000 6.9536778 0.000000 7.5690444 0.000000 7.5694444 0.900000 7.5699444 0.900000 7.5703444 0.000000 8.2162667 0.000000 8.2166667 0.900000 8.2171667 0.900000 8.2175667 0.000000 8.8718222 0.000000 8.8722222 0.900000 8.8727222 0.900000 8.8731222 0.000000 9.5218222 0.000000 9.5222222 0.900000 9.5227222 0.900000 9.5231222 0.000000 10.1523778 0.000000 10.1527778 0.900000 10.1532778 0.900000 10.1536778 0.000000 10.7857111 0.000000 10.7861111 0.900000 10.7866111 0.900000 10.7870111 0.000000 11.4051556 0.000000 11.4055556 0.900000 11.4060556 0.900000 11.4064556 0.000000 12.0051556 0.000000 12.0055556 0.900000 12.0060556 0.900000 12.0064556 0.000000 12.5884889 0.000000 12.5888889 0.900000 12.5893889 0.900000 12.5897889 0.000000 13.1940444 0.000000 13.1944444 0.900000 13.1949444 0.900000 13.1953444 0.000000 13.8051556 0.000000 13.8055556 0.900000 13.8060556 0.900000 13.8064556 0.000000 14.4440444 0.000000 14.4444444 0.900000 14.4449444 0.900000 14.4453444 0.000000 15.0940444 0.000000 15.0944444 0.900000 15.0949444 0.900000 15.0953444 0.000000 15.7273778 0.000000 15.7277778 0.900000 15.7282778 0.900000 15.7286778 0.000000 16.3579333 0.000000 16.3583333 0.900000 16.3588333 0.900000 16.3592333 0.000000 16.9468222 0.000000 16.9472222 0.900000 16.9477222 0.900000 16.9481222 0.000000 17.5662667 0.000000 17.5666667 0.900000 17.5671667 0.900000 17.5675667 0.000000 18.1607111 0.000000 18.1611111 0.900000 18.1616111 0.900000 18.1620111 0.000000 18.7773778 0.000000 18.7777778 0.900000 18.7782778 0.900000 18.7786778 0.000000 19.3773778 0.000000 19.3777778 0.900000 19.3782778 0.900000 19.3786778 0.000000 19.9968222 0.000000 19.9972222 0.900000 19.9977222 0.900000 19.9981222 0.000000 20.6273778 0.000000 20.6277778 0.900000 20.6282778 0.900000 20.6286778 0.000000 21.2940444 0.000000 21.2944444 0.900000 21.2949444 0.900000 21.2953444 0.000000 21.9690444 0.000000 21.9694444 0.900000 21.9699444 0.900000 21.9703444 0.000000 22.6000000 0.000000)
 
@@ -75,8 +105,8 @@ Vpwp trig_pw_peak 0 PWL(0.0000000 0.000000 0.5134889 0.000000 0.5138889 0.900000
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/qrs_slope.spice"
 .include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/qrs_symmetry.spice"
 
-* F1/F2: rr_timing (ideal rpeak + ideal rr_cap, analog rr_copy)
-Xrr ecg_l0 trig_rr_cap trig_rpeak_ideal trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
+* F1/F2: rr_timing (ANALOG rpeak, ANALOG rr_cap via pwave_pred, analog rr_copy)
+Xrr ecg_l0 trig_rr_cap rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
 
 * F3/F4: beat_instability (DELAYED rpeak, ANALOG bi_copy)
 Xbi0 ecg_l0 rpeak_pulse_delayed trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
@@ -98,9 +128,9 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 * INITIAL CONDITIONS
 * ============================================================
 .ic V(xrr.net_timer)=0.9
-.ic V(xrr.ewma_node)=0.409978
-.ic V(xrr.esamp_node)=0.409978
-.ic V(xrr.prev_node)=0.409978
+.ic V(xrr.ewma_node)=0.411449
+.ic V(xrr.esamp_node)=0.411449
+.ic V(xrr.prev_node)=0.411449
 .ic V(xbi0.prev_node)=0.3
 .ic V(xbi0.esamp_node)=0.3
 .ic V(xbi1.prev_node)=0.3
@@ -108,239 +138,376 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
 .tran 0.5m 22.6000
 
-.meas tran f1_5 FIND V(f1_rr_ratio) AT=3.9122222
-.meas tran f2_5 FIND V(f2_rr_asym) AT=4.5294444
+.meas tran rrc_cmp_3 FIND V(rr_cap_level) AT=2.5727778
+.meas tran rrc_cmp2_3 FIND V(rr_cap_level) AT=2.5927778
+.meas tran rrc_timer_3 FIND V(rr_timer) AT=2.5727778
+.meas tran rrc_ewma_3 FIND V(rr_ewma) AT=2.5727778
+.meas tran rrc_thresh_3 FIND V(rrc_threshold) AT=2.5727778
+.meas tran rrc_trig_3 FIND V(trig_rr_cap) AT=2.5727778
+.meas tran rrc_rpklvl_3 FIND V(rpeak_level) AT=2.5727778
+.meas tran rrc_esamp_3 FIND V(xrr.esamp_node) AT=2.5727778
+.meas tran rrc_esamp_ok_3 FIND V(esamp_ok_level) AT=2.5727778
+.meas tran rrc_cmp_max_3 MAX V(rr_cap_level) FROM=2.5427778 TO=2.6077778
+.meas tran rrc_trig_max_3 MAX V(trig_rr_cap) FROM=2.5427778 TO=2.6077778
+.meas tran rrc_cmp_4 FIND V(rr_cap_level) AT=3.2366667
+.meas tran rrc_cmp2_4 FIND V(rr_cap_level) AT=3.2566667
+.meas tran rrc_timer_4 FIND V(rr_timer) AT=3.2366667
+.meas tran rrc_ewma_4 FIND V(rr_ewma) AT=3.2366667
+.meas tran rrc_thresh_4 FIND V(rrc_threshold) AT=3.2366667
+.meas tran rrc_trig_4 FIND V(trig_rr_cap) AT=3.2366667
+.meas tran rrc_rpklvl_4 FIND V(rpeak_level) AT=3.2366667
+.meas tran rrc_esamp_4 FIND V(xrr.esamp_node) AT=3.2366667
+.meas tran rrc_esamp_ok_4 FIND V(esamp_ok_level) AT=3.2366667
+.meas tran rrc_cmp_max_4 MAX V(rr_cap_level) FROM=3.2066667 TO=3.2716667
+.meas tran rrc_trig_max_4 MAX V(trig_rr_cap) FROM=3.2066667 TO=3.2716667
+.meas tran rrc_cmp_5 FIND V(rr_cap_level) AT=3.8922222
+.meas tran rrc_cmp2_5 FIND V(rr_cap_level) AT=3.9122222
+.meas tran rrc_timer_5 FIND V(rr_timer) AT=3.8922222
+.meas tran rrc_ewma_5 FIND V(rr_ewma) AT=3.8922222
+.meas tran rrc_thresh_5 FIND V(rrc_threshold) AT=3.8922222
+.meas tran rrc_trig_5 FIND V(trig_rr_cap) AT=3.8922222
+.meas tran rrc_rpklvl_5 FIND V(rpeak_level) AT=3.8922222
+.meas tran rrc_esamp_5 FIND V(xrr.esamp_node) AT=3.8922222
+.meas tran rrc_esamp_ok_5 FIND V(esamp_ok_level) AT=3.8922222
+.meas tran rrc_cmp_max_5 MAX V(rr_cap_level) FROM=3.8622222 TO=3.9272222
+.meas tran rrc_trig_max_5 MAX V(trig_rr_cap) FROM=3.8622222 TO=3.9272222
+.meas tran rrc_cmp_6 FIND V(rr_cap_level) AT=4.5644444
+.meas tran rrc_cmp2_6 FIND V(rr_cap_level) AT=4.5844444
+.meas tran rrc_timer_6 FIND V(rr_timer) AT=4.5644444
+.meas tran rrc_ewma_6 FIND V(rr_ewma) AT=4.5644444
+.meas tran rrc_thresh_6 FIND V(rrc_threshold) AT=4.5644444
+.meas tran rrc_trig_6 FIND V(trig_rr_cap) AT=4.5644444
+.meas tran rrc_rpklvl_6 FIND V(rpeak_level) AT=4.5644444
+.meas tran rrc_esamp_6 FIND V(xrr.esamp_node) AT=4.5644444
+.meas tran rrc_esamp_ok_6 FIND V(esamp_ok_level) AT=4.5644444
+.meas tran rrc_cmp_max_6 MAX V(rr_cap_level) FROM=4.5344444 TO=4.5994444
+.meas tran rrc_trig_max_6 MAX V(trig_rr_cap) FROM=4.5344444 TO=4.5994444
+.meas tran rrc_cmp_7 FIND V(rr_cap_level) AT=5.2005556
+.meas tran rrc_cmp2_7 FIND V(rr_cap_level) AT=5.2205556
+.meas tran rrc_timer_7 FIND V(rr_timer) AT=5.2005556
+.meas tran rrc_ewma_7 FIND V(rr_ewma) AT=5.2005556
+.meas tran rrc_thresh_7 FIND V(rrc_threshold) AT=5.2005556
+.meas tran rrc_trig_7 FIND V(trig_rr_cap) AT=5.2005556
+.meas tran rrc_rpklvl_7 FIND V(rpeak_level) AT=5.2005556
+.meas tran rrc_esamp_7 FIND V(xrr.esamp_node) AT=5.2005556
+.meas tran rrc_esamp_ok_7 FIND V(esamp_ok_level) AT=5.2005556
+.meas tran rrc_cmp_max_7 MAX V(rr_cap_level) FROM=5.1705556 TO=5.2355556
+.meas tran rrc_trig_max_7 MAX V(trig_rr_cap) FROM=5.1705556 TO=5.2355556
+.meas tran rrc_cmp_8 FIND V(rr_cap_level) AT=5.8255556
+.meas tran rrc_cmp2_8 FIND V(rr_cap_level) AT=5.8455556
+.meas tran rrc_timer_8 FIND V(rr_timer) AT=5.8255556
+.meas tran rrc_ewma_8 FIND V(rr_ewma) AT=5.8255556
+.meas tran rrc_thresh_8 FIND V(rrc_threshold) AT=5.8255556
+.meas tran rrc_trig_8 FIND V(trig_rr_cap) AT=5.8255556
+.meas tran rrc_rpklvl_8 FIND V(rpeak_level) AT=5.8255556
+.meas tran rrc_esamp_8 FIND V(xrr.esamp_node) AT=5.8255556
+.meas tran rrc_esamp_ok_8 FIND V(esamp_ok_level) AT=5.8255556
+.meas tran rrc_cmp_max_8 MAX V(rr_cap_level) FROM=5.7955556 TO=5.8605556
+.meas tran rrc_trig_max_8 MAX V(trig_rr_cap) FROM=5.7955556 TO=5.8605556
+.meas tran rrc_cmp_9 FIND V(rr_cap_level) AT=6.4255556
+.meas tran rrc_cmp2_9 FIND V(rr_cap_level) AT=6.4455556
+.meas tran rrc_timer_9 FIND V(rr_timer) AT=6.4255556
+.meas tran rrc_ewma_9 FIND V(rr_ewma) AT=6.4255556
+.meas tran rrc_thresh_9 FIND V(rrc_threshold) AT=6.4255556
+.meas tran rrc_trig_9 FIND V(trig_rr_cap) AT=6.4255556
+.meas tran rrc_rpklvl_9 FIND V(rpeak_level) AT=6.4255556
+.meas tran rrc_esamp_9 FIND V(xrr.esamp_node) AT=6.4255556
+.meas tran rrc_esamp_ok_9 FIND V(esamp_ok_level) AT=6.4255556
+.meas tran rrc_cmp_max_9 MAX V(rr_cap_level) FROM=6.3955556 TO=6.4605556
+.meas tran rrc_trig_max_9 MAX V(trig_rr_cap) FROM=6.3955556 TO=6.4605556
+.meas tran f1_5 FIND V(f1_rr_ratio) AT=3.8672222
+.meas tran f1_sf_5 FIND V(xrr.sf_out) AT=3.8672222
+.meas tran f1_ewma_5 FIND V(xrr.ewma_node) AT=3.8672222
+.meas tran f2_5 FIND V(f2_rr_asym) AT=4.2444444
 .meas tran f3_5 FIND V(f3_bi_l0) AT=4.0222222
 .meas tran f4_5 FIND V(f4_bi_l1) AT=4.0222222
 .meas tran f5_5 FIND V(f5_pwave) AT=4.0222222
 .meas tran f6_5 FIND V(f6_width) AT=4.0222222
 .meas tran f7_5 FIND V(f7_slope) AT=4.0222222
 .meas tran f8_5 FIND V(f8_symmetry) AT=4.0222222
-.meas tran f1_6 FIND V(f1_rr_ratio) AT=4.5844444
-.meas tran f2_6 FIND V(f2_rr_asym) AT=5.1655556
+.meas tran f1_6 FIND V(f1_rr_ratio) AT=4.5394444
+.meas tran f1_sf_6 FIND V(xrr.sf_out) AT=4.5394444
+.meas tran f1_ewma_6 FIND V(xrr.ewma_node) AT=4.5394444
+.meas tran f2_6 FIND V(f2_rr_asym) AT=4.8805556
 .meas tran f3_6 FIND V(f3_bi_l0) AT=4.6944444
 .meas tran f4_6 FIND V(f4_bi_l1) AT=4.6944444
 .meas tran f5_6 FIND V(f5_pwave) AT=4.6944444
 .meas tran f6_6 FIND V(f6_width) AT=4.6944444
 .meas tran f7_6 FIND V(f7_slope) AT=4.6944444
 .meas tran f8_6 FIND V(f8_symmetry) AT=4.6944444
-.meas tran f1_7 FIND V(f1_rr_ratio) AT=5.2205556
-.meas tran f2_7 FIND V(f2_rr_asym) AT=5.7905556
+.meas tran f1_7 FIND V(f1_rr_ratio) AT=5.1755556
+.meas tran f1_sf_7 FIND V(xrr.sf_out) AT=5.1755556
+.meas tran f1_ewma_7 FIND V(xrr.ewma_node) AT=5.1755556
+.meas tran f2_7 FIND V(f2_rr_asym) AT=5.5055556
 .meas tran f3_7 FIND V(f3_bi_l0) AT=5.3305556
 .meas tran f4_7 FIND V(f4_bi_l1) AT=5.3305556
 .meas tran f5_7 FIND V(f5_pwave) AT=5.3305556
 .meas tran f6_7 FIND V(f6_width) AT=5.3305556
 .meas tran f7_7 FIND V(f7_slope) AT=5.3305556
 .meas tran f8_7 FIND V(f8_symmetry) AT=5.3305556
-.meas tran f1_8 FIND V(f1_rr_ratio) AT=5.8455556
-.meas tran f2_8 FIND V(f2_rr_asym) AT=6.3905556
+.meas tran f1_8 FIND V(f1_rr_ratio) AT=5.8005556
+.meas tran f1_sf_8 FIND V(xrr.sf_out) AT=5.8005556
+.meas tran f1_ewma_8 FIND V(xrr.ewma_node) AT=5.8005556
+.meas tran f2_8 FIND V(f2_rr_asym) AT=6.1055556
 .meas tran f3_8 FIND V(f3_bi_l0) AT=5.9555556
 .meas tran f4_8 FIND V(f4_bi_l1) AT=5.9555556
 .meas tran f5_8 FIND V(f5_pwave) AT=5.9555556
 .meas tran f6_8 FIND V(f6_width) AT=5.9555556
 .meas tran f7_8 FIND V(f7_slope) AT=5.9555556
 .meas tran f8_8 FIND V(f8_symmetry) AT=5.9555556
-.meas tran f1_9 FIND V(f1_rr_ratio) AT=6.4455556
-.meas tran f2_9 FIND V(f2_rr_asym) AT=7.0183333
+.meas tran f1_9 FIND V(f1_rr_ratio) AT=6.4005556
+.meas tran f1_sf_9 FIND V(xrr.sf_out) AT=6.4005556
+.meas tran f1_ewma_9 FIND V(xrr.ewma_node) AT=6.4005556
+.meas tran f2_9 FIND V(f2_rr_asym) AT=6.7333333
 .meas tran f3_9 FIND V(f3_bi_l0) AT=6.5555556
 .meas tran f4_9 FIND V(f4_bi_l1) AT=6.5555556
 .meas tran f5_9 FIND V(f5_pwave) AT=6.5555556
 .meas tran f6_9 FIND V(f6_width) AT=6.5555556
 .meas tran f7_9 FIND V(f7_slope) AT=6.5555556
 .meas tran f8_9 FIND V(f8_symmetry) AT=6.5555556
-.meas tran f1_10 FIND V(f1_rr_ratio) AT=7.0733333
-.meas tran f2_10 FIND V(f2_rr_asym) AT=7.6350000
+.meas tran f1_10 FIND V(f1_rr_ratio) AT=7.0283333
+.meas tran f1_sf_10 FIND V(xrr.sf_out) AT=7.0283333
+.meas tran f1_ewma_10 FIND V(xrr.ewma_node) AT=7.0283333
+.meas tran f2_10 FIND V(f2_rr_asym) AT=7.3500000
 .meas tran f3_10 FIND V(f3_bi_l0) AT=7.1833333
 .meas tran f4_10 FIND V(f4_bi_l1) AT=7.1833333
 .meas tran f5_10 FIND V(f5_pwave) AT=7.1833333
 .meas tran f6_10 FIND V(f6_width) AT=7.1833333
 .meas tran f7_10 FIND V(f7_slope) AT=7.1833333
 .meas tran f8_10 FIND V(f8_symmetry) AT=7.1833333
-.meas tran f1_11 FIND V(f1_rr_ratio) AT=7.6900000
-.meas tran f2_11 FIND V(f2_rr_asym) AT=8.2822222
+.meas tran f1_11 FIND V(f1_rr_ratio) AT=7.6450000
+.meas tran f1_sf_11 FIND V(xrr.sf_out) AT=7.6450000
+.meas tran f1_ewma_11 FIND V(xrr.ewma_node) AT=7.6450000
+.meas tran f2_11 FIND V(f2_rr_asym) AT=7.9972222
 .meas tran f3_11 FIND V(f3_bi_l0) AT=7.8000000
 .meas tran f4_11 FIND V(f4_bi_l1) AT=7.8000000
 .meas tran f5_11 FIND V(f5_pwave) AT=7.8000000
 .meas tran f6_11 FIND V(f6_width) AT=7.8000000
 .meas tran f7_11 FIND V(f7_slope) AT=7.8000000
 .meas tran f8_11 FIND V(f8_symmetry) AT=7.8000000
-.meas tran f1_12 FIND V(f1_rr_ratio) AT=8.3372222
-.meas tran f2_12 FIND V(f2_rr_asym) AT=8.9377778
+.meas tran f1_12 FIND V(f1_rr_ratio) AT=8.2922222
+.meas tran f1_sf_12 FIND V(xrr.sf_out) AT=8.2922222
+.meas tran f1_ewma_12 FIND V(xrr.ewma_node) AT=8.2922222
+.meas tran f2_12 FIND V(f2_rr_asym) AT=8.6527778
 .meas tran f3_12 FIND V(f3_bi_l0) AT=8.4472222
 .meas tran f4_12 FIND V(f4_bi_l1) AT=8.4472222
 .meas tran f5_12 FIND V(f5_pwave) AT=8.4472222
 .meas tran f6_12 FIND V(f6_width) AT=8.4472222
 .meas tran f7_12 FIND V(f7_slope) AT=8.4472222
 .meas tran f8_12 FIND V(f8_symmetry) AT=8.4472222
-.meas tran f1_13 FIND V(f1_rr_ratio) AT=8.9927778
-.meas tran f2_13 FIND V(f2_rr_asym) AT=9.5877778
+.meas tran f1_13 FIND V(f1_rr_ratio) AT=8.9477778
+.meas tran f1_sf_13 FIND V(xrr.sf_out) AT=8.9477778
+.meas tran f1_ewma_13 FIND V(xrr.ewma_node) AT=8.9477778
+.meas tran f2_13 FIND V(f2_rr_asym) AT=9.3027778
 .meas tran f3_13 FIND V(f3_bi_l0) AT=9.1027778
 .meas tran f4_13 FIND V(f4_bi_l1) AT=9.1027778
 .meas tran f5_13 FIND V(f5_pwave) AT=9.1027778
 .meas tran f6_13 FIND V(f6_width) AT=9.1027778
 .meas tran f7_13 FIND V(f7_slope) AT=9.1027778
 .meas tran f8_13 FIND V(f8_symmetry) AT=9.1027778
-.meas tran f1_14 FIND V(f1_rr_ratio) AT=9.6427778
-.meas tran f2_14 FIND V(f2_rr_asym) AT=10.2183333
+.meas tran f1_14 FIND V(f1_rr_ratio) AT=9.5977778
+.meas tran f1_sf_14 FIND V(xrr.sf_out) AT=9.5977778
+.meas tran f1_ewma_14 FIND V(xrr.ewma_node) AT=9.5977778
+.meas tran f2_14 FIND V(f2_rr_asym) AT=9.9333333
 .meas tran f3_14 FIND V(f3_bi_l0) AT=9.7527778
 .meas tran f4_14 FIND V(f4_bi_l1) AT=9.7527778
 .meas tran f5_14 FIND V(f5_pwave) AT=9.7527778
 .meas tran f6_14 FIND V(f6_width) AT=9.7527778
 .meas tran f7_14 FIND V(f7_slope) AT=9.7527778
 .meas tran f8_14 FIND V(f8_symmetry) AT=9.7527778
-.meas tran f1_15 FIND V(f1_rr_ratio) AT=10.2733333
-.meas tran f2_15 FIND V(f2_rr_asym) AT=10.8516667
+.meas tran f1_15 FIND V(f1_rr_ratio) AT=10.2283333
+.meas tran f1_sf_15 FIND V(xrr.sf_out) AT=10.2283333
+.meas tran f1_ewma_15 FIND V(xrr.ewma_node) AT=10.2283333
+.meas tran f2_15 FIND V(f2_rr_asym) AT=10.5666667
 .meas tran f3_15 FIND V(f3_bi_l0) AT=10.3833333
 .meas tran f4_15 FIND V(f4_bi_l1) AT=10.3833333
 .meas tran f5_15 FIND V(f5_pwave) AT=10.3833333
 .meas tran f6_15 FIND V(f6_width) AT=10.3833333
 .meas tran f7_15 FIND V(f7_slope) AT=10.3833333
 .meas tran f8_15 FIND V(f8_symmetry) AT=10.3833333
-.meas tran f1_16 FIND V(f1_rr_ratio) AT=10.9066667
-.meas tran f2_16 FIND V(f2_rr_asym) AT=11.4711111
+.meas tran f1_16 FIND V(f1_rr_ratio) AT=10.8616667
+.meas tran f1_sf_16 FIND V(xrr.sf_out) AT=10.8616667
+.meas tran f1_ewma_16 FIND V(xrr.ewma_node) AT=10.8616667
+.meas tran f2_16 FIND V(f2_rr_asym) AT=11.1861111
 .meas tran f3_16 FIND V(f3_bi_l0) AT=11.0166667
 .meas tran f4_16 FIND V(f4_bi_l1) AT=11.0166667
 .meas tran f5_16 FIND V(f5_pwave) AT=11.0166667
 .meas tran f6_16 FIND V(f6_width) AT=11.0166667
 .meas tran f7_16 FIND V(f7_slope) AT=11.0166667
 .meas tran f8_16 FIND V(f8_symmetry) AT=11.0166667
-.meas tran f1_17 FIND V(f1_rr_ratio) AT=11.5261111
-.meas tran f2_17 FIND V(f2_rr_asym) AT=12.0711111
+.meas tran f1_17 FIND V(f1_rr_ratio) AT=11.4811111
+.meas tran f1_sf_17 FIND V(xrr.sf_out) AT=11.4811111
+.meas tran f1_ewma_17 FIND V(xrr.ewma_node) AT=11.4811111
+.meas tran f2_17 FIND V(f2_rr_asym) AT=11.7861111
 .meas tran f3_17 FIND V(f3_bi_l0) AT=11.6361111
 .meas tran f4_17 FIND V(f4_bi_l1) AT=11.6361111
 .meas tran f5_17 FIND V(f5_pwave) AT=11.6361111
 .meas tran f6_17 FIND V(f6_width) AT=11.6361111
 .meas tran f7_17 FIND V(f7_slope) AT=11.6361111
 .meas tran f8_17 FIND V(f8_symmetry) AT=11.6361111
-.meas tran f1_18 FIND V(f1_rr_ratio) AT=12.1261111
-.meas tran f2_18 FIND V(f2_rr_asym) AT=12.6544444
+.meas tran f1_18 FIND V(f1_rr_ratio) AT=12.0811111
+.meas tran f1_sf_18 FIND V(xrr.sf_out) AT=12.0811111
+.meas tran f1_ewma_18 FIND V(xrr.ewma_node) AT=12.0811111
+.meas tran f2_18 FIND V(f2_rr_asym) AT=12.3694444
 .meas tran f3_18 FIND V(f3_bi_l0) AT=12.2361111
 .meas tran f4_18 FIND V(f4_bi_l1) AT=12.2361111
 .meas tran f5_18 FIND V(f5_pwave) AT=12.2361111
 .meas tran f6_18 FIND V(f6_width) AT=12.2361111
 .meas tran f7_18 FIND V(f7_slope) AT=12.2361111
 .meas tran f8_18 FIND V(f8_symmetry) AT=12.2361111
-.meas tran f1_19 FIND V(f1_rr_ratio) AT=12.7094444
-.meas tran f2_19 FIND V(f2_rr_asym) AT=13.2600000
+.meas tran f1_19 FIND V(f1_rr_ratio) AT=12.6644444
+.meas tran f1_sf_19 FIND V(xrr.sf_out) AT=12.6644444
+.meas tran f1_ewma_19 FIND V(xrr.ewma_node) AT=12.6644444
+.meas tran f2_19 FIND V(f2_rr_asym) AT=12.9750000
 .meas tran f3_19 FIND V(f3_bi_l0) AT=12.8194444
 .meas tran f4_19 FIND V(f4_bi_l1) AT=12.8194444
 .meas tran f5_19 FIND V(f5_pwave) AT=12.8194444
 .meas tran f6_19 FIND V(f6_width) AT=12.8194444
 .meas tran f7_19 FIND V(f7_slope) AT=12.8194444
 .meas tran f8_19 FIND V(f8_symmetry) AT=12.8194444
-.meas tran f1_20 FIND V(f1_rr_ratio) AT=13.3150000
-.meas tran f2_20 FIND V(f2_rr_asym) AT=13.8711111
+.meas tran f1_20 FIND V(f1_rr_ratio) AT=13.2700000
+.meas tran f1_sf_20 FIND V(xrr.sf_out) AT=13.2700000
+.meas tran f1_ewma_20 FIND V(xrr.ewma_node) AT=13.2700000
+.meas tran f2_20 FIND V(f2_rr_asym) AT=13.5861111
 .meas tran f3_20 FIND V(f3_bi_l0) AT=13.4250000
 .meas tran f4_20 FIND V(f4_bi_l1) AT=13.4250000
 .meas tran f5_20 FIND V(f5_pwave) AT=13.4250000
 .meas tran f6_20 FIND V(f6_width) AT=13.4250000
 .meas tran f7_20 FIND V(f7_slope) AT=13.4250000
 .meas tran f8_20 FIND V(f8_symmetry) AT=13.4250000
-.meas tran f1_21 FIND V(f1_rr_ratio) AT=13.9261111
-.meas tran f2_21 FIND V(f2_rr_asym) AT=14.5100000
+.meas tran f1_21 FIND V(f1_rr_ratio) AT=13.8811111
+.meas tran f1_sf_21 FIND V(xrr.sf_out) AT=13.8811111
+.meas tran f1_ewma_21 FIND V(xrr.ewma_node) AT=13.8811111
+.meas tran f2_21 FIND V(f2_rr_asym) AT=14.2250000
 .meas tran f3_21 FIND V(f3_bi_l0) AT=14.0361111
 .meas tran f4_21 FIND V(f4_bi_l1) AT=14.0361111
 .meas tran f5_21 FIND V(f5_pwave) AT=14.0361111
 .meas tran f6_21 FIND V(f6_width) AT=14.0361111
 .meas tran f7_21 FIND V(f7_slope) AT=14.0361111
 .meas tran f8_21 FIND V(f8_symmetry) AT=14.0361111
-.meas tran f1_22 FIND V(f1_rr_ratio) AT=14.5650000
-.meas tran f2_22 FIND V(f2_rr_asym) AT=15.1600000
+.meas tran f1_22 FIND V(f1_rr_ratio) AT=14.5200000
+.meas tran f1_sf_22 FIND V(xrr.sf_out) AT=14.5200000
+.meas tran f1_ewma_22 FIND V(xrr.ewma_node) AT=14.5200000
+.meas tran f2_22 FIND V(f2_rr_asym) AT=14.8750000
 .meas tran f3_22 FIND V(f3_bi_l0) AT=14.6750000
 .meas tran f4_22 FIND V(f4_bi_l1) AT=14.6750000
 .meas tran f5_22 FIND V(f5_pwave) AT=14.6750000
 .meas tran f6_22 FIND V(f6_width) AT=14.6750000
 .meas tran f7_22 FIND V(f7_slope) AT=14.6750000
 .meas tran f8_22 FIND V(f8_symmetry) AT=14.6750000
-.meas tran f1_23 FIND V(f1_rr_ratio) AT=15.2150000
-.meas tran f2_23 FIND V(f2_rr_asym) AT=15.7933333
+.meas tran f1_23 FIND V(f1_rr_ratio) AT=15.1700000
+.meas tran f1_sf_23 FIND V(xrr.sf_out) AT=15.1700000
+.meas tran f1_ewma_23 FIND V(xrr.ewma_node) AT=15.1700000
+.meas tran f2_23 FIND V(f2_rr_asym) AT=15.5083333
 .meas tran f3_23 FIND V(f3_bi_l0) AT=15.3250000
 .meas tran f4_23 FIND V(f4_bi_l1) AT=15.3250000
 .meas tran f5_23 FIND V(f5_pwave) AT=15.3250000
 .meas tran f6_23 FIND V(f6_width) AT=15.3250000
 .meas tran f7_23 FIND V(f7_slope) AT=15.3250000
 .meas tran f8_23 FIND V(f8_symmetry) AT=15.3250000
-.meas tran f1_24 FIND V(f1_rr_ratio) AT=15.8483333
-.meas tran f2_24 FIND V(f2_rr_asym) AT=16.4238889
+.meas tran f1_24 FIND V(f1_rr_ratio) AT=15.8033333
+.meas tran f1_sf_24 FIND V(xrr.sf_out) AT=15.8033333
+.meas tran f1_ewma_24 FIND V(xrr.ewma_node) AT=15.8033333
+.meas tran f2_24 FIND V(f2_rr_asym) AT=16.1388889
 .meas tran f3_24 FIND V(f3_bi_l0) AT=15.9583333
 .meas tran f4_24 FIND V(f4_bi_l1) AT=15.9583333
 .meas tran f5_24 FIND V(f5_pwave) AT=15.9583333
 .meas tran f6_24 FIND V(f6_width) AT=15.9583333
 .meas tran f7_24 FIND V(f7_slope) AT=15.9583333
 .meas tran f8_24 FIND V(f8_symmetry) AT=15.9583333
-.meas tran f1_25 FIND V(f1_rr_ratio) AT=16.4788889
-.meas tran f2_25 FIND V(f2_rr_asym) AT=17.0127778
+.meas tran f1_25 FIND V(f1_rr_ratio) AT=16.4338889
+.meas tran f1_sf_25 FIND V(xrr.sf_out) AT=16.4338889
+.meas tran f1_ewma_25 FIND V(xrr.ewma_node) AT=16.4338889
+.meas tran f2_25 FIND V(f2_rr_asym) AT=16.7277778
 .meas tran f3_25 FIND V(f3_bi_l0) AT=16.5888889
 .meas tran f4_25 FIND V(f4_bi_l1) AT=16.5888889
 .meas tran f5_25 FIND V(f5_pwave) AT=16.5888889
 .meas tran f6_25 FIND V(f6_width) AT=16.5888889
 .meas tran f7_25 FIND V(f7_slope) AT=16.5888889
 .meas tran f8_25 FIND V(f8_symmetry) AT=16.5888889
-.meas tran f1_26 FIND V(f1_rr_ratio) AT=17.0677778
-.meas tran f2_26 FIND V(f2_rr_asym) AT=17.6322222
+.meas tran f1_26 FIND V(f1_rr_ratio) AT=17.0227778
+.meas tran f1_sf_26 FIND V(xrr.sf_out) AT=17.0227778
+.meas tran f1_ewma_26 FIND V(xrr.ewma_node) AT=17.0227778
+.meas tran f2_26 FIND V(f2_rr_asym) AT=17.3472222
 .meas tran f3_26 FIND V(f3_bi_l0) AT=17.1777778
 .meas tran f4_26 FIND V(f4_bi_l1) AT=17.1777778
 .meas tran f5_26 FIND V(f5_pwave) AT=17.1777778
 .meas tran f6_26 FIND V(f6_width) AT=17.1777778
 .meas tran f7_26 FIND V(f7_slope) AT=17.1777778
 .meas tran f8_26 FIND V(f8_symmetry) AT=17.1777778
-.meas tran f1_27 FIND V(f1_rr_ratio) AT=17.6872222
-.meas tran f2_27 FIND V(f2_rr_asym) AT=18.2266667
+.meas tran f1_27 FIND V(f1_rr_ratio) AT=17.6422222
+.meas tran f1_sf_27 FIND V(xrr.sf_out) AT=17.6422222
+.meas tran f1_ewma_27 FIND V(xrr.ewma_node) AT=17.6422222
+.meas tran f2_27 FIND V(f2_rr_asym) AT=17.9416667
 .meas tran f3_27 FIND V(f3_bi_l0) AT=17.7972222
 .meas tran f4_27 FIND V(f4_bi_l1) AT=17.7972222
 .meas tran f5_27 FIND V(f5_pwave) AT=17.7972222
 .meas tran f6_27 FIND V(f6_width) AT=17.7972222
 .meas tran f7_27 FIND V(f7_slope) AT=17.7972222
 .meas tran f8_27 FIND V(f8_symmetry) AT=17.7972222
-.meas tran f1_28 FIND V(f1_rr_ratio) AT=18.2816667
-.meas tran f2_28 FIND V(f2_rr_asym) AT=18.8433333
+.meas tran f1_28 FIND V(f1_rr_ratio) AT=18.2366667
+.meas tran f1_sf_28 FIND V(xrr.sf_out) AT=18.2366667
+.meas tran f1_ewma_28 FIND V(xrr.ewma_node) AT=18.2366667
+.meas tran f2_28 FIND V(f2_rr_asym) AT=18.5583333
 .meas tran f3_28 FIND V(f3_bi_l0) AT=18.3916667
 .meas tran f4_28 FIND V(f4_bi_l1) AT=18.3916667
 .meas tran f5_28 FIND V(f5_pwave) AT=18.3916667
 .meas tran f6_28 FIND V(f6_width) AT=18.3916667
 .meas tran f7_28 FIND V(f7_slope) AT=18.3916667
 .meas tran f8_28 FIND V(f8_symmetry) AT=18.3916667
-.meas tran f1_29 FIND V(f1_rr_ratio) AT=18.8983333
-.meas tran f2_29 FIND V(f2_rr_asym) AT=19.4433333
+.meas tran f1_29 FIND V(f1_rr_ratio) AT=18.8533333
+.meas tran f1_sf_29 FIND V(xrr.sf_out) AT=18.8533333
+.meas tran f1_ewma_29 FIND V(xrr.ewma_node) AT=18.8533333
+.meas tran f2_29 FIND V(f2_rr_asym) AT=19.1583333
 .meas tran f3_29 FIND V(f3_bi_l0) AT=19.0083333
 .meas tran f4_29 FIND V(f4_bi_l1) AT=19.0083333
 .meas tran f5_29 FIND V(f5_pwave) AT=19.0083333
 .meas tran f6_29 FIND V(f6_width) AT=19.0083333
 .meas tran f7_29 FIND V(f7_slope) AT=19.0083333
 .meas tran f8_29 FIND V(f8_symmetry) AT=19.0083333
-.meas tran f1_30 FIND V(f1_rr_ratio) AT=19.4983333
-.meas tran f2_30 FIND V(f2_rr_asym) AT=20.0627778
+.meas tran f1_30 FIND V(f1_rr_ratio) AT=19.4533333
+.meas tran f1_sf_30 FIND V(xrr.sf_out) AT=19.4533333
+.meas tran f1_ewma_30 FIND V(xrr.ewma_node) AT=19.4533333
+.meas tran f2_30 FIND V(f2_rr_asym) AT=19.7777778
 .meas tran f3_30 FIND V(f3_bi_l0) AT=19.6083333
 .meas tran f4_30 FIND V(f4_bi_l1) AT=19.6083333
 .meas tran f5_30 FIND V(f5_pwave) AT=19.6083333
 .meas tran f6_30 FIND V(f6_width) AT=19.6083333
 .meas tran f7_30 FIND V(f7_slope) AT=19.6083333
 .meas tran f8_30 FIND V(f8_symmetry) AT=19.6083333
-.meas tran f1_31 FIND V(f1_rr_ratio) AT=20.1177778
-.meas tran f2_31 FIND V(f2_rr_asym) AT=20.6933333
+.meas tran f1_31 FIND V(f1_rr_ratio) AT=20.0727778
+.meas tran f1_sf_31 FIND V(xrr.sf_out) AT=20.0727778
+.meas tran f1_ewma_31 FIND V(xrr.ewma_node) AT=20.0727778
+.meas tran f2_31 FIND V(f2_rr_asym) AT=20.4083333
 .meas tran f3_31 FIND V(f3_bi_l0) AT=20.2277778
 .meas tran f4_31 FIND V(f4_bi_l1) AT=20.2277778
 .meas tran f5_31 FIND V(f5_pwave) AT=20.2277778
 .meas tran f6_31 FIND V(f6_width) AT=20.2277778
 .meas tran f7_31 FIND V(f7_slope) AT=20.2277778
 .meas tran f8_31 FIND V(f8_symmetry) AT=20.2277778
-.meas tran f1_32 FIND V(f1_rr_ratio) AT=20.7483333
-.meas tran f2_32 FIND V(f2_rr_asym) AT=21.3600000
+.meas tran f1_32 FIND V(f1_rr_ratio) AT=20.7033333
+.meas tran f1_sf_32 FIND V(xrr.sf_out) AT=20.7033333
+.meas tran f1_ewma_32 FIND V(xrr.ewma_node) AT=20.7033333
+.meas tran f2_32 FIND V(f2_rr_asym) AT=21.0750000
 .meas tran f3_32 FIND V(f3_bi_l0) AT=20.8583333
 .meas tran f4_32 FIND V(f4_bi_l1) AT=20.8583333
 .meas tran f5_32 FIND V(f5_pwave) AT=20.8583333
 .meas tran f6_32 FIND V(f6_width) AT=20.8583333
 .meas tran f7_32 FIND V(f7_slope) AT=20.8583333
 .meas tran f8_32 FIND V(f8_symmetry) AT=20.8583333
-.meas tran f1_33 FIND V(f1_rr_ratio) AT=21.4150000
-.meas tran f2_33 FIND V(f2_rr_asym) AT=22.0350000
+.meas tran f1_33 FIND V(f1_rr_ratio) AT=21.3700000
+.meas tran f1_sf_33 FIND V(xrr.sf_out) AT=21.3700000
+.meas tran f1_ewma_33 FIND V(xrr.ewma_node) AT=21.3700000
+.meas tran f2_33 FIND V(f2_rr_asym) AT=21.7500000
 .meas tran f3_33 FIND V(f3_bi_l0) AT=21.5250000
 .meas tran f4_33 FIND V(f4_bi_l1) AT=21.5250000
 .meas tran f5_33 FIND V(f5_pwave) AT=21.5250000
 .meas tran f6_33 FIND V(f6_width) AT=21.5250000
 .meas tran f7_33 FIND V(f7_slope) AT=21.5250000
 .meas tran f8_33 FIND V(f8_symmetry) AT=21.5250000
-.meas tran f1_34 FIND V(f1_rr_ratio) AT=22.0900000
+.meas tran f1_34 FIND V(f1_rr_ratio) AT=22.0450000
+.meas tran f1_sf_34 FIND V(xrr.sf_out) AT=22.0450000
+.meas tran f1_ewma_34 FIND V(xrr.ewma_node) AT=22.0450000
 .meas tran f3_34 FIND V(f3_bi_l0) AT=22.2000000
 .meas tran f4_34 FIND V(f4_bi_l1) AT=22.2000000
 .meas tran f5_34 FIND V(f5_pwave) AT=22.2000000
@@ -356,6 +523,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_0 WHEN V(trig_s69)=0.45 FALL=1 TD=0.5944444
 .meas tran twid_fall_0 WHEN V(trig_wid)=0.45 FALL=1 TD=0.5944444
 .meas tran trpk_del_fall_0 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=0.5944444
+.meas tran trrc_0 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=0.5944444
+.meas tran trrc_fall_0 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=0.5944444
 .meas tran sh14_0 FIND V(xslp.sh14) AT=0.7444444
 .meas tran sh69_0 FIND V(xslp.sh69) AT=0.7444444
 .meas tran bi0_curr_0 FIND V(xbi0.curr_node) AT=0.7444444
@@ -371,6 +540,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_1 WHEN V(trig_s69)=0.45 FALL=1 TD=1.2277778
 .meas tran twid_fall_1 WHEN V(trig_wid)=0.45 FALL=1 TD=1.2277778
 .meas tran trpk_del_fall_1 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=1.2277778
+.meas tran trrc_1 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=1.2277778
+.meas tran trrc_fall_1 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=1.2277778
 .meas tran sh14_1 FIND V(xslp.sh14) AT=1.3777778
 .meas tran sh69_1 FIND V(xslp.sh69) AT=1.3777778
 .meas tran bi0_curr_1 FIND V(xbi0.curr_node) AT=1.3777778
@@ -386,6 +557,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_2 WHEN V(trig_s69)=0.45 FALL=1 TD=1.8833333
 .meas tran twid_fall_2 WHEN V(trig_wid)=0.45 FALL=1 TD=1.8833333
 .meas tran trpk_del_fall_2 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=1.8833333
+.meas tran trrc_2 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=1.8833333
+.meas tran trrc_fall_2 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=1.8833333
 .meas tran sh14_2 FIND V(xslp.sh14) AT=2.0333333
 .meas tran sh69_2 FIND V(xslp.sh69) AT=2.0333333
 .meas tran bi0_curr_2 FIND V(xbi0.curr_node) AT=2.0333333
@@ -401,6 +574,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_3 WHEN V(trig_s69)=0.45 FALL=1 TD=2.5527778
 .meas tran twid_fall_3 WHEN V(trig_wid)=0.45 FALL=1 TD=2.5527778
 .meas tran trpk_del_fall_3 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=2.5527778
+.meas tran trrc_3 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=2.5527778
+.meas tran trrc_fall_3 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=2.5527778
 .meas tran sh14_3 FIND V(xslp.sh14) AT=2.7027778
 .meas tran sh69_3 FIND V(xslp.sh69) AT=2.7027778
 .meas tran bi0_curr_3 FIND V(xbi0.curr_node) AT=2.7027778
@@ -416,6 +591,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_4 WHEN V(trig_s69)=0.45 FALL=1 TD=3.2166667
 .meas tran twid_fall_4 WHEN V(trig_wid)=0.45 FALL=1 TD=3.2166667
 .meas tran trpk_del_fall_4 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=3.2166667
+.meas tran trrc_4 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=3.2166667
+.meas tran trrc_fall_4 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=3.2166667
 .meas tran sh14_4 FIND V(xslp.sh14) AT=3.3666667
 .meas tran sh69_4 FIND V(xslp.sh69) AT=3.3666667
 .meas tran bi0_curr_4 FIND V(xbi0.curr_node) AT=3.3666667
@@ -431,6 +608,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_5 WHEN V(trig_s69)=0.45 FALL=1 TD=3.8722222
 .meas tran twid_fall_5 WHEN V(trig_wid)=0.45 FALL=1 TD=3.8722222
 .meas tran trpk_del_fall_5 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=3.8722222
+.meas tran trrc_5 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=3.8722222
+.meas tran trrc_fall_5 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=3.8722222
 .meas tran sh14_5 FIND V(xslp.sh14) AT=4.0222222
 .meas tran sh69_5 FIND V(xslp.sh69) AT=4.0222222
 .meas tran bi0_curr_5 FIND V(xbi0.curr_node) AT=4.0222222
@@ -446,6 +625,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_6 WHEN V(trig_s69)=0.45 FALL=1 TD=4.5444444
 .meas tran twid_fall_6 WHEN V(trig_wid)=0.45 FALL=1 TD=4.5444444
 .meas tran trpk_del_fall_6 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=4.5444444
+.meas tran trrc_6 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=4.5444444
+.meas tran trrc_fall_6 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=4.5444444
 .meas tran sh14_6 FIND V(xslp.sh14) AT=4.6944444
 .meas tran sh69_6 FIND V(xslp.sh69) AT=4.6944444
 .meas tran bi0_curr_6 FIND V(xbi0.curr_node) AT=4.6944444
@@ -461,6 +642,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_7 WHEN V(trig_s69)=0.45 FALL=1 TD=5.1805556
 .meas tran twid_fall_7 WHEN V(trig_wid)=0.45 FALL=1 TD=5.1805556
 .meas tran trpk_del_fall_7 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=5.1805556
+.meas tran trrc_7 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=5.1805556
+.meas tran trrc_fall_7 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=5.1805556
 .meas tran sh14_7 FIND V(xslp.sh14) AT=5.3305556
 .meas tran sh69_7 FIND V(xslp.sh69) AT=5.3305556
 .meas tran bi0_curr_7 FIND V(xbi0.curr_node) AT=5.3305556
@@ -476,6 +659,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_8 WHEN V(trig_s69)=0.45 FALL=1 TD=5.8055556
 .meas tran twid_fall_8 WHEN V(trig_wid)=0.45 FALL=1 TD=5.8055556
 .meas tran trpk_del_fall_8 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=5.8055556
+.meas tran trrc_8 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=5.8055556
+.meas tran trrc_fall_8 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=5.8055556
 .meas tran sh14_8 FIND V(xslp.sh14) AT=5.9555556
 .meas tran sh69_8 FIND V(xslp.sh69) AT=5.9555556
 .meas tran bi0_curr_8 FIND V(xbi0.curr_node) AT=5.9555556
@@ -491,6 +676,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_9 WHEN V(trig_s69)=0.45 FALL=1 TD=6.4055556
 .meas tran twid_fall_9 WHEN V(trig_wid)=0.45 FALL=1 TD=6.4055556
 .meas tran trpk_del_fall_9 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=6.4055556
+.meas tran trrc_9 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=6.4055556
+.meas tran trrc_fall_9 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=6.4055556
 .meas tran sh14_9 FIND V(xslp.sh14) AT=6.5555556
 .meas tran sh69_9 FIND V(xslp.sh69) AT=6.5555556
 .meas tran bi0_curr_9 FIND V(xbi0.curr_node) AT=6.5555556
@@ -506,6 +693,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_10 WHEN V(trig_s69)=0.45 FALL=1 TD=7.0333333
 .meas tran twid_fall_10 WHEN V(trig_wid)=0.45 FALL=1 TD=7.0333333
 .meas tran trpk_del_fall_10 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=7.0333333
+.meas tran trrc_10 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=7.0333333
+.meas tran trrc_fall_10 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=7.0333333
 .meas tran sh14_10 FIND V(xslp.sh14) AT=7.1833333
 .meas tran sh69_10 FIND V(xslp.sh69) AT=7.1833333
 .meas tran bi0_curr_10 FIND V(xbi0.curr_node) AT=7.1833333
@@ -521,6 +710,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_11 WHEN V(trig_s69)=0.45 FALL=1 TD=7.6500000
 .meas tran twid_fall_11 WHEN V(trig_wid)=0.45 FALL=1 TD=7.6500000
 .meas tran trpk_del_fall_11 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=7.6500000
+.meas tran trrc_11 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=7.6500000
+.meas tran trrc_fall_11 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=7.6500000
 .meas tran sh14_11 FIND V(xslp.sh14) AT=7.8000000
 .meas tran sh69_11 FIND V(xslp.sh69) AT=7.8000000
 .meas tran bi0_curr_11 FIND V(xbi0.curr_node) AT=7.8000000
@@ -536,6 +727,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_12 WHEN V(trig_s69)=0.45 FALL=1 TD=8.2972222
 .meas tran twid_fall_12 WHEN V(trig_wid)=0.45 FALL=1 TD=8.2972222
 .meas tran trpk_del_fall_12 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=8.2972222
+.meas tran trrc_12 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=8.2972222
+.meas tran trrc_fall_12 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=8.2972222
 .meas tran sh14_12 FIND V(xslp.sh14) AT=8.4472222
 .meas tran sh69_12 FIND V(xslp.sh69) AT=8.4472222
 .meas tran bi0_curr_12 FIND V(xbi0.curr_node) AT=8.4472222
@@ -551,6 +744,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_13 WHEN V(trig_s69)=0.45 FALL=1 TD=8.9527778
 .meas tran twid_fall_13 WHEN V(trig_wid)=0.45 FALL=1 TD=8.9527778
 .meas tran trpk_del_fall_13 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=8.9527778
+.meas tran trrc_13 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=8.9527778
+.meas tran trrc_fall_13 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=8.9527778
 .meas tran sh14_13 FIND V(xslp.sh14) AT=9.1027778
 .meas tran sh69_13 FIND V(xslp.sh69) AT=9.1027778
 .meas tran bi0_curr_13 FIND V(xbi0.curr_node) AT=9.1027778
@@ -566,6 +761,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_14 WHEN V(trig_s69)=0.45 FALL=1 TD=9.6027778
 .meas tran twid_fall_14 WHEN V(trig_wid)=0.45 FALL=1 TD=9.6027778
 .meas tran trpk_del_fall_14 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=9.6027778
+.meas tran trrc_14 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=9.6027778
+.meas tran trrc_fall_14 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=9.6027778
 .meas tran sh14_14 FIND V(xslp.sh14) AT=9.7527778
 .meas tran sh69_14 FIND V(xslp.sh69) AT=9.7527778
 .meas tran bi0_curr_14 FIND V(xbi0.curr_node) AT=9.7527778
@@ -581,6 +778,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_15 WHEN V(trig_s69)=0.45 FALL=1 TD=10.2333333
 .meas tran twid_fall_15 WHEN V(trig_wid)=0.45 FALL=1 TD=10.2333333
 .meas tran trpk_del_fall_15 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=10.2333333
+.meas tran trrc_15 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=10.2333333
+.meas tran trrc_fall_15 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=10.2333333
 .meas tran sh14_15 FIND V(xslp.sh14) AT=10.3833333
 .meas tran sh69_15 FIND V(xslp.sh69) AT=10.3833333
 .meas tran bi0_curr_15 FIND V(xbi0.curr_node) AT=10.3833333
@@ -596,6 +795,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_16 WHEN V(trig_s69)=0.45 FALL=1 TD=10.8666667
 .meas tran twid_fall_16 WHEN V(trig_wid)=0.45 FALL=1 TD=10.8666667
 .meas tran trpk_del_fall_16 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=10.8666667
+.meas tran trrc_16 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=10.8666667
+.meas tran trrc_fall_16 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=10.8666667
 .meas tran sh14_16 FIND V(xslp.sh14) AT=11.0166667
 .meas tran sh69_16 FIND V(xslp.sh69) AT=11.0166667
 .meas tran bi0_curr_16 FIND V(xbi0.curr_node) AT=11.0166667
@@ -611,6 +812,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_17 WHEN V(trig_s69)=0.45 FALL=1 TD=11.4861111
 .meas tran twid_fall_17 WHEN V(trig_wid)=0.45 FALL=1 TD=11.4861111
 .meas tran trpk_del_fall_17 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=11.4861111
+.meas tran trrc_17 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=11.4861111
+.meas tran trrc_fall_17 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=11.4861111
 .meas tran sh14_17 FIND V(xslp.sh14) AT=11.6361111
 .meas tran sh69_17 FIND V(xslp.sh69) AT=11.6361111
 .meas tran bi0_curr_17 FIND V(xbi0.curr_node) AT=11.6361111
@@ -626,6 +829,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_18 WHEN V(trig_s69)=0.45 FALL=1 TD=12.0861111
 .meas tran twid_fall_18 WHEN V(trig_wid)=0.45 FALL=1 TD=12.0861111
 .meas tran trpk_del_fall_18 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=12.0861111
+.meas tran trrc_18 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=12.0861111
+.meas tran trrc_fall_18 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=12.0861111
 .meas tran sh14_18 FIND V(xslp.sh14) AT=12.2361111
 .meas tran sh69_18 FIND V(xslp.sh69) AT=12.2361111
 .meas tran bi0_curr_18 FIND V(xbi0.curr_node) AT=12.2361111
@@ -641,6 +846,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_19 WHEN V(trig_s69)=0.45 FALL=1 TD=12.6694444
 .meas tran twid_fall_19 WHEN V(trig_wid)=0.45 FALL=1 TD=12.6694444
 .meas tran trpk_del_fall_19 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=12.6694444
+.meas tran trrc_19 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=12.6694444
+.meas tran trrc_fall_19 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=12.6694444
 .meas tran sh14_19 FIND V(xslp.sh14) AT=12.8194444
 .meas tran sh69_19 FIND V(xslp.sh69) AT=12.8194444
 .meas tran bi0_curr_19 FIND V(xbi0.curr_node) AT=12.8194444
@@ -656,6 +863,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_20 WHEN V(trig_s69)=0.45 FALL=1 TD=13.2750000
 .meas tran twid_fall_20 WHEN V(trig_wid)=0.45 FALL=1 TD=13.2750000
 .meas tran trpk_del_fall_20 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=13.2750000
+.meas tran trrc_20 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=13.2750000
+.meas tran trrc_fall_20 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=13.2750000
 .meas tran sh14_20 FIND V(xslp.sh14) AT=13.4250000
 .meas tran sh69_20 FIND V(xslp.sh69) AT=13.4250000
 .meas tran bi0_curr_20 FIND V(xbi0.curr_node) AT=13.4250000
@@ -671,6 +880,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_21 WHEN V(trig_s69)=0.45 FALL=1 TD=13.8861111
 .meas tran twid_fall_21 WHEN V(trig_wid)=0.45 FALL=1 TD=13.8861111
 .meas tran trpk_del_fall_21 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=13.8861111
+.meas tran trrc_21 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=13.8861111
+.meas tran trrc_fall_21 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=13.8861111
 .meas tran sh14_21 FIND V(xslp.sh14) AT=14.0361111
 .meas tran sh69_21 FIND V(xslp.sh69) AT=14.0361111
 .meas tran bi0_curr_21 FIND V(xbi0.curr_node) AT=14.0361111
@@ -686,6 +897,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_22 WHEN V(trig_s69)=0.45 FALL=1 TD=14.5250000
 .meas tran twid_fall_22 WHEN V(trig_wid)=0.45 FALL=1 TD=14.5250000
 .meas tran trpk_del_fall_22 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=14.5250000
+.meas tran trrc_22 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=14.5250000
+.meas tran trrc_fall_22 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=14.5250000
 .meas tran sh14_22 FIND V(xslp.sh14) AT=14.6750000
 .meas tran sh69_22 FIND V(xslp.sh69) AT=14.6750000
 .meas tran bi0_curr_22 FIND V(xbi0.curr_node) AT=14.6750000
@@ -701,6 +914,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_23 WHEN V(trig_s69)=0.45 FALL=1 TD=15.1750000
 .meas tran twid_fall_23 WHEN V(trig_wid)=0.45 FALL=1 TD=15.1750000
 .meas tran trpk_del_fall_23 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=15.1750000
+.meas tran trrc_23 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=15.1750000
+.meas tran trrc_fall_23 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=15.1750000
 .meas tran sh14_23 FIND V(xslp.sh14) AT=15.3250000
 .meas tran sh69_23 FIND V(xslp.sh69) AT=15.3250000
 .meas tran bi0_curr_23 FIND V(xbi0.curr_node) AT=15.3250000
@@ -716,6 +931,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_24 WHEN V(trig_s69)=0.45 FALL=1 TD=15.8083333
 .meas tran twid_fall_24 WHEN V(trig_wid)=0.45 FALL=1 TD=15.8083333
 .meas tran trpk_del_fall_24 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=15.8083333
+.meas tran trrc_24 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=15.8083333
+.meas tran trrc_fall_24 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=15.8083333
 .meas tran sh14_24 FIND V(xslp.sh14) AT=15.9583333
 .meas tran sh69_24 FIND V(xslp.sh69) AT=15.9583333
 .meas tran bi0_curr_24 FIND V(xbi0.curr_node) AT=15.9583333
@@ -731,6 +948,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_25 WHEN V(trig_s69)=0.45 FALL=1 TD=16.4388889
 .meas tran twid_fall_25 WHEN V(trig_wid)=0.45 FALL=1 TD=16.4388889
 .meas tran trpk_del_fall_25 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=16.4388889
+.meas tran trrc_25 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=16.4388889
+.meas tran trrc_fall_25 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=16.4388889
 .meas tran sh14_25 FIND V(xslp.sh14) AT=16.5888889
 .meas tran sh69_25 FIND V(xslp.sh69) AT=16.5888889
 .meas tran bi0_curr_25 FIND V(xbi0.curr_node) AT=16.5888889
@@ -746,6 +965,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_26 WHEN V(trig_s69)=0.45 FALL=1 TD=17.0277778
 .meas tran twid_fall_26 WHEN V(trig_wid)=0.45 FALL=1 TD=17.0277778
 .meas tran trpk_del_fall_26 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=17.0277778
+.meas tran trrc_26 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=17.0277778
+.meas tran trrc_fall_26 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=17.0277778
 .meas tran sh14_26 FIND V(xslp.sh14) AT=17.1777778
 .meas tran sh69_26 FIND V(xslp.sh69) AT=17.1777778
 .meas tran bi0_curr_26 FIND V(xbi0.curr_node) AT=17.1777778
@@ -761,6 +982,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_27 WHEN V(trig_s69)=0.45 FALL=1 TD=17.6472222
 .meas tran twid_fall_27 WHEN V(trig_wid)=0.45 FALL=1 TD=17.6472222
 .meas tran trpk_del_fall_27 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=17.6472222
+.meas tran trrc_27 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=17.6472222
+.meas tran trrc_fall_27 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=17.6472222
 .meas tran sh14_27 FIND V(xslp.sh14) AT=17.7972222
 .meas tran sh69_27 FIND V(xslp.sh69) AT=17.7972222
 .meas tran bi0_curr_27 FIND V(xbi0.curr_node) AT=17.7972222
@@ -776,6 +999,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_28 WHEN V(trig_s69)=0.45 FALL=1 TD=18.2416667
 .meas tran twid_fall_28 WHEN V(trig_wid)=0.45 FALL=1 TD=18.2416667
 .meas tran trpk_del_fall_28 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=18.2416667
+.meas tran trrc_28 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=18.2416667
+.meas tran trrc_fall_28 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=18.2416667
 .meas tran sh14_28 FIND V(xslp.sh14) AT=18.3916667
 .meas tran sh69_28 FIND V(xslp.sh69) AT=18.3916667
 .meas tran bi0_curr_28 FIND V(xbi0.curr_node) AT=18.3916667
@@ -791,6 +1016,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_29 WHEN V(trig_s69)=0.45 FALL=1 TD=18.8583333
 .meas tran twid_fall_29 WHEN V(trig_wid)=0.45 FALL=1 TD=18.8583333
 .meas tran trpk_del_fall_29 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=18.8583333
+.meas tran trrc_29 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=18.8583333
+.meas tran trrc_fall_29 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=18.8583333
 .meas tran sh14_29 FIND V(xslp.sh14) AT=19.0083333
 .meas tran sh69_29 FIND V(xslp.sh69) AT=19.0083333
 .meas tran bi0_curr_29 FIND V(xbi0.curr_node) AT=19.0083333
@@ -806,6 +1033,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_30 WHEN V(trig_s69)=0.45 FALL=1 TD=19.4583333
 .meas tran twid_fall_30 WHEN V(trig_wid)=0.45 FALL=1 TD=19.4583333
 .meas tran trpk_del_fall_30 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=19.4583333
+.meas tran trrc_30 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=19.4583333
+.meas tran trrc_fall_30 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=19.4583333
 .meas tran sh14_30 FIND V(xslp.sh14) AT=19.6083333
 .meas tran sh69_30 FIND V(xslp.sh69) AT=19.6083333
 .meas tran bi0_curr_30 FIND V(xbi0.curr_node) AT=19.6083333
@@ -821,6 +1050,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_31 WHEN V(trig_s69)=0.45 FALL=1 TD=20.0777778
 .meas tran twid_fall_31 WHEN V(trig_wid)=0.45 FALL=1 TD=20.0777778
 .meas tran trpk_del_fall_31 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=20.0777778
+.meas tran trrc_31 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=20.0777778
+.meas tran trrc_fall_31 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=20.0777778
 .meas tran sh14_31 FIND V(xslp.sh14) AT=20.2277778
 .meas tran sh69_31 FIND V(xslp.sh69) AT=20.2277778
 .meas tran bi0_curr_31 FIND V(xbi0.curr_node) AT=20.2277778
@@ -836,6 +1067,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_32 WHEN V(trig_s69)=0.45 FALL=1 TD=20.7083333
 .meas tran twid_fall_32 WHEN V(trig_wid)=0.45 FALL=1 TD=20.7083333
 .meas tran trpk_del_fall_32 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=20.7083333
+.meas tran trrc_32 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=20.7083333
+.meas tran trrc_fall_32 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=20.7083333
 .meas tran sh14_32 FIND V(xslp.sh14) AT=20.8583333
 .meas tran sh69_32 FIND V(xslp.sh69) AT=20.8583333
 .meas tran bi0_curr_32 FIND V(xbi0.curr_node) AT=20.8583333
@@ -851,6 +1084,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_33 WHEN V(trig_s69)=0.45 FALL=1 TD=21.3750000
 .meas tran twid_fall_33 WHEN V(trig_wid)=0.45 FALL=1 TD=21.3750000
 .meas tran trpk_del_fall_33 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=21.3750000
+.meas tran trrc_33 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=21.3750000
+.meas tran trrc_fall_33 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=21.3750000
 .meas tran sh14_33 FIND V(xslp.sh14) AT=21.5250000
 .meas tran sh69_33 FIND V(xslp.sh69) AT=21.5250000
 .meas tran bi0_curr_33 FIND V(xbi0.curr_node) AT=21.5250000
@@ -866,6 +1101,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran ts69_fall_34 WHEN V(trig_s69)=0.45 FALL=1 TD=22.0500000
 .meas tran twid_fall_34 WHEN V(trig_wid)=0.45 FALL=1 TD=22.0500000
 .meas tran trpk_del_fall_34 WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD=22.0500000
+.meas tran trrc_34 WHEN V(trig_rr_cap)=0.45 RISE=1 TD=22.0500000
+.meas tran trrc_fall_34 WHEN V(trig_rr_cap)=0.45 FALL=1 TD=22.0500000
 .meas tran sh14_34 FIND V(xslp.sh14) AT=22.2000000
 .meas tran sh69_34 FIND V(xslp.sh69) AT=22.2000000
 .meas tran bi0_curr_34 FIND V(xbi0.curr_node) AT=22.2000000
