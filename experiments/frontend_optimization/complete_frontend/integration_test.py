@@ -30,6 +30,7 @@ PW_S = 16; PW_MID = 43
 EWMA_ALPHA = 0.10
 SKIP = 5
 SKIP_BI = 10  # beat_instability needs more EWMA settling (prev_node converges by beat ~8)
+VERBOSE = False  # set True for per-beat diagnostics (<=3 records)
 
 aami_map = {}
 for s in 'NLRej': aami_map[s] = 'N'
@@ -161,7 +162,7 @@ print("=" * 70)
 lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")
 fp = FRONTEND_DIR.replace("\\", "/")
 
-RECORDS = ['100', '109', '208']
+RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
 all_results = {}
 
 for rec_id in RECORDS:
@@ -976,14 +977,27 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
 # ========================================================================
 print("\n\n" + "=" * 70)
-print("SUMMARY: Integration Test Results")
+print("SUMMARY: Fully Analog AFE — Integration Test Results ({} records)".format(len(RECORDS)))
 print("=" * 70)
-print("                       100           109           208")
+fnames = {1:'F1:rr_ratio', 2:'F2:rr_asym', 3:'F3:bi_L0', 4:'F4:bi_L1',
+          5:'F5:pwave', 6:'F6:width', 7:'F7:slope', 8:'F8:symmetry'}
+# Compact table: record IDs on header row
+hdr = "  {:15s}".format("Feature")
+for r in RECORDS:
+    hdr += " {:>6s}".format(r)
+hdr += "   MIN    AVG"
+print(hdr)
+print("  " + "-" * (15 + 7*len(RECORDS) + 14))
 for fk in range(1, 9):
-    fnames = {1:'F1:rr_ratio', 2:'F2:rr_asym', 3:'F3:bi_L0', 4:'F4:bi_L1',
-              5:'F5:pwave', 6:'F6:width', 7:'F7:slope', 8:'F8:symmetry'}
-    vals = "".join("{:14.4f}".format(all_results.get(r, {}).get(fk, 0)) for r in RECORDS)
-    print("  {:20s} {}".format(fnames[fk], vals))
+    row = "  {:15s}".format(fnames[fk])
+    vals = []
+    for r in RECORDS:
+        v = all_results.get(r, {}).get(fk, 0)
+        row += " {:6.3f}".format(v)
+        vals.append(v)
+    if vals:
+        row += "  {:5.3f}  {:5.3f}".format(min(vals), sum(vals)/len(vals))
+    print(row)
 print("=" * 70)
 print("\nThreshold info:")
 print("  rpeak_offset = {:.1f}ms, pg_width = {:.1f}ms".format(RPEAK_OFFSET_MS, PG_WIDTH_MS))

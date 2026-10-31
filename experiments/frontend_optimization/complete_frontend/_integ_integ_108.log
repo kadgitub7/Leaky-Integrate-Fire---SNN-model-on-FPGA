@@ -1,0 +1,1897 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: integ_108
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 96038
+
+  Measurements for Transient Analysis
+
+
+Error: measure  tpwb_2  when(WHEN) : out of interval
+ .meas tran tpwb_2 when v(trig_pw_base)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  tpwp_2  when(WHEN) : out of interval
+ .meas tran tpwp_2 when v(trig_pw_peak)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  tpwb_cmp_2  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_2 when v(pw_base_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  tpwp_cmp_2  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_2 when v(pw_peak_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  pwb_sf_at_2  find(AT) : out of interval
+ .meas tran pwb_sf_at_2 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  pwb_th_2  find(AT) : out of interval
+ .meas tran pwb_th_2 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  pwp_sf_at_2  find(AT) : out of interval
+ .meas tran pwp_sf_at_2 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  pwp_th_2  find(AT) : out of interval
+ .meas tran pwp_th_2 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=2.6638889 failed!
+
+
+Error: measure  tpwb_3  when(WHEN) : out of interval
+ .meas tran tpwb_3 when v(trig_pw_base)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  tpwp_3  when(WHEN) : out of interval
+ .meas tran tpwp_3 when v(trig_pw_peak)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  tpwb_cmp_3  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_3 when v(pw_base_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  tpwp_cmp_3  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_3 when v(pw_peak_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  pwb_sf_at_3  find(AT) : out of interval
+ .meas tran pwb_sf_at_3 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  pwb_th_3  find(AT) : out of interval
+ .meas tran pwb_th_3 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  pwp_sf_at_3  find(AT) : out of interval
+ .meas tran pwp_sf_at_3 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  pwp_th_3  find(AT) : out of interval
+ .meas tran pwp_th_3 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=3.6027778 failed!
+
+
+Error: measure  tpwb_4  when(WHEN) : out of interval
+ .meas tran tpwb_4 when v(trig_pw_base)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  tpwp_4  when(WHEN) : out of interval
+ .meas tran tpwp_4 when v(trig_pw_peak)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  tpwb_cmp_4  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_4 when v(pw_base_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  tpwp_cmp_4  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_4 when v(pw_peak_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  pwb_sf_at_4  find(AT) : out of interval
+ .meas tran pwb_sf_at_4 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  pwb_th_4  find(AT) : out of interval
+ .meas tran pwb_th_4 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  pwp_sf_at_4  find(AT) : out of interval
+ .meas tran pwp_sf_at_4 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  pwp_th_4  find(AT) : out of interval
+ .meas tran pwp_th_4 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=4.5138889 failed!
+
+
+Error: measure  tpwb_5  when(WHEN) : out of interval
+ .meas tran tpwb_5 when v(trig_pw_base)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  tpwp_5  when(WHEN) : out of interval
+ .meas tran tpwp_5 when v(trig_pw_peak)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  tpwb_cmp_5  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_5 when v(pw_base_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  tpwp_cmp_5  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_5 when v(pw_peak_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  pwb_sf_at_5  find(AT) : out of interval
+ .meas tran pwb_sf_at_5 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  pwb_th_5  find(AT) : out of interval
+ .meas tran pwb_th_5 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  pwp_sf_at_5  find(AT) : out of interval
+ .meas tran pwp_sf_at_5 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  pwp_th_5  find(AT) : out of interval
+ .meas tran pwp_th_5 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=5.4472222 failed!
+
+
+Error: measure  tpwb_6  when(WHEN) : out of interval
+ .meas tran tpwb_6 when v(trig_pw_base)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  tpwp_6  when(WHEN) : out of interval
+ .meas tran tpwp_6 when v(trig_pw_peak)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  tpwb_cmp_6  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_6 when v(pw_base_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  tpwp_cmp_6  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_6 when v(pw_peak_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  pwb_sf_at_6  find(AT) : out of interval
+ .meas tran pwb_sf_at_6 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  pwb_th_6  find(AT) : out of interval
+ .meas tran pwb_th_6 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  pwp_sf_at_6  find(AT) : out of interval
+ .meas tran pwp_sf_at_6 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  pwp_th_6  find(AT) : out of interval
+ .meas tran pwp_th_6 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=6.4472222 failed!
+
+
+Error: measure  tpwb_7  when(WHEN) : out of interval
+ .meas tran tpwb_7 when v(trig_pw_base)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  tpwp_7  when(WHEN) : out of interval
+ .meas tran tpwp_7 when v(trig_pw_peak)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  tpwb_cmp_7  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_7 when v(pw_base_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  tpwp_cmp_7  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_7 when v(pw_peak_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  pwb_sf_at_7  find(AT) : out of interval
+ .meas tran pwb_sf_at_7 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  pwb_th_7  find(AT) : out of interval
+ .meas tran pwb_th_7 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  pwp_sf_at_7  find(AT) : out of interval
+ .meas tran pwp_sf_at_7 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  pwp_th_7  find(AT) : out of interval
+ .meas tran pwp_th_7 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=7.4805556 failed!
+
+
+Error: measure  tpwb_8  when(WHEN) : out of interval
+ .meas tran tpwb_8 when v(trig_pw_base)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  tpwp_8  when(WHEN) : out of interval
+ .meas tran tpwp_8 when v(trig_pw_peak)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  tpwb_cmp_8  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_8 when v(pw_base_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  tpwp_cmp_8  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_8 when v(pw_peak_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  pwb_sf_at_8  find(AT) : out of interval
+ .meas tran pwb_sf_at_8 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  pwb_th_8  find(AT) : out of interval
+ .meas tran pwb_th_8 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  pwp_sf_at_8  find(AT) : out of interval
+ .meas tran pwp_sf_at_8 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  pwp_th_8  find(AT) : out of interval
+ .meas tran pwp_th_8 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=8.4500000 failed!
+
+
+Error: measure  tpwb_9  when(WHEN) : out of interval
+ .meas tran tpwb_9 when v(trig_pw_base)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  tpwp_9  when(WHEN) : out of interval
+ .meas tran tpwp_9 when v(trig_pw_peak)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  tpwb_cmp_9  when(WHEN) : out of interval
+ .meas tran tpwb_cmp_9 when v(pw_base_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  tpwp_cmp_9  when(WHEN) : out of interval
+ .meas tran tpwp_cmp_9 when v(pw_peak_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  pwb_sf_at_9  find(AT) : out of interval
+ .meas tran pwb_sf_at_9 find v(sf2_out) when v(pw_base_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  pwb_th_9  find(AT) : out of interval
+ .meas tran pwb_th_9 find v(vth_pw_base_node) when v(pw_base_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  pwp_sf_at_9  find(AT) : out of interval
+ .meas tran pwp_sf_at_9 find v(sf2_out) when v(pw_peak_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  pwp_th_9  find(AT) : out of interval
+ .meas tran pwp_th_9 find v(vth_pw_peak_node) when v(pw_peak_cmp)=0.45 rise=1 td=9.4361111 failed!
+
+
+Error: measure  tpwb_fall_1  when(WHEN) : out of interval
+ .meas tran tpwb_fall_1 when v(trig_pw_base)=0.45 fall=1 td=1.6472222 failed!
+
+
+Error: measure  tpwp_fall_1  when(WHEN) : out of interval
+ .meas tran tpwp_fall_1 when v(trig_pw_peak)=0.45 fall=1 td=1.6472222 failed!
+
+
+Error: measure  tpwb_fall_2  when(WHEN) : out of interval
+ .meas tran tpwb_fall_2 when v(trig_pw_base)=0.45 fall=1 td=2.6638889 failed!
+
+
+Error: measure  tpwp_fall_2  when(WHEN) : out of interval
+ .meas tran tpwp_fall_2 when v(trig_pw_peak)=0.45 fall=1 td=2.6638889 failed!
+
+
+Error: measure  tpwb_fall_3  when(WHEN) : out of interval
+ .meas tran tpwb_fall_3 when v(trig_pw_base)=0.45 fall=1 td=3.6027778 failed!
+
+
+Error: measure  tpwp_fall_3  when(WHEN) : out of interval
+ .meas tran tpwp_fall_3 when v(trig_pw_peak)=0.45 fall=1 td=3.6027778 failed!
+
+
+Error: measure  tpwb_fall_4  when(WHEN) : out of interval
+ .meas tran tpwb_fall_4 when v(trig_pw_base)=0.45 fall=1 td=4.5138889 failed!
+
+
+Error: measure  tpwp_fall_4  when(WHEN) : out of interval
+ .meas tran tpwp_fall_4 when v(trig_pw_peak)=0.45 fall=1 td=4.5138889 failed!
+
+
+Error: measure  tpwb_fall_5  when(WHEN) : out of interval
+ .meas tran tpwb_fall_5 when v(trig_pw_base)=0.45 fall=1 td=5.4472222 failed!
+
+
+Error: measure  tpwp_fall_5  when(WHEN) : out of interval
+ .meas tran tpwp_fall_5 when v(trig_pw_peak)=0.45 fall=1 td=5.4472222 failed!
+
+
+Error: measure  tpwb_fall_6  when(WHEN) : out of interval
+ .meas tran tpwb_fall_6 when v(trig_pw_base)=0.45 fall=1 td=6.4472222 failed!
+
+
+Error: measure  tpwp_fall_6  when(WHEN) : out of interval
+ .meas tran tpwp_fall_6 when v(trig_pw_peak)=0.45 fall=1 td=6.4472222 failed!
+
+
+Error: measure  tpwb_fall_7  when(WHEN) : out of interval
+ .meas tran tpwb_fall_7 when v(trig_pw_base)=0.45 fall=1 td=7.4805556 failed!
+
+
+Error: measure  tpwp_fall_7  when(WHEN) : out of interval
+ .meas tran tpwp_fall_7 when v(trig_pw_peak)=0.45 fall=1 td=7.4805556 failed!
+
+
+Error: measure  tpwb_fall_8  when(WHEN) : out of interval
+ .meas tran tpwb_fall_8 when v(trig_pw_base)=0.45 fall=1 td=8.4500000 failed!
+
+
+Error: measure  tpwp_fall_8  when(WHEN) : out of interval
+ .meas tran tpwp_fall_8 when v(trig_pw_peak)=0.45 fall=1 td=8.4500000 failed!
+
+
+Error: measure  tpwb_fall_9  when(WHEN) : out of interval
+ .meas tran tpwb_fall_9 when v(trig_pw_base)=0.45 fall=1 td=9.4361111 failed!
+
+
+Error: measure  tpwp_fall_9  when(WHEN) : out of interval
+ .meas tran tpwp_fall_9 when v(trig_pw_peak)=0.45 fall=1 td=9.4361111 failed!
+
+
+Error: measure  tpwb_fall_10  when(WHEN) : out of interval
+ .meas tran tpwb_fall_10 when v(trig_pw_base)=0.45 fall=1 td=10.3555556 failed!
+
+
+Error: measure  tpwp_fall_10  when(WHEN) : out of interval
+ .meas tran tpwp_fall_10 when v(trig_pw_peak)=0.45 fall=1 td=10.3555556 failed!
+
+
+Error: measure  tpwb_fall_11  when(WHEN) : out of interval
+ .meas tran tpwb_fall_11 when v(trig_pw_base)=0.45 fall=1 td=10.8583333 failed!
+
+
+Error: measure  tpwp_fall_11  when(WHEN) : out of interval
+ .meas tran tpwp_fall_11 when v(trig_pw_peak)=0.45 fall=1 td=10.8583333 failed!
+
+
+Error: measure  tpwb_fall_12  when(WHEN) : out of interval
+ .meas tran tpwb_fall_12 when v(trig_pw_base)=0.45 fall=1 td=12.2388889 failed!
+
+
+Error: measure  tpwp_fall_12  when(WHEN) : out of interval
+ .meas tran tpwp_fall_12 when v(trig_pw_peak)=0.45 fall=1 td=12.2388889 failed!
+
+
+Error: measure  tpwb_fall_13  when(WHEN) : out of interval
+ .meas tran tpwb_fall_13 when v(trig_pw_base)=0.45 fall=1 td=13.2638889 failed!
+
+
+Error: measure  tpwp_fall_13  when(WHEN) : out of interval
+ .meas tran tpwp_fall_13 when v(trig_pw_peak)=0.45 fall=1 td=13.2638889 failed!
+
+
+Error: measure  tpwb_fall_14  when(WHEN) : out of interval
+ .meas tran tpwb_fall_14 when v(trig_pw_base)=0.45 fall=1 td=14.3166667 failed!
+
+
+Error: measure  tpwp_fall_14  when(WHEN) : out of interval
+ .meas tran tpwp_fall_14 when v(trig_pw_peak)=0.45 fall=1 td=14.3166667 failed!
+
+
+Error: measure  tpwb_fall_15  when(WHEN) : out of interval
+ .meas tran tpwb_fall_15 when v(trig_pw_base)=0.45 fall=1 td=15.3305556 failed!
+
+
+Error: measure  tpwp_fall_15  when(WHEN) : out of interval
+ .meas tran tpwp_fall_15 when v(trig_pw_peak)=0.45 fall=1 td=15.3305556 failed!
+
+
+Error: measure  tpwb_fall_16  when(WHEN) : out of interval
+ .meas tran tpwb_fall_16 when v(trig_pw_base)=0.45 fall=1 td=16.4416667 failed!
+
+
+Error: measure  tpwp_fall_16  when(WHEN) : out of interval
+ .meas tran tpwp_fall_16 when v(trig_pw_peak)=0.45 fall=1 td=16.4416667 failed!
+
+
+Error: measure  tpwb_fall_17  when(WHEN) : out of interval
+ .meas tran tpwb_fall_17 when v(trig_pw_base)=0.45 fall=1 td=17.4527778 failed!
+
+
+Error: measure  tpwp_fall_17  when(WHEN) : out of interval
+ .meas tran tpwp_fall_17 when v(trig_pw_peak)=0.45 fall=1 td=17.4527778 failed!
+
+
+Error: measure  tpwb_fall_18  when(WHEN) : out of interval
+ .meas tran tpwb_fall_18 when v(trig_pw_base)=0.45 fall=1 td=18.5833333 failed!
+
+
+Error: measure  tpwp_fall_18  when(WHEN) : out of interval
+ .meas tran tpwp_fall_18 when v(trig_pw_peak)=0.45 fall=1 td=18.5833333 failed!
+
+
+Error: measure  tpwb_fall_19  when(WHEN) : out of interval
+ .meas tran tpwb_fall_19 when v(trig_pw_base)=0.45 fall=1 td=19.6972222 failed!
+
+
+Error: measure  tpwp_fall_19  when(WHEN) : out of interval
+ .meas tran tpwp_fall_19 when v(trig_pw_peak)=0.45 fall=1 td=19.6972222 failed!
+
+
+Error: measure  tpwb_fall_20  when(WHEN) : out of interval
+ .meas tran tpwb_fall_20 when v(trig_pw_base)=0.45 fall=1 td=20.8083333 failed!
+
+
+Error: measure  tpwp_fall_20  when(WHEN) : out of interval
+ .meas tran tpwp_fall_20 when v(trig_pw_peak)=0.45 fall=1 td=20.8083333 failed!
+
+
+Error: measure  tpwb_fall_21  when(WHEN) : out of interval
+ .meas tran tpwb_fall_21 when v(trig_pw_base)=0.45 fall=1 td=21.8333333 failed!
+
+
+Error: measure  tpwp_fall_21  when(WHEN) : out of interval
+ .meas tran tpwp_fall_21 when v(trig_pw_peak)=0.45 fall=1 td=21.8333333 failed!
+
+
+Error: measure  tpwb_fall_22  when(WHEN) : out of interval
+ .meas tran tpwb_fall_22 when v(trig_pw_base)=0.45 fall=1 td=22.8777778 failed!
+
+
+Error: measure  tpwp_fall_22  when(WHEN) : out of interval
+ .meas tran tpwp_fall_22 when v(trig_pw_peak)=0.45 fall=1 td=22.8777778 failed!
+
+
+Error: measure  tpwb_fall_23  when(WHEN) : out of interval
+ .meas tran tpwb_fall_23 when v(trig_pw_base)=0.45 fall=1 td=23.9111111 failed!
+
+
+Error: measure  tpwp_fall_23  when(WHEN) : out of interval
+ .meas tran tpwp_fall_23 when v(trig_pw_peak)=0.45 fall=1 td=23.9111111 failed!
+
+
+Error: measure  tpwb_fall_24  when(WHEN) : out of interval
+ .meas tran tpwb_fall_24 when v(trig_pw_base)=0.45 fall=1 td=25.0000000 failed!
+
+
+Error: measure  tpwp_fall_24  when(WHEN) : out of interval
+ .meas tran tpwp_fall_24 when v(trig_pw_peak)=0.45 fall=1 td=25.0000000 failed!
+
+
+Error: measure  tpwb_fall_25  when(WHEN) : out of interval
+ .meas tran tpwb_fall_25 when v(trig_pw_base)=0.45 fall=1 td=26.0833333 failed!
+
+
+Error: measure  tpwp_fall_25  when(WHEN) : out of interval
+ .meas tran tpwp_fall_25 when v(trig_pw_peak)=0.45 fall=1 td=26.0833333 failed!
+
+
+Error: measure  tpwb_fall_26  when(WHEN) : out of interval
+ .meas tran tpwb_fall_26 when v(trig_pw_base)=0.45 fall=1 td=27.1305556 failed!
+
+
+Error: measure  tpwp_fall_26  when(WHEN) : out of interval
+ .meas tran tpwp_fall_26 when v(trig_pw_peak)=0.45 fall=1 td=27.1305556 failed!
+
+
+Error: measure  tpwb_fall_27  when(WHEN) : out of interval
+ .meas tran tpwb_fall_27 when v(trig_pw_base)=0.45 fall=1 td=28.1361111 failed!
+
+
+Error: measure  tpwp_fall_27  when(WHEN) : out of interval
+ .meas tran tpwp_fall_27 when v(trig_pw_peak)=0.45 fall=1 td=28.1361111 failed!
+
+
+Error: measure  tpwb_fall_28  when(WHEN) : out of interval
+ .meas tran tpwb_fall_28 when v(trig_pw_base)=0.45 fall=1 td=29.1666667 failed!
+
+
+Error: measure  tpwp_fall_28  when(WHEN) : out of interval
+ .meas tran tpwp_fall_28 when v(trig_pw_peak)=0.45 fall=1 td=29.1666667 failed!
+
+
+Error: measure  tpwb_fall_29  when(WHEN) : out of interval
+ .meas tran tpwb_fall_29 when v(trig_pw_base)=0.45 fall=1 td=29.6666667 failed!
+
+
+Error: measure  tpwp_fall_29  when(WHEN) : out of interval
+ .meas tran tpwp_fall_29 when v(trig_pw_peak)=0.45 fall=1 td=29.6666667 failed!
+
+
+Error: measure  trpk_30  when(WHEN) : out of interval
+ .meas tran trpk_30 when v(rpeak_pulse)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  ts14_30  when(WHEN) : out of interval
+ .meas tran ts14_30 when v(trig_s14)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  ts69_30  when(WHEN) : out of interval
+ .meas tran ts69_30 when v(trig_s69)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  twid_30  when(WHEN) : out of interval
+ .meas tran twid_30 when v(trig_wid)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  trpk_del_30  when(WHEN) : out of interval
+ .meas tran trpk_del_30 when v(rpeak_pulse_delayed)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  ts14_fall_30  when(WHEN) : out of interval
+ .meas tran ts14_fall_30 when v(trig_s14)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  ts69_fall_30  when(WHEN) : out of interval
+ .meas tran ts69_fall_30 when v(trig_s69)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  twid_fall_30  when(WHEN) : out of interval
+ .meas tran twid_fall_30 when v(trig_wid)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  trpk_del_fall_30  when(WHEN) : out of interval
+ .meas tran trpk_del_fall_30 when v(rpeak_pulse_delayed)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  trrc_30  when(WHEN) : out of interval
+ .meas tran trrc_30 when v(trig_rr_cap)=0.45 rise=1 td=31.5194444 failed!
+
+
+Error: measure  trrc_fall_30  when(WHEN) : out of interval
+ .meas tran trrc_fall_30 when v(trig_rr_cap)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  ecg_at_f8cap_30  find(AT) : out of interval
+ .meas tran ecg_at_f8cap_30 find v(ecg_l0) when v(rpeak_pulse_delayed)=0.45 fall=1 td=31.5194444 failed!
+
+
+Error: measure  tpwb_fall_30  when(WHEN) : out of interval
+ .meas tran tpwb_fall_30 when v(trig_pw_base)=0.45 fall=1 td=31.2694444 failed!
+
+
+Error: measure  tpwp_fall_30  when(WHEN) : out of interval
+ .meas tran tpwp_fall_30 when v(trig_pw_peak)=0.45 fall=1 td=31.2694444 failed!
+
+
+Error: measure  trpk_31  when(WHEN) : out of interval
+ .meas tran trpk_31 when v(rpeak_pulse)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  ts14_31  when(WHEN) : out of interval
+ .meas tran ts14_31 when v(trig_s14)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  ts69_31  when(WHEN) : out of interval
+ .meas tran ts69_31 when v(trig_s69)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  twid_31  when(WHEN) : out of interval
+ .meas tran twid_31 when v(trig_wid)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  trpk_del_31  when(WHEN) : out of interval
+ .meas tran trpk_del_31 when v(rpeak_pulse_delayed)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  ts14_fall_31  when(WHEN) : out of interval
+ .meas tran ts14_fall_31 when v(trig_s14)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  ts69_fall_31  when(WHEN) : out of interval
+ .meas tran ts69_fall_31 when v(trig_s69)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  twid_fall_31  when(WHEN) : out of interval
+ .meas tran twid_fall_31 when v(trig_wid)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  trpk_del_fall_31  when(WHEN) : out of interval
+ .meas tran trpk_del_fall_31 when v(rpeak_pulse_delayed)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  trrc_31  when(WHEN) : out of interval
+ .meas tran trrc_31 when v(trig_rr_cap)=0.45 rise=1 td=32.5361111 failed!
+
+
+Error: measure  trrc_fall_31  when(WHEN) : out of interval
+ .meas tran trrc_fall_31 when v(trig_rr_cap)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  ecg_at_f8cap_31  find(AT) : out of interval
+ .meas tran ecg_at_f8cap_31 find v(ecg_l0) when v(rpeak_pulse_delayed)=0.45 fall=1 td=32.5361111 failed!
+
+
+Error: measure  tpwb_fall_31  when(WHEN) : out of interval
+ .meas tran tpwb_fall_31 when v(trig_pw_base)=0.45 fall=1 td=32.2861111 failed!
+
+
+Error: measure  tpwp_fall_31  when(WHEN) : out of interval
+ .meas tran tpwp_fall_31 when v(trig_pw_peak)=0.45 fall=1 td=32.2861111 failed!
+
+
+Error: measure  trpk_32  when(WHEN) : out of interval
+ .meas tran trpk_32 when v(rpeak_pulse)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  ts14_32  when(WHEN) : out of interval
+ .meas tran ts14_32 when v(trig_s14)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  ts69_32  when(WHEN) : out of interval
+ .meas tran ts69_32 when v(trig_s69)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  twid_32  when(WHEN) : out of interval
+ .meas tran twid_32 when v(trig_wid)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  trpk_del_32  when(WHEN) : out of interval
+ .meas tran trpk_del_32 when v(rpeak_pulse_delayed)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  ts14_fall_32  when(WHEN) : out of interval
+ .meas tran ts14_fall_32 when v(trig_s14)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  ts69_fall_32  when(WHEN) : out of interval
+ .meas tran ts69_fall_32 when v(trig_s69)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  twid_fall_32  when(WHEN) : out of interval
+ .meas tran twid_fall_32 when v(trig_wid)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  trpk_del_fall_32  when(WHEN) : out of interval
+ .meas tran trpk_del_fall_32 when v(rpeak_pulse_delayed)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  trrc_32  when(WHEN) : out of interval
+ .meas tran trrc_32 when v(trig_rr_cap)=0.45 rise=1 td=33.5222222 failed!
+
+
+Error: measure  trrc_fall_32  when(WHEN) : out of interval
+ .meas tran trrc_fall_32 when v(trig_rr_cap)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  ecg_at_f8cap_32  find(AT) : out of interval
+ .meas tran ecg_at_f8cap_32 find v(ecg_l0) when v(rpeak_pulse_delayed)=0.45 fall=1 td=33.5222222 failed!
+
+
+Error: measure  tpwb_fall_32  when(WHEN) : out of interval
+ .meas tran tpwb_fall_32 when v(trig_pw_base)=0.45 fall=1 td=33.2722222 failed!
+
+
+Error: measure  tpwp_fall_32  when(WHEN) : out of interval
+ .meas tran tpwp_fall_32 when v(trig_pw_peak)=0.45 fall=1 td=33.2722222 failed!
+
+
+Error: measure  trpk_33  when(WHEN) : out of interval
+ .meas tran trpk_33 when v(rpeak_pulse)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  ts14_33  when(WHEN) : out of interval
+ .meas tran ts14_33 when v(trig_s14)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  ts69_33  when(WHEN) : out of interval
+ .meas tran ts69_33 when v(trig_s69)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  twid_33  when(WHEN) : out of interval
+ .meas tran twid_33 when v(trig_wid)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  trpk_del_33  when(WHEN) : out of interval
+ .meas tran trpk_del_33 when v(rpeak_pulse_delayed)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  ts14_fall_33  when(WHEN) : out of interval
+ .meas tran ts14_fall_33 when v(trig_s14)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  ts69_fall_33  when(WHEN) : out of interval
+ .meas tran ts69_fall_33 when v(trig_s69)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  twid_fall_33  when(WHEN) : out of interval
+ .meas tran twid_fall_33 when v(trig_wid)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  trpk_del_fall_33  when(WHEN) : out of interval
+ .meas tran trpk_del_fall_33 when v(rpeak_pulse_delayed)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  trrc_33  when(WHEN) : out of interval
+ .meas tran trrc_33 when v(trig_rr_cap)=0.45 rise=1 td=34.4527778 failed!
+
+
+Error: measure  trrc_fall_33  when(WHEN) : out of interval
+ .meas tran trrc_fall_33 when v(trig_rr_cap)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  ecg_at_f8cap_33  find(AT) : out of interval
+ .meas tran ecg_at_f8cap_33 find v(ecg_l0) when v(rpeak_pulse_delayed)=0.45 fall=1 td=34.4527778 failed!
+
+
+Error: measure  tpwb_fall_33  when(WHEN) : out of interval
+ .meas tran tpwb_fall_33 when v(trig_pw_base)=0.45 fall=1 td=34.2027778 failed!
+
+
+Error: measure  tpwp_fall_33  when(WHEN) : out of interval
+ .meas tran tpwp_fall_33 when v(trig_pw_peak)=0.45 fall=1 td=34.2027778 failed!
+
+
+Error: measure  trpk_34  when(WHEN) : out of interval
+ .meas tran trpk_34 when v(rpeak_pulse)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  ts14_34  when(WHEN) : out of interval
+ .meas tran ts14_34 when v(trig_s14)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  ts69_34  when(WHEN) : out of interval
+ .meas tran ts69_34 when v(trig_s69)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  twid_34  when(WHEN) : out of interval
+ .meas tran twid_34 when v(trig_wid)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  trpk_del_34  when(WHEN) : out of interval
+ .meas tran trpk_del_34 when v(rpeak_pulse_delayed)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  ts14_fall_34  when(WHEN) : out of interval
+ .meas tran ts14_fall_34 when v(trig_s14)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  ts69_fall_34  when(WHEN) : out of interval
+ .meas tran ts69_fall_34 when v(trig_s69)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  twid_fall_34  when(WHEN) : out of interval
+ .meas tran twid_fall_34 when v(trig_wid)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  trpk_del_fall_34  when(WHEN) : out of interval
+ .meas tran trpk_del_fall_34 when v(rpeak_pulse_delayed)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  trrc_34  when(WHEN) : out of interval
+ .meas tran trrc_34 when v(trig_rr_cap)=0.45 rise=1 td=35.4166667 failed!
+
+
+Error: measure  trrc_fall_34  when(WHEN) : out of interval
+ .meas tran trrc_fall_34 when v(trig_rr_cap)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  ecg_at_f8cap_34  find(AT) : out of interval
+ .meas tran ecg_at_f8cap_34 find v(ecg_l0) when v(rpeak_pulse_delayed)=0.45 fall=1 td=35.4166667 failed!
+
+
+Error: measure  tpwb_fall_34  when(WHEN) : out of interval
+ .meas tran tpwb_fall_34 when v(trig_pw_base)=0.45 fall=1 td=35.1666667 failed!
+
+
+Error: measure  tpwp_fall_34  when(WHEN) : out of interval
+ .meas tran tpwp_fall_34 when v(trig_pw_peak)=0.45 fall=1 td=35.1666667 failed!
+
+rrc_cmp_3           =  9.000000e-01
+rrc_cmp2_3          =  9.000000e-01
+rrc_timer_3         =  6.447065e-02
+rrc_ewma_3          =  3.671065e-01
+rrc_thresh_3        =  3.871065e-01
+rrc_trig_3          =  9.000000e-01
+rrc_rpklvl_3        =  2.262234e-11
+rrc_esamp_3         =  6.447065e-02
+rrc_esamp_ok_3      =  1.988260e-11
+rrc_cmp_max_3       =  9.000000e-01 at=  3.907306e+00
+rrc_trig_max_3      =  9.000000e-01 at=  3.894794e+00
+rrc_cmp_4           =  9.000000e-01
+rrc_cmp2_4          =  9.000000e-01
+rrc_timer_4         =  7.939535e-03
+rrc_ewma_4          =  3.648889e-01
+rrc_thresh_4        =  3.848889e-01
+rrc_trig_4          =  9.000000e-01
+rrc_rpklvl_4        =  2.067351e-11
+rrc_esamp_4         =  7.939536e-03
+rrc_esamp_ok_4      =  1.987986e-11
+rrc_cmp_max_4       =  9.000000e-01 at=  4.813889e+00
+rrc_trig_max_4      =  9.000000e-01 at=  4.814039e+00
+rrc_cmp_5           =  9.000000e-01
+rrc_cmp2_5          =  9.000000e-01
+rrc_timer_5         =  4.771473e-04
+rrc_ewma_5          =  3.614049e-01
+rrc_thresh_5        =  3.814049e-01
+rrc_trig_5          =  9.000000e-01
+rrc_rpklvl_5        =  2.072943e-11
+rrc_esamp_5         =  4.771478e-04
+rrc_esamp_ok_5      =  1.988115e-11
+rrc_cmp_max_5       =  9.000000e-01 at=  5.744444e+00
+rrc_trig_max_5      =  9.000000e-01 at=  5.750350e+00
+rrc_cmp_6           =  9.000000e-01
+rrc_cmp2_6          =  9.000000e-01
+rrc_timer_6         =  9.053241e-05
+rrc_ewma_6          =  3.576832e-01
+rrc_thresh_6        =  3.776832e-01
+rrc_trig_6          =  9.000000e-01
+rrc_rpklvl_6        =  2.091562e-11
+rrc_esamp_6         =  9.053287e-05
+rrc_esamp_ok_6      =  1.988037e-11
+rrc_cmp_max_6       =  9.000000e-01 at=  6.738889e+00
+rrc_trig_max_6      =  9.000000e-01 at=  6.738889e+00
+rrc_cmp_7           =  9.000000e-01
+rrc_cmp2_7          =  9.000000e-01
+rrc_timer_7         =  8.251615e-05
+rrc_ewma_7          =  3.536530e-01
+rrc_thresh_7        =  3.736530e-01
+rrc_trig_7          =  9.000000e-01
+rrc_rpklvl_7        =  2.090984e-11
+rrc_esamp_7         =  8.251660e-05
+rrc_esamp_ok_7      =  1.987915e-11
+rrc_cmp_max_7       =  9.000000e-01 at=  7.769444e+00
+rrc_trig_max_7      =  9.000000e-01 at=  7.769444e+00
+rrc_cmp_8           =  9.000000e-01
+rrc_cmp2_8          =  9.000000e-01
+rrc_timer_8         =  8.241835e-05
+rrc_ewma_8          =  3.502515e-01
+rrc_thresh_8        =  3.702515e-01
+rrc_trig_8          =  9.000000e-01
+rrc_rpklvl_8        =  2.007464e-11
+rrc_esamp_8         =  8.241880e-05
+rrc_esamp_ok_8      =  1.988043e-11
+rrc_cmp_max_8       =  9.000000e-01 at=  8.725150e+00
+rrc_trig_max_8      =  9.000000e-01 at=  8.725150e+00
+rrc_cmp_9           =  9.000000e-01
+rrc_cmp2_9          =  9.000000e-01
+rrc_timer_9         =  8.236164e-05
+rrc_ewma_9          =  3.465252e-01
+rrc_thresh_9        =  3.665252e-01
+rrc_trig_9          =  9.000000e-01
+rrc_rpklvl_9        =  2.110529e-11
+rrc_esamp_9         =  8.236210e-05
+rrc_esamp_ok_9      =  1.988012e-11
+rrc_cmp_max_9       =  9.000000e-01 at=  9.711111e+00
+rrc_trig_max_9      =  9.000000e-01 at=  9.711111e+00
+pwb_max_2           =  1.739597e-07 at=  2.897272e+00
+pwp_max_2           =  1.739597e-07 at=  2.897272e+00
+sf2_at30_2          =  1.604442e-01
+pwb_max_3           =  1.739592e-07 at=  3.836161e+00
+pwp_max_3           =  1.739592e-07 at=  3.836161e+00
+sf2_at30_3          =  6.365274e-02
+pwb_max_4           =  1.739632e-07 at=  4.816717e+00
+pwp_max_4           =  1.739632e-07 at=  4.816717e+00
+sf2_at30_4          =  7.727887e-03
+pwb_max_5           =  1.739621e-07 at=  5.750050e+00
+pwp_max_5           =  1.739621e-07 at=  5.750050e+00
+sf2_at30_5          =  3.977660e-04
+pwb_max_6           =  1.739593e-07 at=  6.750050e+00
+pwp_max_6           =  1.739593e-07 at=  6.750050e+00
+sf2_at30_6          =  1.942864e-05
+pwb_max_7           =  1.739592e-07 at=  7.530606e+00
+pwp_max_7           =  1.739592e-07 at=  7.530606e+00
+sf2_at30_7          =  1.170675e-05
+pwb_max_8           =  1.739597e-07 at=  8.508383e+00
+pwp_max_8           =  1.739597e-07 at=  8.508383e+00
+sf2_at30_8          =  1.168127e-05
+pwb_max_9           =  1.739599e-07 at=  9.738939e+00
+pwp_max_9           =  1.739599e-07 at=  9.738939e+00
+sf2_at30_9          =  1.167104e-05
+f1_5                =  2.688314e-01
+f1_sf_5             =  5.118636e-04
+f1_ewma_5           =  3.615102e-01
+f2_5                =  4.207247e-01
+f3_5                =  2.947071e-01
+f4_5                =  2.946568e-01
+f5_5                =  2.989667e-01
+f6_5                =  2.707517e-01
+f7_5                =  3.603502e-01
+f8_5                =  3.005554e-01
+f1_6                =  2.688528e-01
+f1_sf_6             =  9.157407e-05
+f1_ewma_6           =  3.577969e-01
+f2_6                =  4.207546e-01
+f3_6                =  2.947255e-01
+f4_6                =  2.946640e-01
+f5_6                =  2.992023e-01
+f6_6                =  2.657876e-01
+f7_6                =  3.604114e-01
+f8_6                =  3.006928e-01
+f1_7                =  2.688765e-01
+f1_sf_7             =  8.251932e-05
+f1_ewma_7           =  3.537559e-01
+f2_7                =  4.207548e-01
+f3_7                =  2.947398e-01
+f4_7                =  2.946620e-01
+f5_7                =  2.994850e-01
+f6_7                =  2.606600e-01
+f7_7                =  3.604766e-01
+f8_7                =  3.008331e-01
+f1_8                =  2.688965e-01
+f1_sf_8             =  8.241959e-05
+f1_ewma_8           =  3.503663e-01
+f2_8                =  4.207548e-01
+f3_8                =  2.947629e-01
+f4_8                =  2.946681e-01
+f5_8                =  2.998069e-01
+f6_8                =  2.558503e-01
+f7_8                =  3.605542e-01
+f8_8                =  3.009622e-01
+f1_9                =  2.689138e-01
+f1_sf_9             =  8.235444e-05
+f1_ewma_9           =  3.466255e-01
+f2_9                =  4.207550e-01
+f3_9                =  2.947860e-01
+f4_9                =  2.946811e-01
+f5_9                =  3.001907e-01
+f6_9                =  2.509638e-01
+f7_9                =  3.606402e-01
+f8_9                =  3.010957e-01
+f1_10               =  2.689393e-01
+f1_sf_10            =  8.230518e-05
+f1_ewma_10          =  3.435788e-01
+f2_10               =  4.207550e-01
+f3_10               =  2.948071e-01
+f4_10               =  2.946873e-01
+f5_10               =  3.006073e-01
+f6_10               =  2.464144e-01
+f7_10               =  3.607282e-01
+f8_10               =  3.012235e-01
+f1_11               =  2.689464e-01
+f1_sf_11            =  8.227137e-05
+f1_ewma_11          =  3.419003e-01
+f2_11               =  4.067611e-01
+f3_11               =  3.252810e-01
+f4_11               =  3.289989e-01
+f5_11               =  3.008611e-01
+f6_11               =  2.262577e-01
+f7_11               =  4.136089e-01
+f8_11               =  3.250296e-01
+f1_12               =  2.689680e-01
+f1_sf_12            =  6.970233e-03
+f1_ewma_12          =  3.398360e-01
+f2_12               =  4.201573e-01
+f3_12               =  2.970660e-01
+f4_12               =  2.973170e-01
+f5_12               =  3.016859e-01
+f6_12               =  2.194662e-01
+f7_12               =  4.135623e-01
+f8_12               =  3.251917e-01
+f1_13               =  2.689943e-01
+f1_sf_13            =  3.303684e-04
+f1_ewma_13          =  3.363628e-01
+f2_13               =  4.207433e-01
+f3_13               =  2.970704e-01
+f4_13               =  2.973018e-01
+f5_13               =  3.024172e-01
+f6_13               =  2.144319e-01
+f7_13               =  4.135187e-01
+f8_13               =  3.253117e-01
+f1_14               =  2.690126e-01
+f1_sf_14            =  8.521946e-05
+f1_ewma_14          =  3.330931e-01
+f2_14               =  4.207551e-01
+f3_14               =  2.970825e-01
+f4_14               =  2.972889e-01
+f5_14               =  3.033038e-01
+f6_14               =  2.092681e-01
+f7_14               =  4.134815e-01
+f8_14               =  3.254336e-01
+f1_15               =  2.690317e-01
+f1_sf_15            =  8.210736e-05
+f1_ewma_15          =  3.307305e-01
+f2_15               =  4.207553e-01
+f3_15               =  2.970949e-01
+f4_15               =  2.972890e-01
+f5_15               =  3.042927e-01
+f6_15               =  2.043032e-01
+f7_15               =  4.134452e-01
+f8_15               =  3.255498e-01
+f1_16               =  2.690563e-01
+f1_sf_16            =  8.204749e-05
+f1_ewma_16          =  3.282260e-01
+f2_16               =  4.207553e-01
+f3_16               =  2.971057e-01
+f4_16               =  2.972933e-01
+f5_16               =  3.055369e-01
+f6_16               =  1.988769e-01
+f7_16               =  4.134053e-01
+f8_16               =  3.256802e-01
+f1_17               =  2.690617e-01
+f1_sf_17            =  8.202554e-05
+f1_ewma_17          =  3.269125e-01
+f2_17               =  4.207553e-01
+f3_17               =  2.971268e-01
+f4_17               =  2.972967e-01
+f5_17               =  3.068299e-01
+f6_17               =  1.939495e-01
+f7_17               =  4.133780e-01
+f8_17               =  3.257970e-01
+f1_18               =  2.690838e-01
+f1_sf_18            =  8.198030e-05
+f1_ewma_18          =  3.244315e-01
+f2_18               =  4.207552e-01
+f3_18               =  2.971408e-01
+f4_18               =  2.972554e-01
+f5_18               =  3.084453e-01
+f6_18               =  1.884563e-01
+f7_18               =  4.133411e-01
+f8_18               =  3.259279e-01
+f1_19               =  2.690910e-01
+f1_sf_19            =  8.195658e-05
+f1_ewma_19          =  3.231922e-01
+f2_19               =  4.207552e-01
+f3_19               =  2.971512e-01
+f4_19               =  2.972569e-01
+f5_19               =  3.102148e-01
+f6_19               =  1.830623e-01
+f7_19               =  4.133036e-01
+f8_19               =  3.260559e-01
+f1_20               =  2.691215e-01
+f1_sf_20            =  8.191573e-05
+f1_ewma_20          =  3.207351e-01
+f2_20               =  4.207553e-01
+f3_20               =  2.971706e-01
+f4_20               =  2.972564e-01
+f5_20               =  3.121539e-01
+f6_20               =  1.777051e-01
+f7_20               =  4.132733e-01
+f8_20               =  3.261847e-01
+f1_21               =  2.691427e-01
+f1_sf_21            =  8.187769e-05
+f1_ewma_21          =  3.184334e-01
+f2_21               =  4.207553e-01
+f3_21               =  2.971762e-01
+f4_21               =  2.972407e-01
+f5_21               =  3.140782e-01
+f6_21               =  1.727853e-01
+f7_21               =  4.132376e-01
+f8_21               =  3.263026e-01
+f1_22               =  2.691522e-01
+f1_sf_22            =  8.185790e-05
+f1_ewma_22          =  3.169151e-01
+f2_22               =  4.207553e-01
+f3_22               =  2.971974e-01
+f4_22               =  2.972451e-01
+f5_22               =  3.161741e-01
+f6_22               =  1.677993e-01
+f7_22               =  4.132178e-01
+f8_22               =  3.264231e-01
+f1_23               =  2.691892e-01
+f1_sf_23            =  8.180379e-05
+f1_ewma_23          =  3.139248e-01
+f2_23               =  4.207555e-01
+f3_23               =  2.972159e-01
+f4_23               =  2.972495e-01
+f5_23               =  3.183567e-01
+f6_23               =  1.628974e-01
+f7_23               =  4.131972e-01
+f8_23               =  3.265427e-01
+f1_24               =  2.692153e-01
+f1_sf_24            =  8.175249e-05
+f1_ewma_24          =  3.111628e-01
+f2_24               =  4.207555e-01
+f3_24               =  2.972346e-01
+f4_24               =  2.972622e-01
+f5_24               =  3.207581e-01
+f6_24               =  1.577704e-01
+f7_24               =  4.131790e-01
+f8_24               =  3.266682e-01
+f1_25               =  2.692412e-01
+f1_sf_25            =  8.170209e-05
+f1_ewma_25          =  3.083932e-01
+f2_25               =  4.207554e-01
+f3_25               =  2.972533e-01
+f4_25               =  2.972598e-01
+f5_25               =  3.232302e-01
+f6_25               =  1.527154e-01
+f7_25               =  4.131671e-01
+f8_25               =  3.267924e-01
+f1_26               =  2.692693e-01
+f1_sf_26            =  8.166633e-05
+f1_ewma_26          =  3.062158e-01
+f2_26               =  4.207557e-01
+f3_26               =  2.972675e-01
+f4_26               =  2.972295e-01
+f5_26               =  3.256762e-01
+f6_26               =  1.478781e-01
+f7_26               =  4.131592e-01
+f8_26               =  3.269103e-01
+f1_27               =  2.692908e-01
+f1_sf_27            =  8.162139e-05
+f1_ewma_27          =  3.037685e-01
+f2_27               =  4.207556e-01
+f3_27               =  2.972860e-01
+f4_27               =  2.971721e-01
+f5_27               =  3.280554e-01
+f6_27               =  1.432906e-01
+f7_27               =  4.131614e-01
+f8_27               =  3.270254e-01
+f1_28               =  2.693209e-01
+f1_sf_28            =  8.157787e-05
+f1_ewma_28          =  3.012143e-01
+f2_28               =  4.207557e-01
+f3_28               =  2.973097e-01
+f4_28               =  2.971818e-01
+f5_28               =  3.305067e-01
+f6_28               =  1.386527e-01
+f7_28               =  4.131807e-01
+f8_28               =  3.271416e-01
+f1_29               =  2.693322e-01
+f1_sf_29            =  8.154730e-05
+f1_ewma_29          =  3.001052e-01
+f2_29               =  4.132399e-01
+f3_29               =  3.866756e-01
+f4_29               =  3.596540e-01
+f5_29               =  3.316888e-01
+f6_29               =  3.951050e-01
+f7_29               =  5.361165e-01
+f8_29               =  4.005013e-01
+f1_30               =  2.693715e-01
+f1_sf_30            =  3.546271e-03
+f1_ewma_30          =  2.978418e-01
+f2_30               =  4.204667e-01
+f3_30               =  3.029614e-01
+f4_30               =  2.983732e-01
+f5_30               =  3.354380e-01
+f6_30               =  3.870470e-01
+f7_30               =  5.358798e-01
+f8_30               =  4.005656e-01
+f1_31               =  2.694009e-01
+f1_sf_31            =  1.980427e-04
+f1_ewma_31          =  2.954888e-01
+f2_31               =  4.207502e-01
+f3_31               =  3.029642e-01
+f4_31               =  2.983581e-01
+f5_31               =  3.377429e-01
+f6_31               =  3.819414e-01
+f7_31               =  5.357227e-01
+f8_31               =  4.006089e-01
+f1_32               =  2.694369e-01
+f1_sf_32            =  8.285483e-05
+f1_ewma_32          =  2.927863e-01
+f2_32               =  4.207556e-01
+f3_32               =  3.029820e-01
+f4_32               =  2.983674e-01
+f5_32               =  3.399076e-01
+f6_32               =  3.769929e-01
+f7_32               =  5.355602e-01
+f8_32               =  4.006519e-01
+f1_33               =  2.694778e-01
+f1_sf_33            =  8.138011e-05
+f1_ewma_33          =  2.900394e-01
+f2_33               =  4.207559e-01
+f3_33               =  3.030032e-01
+f4_33               =  2.983729e-01
+f5_33               =  3.418720e-01
+f6_33               =  3.723240e-01
+f7_33               =  5.354027e-01
+f8_33               =  4.006913e-01
+f1_34               =  2.695307e-01
+f1_sf_34            =  8.130987e-05
+f1_ewma_34          =  2.871681e-01
+f3_34               =  3.030154e-01
+f4_34               =  2.983725e-01
+f5_34               =  3.438098e-01
+f6_34               =  3.674895e-01
+f7_34               =  5.352308e-01
+f8_34               =  4.007313e-01
+trpk_0              =   1.11498e+01
+ts14_0              =   1.11687e+01
+ts69_0              =   1.12266e+01
+twid_0              =   1.11853e+01
+trpk_del_0          =   1.11557e+01
+ts14_fall_0         =   1.11692e+01
+ts69_fall_0         =   1.12277e+01
+twid_fall_0         =   1.11864e+01
+trpk_del_fall_0     =   1.11564e+01
+trrc_0              =   1.11731e+01
+trrc_fall_0         =   1.11498e+01
+sh14_0              =  2.943909e-01
+sh69_0              =  2.946662e-01
+bi0_curr_0          =  2.976547e-01
+bi0_prev_0          =  2.980749e-01
+bi1_curr_0          =  2.975878e-01
+bi1_prev_0          =  2.980748e-01
+ecg_at_f8cap_0      =  3.254497e-01
+pw_shb_0            =  2.464245e-01
+pw_shp_0            =  2.450803e-01
+tpwb_fall_0         =   8.10329e-01
+tpwp_fall_0         =   8.85830e-01
+trpk_1              =   1.11498e+01
+ts14_1              =   1.11687e+01
+ts69_1              =   1.12266e+01
+twid_1              =   1.11853e+01
+trpk_del_1          =   1.11557e+01
+ts14_fall_1         =   1.11692e+01
+ts69_fall_1         =   1.12277e+01
+twid_fall_1         =   1.11864e+01
+trpk_del_fall_1     =   1.11564e+01
+trrc_1              =   1.11731e+01
+trrc_fall_1         =   1.11498e+01
+sh14_1              =  2.896330e-01
+sh69_1              =  2.899082e-01
+bi0_curr_1          =  2.956878e-01
+bi0_prev_1          =  2.961100e-01
+bi1_curr_1          =  2.956084e-01
+bi1_prev_1          =  2.961100e-01
+ecg_at_f8cap_1      =  3.254497e-01
+pw_shb_1            =  2.416984e-01
+pw_shp_1            =  2.403553e-01
+trpk_2              =   1.11498e+01
+ts14_2              =   1.11687e+01
+ts69_2              =   1.12266e+01
+twid_2              =   1.11853e+01
+trpk_del_2          =   1.11557e+01
+ts14_fall_2         =   1.11692e+01
+ts69_fall_2         =   1.12277e+01
+twid_fall_2         =   1.11864e+01
+trpk_del_fall_2     =   1.11564e+01
+trrc_2              =   1.11731e+01
+trrc_fall_2         =   1.11498e+01
+sh14_2              =  2.846171e-01
+sh69_2              =  2.848921e-01
+bi0_curr_2          =  2.936135e-01
+bi0_prev_2          =  2.940381e-01
+bi1_curr_2          =  2.935302e-01
+bi1_prev_2          =  2.940381e-01
+ecg_at_f8cap_2      =  3.254497e-01
+pw_shb_2            =  2.367176e-01
+pw_shp_2            =  2.353758e-01
+trpk_3              =   1.11498e+01
+ts14_3              =   1.11687e+01
+ts69_3              =   1.12266e+01
+twid_3              =   1.11853e+01
+trpk_del_3          =   1.11557e+01
+ts14_fall_3         =   1.11692e+01
+ts69_fall_3         =   1.12277e+01
+twid_fall_3         =   1.11864e+01
+trpk_del_fall_3     =   1.11564e+01
+trrc_3              =   1.11731e+01
+trrc_fall_3         =   1.11498e+01
+sh14_3              =  2.799874e-01
+sh69_3              =  2.802622e-01
+bi0_curr_3          =  2.916983e-01
+bi0_prev_3          =  2.921251e-01
+bi1_curr_3          =  2.916112e-01
+bi1_prev_3          =  2.921251e-01
+ecg_at_f8cap_3      =  3.254497e-01
+pw_shb_3            =  2.321222e-01
+pw_shp_3            =  2.307817e-01
+trpk_4              =   1.11498e+01
+ts14_4              =   1.11687e+01
+ts69_4              =   1.12266e+01
+twid_4              =   1.11853e+01
+trpk_del_4          =   1.11557e+01
+ts14_fall_4         =   1.11692e+01
+ts69_fall_4         =   1.12277e+01
+twid_fall_4         =   1.11864e+01
+trpk_del_fall_4     =   1.11564e+01
+trrc_4              =   1.11731e+01
+trrc_fall_4         =   1.11498e+01
+sh14_4              =  2.754976e-01
+sh69_4              =  2.757723e-01
+bi0_curr_4          =  2.898402e-01
+bi0_prev_4          =  2.902691e-01
+bi1_curr_4          =  2.897399e-01
+bi1_prev_4          =  2.902690e-01
+ecg_at_f8cap_4      =  3.254497e-01
+pw_shb_4            =  2.276675e-01
+pw_shp_4            =  2.263284e-01
+trpk_5              =   1.11498e+01
+ts14_5              =   1.11687e+01
+ts69_5              =   1.12266e+01
+twid_5              =   1.11853e+01
+trpk_del_5          =   1.11557e+01
+ts14_fall_5         =   1.11692e+01
+ts69_fall_5         =   1.12277e+01
+twid_fall_5         =   1.11864e+01
+trpk_del_fall_5     =   1.11564e+01
+trrc_5              =   1.11731e+01
+trrc_fall_5         =   1.11498e+01
+sh14_5              =  2.708987e-01
+sh69_5              =  2.711732e-01
+bi0_curr_5          =  2.879364e-01
+bi0_prev_5          =  2.883682e-01
+bi1_curr_5          =  2.878343e-01
+bi1_prev_5          =  2.883681e-01
+ecg_at_f8cap_5      =  3.254497e-01
+pw_shb_5            =  2.231070e-01
+pw_shp_5            =  2.217694e-01
+trpk_6              =   1.11498e+01
+ts14_6              =   1.11687e+01
+ts69_6              =   1.12266e+01
+twid_6              =   1.11853e+01
+trpk_del_6          =   1.11557e+01
+ts14_fall_6         =   1.11692e+01
+ts69_fall_6         =   1.12277e+01
+twid_fall_6         =   1.11864e+01
+trpk_del_fall_6     =   1.11564e+01
+trrc_6              =   1.11731e+01
+trrc_fall_6         =   1.11498e+01
+sh14_6              =  2.659751e-01
+sh69_6              =  2.662495e-01
+bi0_curr_6          =  2.858973e-01
+bi0_prev_6          =  2.863320e-01
+bi1_curr_6          =  2.857723e-01
+bi1_prev_6          =  2.863319e-01
+ecg_at_f8cap_6      =  3.254497e-01
+pw_shb_6            =  2.182274e-01
+pw_shp_6            =  2.168917e-01
+trpk_7              =   1.11498e+01
+ts14_7              =   1.11687e+01
+ts69_7              =   1.12266e+01
+twid_7              =   1.11853e+01
+trpk_del_7          =   1.11557e+01
+ts14_fall_7         =   1.11692e+01
+ts69_fall_7         =   1.12277e+01
+twid_fall_7         =   1.11864e+01
+trpk_del_fall_7     =   1.11564e+01
+trrc_7              =   1.11731e+01
+trrc_fall_7         =   1.11498e+01
+sh14_7              =  2.608894e-01
+sh69_7              =  2.611635e-01
+bi0_curr_7          =  2.837901e-01
+bi0_prev_7          =  2.842284e-01
+bi1_curr_7          =  2.836318e-01
+bi1_prev_7          =  2.842283e-01
+ecg_at_f8cap_7      =  3.254497e-01
+pw_shb_7            =  2.131911e-01
+pw_shp_7            =  2.118575e-01
+trpk_8              =   1.11498e+01
+ts14_8              =   1.11687e+01
+ts69_8              =   1.12266e+01
+twid_8              =   1.11853e+01
+trpk_del_8          =   1.11557e+01
+ts14_fall_8         =   1.11692e+01
+ts69_fall_8         =   1.12277e+01
+twid_fall_8         =   1.11864e+01
+trpk_del_fall_8     =   1.11564e+01
+trrc_8              =   1.11731e+01
+trrc_fall_8         =   1.11498e+01
+sh14_8              =  2.561191e-01
+sh69_8              =  2.563931e-01
+bi0_curr_8          =  2.818127e-01
+bi0_prev_8          =  2.822553e-01
+bi1_curr_8          =  2.816197e-01
+bi1_prev_8          =  2.822552e-01
+ecg_at_f8cap_8      =  3.254497e-01
+pw_shb_8            =  2.084716e-01
+pw_shp_8            =  2.071402e-01
+trpk_9              =   1.11498e+01
+ts14_9              =   1.11687e+01
+ts69_9              =   1.12266e+01
+twid_9              =   1.11853e+01
+trpk_del_9          =   1.11557e+01
+ts14_fall_9         =   1.11692e+01
+ts69_fall_9         =   1.12277e+01
+twid_fall_9         =   1.11864e+01
+trpk_del_fall_9     =   1.11564e+01
+trrc_9              =   1.11731e+01
+trrc_fall_9         =   1.11498e+01
+sh14_9              =  2.512727e-01
+sh69_9              =  2.515465e-01
+bi0_curr_9          =  2.798027e-01
+bi0_prev_9          =  2.802488e-01
+bi1_curr_9          =  2.795889e-01
+bi1_prev_9          =  2.802487e-01
+ecg_at_f8cap_9      =  3.254497e-01
+pw_shb_9            =  2.036819e-01
+pw_shp_9            =  2.023530e-01
+trpk_10             =   1.11498e+01
+ts14_10             =   1.11687e+01
+ts69_10             =   1.12266e+01
+twid_10             =   1.11853e+01
+trpk_del_10         =   1.11557e+01
+ts14_fall_10        =   1.11692e+01
+ts69_fall_10        =   1.12277e+01
+twid_fall_10        =   1.11864e+01
+trpk_del_fall_10    =   1.11564e+01
+trrc_10             =   1.11731e+01
+trrc_fall_10        =   1.11498e+01
+sh14_10             =  2.467608e-01
+sh69_10             =  2.470343e-01
+bi0_curr_10         =  2.779305e-01
+bi0_prev_10         =  2.783784e-01
+bi1_curr_10         =  2.776862e-01
+bi1_prev_10         =  2.783783e-01
+ecg_at_f8cap_10     =  3.254497e-01
+pw_shb_10           =  1.992281e-01
+pw_shp_10           =  1.979019e-01
+trpk_11             =   1.11498e+01
+ts14_11             =   1.11687e+01
+ts69_11             =   1.12266e+01
+twid_11             =   1.11853e+01
+trpk_del_11         =   1.11557e+01
+ts14_fall_11        =   1.11692e+01
+ts69_fall_11        =   1.12277e+01
+twid_fall_11        =   1.11864e+01
+trpk_del_fall_11    =   1.11564e+01
+trrc_11             =   1.11731e+01
+trrc_fall_11        =   1.11498e+01
+sh14_11             =  3.301025e-01
+sh69_11             =  2.506168e-01
+bi0_curr_11         =  3.248845e-01
+bi0_prev_11         =  2.773860e-01
+bi1_curr_11         =  3.297268e-01
+bi1_prev_11         =  2.773895e-01
+ecg_at_f8cap_11     =  3.254497e-01
+pw_shb_11           =  1.967981e-01
+pw_shp_11           =  1.954735e-01
+trpk_12             =   2.99460e+01
+ts14_12             =   2.99650e+01
+ts69_12             =   3.00228e+01
+twid_12             =   2.99815e+01
+trpk_del_12         =   2.99520e+01
+ts14_fall_12        =   2.99659e+01
+ts69_fall_12        =   3.00237e+01
+twid_fall_12        =   2.99824e+01
+trpk_del_fall_12    =   2.99526e+01
+trrc_12             =   2.99913e+01
+trrc_fall_12        =   2.99460e+01
+sh14_12             =  3.232658e-01
+sh69_12             =  2.438469e-01
+bi0_curr_12         =  3.220759e-01
+bi0_prev_12         =  3.174631e-01
+bi1_curr_12         =  3.268966e-01
+bi1_prev_12         =  3.217599e-01
+ecg_at_f8cap_12     =  4.003274e-01
+pw_shb_12           =  1.901414e-01
+pw_shp_12           =  1.888219e-01
+trpk_13             =   2.99460e+01
+ts14_13             =   2.99650e+01
+ts69_13             =   3.00228e+01
+twid_13             =   2.99815e+01
+trpk_del_13         =   2.99520e+01
+ts14_fall_13        =   2.99659e+01
+ts69_fall_13        =   3.00237e+01
+twid_fall_13        =   2.99824e+01
+trpk_del_fall_13    =   2.99526e+01
+trrc_13             =   2.99913e+01
+trrc_fall_13        =   2.99460e+01
+sh14_13             =  3.181929e-01
+sh69_13             =  2.388256e-01
+bi0_curr_13         =  3.199799e-01
+bi0_prev_13         =  3.153696e-01
+bi1_curr_13         =  3.247637e-01
+bi1_prev_13         =  3.196655e-01
+ecg_at_f8cap_13     =  4.003274e-01
+pw_shb_13           =  1.852166e-01
+pw_shp_13           =  1.839014e-01
+trpk_14             =   2.99460e+01
+ts14_14             =   2.99650e+01
+ts69_14             =   3.00228e+01
+twid_14             =   2.99815e+01
+trpk_del_14         =   2.99520e+01
+ts14_fall_14        =   2.99659e+01
+ts69_fall_14        =   3.00237e+01
+twid_fall_14        =   2.99824e+01
+trpk_del_fall_14    =   2.99526e+01
+trrc_14             =   2.99913e+01
+trrc_fall_14        =   2.99460e+01
+sh14_14             =  3.129840e-01
+sh69_14             =  2.336721e-01
+bi0_curr_14         =  3.178270e-01
+bi0_prev_14         =  3.132198e-01
+bi1_curr_14         =  3.225639e-01
+bi1_prev_14         =  3.175148e-01
+ecg_at_f8cap_14     =  4.003274e-01
+pw_shb_14           =  1.801755e-01
+pw_shp_14           =  1.788656e-01
+trpk_15             =   2.99460e+01
+ts14_15             =   2.99650e+01
+ts69_15             =   3.00228e+01
+twid_15             =   2.99815e+01
+trpk_del_15         =   2.99520e+01
+ts14_fall_15        =   2.99659e+01
+ts69_fall_15        =   3.00237e+01
+twid_fall_15        =   2.99824e+01
+trpk_del_fall_15    =   2.99526e+01
+trrc_15             =   2.99913e+01
+trrc_fall_15        =   2.99460e+01
+sh14_15             =  3.079694e-01
+sh69_15             =  2.287133e-01
+bi0_curr_15         =  3.157538e-01
+bi0_prev_15         =  3.111499e-01
+bi1_curr_15         =  3.204678e-01
+bi1_prev_15         =  3.154440e-01
+ecg_at_f8cap_15     =  4.003274e-01
+pw_shb_15           =  1.753402e-01
+pw_shp_15           =  1.740361e-01
+trpk_16             =   2.99460e+01
+ts14_16             =   2.99650e+01
+ts69_16             =   3.00228e+01
+twid_16             =   2.99815e+01
+trpk_del_16         =   2.99520e+01
+ts14_fall_16        =   2.99659e+01
+ts69_fall_16        =   3.00237e+01
+twid_fall_16        =   2.99824e+01
+trpk_del_fall_16    =   2.99526e+01
+trrc_16             =   2.99913e+01
+trrc_fall_16        =   2.99460e+01
+sh14_16             =  3.024801e-01
+sh69_16             =  2.232887e-01
+bi0_curr_16         =  3.134834e-01
+bi0_prev_16         =  3.088821e-01
+bi1_curr_16         =  3.181856e-01
+bi1_prev_16         =  3.131751e-01
+ecg_at_f8cap_16     =  4.003274e-01
+pw_shb_16           =  1.700711e-01
+pw_shp_16           =  1.687745e-01
+trpk_17             =   2.99460e+01
+ts14_17             =   2.99650e+01
+ts69_17             =   3.00228e+01
+twid_17             =   2.99815e+01
+trpk_del_17         =   2.99520e+01
+ts14_fall_17        =   2.99659e+01
+ts69_fall_17        =   3.00237e+01
+twid_fall_17        =   2.99824e+01
+trpk_del_fall_17    =   2.99526e+01
+trrc_17             =   2.99913e+01
+trrc_fall_17        =   2.99460e+01
+sh14_17             =  2.974861e-01
+sh69_17             =  2.183574e-01
+bi0_curr_17         =  3.114173e-01
+bi0_prev_17         =  3.068188e-01
+bi1_curr_17         =  3.160866e-01
+bi1_prev_17         =  3.111109e-01
+ecg_at_f8cap_17     =  4.003274e-01
+pw_shb_17           =  1.653032e-01
+pw_shp_17           =  1.640146e-01
+trpk_18             =   2.99460e+01
+ts14_18             =   2.99650e+01
+ts69_18             =   3.00228e+01
+twid_18             =   2.99815e+01
+trpk_del_18         =   2.99520e+01
+ts14_fall_18        =   2.99659e+01
+ts69_fall_18        =   3.00237e+01
+twid_fall_18        =   2.99824e+01
+trpk_del_fall_18    =   2.99526e+01
+trrc_18             =   2.99913e+01
+trrc_fall_18        =   2.99460e+01
+sh14_18             =  2.919059e-01
+sh69_18             =  2.128523e-01
+bi0_curr_18         =  3.091077e-01
+bi0_prev_18         =  3.045123e-01
+bi1_curr_18         =  3.136728e-01
+bi1_prev_18         =  3.088033e-01
+ecg_at_f8cap_18     =  4.003274e-01
+pw_shb_18           =  1.600099e-01
+pw_shp_18           =  1.587318e-01
+trpk_19             =   2.99460e+01
+ts14_19             =   2.99650e+01
+ts69_19             =   3.00228e+01
+twid_19             =   2.99815e+01
+trpk_del_19         =   2.99520e+01
+ts14_fall_19        =   2.99659e+01
+ts69_fall_19        =   3.00237e+01
+twid_fall_19        =   2.99824e+01
+trpk_del_fall_19    =   2.99526e+01
+trrc_19             =   2.99913e+01
+trrc_fall_19        =   2.99460e+01
+sh14_19             =  2.864107e-01
+sh69_19             =  2.074373e-01
+bi0_curr_19         =  3.068324e-01
+bi0_prev_19         =  3.022404e-01
+bi1_curr_19         =  3.113814e-01
+bi1_prev_19         =  3.065304e-01
+ecg_at_f8cap_19     =  4.003274e-01
+pw_shb_19           =  1.548394e-01
+pw_shp_19           =  1.535734e-01
+trpk_20             =   2.99460e+01
+ts14_20             =   2.99650e+01
+ts69_20             =   3.00228e+01
+twid_20             =   2.99815e+01
+trpk_del_20         =   2.99520e+01
+ts14_fall_20        =   2.99659e+01
+ts69_fall_20        =   3.00237e+01
+twid_fall_20        =   2.99824e+01
+trpk_del_fall_20    =   2.99526e+01
+trrc_20             =   2.99913e+01
+trrc_fall_20        =   2.99460e+01
+sh14_20             =  2.809340e-01
+sh69_20             =  2.020482e-01
+bi0_curr_20         =  3.045638e-01
+bi0_prev_20         =  2.999747e-01
+bi1_curr_20         =  3.090760e-01
+bi1_prev_20         =  3.042637e-01
+ecg_at_f8cap_20     =  4.003274e-01
+pw_shb_20           =  1.497358e-01
+pw_shp_20           =  1.484841e-01
+trpk_21             =   2.99460e+01
+ts14_21             =   2.99650e+01
+ts69_21             =   3.00228e+01
+twid_21             =   2.99815e+01
+trpk_del_21         =   2.99520e+01
+ts14_fall_21        =   2.99659e+01
+ts69_fall_21        =   3.00237e+01
+twid_fall_21        =   2.99824e+01
+trpk_del_fall_21    =   2.99526e+01
+trrc_21             =   2.99913e+01
+trrc_fall_21        =   2.99460e+01
+sh14_21             =  2.758842e-01
+sh69_21             =  1.970873e-01
+bi0_curr_21         =  3.024713e-01
+bi0_prev_21         =  2.978851e-01
+bi1_curr_21         =  3.069437e-01
+bi1_prev_21         =  3.021731e-01
+ecg_at_f8cap_21     =  4.003274e-01
+pw_shb_21           =  1.450817e-01
+pw_shp_21           =  1.438453e-01
+trpk_22             =   2.99460e+01
+ts14_22             =   2.99650e+01
+ts69_22             =   3.00228e+01
+twid_22             =   2.99815e+01
+trpk_del_22         =   2.99520e+01
+ts14_fall_22        =   2.99659e+01
+ts69_fall_22        =   3.00237e+01
+twid_fall_22        =   2.99824e+01
+trpk_del_fall_22    =   2.99526e+01
+trrc_22             =   2.99913e+01
+trrc_fall_22        =   2.99460e+01
+sh14_22             =  2.707426e-01
+sh69_22             =  1.920456e-01
+bi0_curr_22         =  3.003397e-01
+bi0_prev_22         =  2.957563e-01
+bi1_curr_22         =  3.047811e-01
+bi1_prev_22         =  3.000433e-01
+ecg_at_f8cap_22     =  4.003274e-01
+pw_shb_22           =  1.404024e-01
+pw_shp_22           =  1.391841e-01
+trpk_23             =   2.99460e+01
+ts14_23             =   2.99650e+01
+ts69_23             =   3.00228e+01
+twid_23             =   2.99815e+01
+trpk_del_23         =   2.99520e+01
+ts14_fall_23        =   2.99659e+01
+ts69_fall_23        =   3.00237e+01
+twid_fall_23        =   2.99824e+01
+trpk_del_fall_23    =   2.99526e+01
+trrc_23             =   2.99913e+01
+trrc_fall_23        =   2.99460e+01
+sh14_23             =  2.656595e-01
+sh69_23             =  1.870725e-01
+bi0_curr_23         =  2.982314e-01
+bi0_prev_23         =  2.936507e-01
+bi1_curr_23         =  3.026470e-01
+bi1_prev_23         =  2.979367e-01
+ecg_at_f8cap_23     =  4.003274e-01
+pw_shb_23           =  1.358454e-01
+pw_shp_23           =  1.346477e-01
+trpk_24             =   2.99460e+01
+ts14_24             =   2.99650e+01
+ts69_24             =   3.00228e+01
+twid_24             =   2.99815e+01
+trpk_del_24         =   2.99520e+01
+ts14_fall_24        =   2.99659e+01
+ts69_fall_24        =   3.00237e+01
+twid_fall_24        =   2.99824e+01
+trpk_del_fall_24    =   2.99526e+01
+trrc_24             =   2.99913e+01
+trrc_fall_24        =   2.99460e+01
+sh14_24             =  2.603067e-01
+sh69_24             =  1.818500e-01
+bi0_curr_24         =  2.960102e-01
+bi0_prev_24         =  2.914324e-01
+bi1_curr_24         =  3.004155e-01
+bi1_prev_24         =  2.957174e-01
+ecg_at_f8cap_24     =  4.003274e-01
+pw_shb_24           =  1.311323e-01
+pw_shp_24           =  1.299597e-01
+trpk_25             =   2.99460e+01
+ts14_25             =   2.99650e+01
+ts69_25             =   3.00228e+01
+twid_25             =   2.99815e+01
+trpk_del_25         =   2.99520e+01
+ts14_fall_25        =   2.99659e+01
+ts69_fall_25        =   3.00237e+01
+twid_fall_25        =   2.99824e+01
+trpk_del_fall_25    =   2.99526e+01
+trrc_25             =   2.99913e+01
+trrc_fall_25        =   2.99460e+01
+sh14_25             =  2.549849e-01
+sh69_25             =  1.766753e-01
+bi0_curr_25         =  2.938007e-01
+bi0_prev_25         =  2.892260e-01
+bi1_curr_25         =  2.981670e-01
+bi1_prev_25         =  2.935100e-01
+ecg_at_f8cap_25     =  4.003274e-01
+pw_shb_25           =  1.265471e-01
+pw_shp_25           =  1.254032e-01
+trpk_26             =   2.99460e+01
+ts14_26             =   2.99650e+01
+ts69_26             =   3.00228e+01
+twid_26             =   2.99815e+01
+trpk_del_26         =   2.99520e+01
+ts14_fall_26        =   2.99659e+01
+ts69_fall_26        =   3.00237e+01
+twid_fall_26        =   2.99824e+01
+trpk_del_fall_26    =   2.99526e+01
+trrc_26             =   2.99913e+01
+trrc_fall_26        =   2.99460e+01
+sh14_26             =  2.498426e-01
+sh69_26             =  1.716948e-01
+bi0_curr_26         =  2.916645e-01
+bi0_prev_26         =  2.870937e-01
+bi1_curr_26         =  2.959475e-01
+bi1_prev_26         =  2.913766e-01
+ecg_at_f8cap_26     =  4.003274e-01
+pw_shb_26           =  1.222255e-01
+pw_shp_26           =  1.211129e-01
+trpk_27             =   2.99460e+01
+ts14_27             =   2.99650e+01
+ts69_27             =   3.00228e+01
+twid_27             =   2.99815e+01
+trpk_del_27         =   2.99520e+01
+ts14_fall_27        =   2.99659e+01
+ts69_fall_27        =   3.00237e+01
+twid_fall_27        =   2.99824e+01
+trpk_del_fall_27    =   2.99526e+01
+trrc_27             =   2.99913e+01
+trrc_fall_27        =   2.99460e+01
+sh14_27             =  2.449111e-01
+sh69_27             =  1.669405e-01
+bi0_curr_27         =  2.896146e-01
+bi0_prev_27         =  2.850467e-01
+bi1_curr_27         =  2.937542e-01
+bi1_prev_27         =  2.893285e-01
+ecg_at_f8cap_27     =  4.003274e-01
+pw_shb_27           =  1.181955e-01
+pw_shp_27           =  1.171168e-01
+trpk_28             =   2.99460e+01
+ts14_28             =   2.99650e+01
+ts69_28             =   3.00228e+01
+twid_28             =   2.99815e+01
+trpk_del_28         =   2.99520e+01
+ts14_fall_28        =   2.99659e+01
+ts69_fall_28        =   3.00237e+01
+twid_fall_28        =   2.99824e+01
+trpk_del_fall_28    =   2.99526e+01
+trrc_28             =   2.99913e+01
+trrc_fall_28        =   2.99460e+01
+sh14_28             =  2.398599e-01
+sh69_28             =  1.620968e-01
+bi0_curr_28         =  2.875136e-01
+bi0_prev_28         =  2.829493e-01
+bi1_curr_28         =  2.916278e-01
+bi1_prev_28         =  2.872301e-01
+ecg_at_f8cap_28     =  4.003274e-01
+pw_shb_28           =  1.141985e-01
+pw_shp_28           =  1.131584e-01
+trpk_29             =   2.99460e+01
+ts14_29             =   2.99650e+01
+ts69_29             =   3.00228e+01
+twid_29             =   2.99815e+01
+trpk_del_29         =   2.99520e+01
+ts14_fall_29        =   2.99659e+01
+ts69_fall_29        =   3.00237e+01
+twid_fall_29        =   2.99824e+01
+trpk_del_fall_29    =   2.99526e+01
+trrc_29             =   2.99913e+01
+trrc_fall_29        =   2.99460e+01
+sh14_29             =  4.503377e-01
+sh69_29             =  2.333784e-01
+bi0_curr_29         =  4.019080e-01
+bi0_prev_29         =  2.820155e-01
+bi1_curr_29         =  3.755815e-01
+bi1_prev_29         =  2.862720e-01
+ecg_at_f8cap_29     =  4.003274e-01
+pw_shb_29           =  1.123133e-01
+pw_shp_29           =  1.112934e-01
+sh14_30             =  4.422987e-01
+sh69_30             =  2.255399e-01
+bi0_curr_30         =  3.986211e-01
+bi0_prev_30         =  3.828133e-01
+bi1_curr_30         =  3.722866e-01
+bi1_prev_30         =  3.647564e-01
+pw_shb_30           =  1.065286e-01
+pw_shp_30           =  1.055797e-01
+sh14_31             =  4.372051e-01
+sh69_31             =  2.205780e-01
+bi0_curr_31         =  3.965258e-01
+bi0_prev_31         =  3.807234e-01
+bi1_curr_31         =  3.701744e-01
+bi1_prev_31         =  3.626702e-01
+pw_shb_31           =  1.030850e-01
+pw_shp_31           =  1.021857e-01
+sh14_32             =  4.322684e-01
+sh69_32             =  2.157729e-01
+bi0_curr_32         =  3.944943e-01
+bi0_prev_32         =  3.786967e-01
+bi1_curr_32         =  3.681416e-01
+bi1_prev_32         =  3.606470e-01
+pw_shb_32           =  9.992628e-02
+pw_shp_32           =  9.907820e-02
+sh14_33             =  4.276106e-01
+sh69_33             =  2.112438e-01
+bi0_curr_33         =  3.925772e-01
+bi0_prev_33         =  3.767845e-01
+bi1_curr_33         =  3.662083e-01
+bi1_prev_33         =  3.587382e-01
+pw_shb_33           =  9.711490e-02
+pw_shp_33           =  9.631725e-02
+sh14_34             =  4.227876e-01
+sh69_34             =  2.065593e-01
+bi0_curr_34         =  3.905914e-01
+bi0_prev_34         =  3.748042e-01
+bi1_curr_34         =  3.642114e-01
+bi1_prev_34         =  3.567614e-01
+pw_shb_34           =  9.438298e-02
+pw_shp_34           =  9.363922e-02
+rpk_amp_5           =  9.027909e-11 at=  5.743417e+00
+rpk_raw_5           =  1.739548e-07 at=  5.741139e+00
+ecg_at_rpk_5        =  1.622669e-01
+sh_sym_5            =  3.005441e-01
+bi_out_5            =  2.947071e-01
+ecg_at_s14_5        =  1.810965e-01
+rpk_amp_6           =  9.050815e-11 at=  6.745194e+00
+rpk_raw_6           =  1.739548e-07 at=  6.744494e+00
+ecg_at_rpk_6        =  1.607856e-01
+sh_sym_6            =  3.006814e-01
+bi_out_6            =  2.947255e-01
+ecg_at_s14_6        =  1.802074e-01
+rpk_amp_7           =  9.082446e-11 at=  7.777778e+00
+rpk_raw_7           =  1.739548e-07 at=  7.772972e+00
+ecg_at_rpk_7        =  1.565922e-01
+sh_sym_7            =  3.008228e-01
+bi_out_7            =  2.947398e-01
+ecg_at_s14_7        =  1.698969e-01
+rpk_amp_8           =  9.082700e-11 at=  8.744444e+00
+rpk_raw_8           =  1.739548e-07 at=  8.747222e+00
+ecg_at_rpk_8        =  1.516593e-01
+sh_sym_8            =  3.009529e-01
+bi_out_8            =  2.947629e-01
+ecg_at_s14_8        =  1.646810e-01
+rpk_amp_9           =  9.082702e-11 at=  9.730606e+00
+rpk_raw_9           =  1.739548e-07 at=  9.730556e+00
+ecg_at_rpk_9        =  1.592890e-01
+sh_sym_9            =  3.010848e-01
+bi_out_9            =  2.947860e-01
+ecg_at_s14_9        =  1.744888e-01
+rpk_amp_10          =  9.082702e-11 at=  1.065175e+01
+rpk_raw_10          =  1.739548e-07 at=  1.065000e+01
+ecg_at_rpk_10       =  1.750814e-01
+sh_sym_10           =  3.012112e-01
+bi_out_10           =  2.948071e-01
+ecg_at_s14_10       =  1.877332e-01
+rpk_amp_11          =  9.000049e-01 at=  1.115000e+01
+rpk_raw_11          =  9.000001e-01 at=  1.115000e+01
+ecg_at_rpk_11       =  3.360150e-01
+sh_sym_11           =  3.254724e-01
+bi_out_11           =  3.252810e-01
+ecg_at_s14_11       =  3.172743e-01
+rpk_amp_12          =  9.028075e-11 at=  1.253558e+01
+rpk_raw_12          =  1.739548e-07 at=  1.253611e+01
+ecg_at_rpk_12       =  1.886519e-01
+sh_sym_12           =  3.251811e-01
+bi_out_12           =  2.970660e-01
+ecg_at_s14_12       =  1.928300e-01
+rpk_amp_13          =  9.028377e-11 at=  1.355561e+01
+rpk_raw_13          =  1.739548e-07 at=  1.355631e+01
+ecg_at_rpk_13       =  1.849778e-01
+sh_sym_13           =  3.253011e-01
+bi_out_13           =  2.970704e-01
+ecg_at_s14_13       =  1.989634e-01
+rpk_amp_14          =  9.028015e-11 at=  1.460958e+01
+rpk_raw_14          =  1.739548e-07 at=  1.460833e+01
+ecg_at_rpk_14       =  1.703999e-01
+sh_sym_14           =  3.254234e-01
+bi_out_14           =  2.970825e-01
+ecg_at_s14_14       =  1.929485e-01
+
+
+Total analysis time (seconds) = 198.275
+
+Total elapsed time (seconds) = 236.861 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1614.516 MB.
+Maximum ngspice program size =  283.430 MB.
+Current ngspice program size =  283.430 MB.
+

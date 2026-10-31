@@ -1,0 +1,1123 @@
+======================================================================
+INTEGRATION TEST: Analog supplementary + feature circuits
+  Analog: bias_gen, rpeak_detector, pulse_gen, delay_timer, rpeak->rr_timing, rr_cap+pw_base+pw_peak(pwave_pred)
+  Ideal:  NONE — fully analog pipeline
+======================================================================
+
+--- Record 101 ---
+  35 beats, gain=0.1164
+  rpeak pos_thresh: 0.3666V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4047V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3834V  avg_rr=881ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 540s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3814 ewma=0.3821 thresh=0.4021 cmp@-30=0.9000 esamp=0.3814 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3788 ewma=0.3814 thresh=0.4014 cmp@-30=0.9000 esamp=0.3788 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3849 ewma=0.3803 thresh=0.4003 cmp@-30=0.9000 esamp=0.3849 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3884 ewma=0.3802 thresh=0.4002 cmp@-30=0.9000 esamp=0.3884 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.3882 ewma=0.3804 thresh=0.4004 cmp@-30=0.9000 esamp=0.3882 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3891 ewma=0.3805 thresh=0.4005 cmp@-30=0.9000 esamp=0.3891 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3832 ewma=0.3807 thresh=0.4007 cmp@-30=0.9000 esamp=0.3832 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3850 pwb_max=0.900 pwp_max=0.900 tpwb=R-211ms tpwp=R-136ms gap=76ms sf2@pwb=0.4043 th@pwb=0.4059 sf2@pwp=0.3959 th@pwp=0.3975
+    beat 3: sf2=0.3805 pwb_max=0.900 pwp_max=0.900 tpwb=R-249ms tpwp=R-173ms gap=76ms sf2@pwb=0.4045 th@pwb=0.4056 sf2@pwp=0.3960 th@pwp=0.3972
+    beat 4: sf2=0.3781 pwb_max=0.000 pwp_max=0.900 tpwb=R-264ms tpwp=R-189ms gap=75ms sf2@pwb=0.4037 th@pwb=0.4049 sf2@pwp=0.3946 th@pwp=0.3964
+    beat 5: sf2=0.3841 pwb_max=0.900 pwp_max=0.900 tpwb=R-200ms tpwp=R-125ms gap=76ms sf2@pwb=0.4026 th@pwb=0.4038 sf2@pwp=0.3938 th@pwp=0.3953
+    beat 6: sf2=0.3876 pwb_max=0.900 pwp_max=0.900 tpwb=R-168ms tpwp=R-92ms gap=76ms sf2@pwb=0.4022 th@pwb=0.4036 sf2@pwp=0.3940 th@pwp=0.3952
+    beat 7: sf2=0.3874 pwb_max=0.900 pwp_max=0.900 tpwb=R-171ms tpwp=R-96ms gap=76ms sf2@pwb=0.4026 th@pwb=0.4038 sf2@pwp=0.3939 th@pwp=0.3953
+    beat 8: sf2=0.3883 pwb_max=0.900 pwp_max=0.900 tpwb=R-165ms tpwp=R-89ms gap=75ms sf2@pwb=0.4027 th@pwb=0.4040 sf2@pwp=0.3942 th@pwp=0.3955
+    beat 9: sf2=0.3824 pwb_max=0.900 pwp_max=0.900 tpwb=R-219ms tpwp=R-144ms gap=75ms sf2@pwb=0.4025 th@pwb=0.4042 sf2@pwp=0.3942 th@pwp=0.3957
+  rpeak valid: 35/35, rpk_delayed valid: 33/35, delay_timer valid: 30/35
+    beat 5: rpk=-5.7, rpk_del=0.2, s14=13.6, wid=27.5, s69=69.2 ms from R
+    beat 6: rpk=-7.7, rpk_del=-1.8, s14=11.4, wid=25.5, s69=66.8 ms from R
+    beat 7: rpk=-7.6, rpk_del=-1.8, s14=11.6, wid=26.0, s69=67.2 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 869.4ms  f1=0.3007  py=-0.0226  sf=0.3913  ewma=0.3795  diff=+11.8mV  rpk_prev=-4.3ms  eff_d=818.8ms
+    beat 16: rr= 911.1ms  f1=0.2977  py=+0.0213  sf=0.3862  ewma=0.3798  diff=+6.4mV  rpk_prev=-8.8ms  eff_d=864.9ms
+    beat 17: rr= 913.9ms  f1=0.2976  py=+0.0219  sf=0.3858  ewma=0.3796  diff=+6.3mV  rpk_prev=-8.7ms  eff_d=867.6ms
+    beat 18: rr= 902.8ms  f1=0.2987  py=+0.0086  sf=0.3876  ewma=0.3793  diff=+8.3mV  rpk_prev=-4.2ms  eff_d=852.0ms
+    beat 19: rr= 847.2ms  f1=0.3021  py=-0.0478  sf=0.3935  ewma=0.3792  diff=+14.3mV  rpk_prev=-7.2ms  eff_d=799.4ms
+    beat 20: rr= 838.9ms  f1=0.3024  py=-0.0513  sf=0.3944  ewma=0.3798  diff=+14.7mV  rpk_prev=-7.3ms  eff_d=791.2ms
+    beat 21: rr= 869.4ms  f1=0.3001  py=-0.0157  sf=0.3911  ewma=0.3803  diff=+10.7mV  rpk_prev=-6.8ms  eff_d=821.2ms
+    beat 22: rr= 888.9ms  f1=0.2988  py=+0.0054  sf=0.3888  ewma=0.3805  diff=+8.4mV  rpk_prev=-7.3ms  eff_d=841.2ms
+    beat 23: rr= 897.2ms  f1=0.2984  py=+0.0132  sf=0.3880  ewma=0.3804  diff=+7.6mV  rpk_prev=-6.3ms  eff_d=848.5ms
+    beat 24: rr= 886.1ms  f1=0.2991  py=+0.0007  sf=0.3893  ewma=0.3802  diff=+9.0mV  rpk_prev=-5.9ms  eff_d=837.0ms
+    beat 25: rr= 858.3ms  f1=0.3010  py=-0.0271  sf=0.3927  ewma=0.3803  diff=+12.5mV  rpk_prev=-2.9ms  eff_d=806.3ms
+    beat 26: rr= 852.8ms  f1=0.3010  py=-0.0300  sf=0.3930  ewma=0.3806  diff=+12.4mV  rpk_prev=-6.3ms  eff_d=804.0ms
+    beat 27: rr= 847.2ms  f1=0.3011  py=-0.0325  sf=0.3936  ewma=0.3809  diff=+12.7mV  rpk_prev=-6.2ms  eff_d=798.5ms
+    beat 28: rr= 819.4ms  f1=0.3028  py=-0.0571  sf=0.3965  ewma=0.3816  diff=+14.9mV  rpk_prev=-7.1ms  eff_d=771.5ms
+    beat 29: rr= 852.8ms  f1=0.2999  py=-0.0180  sf=0.3927  ewma=0.3822  diff=+10.5mV  rpk_prev=-8.4ms  eff_d=806.2ms
+    beat 30: rr= 902.8ms  f1=0.2969  py=+0.0338  sf=0.3874  ewma=0.3824  diff=+5.0mV  rpk_prev=-6.6ms  eff_d=854.4ms
+    beat 31: rr= 911.1ms  f1=0.2966  py=+0.0387  sf=0.3863  ewma=0.3820  diff=+4.3mV  rpk_prev=-7.9ms  eff_d=864.0ms
+    beat 32: rr= 858.3ms  f1=0.3002  py=-0.0179  sf=0.3925  ewma=0.3815  diff=+10.9mV  rpk_prev=-5.4ms  eff_d=808.7ms
+    beat 33: rr= 838.9ms  f1=0.3012  py=-0.0356  sf=0.3945  ewma=0.3817  diff=+12.8mV  rpk_prev=-6.5ms  eff_d=790.4ms
+    beat 34: rr= 813.9ms  f1=0.3026  py=-0.0570  sf=0.3973  ewma=0.3821  diff=+15.2mV  rpk_prev=-6.3ms  eff_d=765.2ms
+  F1 Pearson r=-0.9980  Spearman rho=-0.9940  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9943  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9951  rpk_range=5.8ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9985  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9955  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.41549 ecg_sim=0.41520 delta=+0.29mV  tfall=R+1.0ms
+    beat  6: cv=0.46819 ecg_sim=0.45946 delta=+8.73mV  tfall=R-1.3ms
+    beat  7: cv=0.45271 ecg_sim=0.45287 delta=-0.16mV  tfall=R-1.2ms
+    beat  8: cv=0.43815 ecg_sim=0.44164 delta=-3.48mV  tfall=R-0.8ms
+    beat  9: cv=0.42990 ecg_sim=0.43024 delta=-0.34mV  tfall=R+0.6ms
+    beat 10: cv=0.43090 ecg_sim=0.43075 delta=+0.15mV  tfall=R-1.3ms
+    beat 11: cv=0.43366 ecg_sim=0.43422 delta=-0.56mV  tfall=R+0.7ms
+    beat 13: cv=0.42812 ecg_sim=0.42861 delta=-0.49mV  tfall=R+0.9ms
+    beat 14: cv=0.39006 ecg_sim=0.39156 delta=-1.51mV  tfall=R+2.4ms
+    beat 15: cv=0.45125 ecg_sim=0.44429 delta=+6.96mV  tfall=R-2.5ms
+  F8 rho sim_ecg=0.9923  ecg_at_time=0.9923
+  F1:rr_ratio      rho=0.9940  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9903  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9980  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.6034)  (fall=0.9519 sdiff=0.8870)
+  F4:bi_L1         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.5577)  (fall=0.9922 sdiff=0.9896)
+  F5:pwave         rho=0.9987  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.3253)
+  F6:width         rho=1.0000  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9860)
+  F7:slope         rho=1.0000  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.5181)  (fall_ref=0.9453)
+  F8:symmetry      rho=0.9923  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7204)  (ecgref=0.9923)
+
+--- Record 102 ---
+  35 beats, gain=0.1675
+  rpeak pos_thresh: 0.3683V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4055V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3896V  avg_rr=826ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 358s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3873 ewma=0.3892 thresh=0.4092 cmp@-30=0.9000 esamp=0.3873 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3897 ewma=0.3884 thresh=0.4084 cmp@-30=0.9000 esamp=0.3897 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3934 ewma=0.3879 thresh=0.4079 cmp@-30=0.9000 esamp=0.3934 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3954 ewma=0.3878 thresh=0.4078 cmp@-30=0.9000 esamp=0.3954 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.3963 ewma=0.3879 thresh=0.4079 cmp@-30=0.9000 esamp=0.3963 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3949 ewma=0.3880 thresh=0.4080 cmp@-30=0.9000 esamp=0.3949 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3955 ewma=0.3881 thresh=0.4081 cmp@-30=0.9000 esamp=0.3955 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3942 pwb_max=0.905 pwp_max=0.900 tpwb=R-191ms tpwp=R-115ms gap=75ms sf2@pwb=0.4116 th@pwb=0.4128 sf2@pwp=0.4031 th@pwp=0.4043
+    beat 3: sf2=0.3866 pwb_max=0.000 pwp_max=0.900 tpwb=R-258ms tpwp=R-183ms gap=75ms sf2@pwb=0.4115 th@pwb=0.4127 sf2@pwp=0.4027 th@pwp=0.4043
+    beat 4: sf2=0.3889 pwb_max=0.900 pwp_max=0.900 tpwb=R-230ms tpwp=R-155ms gap=75ms sf2@pwb=0.4105 th@pwb=0.4119 sf2@pwp=0.4022 th@pwp=0.4034
+    beat 5: sf2=0.3925 pwb_max=0.900 pwp_max=0.900 tpwb=R-192ms tpwp=R-117ms gap=75ms sf2@pwb=0.4101 th@pwb=0.4113 sf2@pwp=0.4016 th@pwp=0.4028
+    beat 6: sf2=0.3946 pwb_max=0.900 pwp_max=0.900 tpwb=R-174ms tpwp=R-98ms gap=76ms sf2@pwb=0.4099 th@pwb=0.4113 sf2@pwp=0.4012 th@pwp=0.4028
+    beat 7: sf2=0.3954 pwb_max=0.900 pwp_max=0.900 tpwb=R-166ms tpwp=R-91ms gap=75ms sf2@pwb=0.4098 th@pwb=0.4113 sf2@pwp=0.4014 th@pwp=0.4028
+    beat 8: sf2=0.3941 pwb_max=0.900 pwp_max=0.900 tpwb=R-180ms tpwp=R-104ms gap=75ms sf2@pwb=0.4099 th@pwb=0.4115 sf2@pwp=0.4014 th@pwp=0.4030
+    beat 9: sf2=0.3947 pwb_max=0.900 pwp_max=0.900 tpwb=R-175ms tpwp=R-100ms gap=75ms sf2@pwb=0.4102 th@pwb=0.4115 sf2@pwp=0.4014 th@pwp=0.4031
+  rpeak valid: 35/35, rpk_delayed valid: 34/35, delay_timer valid: 29/35
+    beat 5: rpk=-7.1, rpk_del=-1.3, s14=12.2, wid=26.4, s69=67.5 ms from R
+    beat 6: rpk=-4.9, rpk_del=1.0, s14=14.1, wid=28.3, s69=69.7 ms from R
+    beat 7: rpk=-5.5, rpk_del=0.6, s14=13.6, wid=28.0, s69=69.2 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 797.2ms  f1=0.3007  py=-0.0149  sf=0.3992  ewma=0.3873  diff=+11.9mV  rpk_prev=-6.3ms  eff_d=748.5ms
+    beat 16: rr= 827.8ms  f1=0.2987  py=+0.0172  sf=0.3959  ewma=0.3876  diff=+8.3mV  rpk_prev=-5.1ms  eff_d=777.9ms
+    beat 17: rr= 838.9ms  f1=0.2981  py=+0.0265  sf=0.3947  ewma=0.3875  diff=+7.2mV  rpk_prev=-5.3ms  eff_d=789.2ms
+    beat 18: rr= 838.9ms  f1=0.2981  py=+0.0239  sf=0.3945  ewma=0.3873  diff=+7.2mV  rpk_prev=-6.7ms  eff_d=790.5ms
+    beat 19: rr= 877.8ms  f1=0.2960  py=+0.0604  sf=0.3903  ewma=0.3871  diff=+3.2mV  rpk_prev=-5.0ms  eff_d=827.8ms
+    beat 20: rr= 822.2ms  f1=0.2996  py=-0.0012  sf=0.3966  ewma=0.3865  diff=+10.1mV  rpk_prev=-5.1ms  eff_d=772.3ms
+    beat 21: rr= 791.7ms  f1=0.3016  py=-0.0316  sf=0.4001  ewma=0.3866  diff=+13.5mV  rpk_prev=-4.1ms  eff_d=740.8ms
+    beat 22: rr= 794.4ms  f1=0.3010  py=-0.0257  sf=0.3995  ewma=0.3871  diff=+12.4mV  rpk_prev=-6.2ms  eff_d=745.7ms
+    beat 23: rr= 808.3ms  f1=0.3000  py=-0.0092  sf=0.3982  ewma=0.3874  diff=+10.8mV  rpk_prev=-4.4ms  eff_d=757.7ms
+    beat 24: rr= 852.8ms  f1=0.2971  py=+0.0361  sf=0.3929  ewma=0.3876  diff=+5.4mV  rpk_prev=-6.8ms  eff_d=804.6ms
+    beat 25: rr= 855.6ms  f1=0.2973  py=+0.0353  sf=0.3928  ewma=0.3871  diff=+5.7mV  rpk_prev=-5.0ms  eff_d=805.5ms
+    beat 26: rr= 838.9ms  f1=0.2983  py=+0.0151  sf=0.3945  ewma=0.3868  diff=+7.7mV  rpk_prev=-6.4ms  eff_d=790.3ms
+    beat 27: rr= 872.2ms  f1=0.3002  py=+0.0469  sf=0.3977  ewma=0.3866  diff=+11.1mV  rpk_prev=-4.3ms  eff_d=821.5ms
+    beat 28: rr= 805.6ms  f1=0.3005  py=-0.0244  sf=0.3984  ewma=0.3868  diff=+11.6mV  rpk_prev=-5.1ms  eff_d=755.7ms
+    beat 29: rr= 777.8ms  f1=0.3026  py=-0.0498  sf=0.4018  ewma=0.3865  diff=+15.3mV  rpk_prev=-2.8ms  eff_d=725.6ms
+    beat 30: rr= 805.6ms  f1=0.3002  py=-0.0170  sf=0.3983  ewma=0.3871  diff=+11.1mV  rpk_prev=-6.0ms  eff_d=756.5ms
+    beat 31: rr= 825.0ms  f1=0.2990  py=+0.0041  sf=0.3962  ewma=0.3873  diff=+8.9mV  rpk_prev=-5.3ms  eff_d=775.3ms
+    beat 32: rr= 861.1ms  f1=0.2970  py=+0.0398  sf=0.3924  ewma=0.3873  diff=+5.2mV  rpk_prev=-2.9ms  eff_d=809.0ms
+    beat 33: rr= 847.2ms  f1=0.2979  py=+0.0220  sf=0.3939  ewma=0.3869  diff=+7.0mV  rpk_prev=-3.8ms  eff_d=796.1ms
+    beat 34: rr= 827.8ms  f1=0.2992  py=+0.0003  sf=0.3960  ewma=0.3867  diff=+9.3mV  rpk_prev=-4.7ms  eff_d=777.4ms
+  F1 Pearson r=-0.8861  Spearman rho=-0.8722  n=20
+  SF vs annotation_RR: Spearman |rho|=0.8983  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9962  rpk_range=4.3ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9008  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.8797  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.43091 ecg_sim=0.43139 delta=-0.49mV  tfall=R-0.7ms
+    beat  6: cv=0.43481 ecg_sim=0.43456 delta=+0.25mV  tfall=R+1.6ms
+    beat  7: cv=0.38390 ecg_sim=0.38713 delta=-3.23mV  tfall=R+1.2ms
+    beat  8: cv=0.38850 ecg_sim=0.38973 delta=-1.24mV  tfall=R+3.3ms
+    beat  9: cv=0.42456 ecg_sim=0.42559 delta=-1.03mV  tfall=R+2.2ms
+    beat 10: cv=0.38564 ecg_sim=0.38685 delta=-1.21mV  tfall=R+2.1ms
+    beat 11: cv=0.36037 ecg_sim=0.36036 delta=+0.01mV  tfall=R+1.5ms
+    beat 12: cv=0.39206 ecg_sim=0.39394 delta=-1.88mV  tfall=R+0.4ms
+    beat 13: cv=0.39659 ecg_sim=0.39764 delta=-1.05mV  tfall=R+1.6ms
+    beat 14: cv=0.36339 ecg_sim=0.36485 delta=-1.46mV  tfall=R+0.2ms
+  F8 rho sim_ecg=0.9103  ecg_at_time=0.9103
+  F1:rr_ratio      rho=0.8722  [WARN]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.7881  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.3609)  (fall=0.7856 sdiff=0.9377)
+  F4:bi_L1         rho=0.9991  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.2757)  (fall=0.6709 sdiff=0.9180)
+  F5:pwave         rho=0.9956  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.0413)
+  F6:width         rho=0.9998  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9634)
+  F7:slope         rho=0.9991  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.9674)  (fall_ref=0.9991)
+  F8:symmetry      rho=0.9103  [WARN]  trigger=DELAYED rpk  (fixed_ref=0.2920)  (ecgref=0.9103)
+
+--- Record 105 ---
+  35 beats, gain=0.0899
+  rpeak pos_thresh: 0.3544V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4038V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.4007V  avg_rr=726ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 16514s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.4049 ewma=0.4009 thresh=0.4209 cmp@-30=0.8999 esamp=0.4049 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.4049 ewma=0.4010 thresh=0.4210 cmp@-30=0.8999 esamp=0.4049 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.4034 ewma=0.4011 thresh=0.4211 cmp@-30=0.9000 esamp=0.4034 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3998 ewma=0.4010 thresh=0.4210 cmp@-30=0.9000 esamp=0.3998 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.4003 ewma=0.4006 thresh=0.4206 cmp@-30=0.9000 esamp=0.4004 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.4030 ewma=0.4003 thresh=0.4203 cmp@-30=0.9000 esamp=0.4030 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.4063 ewma=0.4003 thresh=0.4203 cmp@-30=0.8999 esamp=0.4063 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.4044 pwb_max=0.900 pwp_max=0.900 tpwb=R-202ms tpwp=R-127ms gap=75ms sf2@pwb=0.4229 th@pwb=0.4243 sf2@pwp=0.4144 th@pwp=0.4158
+    beat 3: sf2=0.4041 pwb_max=0.900 pwp_max=0.900 tpwb=R-206ms tpwp=R-131ms gap=75ms sf2@pwb=0.4232 th@pwb=0.4244 sf2@pwp=0.4146 th@pwp=0.4160
+    beat 4: sf2=0.4041 pwb_max=0.900 pwp_max=0.900 tpwb=R-206ms tpwp=R-131ms gap=75ms sf2@pwb=0.4233 th@pwb=0.4245 sf2@pwp=0.4145 th@pwp=0.4160
+    beat 5: sf2=0.4026 pwb_max=0.900 pwp_max=0.900 tpwb=R-221ms tpwp=R-146ms gap=75ms sf2@pwb=0.4230 th@pwb=0.4246 sf2@pwp=0.4146 th@pwp=0.4161
+    beat 6: sf2=0.3989 pwb_max=0.000 pwp_max=0.900 tpwb=R-253ms tpwp=R-178ms gap=75ms sf2@pwb=0.4229 th@pwb=0.4245 sf2@pwp=0.4145 th@pwp=0.4160
+    beat 7: sf2=0.3995 pwb_max=0.900 pwp_max=0.900 tpwb=R-243ms tpwp=R-168ms gap=75ms sf2@pwb=0.4228 th@pwb=0.4240 sf2@pwp=0.4142 th@pwp=0.4156
+    beat 8: sf2=0.4022 pwb_max=0.900 pwp_max=0.900 tpwb=R-217ms tpwp=R-142ms gap=75ms sf2@pwb=0.4224 th@pwb=0.4237 sf2@pwp=0.4136 th@pwp=0.4153
+    beat 9: sf2=0.4055 pwb_max=0.900 pwp_max=0.900 tpwb=R-187ms tpwp=R-112ms gap=75ms sf2@pwb=0.4222 th@pwb=0.4237 sf2@pwp=0.4141 th@pwp=0.4153
+  rpeak valid: 35/35, rpk_delayed valid: 34/35, delay_timer valid: 32/35
+    beat 5: rpk=-12.6, rpk_del=-6.8, s14=6.6, wid=20.4, s69=62.1 ms from R
+    beat 6: rpk=-13.0, rpk_del=-6.8, s14=6.1, wid=20.4, s69=61.7 ms from R
+    beat 7: rpk=-14.1, rpk_del=-8.1, s14=5.1, wid=19.2, s69=60.8 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 747.2ms  f1=0.2959  py=+0.0214  sf=0.4039  ewma=0.4006  diff=+3.2mV  rpk_prev=-14.9ms  eff_d=707.1ms
+    beat 16: rr= 733.3ms  f1=0.2969  py=+0.0054  sf=0.4056  ewma=0.4004  diff=+5.2mV  rpk_prev=-13.1ms  eff_d=691.5ms
+    beat 17: rr= 738.9ms  f1=0.2968  py=+0.0104  sf=0.4053  ewma=0.4003  diff=+5.0mV  rpk_prev=-10.7ms  eff_d=694.6ms
+    beat 18: rr= 702.8ms  f1=0.2989  py=-0.0268  sf=0.4091  ewma=0.4002  diff=+8.9mV  rpk_prev=-12.9ms  eff_d=660.6ms
+    beat 19: rr= 702.8ms  f1=0.2988  py=-0.0241  sf=0.4093  ewma=0.4005  diff=+8.8mV  rpk_prev=-11.0ms  eff_d=658.8ms
+    beat 20: rr= 427.8ms  f1=0.3170  py=-0.2967  sf=0.4395  ewma=0.4009  diff=+38.6mV  rpk_prev=-10.5ms  eff_d=383.3ms
+    beat 21: rr=1005.6ms  f1=0.2835  py=+0.3108  sf=0.3743  ewma=0.4005  diff=-26.2mV  rpk_prev=-20.8ms  eff_d=971.4ms
+    beat 22: rr= 755.6ms  f1=0.2973  py=+0.0297  sf=0.4031  ewma=0.3973  diff=+5.8mV  rpk_prev=-13.7ms  eff_d=714.2ms
+    beat 23: rr= 758.3ms  f1=0.2972  py=+0.0295  sf=0.4028  ewma=0.3972  diff=+5.6mV  rpk_prev=-13.6ms  eff_d=716.9ms
+    beat 24: rr= 744.4ms  f1=0.2981  py=+0.0127  sf=0.4044  ewma=0.3971  diff=+7.4mV  rpk_prev=-12.6ms  eff_d=702.1ms
+    beat 25: rr= 722.2ms  f1=0.2995  py=-0.0108  sf=0.4071  ewma=0.3972  diff=+10.0mV  rpk_prev=-11.0ms  eff_d=678.2ms
+    beat 26: rr= 694.4ms  f1=0.3009  py=-0.0375  sf=0.4101  ewma=0.3976  diff=+12.6mV  rpk_prev=-11.7ms  eff_d=651.2ms
+    beat 27: rr= 722.2ms  f1=0.2993  py=-0.0060  sf=0.4071  ewma=0.3974  diff=+9.6mV  rpk_prev=-11.7ms  eff_d=678.9ms
+    beat 28: rr= 725.0ms  f1=0.2989  py=-0.0026  sf=0.4065  ewma=0.3978  diff=+8.8mV  rpk_prev=-13.6ms  eff_d=683.6ms
+    beat 29: rr= 430.6ms  f1=0.3184  py=-0.2968  sf=0.4388  ewma=0.3982  diff=+40.6mV  rpk_prev=-14.3ms  eff_d=389.8ms
+    beat 30: rr=1022.2ms  f1=0.2838  py=+0.3245  sf=0.3723  ewma=0.3977  diff=-25.5mV  rpk_prev=-22.2ms  eff_d=989.5ms
+    beat 31: rr= 761.1ms  f1=0.2991  py=+0.0310  sf=0.4026  ewma=0.3934  diff=+9.2mV  rpk_prev=-12.1ms  eff_d=718.2ms
+    beat 32: rr= 736.1ms  f1=0.3004  py=+0.0029  sf=0.4052  ewma=0.3937  diff=+11.6mV  rpk_prev=-13.3ms  eff_d=694.4ms
+    beat 33: rr= 733.3ms  f1=0.3005  py=-0.0002  sf=0.4058  ewma=0.3941  diff=+11.7mV  rpk_prev=-11.6ms  eff_d=689.9ms
+    beat 34: rr= 713.9ms  f1=0.3014  py=-0.0196  sf=0.4078  ewma=0.3946  diff=+13.2mV  rpk_prev=-13.2ms  eff_d=672.1ms
+  F1 Pearson r=-0.9816  Spearman rho=-0.7865  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9974  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9966  rpk_range=11.7ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9985  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.8241  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.39708 ecg_sim=0.39900 delta=-1.92mV  tfall=R-6.3ms
+    beat  6: cv=0.39211 ecg_sim=0.39456 delta=-2.45mV  tfall=R-6.3ms
+    beat  7: cv=0.40119 ecg_sim=0.40118 delta=+0.01mV  tfall=R-7.4ms
+    beat  8: cv=0.39472 ecg_sim=0.39463 delta=+0.10mV  tfall=R-6.2ms
+    beat  9: cv=0.40046 ecg_sim=0.40058 delta=-0.12mV  tfall=R-6.8ms
+    beat 10: cv=0.40298 ecg_sim=0.40300 delta=-0.01mV  tfall=R-7.8ms
+    beat 11: cv=0.40547 ecg_sim=0.40469 delta=+0.78mV  tfall=R-6.8ms
+    beat 12: cv=0.39455 ecg_sim=0.39519 delta=-0.64mV  tfall=R-6.8ms
+    beat 13: cv=0.39791 ecg_sim=0.39928 delta=-1.36mV  tfall=R-6.6ms
+    beat 14: cv=0.38752 ecg_sim=0.39182 delta=-4.30mV  tfall=R-8.6ms
+  F8 rho sim_ecg=0.9379  ecg_at_time=0.9453
+  F1:rr_ratio      rho=0.7865  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9715  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.2305)  (fall=0.9802 sdiff=0.9812)
+  F4:bi_L1         rho=0.9974  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9591)  (fall=0.9862 sdiff=0.9931)
+  F5:pwave         rho=0.9987  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.6101)
+  F6:width         rho=0.9994  [PASS]  trigger=ANALOG wid  (fixed_ref=0.5537)
+  F7:slope         rho=0.9994  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.4956)  (fall_ref=0.9139)
+  F8:symmetry      rho=0.9379  [WARN]  trigger=DELAYED rpk  (fixed_ref=0.5266)  (ecgref=0.9453)
+
+--- Record 106 ---
+  35 beats, gain=0.0727
+  rpeak pos_thresh: 0.3731V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4335V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3853V  avg_rr=865ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 284s, 1291 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3669 ewma=0.3785 thresh=0.3985 cmp@-30=0.9000 esamp=0.3669 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3710 ewma=0.3765 thresh=0.3965 cmp@-30=0.9000 esamp=0.3710 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3692 ewma=0.3754 thresh=0.3954 cmp@-30=0.9000 esamp=0.3692 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3774 ewma=0.3743 thresh=0.3943 cmp@-30=0.9000 esamp=0.3774 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.3873 ewma=0.3742 thresh=0.3942 cmp@-30=0.8999 esamp=0.3873 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3805 ewma=0.3755 thresh=0.3955 cmp@-30=0.9000 esamp=0.3805 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3735 ewma=0.3752 thresh=0.3952 cmp@-30=0.9000 esamp=0.3735 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3721 pwb_max=0.000 pwp_max=0.900 tpwb=R+713ms tpwp=R-231ms gap=-944ms sf2@pwb=0.4004 th@pwb=0.4020 sf2@pwp=0.3935 th@pwp=0.3952
+    beat 3: sf2=0.3661 pwb_max=0.000 pwp_max=0.000 tpwb=R+731ms tpwp=R-270ms gap=-1001ms sf2@pwb=0.3984 th@pwb=0.4000 sf2@pwp=0.3921 th@pwp=0.3935
+    beat 4: sf2=0.3702 pwb_max=0.000 pwp_max=0.900 tpwb=R-291ms tpwp=R-216ms gap=75ms sf2@pwb=0.3984 th@pwb=0.4000 sf2@pwp=0.3901 th@pwp=0.3915
+    beat 5: sf2=0.3684 pwb_max=0.900 pwp_max=0.900 tpwb=R-298ms tpwp=R-222ms gap=76ms sf2@pwb=0.3975 th@pwb=0.3989 sf2@pwp=0.3887 th@pwp=0.3905
+    beat 6: sf2=0.3766 pwb_max=0.900 pwp_max=0.900 tpwb=R-214ms tpwp=R-138ms gap=76ms sf2@pwb=0.3965 th@pwb=0.3978 sf2@pwp=0.3880 th@pwp=0.3893
+    beat 7: sf2=0.3865 pwb_max=0.900 pwp_max=0.900 tpwb=R-124ms tpwp=R-48ms gap=76ms sf2@pwb=0.3959 th@pwb=0.3976 sf2@pwp=0.3878 th@pwp=0.3892
+    beat 8: sf2=0.3797 pwb_max=0.900 pwp_max=0.900 tpwb=R-197ms tpwp=R-121ms gap=76ms sf2@pwb=0.3976 th@pwb=0.3989 sf2@pwp=0.3889 th@pwp=0.3905
+    beat 9: sf2=0.3726 pwb_max=0.000 pwp_max=0.900 tpwb=R-258ms tpwp=R-182ms gap=76ms sf2@pwb=0.3976 th@pwb=0.3987 sf2@pwp=0.3890 th@pwp=0.3903
+  rpeak valid: 35/35, rpk_delayed valid: 33/35, delay_timer valid: 35/35
+    beat 5: rpk=-9.8, rpk_del=-4.1, s14=9.3, wid=23.7, s69=65.0 ms from R
+    beat 6: rpk=-6.9, rpk_del=-0.8, s14=12.1, wid=26.5, s69=67.7 ms from R
+    beat 7: rpk=-9.5, rpk_del=-3.6, s14=9.8, wid=23.7, s69=65.4 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 847.2ms  f1=0.3032  py=-0.1125  sf=0.3931  ewma=0.3769  diff=+16.2mV  rpk_prev=-9.2ms  eff_d=801.4ms
+    beat 16: rr= 863.9ms  f1=0.3017  py=-0.0846  sf=0.3913  ewma=0.3777  diff=+13.7mV  rpk_prev=-10.5ms  eff_d=819.4ms
+    beat 17: rr= 827.8ms  f1=0.3035  py=-0.1122  sf=0.3952  ewma=0.3785  diff=+16.6mV  rpk_prev=-8.9ms  eff_d=781.7ms
+    beat 18: rr= 791.7ms  f1=0.2977  py=-0.1371  sf=0.3861  ewma=0.3797  diff=+6.5mV  rpk_prev=-8.5ms  eff_d=745.1ms
+    beat 19: rr= 800.0ms  f1=0.3036  py=-0.1151  sf=0.3981  ewma=0.3812  diff=+16.9mV  rpk_prev=-8.7ms  eff_d=753.7ms
+    beat 20: rr= 808.3ms  f1=0.3028  py=-0.0952  sf=0.3976  ewma=0.3821  diff=+15.5mV  rpk_prev=-8.7ms  eff_d=762.1ms
+    beat 21: rr= 775.0ms  f1=0.3035  py=-0.1190  sf=0.3995  ewma=0.3828  diff=+16.6mV  rpk_prev=-10.4ms  eff_d=730.4ms
+    beat 22: rr= 783.3ms  f1=0.3032  py=-0.0988  sf=0.4004  ewma=0.3842  diff=+16.2mV  rpk_prev=-8.7ms  eff_d=737.0ms
+    beat 23: rr= 794.4ms  f1=0.3017  py=-0.0778  sf=0.3991  ewma=0.3854  diff=+13.7mV  rpk_prev=-9.7ms  eff_d=749.2ms
+    beat 24: rr= 811.1ms  f1=0.3003  py=-0.0534  sf=0.3972  ewma=0.3860  diff=+11.3mV  rpk_prev=-9.9ms  eff_d=766.0ms
+    beat 25: rr= 786.1ms  f1=0.3017  py=-0.0730  sf=0.4001  ewma=0.3863  diff=+13.8mV  rpk_prev=-9.8ms  eff_d=740.9ms
+    beat 26: rr= 741.7ms  f1=0.3034  py=-0.1102  sf=0.4035  ewma=0.3868  diff=+16.6mV  rpk_prev=-8.4ms  eff_d=695.0ms
+    beat 27: rr= 683.3ms  f1=0.3072  py=-0.1575  sf=0.4108  ewma=0.3879  diff=+22.9mV  rpk_prev=-9.0ms  eff_d=637.4ms
+    beat 28: rr= 683.3ms  f1=0.3065  py=-0.1417  sf=0.4111  ewma=0.3893  diff=+21.8mV  rpk_prev=-7.0ms  eff_d=635.3ms
+    beat 29: rr= 700.0ms  f1=0.3023  py=-0.1109  sf=0.4055  ewma=0.3907  diff=+14.9mV  rpk_prev=-8.0ms  eff_d=653.0ms
+    beat 30: rr= 747.2ms  f1=0.3009  py=-0.0526  sf=0.4045  ewma=0.3921  diff=+12.4mV  rpk_prev=-8.7ms  eff_d=700.9ms
+    beat 31: rr= 769.4ms  f1=0.2994  py=-0.0251  sf=0.4022  ewma=0.3925  diff=+9.7mV  rpk_prev=-7.2ms  eff_d=721.7ms
+    beat 32: rr= 744.4ms  f1=0.3010  py=-0.0476  sf=0.4048  ewma=0.3923  diff=+12.6mV  rpk_prev=-8.9ms  eff_d=698.3ms
+    beat 33: rr= 838.9ms  f1=0.2950  py=+0.0516  sf=0.3941  ewma=0.3927  diff=+1.4mV  rpk_prev=-9.8ms  eff_d=793.7ms
+    beat 34: rr= 997.2ms  f1=0.2874  py=+0.2048  sf=0.3763  ewma=0.3920  diff=-15.7mV  rpk_prev=-10.9ms  eff_d=953.1ms
+  F1 Pearson r=-0.9155  Spearman rho=-0.7880  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9364  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9996  rpk_range=4.0ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9368  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.7789  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.44602 ecg_sim=0.44473 delta=+1.28mV  tfall=R-3.5ms
+    beat  6: cv=0.43264 ecg_sim=0.43339 delta=-0.75mV  tfall=R-0.2ms
+    beat  7: cv=0.43382 ecg_sim=0.43415 delta=-0.33mV  tfall=R-3.0ms
+    beat  8: cv=0.43126 ecg_sim=0.43133 delta=-0.07mV  tfall=R-2.2ms
+    beat  9: cv=0.43125 ecg_sim=0.43258 delta=-1.33mV  tfall=R-3.1ms
+    beat 10: cv=0.44311 ecg_sim=0.44213 delta=+0.98mV  tfall=R-1.7ms
+    beat 11: cv=0.44540 ecg_sim=0.44577 delta=-0.37mV  tfall=R-1.3ms
+    beat 12: cv=0.44330 ecg_sim=0.44471 delta=-1.41mV  tfall=R-1.3ms
+    beat 13: cv=0.44536 ecg_sim=0.44603 delta=-0.66mV  tfall=R-4.0ms
+    beat 14: cv=0.45309 ecg_sim=0.45294 delta=+0.15mV  tfall=R-2.2ms
+  F8 rho sim_ecg=0.9765  ecg_at_time=0.9726
+  F1:rr_ratio      rho=0.7880  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9934  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.4794)  (fall=0.8883 sdiff=0.8403)
+  F4:bi_L1         rho=0.9990  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7520)  (fall=0.9766 sdiff=0.9844)
+  F5:pwave         rho=0.9982  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.1157)
+  F6:width         rho=0.9987  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9354)
+  F7:slope         rho=0.9996  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.4621)  (fall_ref=0.9947)
+  F8:symmetry      rho=0.9765  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.6988)  (ecgref=0.9726)
+
+--- Record 107 ---
+  35 beats, gain=0.0515
+  rpeak pos_thresh: 0.3439V (frac=50% of median) detectable: pos=35/35 min_rpk=0.3698V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3879V  avg_rr=841ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 285s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3848 ewma=0.3853 thresh=0.4053 cmp@-30=0.9000 esamp=0.3848 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.4199 ewma=0.3848 thresh=0.4048 cmp@-30=0.0000 esamp=0.3827 esamp_ok=0.9000 trig_max=0.0000
+    beat 5: timer=0.3912 ewma=0.3842 thresh=0.4042 cmp@-30=0.9000 esamp=0.3912 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.4258 ewma=0.3846 thresh=0.4046 cmp@-30=0.0000 esamp=0.3812 esamp_ok=0.9000 trig_max=0.0000
+    beat 7: timer=0.4252 ewma=0.3840 thresh=0.4040 cmp@-30=0.0000 esamp=0.3820 esamp_ok=0.9000 trig_max=0.0000
+    beat 8: timer=0.3896 ewma=0.3833 thresh=0.4033 cmp@-30=0.9000 esamp=0.3896 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3878 ewma=0.3834 thresh=0.4034 cmp@-30=0.9000 esamp=0.3878 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3859 pwb_max=0.900 pwp_max=0.900 tpwb=R-234ms tpwp=R-159ms gap=76ms sf2@pwb=0.4078 th@pwb=0.4093 sf2@pwp=0.3993 th@pwp=0.4009
+    beat 3: sf2=0.3840 pwb_max=0.900 pwp_max=0.900 tpwb=R-246ms tpwp=R-170ms gap=75ms sf2@pwb=0.4076 th@pwb=0.4088 sf2@pwp=0.3986 th@pwp=0.4003
+    beat 4: sf2=0.4200 pwb_max=0.000 pwp_max=0.000 tpwb=R+657ms tpwp=R+732ms gap=75ms sf2@pwb=0.4065 th@pwb=0.4076 sf2@pwp=0.3976 th@pwp=0.3992
+    beat 5: sf2=0.3904 pwb_max=0.900 pwp_max=0.900 tpwb=R-179ms tpwp=R-104ms gap=75ms sf2@pwb=0.4065 th@pwb=0.4076 sf2@pwp=0.3976 th@pwp=0.3992
+    beat 6: sf2=0.4258 pwb_max=0.000 pwp_max=0.000 tpwb=R+1489ms tpwp=R+1565ms gap=75ms sf2@pwb=0.4051 th@pwb=0.4068 sf2@pwp=0.3966 th@pwp=0.3983
+    beat 7: sf2=0.4251 pwb_max=0.000 pwp_max=0.000 tpwb=R+667ms tpwp=R+742ms gap=75ms sf2@pwb=0.4051 th@pwb=0.4068 sf2@pwp=0.3966 th@pwp=0.3983
+    beat 8: sf2=0.3888 pwb_max=0.900 pwp_max=0.900 tpwb=R-186ms tpwp=R-110ms gap=75ms sf2@pwb=0.4051 th@pwb=0.4068 sf2@pwp=0.3966 th@pwp=0.3983
+    beat 9: sf2=0.3870 pwb_max=0.900 pwp_max=0.900 tpwb=R-203ms tpwp=R-127ms gap=76ms sf2@pwb=0.4055 th@pwb=0.4069 sf2@pwp=0.3971 th@pwp=0.3985
+  rpeak valid: 35/35, rpk_delayed valid: 31/35, delay_timer valid: 32/35
+    beat 5: rpk=-15.6, rpk_del=-9.6, s14=3.8, wid=17.7, s69=59.3 ms from R
+    beat 6: rpk=-13.5, rpk_del=-7.3, s14=5.8, wid=20.0, s69=61.4 ms from R
+    beat 7: rpk=-12.0, rpk_del=845.0, s14=7.1, wid=20.9, s69=62.6 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 833.3ms  f1=0.3186  py=+0.0670  sf=0.4229  ewma=0.3829  diff=+40.0mV  rpk_prev=-16.7ms  eff_d=795.0ms
+    beat 16: rr= 861.1ms  f1=0.3204  py=+0.0881  sf=0.4248  ewma=0.3824  diff=+42.4mV  rpk_prev=-18.0ms  eff_d=824.2ms
+    beat 17: rr= 888.9ms  f1=0.2975  py=+0.1070  sf=0.3878  ewma=0.3818  diff=+6.0mV  rpk_prev=-16.6ms  eff_d=850.4ms
+    beat 18: rr= 872.2ms  f1=0.2988  py=+0.0797  sf=0.3900  ewma=0.3816  diff=+8.4mV  rpk_prev=-13.4ms  eff_d=830.7ms
+    beat 19: rr= 847.2ms  f1=0.3003  py=+0.0467  sf=0.3928  ewma=0.3816  diff=+11.3mV  rpk_prev=-13.0ms  eff_d=805.2ms
+    beat 20: rr= 827.8ms  f1=0.3235  py=+0.0226  sf=0.4288  ewma=0.3819  diff=+46.8mV  rpk_prev=-13.3ms  eff_d=786.1ms
+    beat 21: rr= 847.2ms  f1=0.3200  py=+0.0398  sf=0.4232  ewma=0.3814  diff=+41.8mV  rpk_prev=-12.3ms  eff_d=804.5ms
+    beat 22: rr= 836.1ms  f1=0.3237  py=+0.0247  sf=0.4278  ewma=0.3808  diff=+47.1mV  rpk_prev=-16.1ms  eff_d=797.2ms
+    beat 23: rr= 847.2ms  f1=0.3010  py=+0.0333  sf=0.3926  ewma=0.3801  diff=+12.5mV  rpk_prev=-15.1ms  eff_d=807.3ms
+    beat 24: rr= 875.0ms  f1=0.2990  py=+0.0578  sf=0.3898  ewma=0.3810  diff=+8.8mV  rpk_prev=-12.9ms  eff_d=832.9ms
+    beat 25: rr= 869.4ms  f1=0.2992  py=+0.0464  sf=0.3902  ewma=0.3811  diff=+9.1mV  rpk_prev=-14.1ms  eff_d=828.6ms
+    beat 26: rr= 855.6ms  f1=0.3209  py=+0.0279  sf=0.4244  ewma=0.3813  diff=+43.1mV  rpk_prev=-14.9ms  eff_d=815.4ms
+    beat 27: rr= 825.0ms  f1=0.3228  py=-0.0054  sf=0.4265  ewma=0.3807  diff=+45.9mV  rpk_prev=-14.3ms  eff_d=784.3ms
+    beat 28: rr= 816.7ms  f1=0.3246  py=-0.0132  sf=0.4285  ewma=0.3802  diff=+48.4mV  rpk_prev=-15.9ms  eff_d=777.6ms
+    beat 29: rr= 825.0ms  f1=0.3234  py=-0.0036  sf=0.4261  ewma=0.3795  diff=+46.6mV  rpk_prev=-16.1ms  eff_d=786.1ms
+    beat 30: rr= 888.9ms  f1=0.2993  py=+0.0607  sf=0.3882  ewma=0.3789  diff=+9.3mV  rpk_prev=-13.6ms  eff_d=847.5ms
+    beat 31: rr= 886.1ms  f1=0.2993  py=+0.0518  sf=0.3884  ewma=0.3790  diff=+9.4mV  rpk_prev=-13.5ms  eff_d=844.6ms
+    beat 32: rr= 858.3ms  f1=0.3223  py=+0.0189  sf=0.4242  ewma=0.3792  diff=+45.0mV  rpk_prev=-14.8ms  eff_d=818.1ms
+    beat 33: rr= 855.6ms  f1=0.3015  py=+0.0142  sf=0.3918  ewma=0.3786  diff=+13.2mV  rpk_prev=-14.3ms  eff_d=814.9ms
+    beat 34: rr= 822.2ms  f1=0.3032  py=-0.0206  sf=0.3952  ewma=0.3792  diff=+16.1mV  rpk_prev=-15.4ms  eff_d=782.6ms
+  F1 Pearson r=-0.4384  Spearman rho=-0.6767  n=20
+  SF vs annotation_RR: Spearman |rho|=0.7938  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9951  rpk_range=6.0ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.8000  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.7444  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.36797 ecg_sim=0.36835 delta=-0.37mV  tfall=R-9.1ms
+    beat  6: cv=0.36773 ecg_sim=0.36799 delta=-0.26mV  tfall=R-6.8ms
+    beat  8: cv=0.36829 ecg_sim=0.36727 delta=+1.02mV  tfall=R-6.8ms
+    beat  9: cv=0.36442 ecg_sim=0.36486 delta=-0.45mV  tfall=R-6.8ms
+    beat 10: cv=0.37171 ecg_sim=0.36849 delta=+3.22mV  tfall=R-7.4ms
+    beat 11: cv=0.37248 ecg_sim=0.37258 delta=-0.11mV  tfall=R-8.5ms
+    beat 12: cv=0.36007 ecg_sim=0.36008 delta=-0.00mV  tfall=R-5.8ms
+    beat 13: cv=0.36874 ecg_sim=0.36862 delta=+0.12mV  tfall=R-5.7ms
+    beat 14: cv=0.38914 ecg_sim=0.38912 delta=+0.02mV  tfall=R-9.9ms
+    beat 15: cv=0.41583 ecg_sim=0.40156 delta=+14.27mV  tfall=R-11.3ms
+  F8 rho sim_ecg=0.9591  ecg_at_time=0.9597
+  F1:rr_ratio      rho=0.6767  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.2924  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.4507)  (fall=0.5571 sdiff=0.4390)
+  F4:bi_L1         rho=0.9990  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.5411)  (fall=0.5468 sdiff=0.5481)
+  F5:pwave         rho=0.9479  [WARN]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.1919)
+  F6:width         rho=0.9995  [PASS]  trigger=ANALOG wid  (fixed_ref=0.8619)
+  F7:slope         rho=1.0000  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.9027)  (fall_ref=0.9232)
+  F8:symmetry      rho=0.9591  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.8400)  (ecgref=0.9597)
+
+--- Record 108 ---
+  35 beats, gain=0.1481
+  rpeak pos_thresh: 0.3200V (frac=50% of median) detectable: pos=2/35 min_rpk=0.2415V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3702V  avg_rr=1013ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 237s, 1102 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.0645 ewma=0.3671 thresh=0.3871 cmp@-30=0.9000 esamp=0.0645 esamp_ok=0.0000 trig_max=0.9000
+    beat 4: timer=0.0079 ewma=0.3649 thresh=0.3849 cmp@-30=0.9000 esamp=0.0079 esamp_ok=0.0000 trig_max=0.9000
+    beat 5: timer=0.0005 ewma=0.3614 thresh=0.3814 cmp@-30=0.9000 esamp=0.0005 esamp_ok=0.0000 trig_max=0.9000
+    beat 6: timer=0.0001 ewma=0.3577 thresh=0.3777 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+    beat 7: timer=0.0001 ewma=0.3537 thresh=0.3737 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+    beat 8: timer=0.0001 ewma=0.3503 thresh=0.3703 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+    beat 9: timer=0.0001 ewma=0.3465 thresh=0.3665 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.1604 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 3: sf2=0.0637 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 4: sf2=0.0077 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 5: sf2=0.0004 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 6: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 7: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 8: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+    beat 9: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+nanms tpwp=R+nanms gap=nanms sf2@pwb=-1.0000 th@pwb=-1.0000 sf2@pwp=-1.0000 th@pwp=-1.0000
+  rpeak valid: 2/35, rpk_delayed valid: 2/35, delay_timer valid: 2/35
+    beat 11: rpk=-8.5, rpk_del=-2.6, s14=10.4, wid=27.0, s69=68.3 ms from R
+    beat 29: rpk=-20.7, rpk_del=-14.7, s14=-1.7, wid=14.8, s69=56.1 ms from R
+  F1 per-beat (measured at R-55ms):
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat 11: cv=0.32503 ecg_sim=0.32545 delta=-0.42mV  tfall=R-1.9ms
+    beat 29: cv=0.40050 ecg_sim=0.40033 delta=+0.17mV  tfall=R-14.1ms
+  F8 rho sim_ecg=0.0000  ecg_at_time=0.0000
+  F1:rr_ratio      rho=0.0000  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.0000  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (fall=0.0000 sdiff=0.0000)
+  F4:bi_L1         rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (fall=0.0000 sdiff=0.0000)
+  F5:pwave         rho=1.0000  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.0383)
+  F6:width         rho=0.0000  [FAIL]  trigger=ANALOG wid  (fixed_ref=0.0000)
+  F7:slope         rho=0.0000  [FAIL]  trigger=ANALOG s14/s69  (fixed_ref=0.0000)  (fall_ref=0.0000)
+  F8:symmetry      rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (ecgref=0.0000)
+
+--- Record 114 ---
+  35 beats, gain=0.2092
+  rpeak pos_thresh: 0.3200V (frac=50% of median) detectable: pos=1/35 min_rpk=0.2697V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3702V  avg_rr=1117ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 282s, 1138 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.0145 ewma=0.3654 thresh=0.3854 cmp@-30=0.9000 esamp=0.0145 esamp_ok=0.0000 trig_max=0.9000
+    beat 4: timer=0.0006 ewma=0.3616 thresh=0.3816 cmp@-30=0.9000 esamp=0.0006 esamp_ok=0.0000 trig_max=0.9000
+    beat 5: timer=0.0001 ewma=0.3576 thresh=0.3776 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+    beat 6: timer=0.0001 ewma=0.3529 thresh=0.3729 cmp@-30=0.9000 esamp=0.0001 esamp_ok=0.0000 trig_max=0.9000
+    beat 7: timer=0.0203 ewma=0.3503 thresh=0.3703 cmp@-30=0.9000 esamp=0.0203 esamp_ok=0.0000 trig_max=0.9000
+    beat 8: timer=0.2171 ewma=0.3494 thresh=0.3694 cmp@-30=0.9000 esamp=0.2171 esamp_ok=0.0000 trig_max=0.9000
+    beat 9: timer=0.1024 ewma=0.3489 thresh=0.3689 cmp@-30=0.9000 esamp=0.1024 esamp_ok=0.0000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.1092 pwb_max=0.000 pwp_max=0.000 tpwb=R+6744ms tpwp=R+6819ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 3: sf2=0.0142 pwb_max=0.000 pwp_max=0.000 tpwb=R+5599ms tpwp=R+5675ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 4: sf2=0.0005 pwb_max=0.000 pwp_max=0.000 tpwb=R+4508ms tpwp=R+4583ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 5: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+3441ms tpwp=R+3516ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 6: sf2=0.0000 pwb_max=0.000 pwp_max=0.000 tpwb=R+2263ms tpwp=R+2339ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 7: sf2=0.2101 pwb_max=0.000 pwp_max=0.000 tpwb=R+1146ms tpwp=R+1222ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 8: sf2=0.3815 pwb_max=0.000 pwp_max=0.000 tpwb=R+55ms tpwp=R+130ms gap=75ms sf2@pwb=0.3715 th@pwb=0.3727 sf2@pwp=0.3628 th@pwp=0.3643
+    beat 9: sf2=0.2618 pwb_max=0.000 pwp_max=0.000 tpwb=R+1250ms tpwp=R+2391ms gap=1141ms sf2@pwb=0.3704 th@pwb=0.3720 sf2@pwp=0.3616 th@pwp=0.3634
+  rpeak valid: 0/35, rpk_delayed valid: 0/35, delay_timer valid: 0/35
+  F1 per-beat (measured at R-55ms):
+  F1:rr_ratio      rho=0.0000  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.0000  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (fall=0.0000 sdiff=0.0000)
+  F4:bi_L1         rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (fall=0.0000 sdiff=0.0000)
+  F5:pwave         rho=0.5662  [FAIL]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.0254)
+  F6:width         rho=0.0000  [FAIL]  trigger=ANALOG wid  (fixed_ref=0.0000)
+  F7:slope         rho=0.0000  [FAIL]  trigger=ANALOG s14/s69  (fixed_ref=0.0000)  (fall_ref=0.0000)
+  F8:symmetry      rho=0.0000  [FAIL]  trigger=DELAYED rpk  (fixed_ref=0.0000)  (ecgref=0.0000)
+
+--- Record 115 ---
+  35 beats, gain=0.0856
+  rpeak pos_thresh: 0.3710V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4224V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3759V  avg_rr=949ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 334s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3561 ewma=0.3737 thresh=0.3937 cmp@-30=0.9000 esamp=0.3561 esamp_ok=0.8999 trig_max=0.9000
+    beat 4: timer=0.3780 ewma=0.3715 thresh=0.3915 cmp@-30=0.9000 esamp=0.3780 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3770 ewma=0.3717 thresh=0.3917 cmp@-30=0.9000 esamp=0.3770 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3703 ewma=0.3717 thresh=0.3917 cmp@-30=0.9000 esamp=0.3703 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.3721 ewma=0.3708 thresh=0.3908 cmp@-30=0.9000 esamp=0.3721 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3799 ewma=0.3704 thresh=0.3904 cmp@-30=0.9000 esamp=0.3799 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3829 ewma=0.3712 thresh=0.3912 cmp@-30=0.9000 esamp=0.3829 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3727 pwb_max=0.900 pwp_max=0.900 tpwb=R-250ms tpwp=R-174ms gap=76ms sf2@pwb=0.3962 th@pwb=0.3979 sf2@pwp=0.3876 th@pwp=0.3894
+    beat 3: sf2=0.3553 pwb_max=0.000 pwp_max=0.000 tpwb=R+784ms tpwp=R+859ms gap=76ms sf2@pwb=0.3934 th@pwb=0.3950 sf2@pwp=0.3852 th@pwp=0.3865
+    beat 4: sf2=0.3772 pwb_max=0.900 pwp_max=0.900 tpwb=R-183ms tpwp=R-107ms gap=76ms sf2@pwb=0.3934 th@pwb=0.3950 sf2@pwp=0.3852 th@pwp=0.3865
+    beat 5: sf2=0.3762 pwb_max=0.900 pwp_max=0.900 tpwb=R-194ms tpwp=R-119ms gap=76ms sf2@pwb=0.3934 th@pwb=0.3951 sf2@pwp=0.3850 th@pwp=0.3867
+    beat 6: sf2=0.3694 pwb_max=0.000 pwp_max=0.900 tpwb=R-255ms tpwp=R-179ms gap=76ms sf2@pwb=0.3936 th@pwb=0.3952 sf2@pwp=0.3851 th@pwp=0.3867
+    beat 7: sf2=0.3713 pwb_max=0.900 pwp_max=0.900 tpwb=R-230ms tpwp=R-155ms gap=76ms sf2@pwb=0.3928 th@pwb=0.3943 sf2@pwp=0.3846 th@pwp=0.3858
+    beat 8: sf2=0.3791 pwb_max=0.900 pwp_max=0.900 tpwb=R-157ms tpwp=R-81ms gap=76ms sf2@pwb=0.3921 th@pwb=0.3939 sf2@pwp=0.3840 th@pwp=0.3854
+    beat 9: sf2=0.3822 pwb_max=0.900 pwp_max=0.900 tpwb=R-136ms tpwp=R-60ms gap=76ms sf2@pwb=0.3931 th@pwb=0.3946 sf2@pwp=0.3846 th@pwp=0.3861
+  rpeak valid: 35/35, rpk_delayed valid: 29/35, delay_timer valid: 34/35
+    beat 5: rpk=-4.1, rpk_del=2.0, s14=14.9, wid=29.3, s69=70.4 ms from R
+    beat 6: rpk=-4.0, rpk_del=2.0, s14=15.4, wid=29.3, s69=70.8 ms from R
+    beat 7: rpk=-4.2, rpk_del=949.2, s14=14.9, wid=29.3, s69=70.5 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 905.6ms  f1=0.3033  py=-0.0819  sf=0.3875  ewma=0.3713  diff=+16.2mV  rpk_prev=-1.4ms  eff_d=852.0ms
+    beat 16: rr= 877.8ms  f1=0.3034  py=-0.1015  sf=0.3887  ewma=0.3722  diff=+16.5mV  rpk_prev=-2.6ms  eff_d=825.4ms
+    beat 17: rr= 933.3ms  f1=0.3004  py=-0.0358  sf=0.3844  ewma=0.3731  diff=+11.2mV  rpk_prev=-2.3ms  eff_d=880.6ms
+    beat 18: rr=1000.0ms  f1=0.2962  py=+0.0345  sf=0.3770  ewma=0.3734  diff=+3.6mV  rpk_prev=-1.8ms  eff_d=946.8ms
+    beat 19: rr= 897.2ms  f1=0.3028  py=-0.0717  sf=0.3884  ewma=0.3731  diff=+15.4mV  rpk_prev=-2.1ms  eff_d=844.3ms
+    beat 20: rr= 877.8ms  f1=0.3034  py=-0.0840  sf=0.3903  ewma=0.3738  diff=+16.5mV  rpk_prev=-2.8ms  eff_d=825.6ms
+    beat 21: rr= 944.4ms  f1=0.2986  py=-0.0090  sf=0.3827  ewma=0.3747  diff=+8.0mV  rpk_prev=-6.4ms  eff_d=895.8ms
+    beat 22: rr= 969.4ms  f1=0.2973  py=+0.0169  sf=0.3803  ewma=0.3748  diff=+5.6mV  rpk_prev=-2.9ms  eff_d=917.4ms
+    beat 23: rr= 925.0ms  f1=0.3000  py=-0.0292  sf=0.3852  ewma=0.3745  diff=+10.7mV  rpk_prev=-3.3ms  eff_d=873.3ms
+    beat 24: rr= 866.7ms  f1=0.3034  py=-0.0846  sf=0.3915  ewma=0.3751  diff=+16.4mV  rpk_prev=-3.6ms  eff_d=815.3ms
+    beat 25: rr= 927.8ms  f1=0.2991  py=-0.0150  sf=0.3848  ewma=0.3759  diff=+8.9mV  rpk_prev=-4.0ms  eff_d=876.7ms
+    beat 26: rr= 927.8ms  f1=0.2990  py=-0.0135  sf=0.3848  ewma=0.3760  diff=+8.8mV  rpk_prev=-4.7ms  eff_d=877.5ms
+    beat 27: rr= 952.8ms  f1=0.2976  py=+0.0128  sf=0.3822  ewma=0.3761  diff=+6.1mV  rpk_prev=-2.9ms  eff_d=900.7ms
+    beat 28: rr= 880.6ms  f1=0.3023  py=-0.0607  sf=0.3904  ewma=0.3759  diff=+14.5mV  rpk_prev=-1.4ms  eff_d=826.9ms
+    beat 29: rr= 927.8ms  f1=0.2989  py=-0.0074  sf=0.3850  ewma=0.3765  diff=+8.6mV  rpk_prev=-2.3ms  eff_d=875.1ms
+    beat 30: rr= 933.3ms  f1=0.2985  py=-0.0011  sf=0.3843  ewma=0.3765  diff=+7.8mV  rpk_prev=-3.4ms  eff_d=881.8ms
+    beat 31: rr= 916.7ms  f1=0.2997  py=-0.0177  sf=0.3865  ewma=0.3764  diff=+10.1mV  rpk_prev=-0.9ms  eff_d=862.5ms
+    beat 32: rr= 875.0ms  f1=0.3023  py=-0.0576  sf=0.3911  ewma=0.3765  diff=+14.5mV  rpk_prev=-1.0ms  eff_d=821.0ms
+    beat 33: rr= 880.6ms  f1=0.3014  py=-0.0462  sf=0.3904  ewma=0.3774  diff=+13.1mV  rpk_prev=-1.4ms  eff_d=827.0ms
+    beat 34: rr= 897.2ms  f1=0.2997  py=-0.0250  sf=0.3882  ewma=0.3781  diff=+10.1mV  rpk_prev=-4.2ms  eff_d=846.4ms
+  F1 Pearson r=-0.9915  Spearman rho=-0.9970  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9849  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9970  rpk_range=5.5ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9850  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9970  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.44414 ecg_sim=0.44453 delta=-0.39mV  tfall=R+2.6ms
+    beat  6: cv=0.44935 ecg_sim=0.44979 delta=-0.44mV  tfall=R+2.6ms
+    beat  8: cv=0.44436 ecg_sim=0.44518 delta=-0.82mV  tfall=R+2.6ms
+    beat  9: cv=0.44428 ecg_sim=0.44445 delta=-0.16mV  tfall=R+3.1ms
+    beat 10: cv=0.44930 ecg_sim=0.44802 delta=+1.28mV  tfall=R+2.0ms
+    beat 11: cv=0.45216 ecg_sim=0.45338 delta=-1.22mV  tfall=R+2.0ms
+    beat 12: cv=0.44127 ecg_sim=0.44201 delta=-0.74mV  tfall=R+1.6ms
+    beat 13: cv=0.43819 ecg_sim=0.43871 delta=-0.52mV  tfall=R+4.3ms
+    beat 15: cv=0.42140 ecg_sim=0.42138 delta=+0.03mV  tfall=R+4.2ms
+    beat 16: cv=0.41790 ecg_sim=0.41770 delta=+0.20mV  tfall=R+4.5ms
+  F8 rho sim_ecg=0.9777  ecg_at_time=0.9800
+  F1:rr_ratio      rho=0.9970  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9903  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9987  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.3722)  (fall=0.8968 sdiff=0.8473)
+  F4:bi_L1         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.8795)  (fall=0.9876 sdiff=0.9835)
+  F5:pwave         rho=0.9969  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.0383)
+  F6:width         rho=0.9970  [PASS]  trigger=ANALOG wid  (fixed_ref=0.7131)
+  F7:slope         rho=0.9990  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.3934)  (fall_ref=0.9749)
+  F8:symmetry      rho=0.9777  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7686)  (ecgref=0.9800)
+
+--- Record 116 ---
+  35 beats, gain=0.0618
+  rpeak pos_thresh: 0.3734V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4140V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3972V  avg_rr=758ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 20911s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.4034 ewma=0.3962 thresh=0.4162 cmp@-30=0.8999 esamp=0.4034 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.4019 ewma=0.3965 thresh=0.4165 cmp@-30=0.8999 esamp=0.4019 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.4017 ewma=0.3966 thresh=0.4166 cmp@-30=0.9000 esamp=0.4017 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.4017 ewma=0.3966 thresh=0.4166 cmp@-30=0.9000 esamp=0.4017 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.4037 ewma=0.3967 thresh=0.4167 cmp@-30=0.8999 esamp=0.4037 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.4014 ewma=0.3970 thresh=0.4170 cmp@-30=0.9000 esamp=0.4014 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.4025 ewma=0.3970 thresh=0.4170 cmp@-30=0.8999 esamp=0.4025 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.4015 pwb_max=0.900 pwp_max=0.900 tpwb=R-186ms tpwp=R-111ms gap=75ms sf2@pwb=0.4179 th@pwb=0.4196 sf2@pwp=0.4096 th@pwp=0.4111
+    beat 3: sf2=0.4026 pwb_max=0.900 pwp_max=0.900 tpwb=R-178ms tpwp=R-102ms gap=75ms sf2@pwb=0.4182 th@pwb=0.4197 sf2@pwp=0.4098 th@pwp=0.4112
+    beat 4: sf2=0.4011 pwb_max=0.900 pwp_max=0.900 tpwb=R-193ms tpwp=R-118ms gap=75ms sf2@pwb=0.4185 th@pwb=0.4199 sf2@pwp=0.4102 th@pwp=0.4115
+    beat 5: sf2=0.4009 pwb_max=0.900 pwp_max=0.900 tpwb=R-196ms tpwp=R-120ms gap=75ms sf2@pwb=0.4185 th@pwb=0.4200 sf2@pwp=0.4105 th@pwp=0.4116
+    beat 6: sf2=0.4008 pwb_max=0.900 pwp_max=0.900 tpwb=R-197ms tpwp=R-121ms gap=76ms sf2@pwb=0.4187 th@pwb=0.4201 sf2@pwp=0.4100 th@pwp=0.4116
+    beat 7: sf2=0.4029 pwb_max=0.900 pwp_max=0.900 tpwb=R-179ms tpwp=R-103ms gap=75ms sf2@pwb=0.4191 th@pwb=0.4201 sf2@pwp=0.4101 th@pwp=0.4117
+    beat 8: sf2=0.4006 pwb_max=0.900 pwp_max=0.900 tpwb=R-202ms tpwp=R-127ms gap=75ms sf2@pwb=0.4193 th@pwb=0.4204 sf2@pwp=0.4106 th@pwp=0.4120
+    beat 9: sf2=0.4017 pwb_max=0.900 pwp_max=0.900 tpwb=R-192ms tpwp=R-117ms gap=75ms sf2@pwb=0.4193 th@pwb=0.4204 sf2@pwp=0.4103 th@pwp=0.4120
+  rpeak valid: 35/35, rpk_delayed valid: 32/35, delay_timer valid: 34/35
+    beat 5: rpk=-4.2, rpk_del=1.9, s14=14.9, wid=29.3, s69=70.4 ms from R
+    beat 6: rpk=-7.0, rpk_del=-1.3, s14=12.1, wid=27.5, s69=69.2 ms from R
+    beat 7: rpk=-6.3, rpk_del=-0.3, s14=770.0, wid=27.0, s69=68.4 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 750.0ms  f1=0.2981  py=-0.0071  sf=0.4043  ewma=0.3970  diff=+7.3mV  rpk_prev=-8.0ms  eff_d=703.0ms
+    beat 16: rr= 755.6ms  f1=0.2978  py=-0.0009  sf=0.4038  ewma=0.3970  diff=+6.7mV  rpk_prev=-7.4ms  eff_d=708.0ms
+    beat 17: rr= 772.2ms  f1=0.2969  py=+0.0159  sf=0.4020  ewma=0.3970  diff=+5.1mV  rpk_prev=-6.0ms  eff_d=723.2ms
+    beat 18: rr= 750.0ms  f1=0.2982  py=-0.0079  sf=0.4043  ewma=0.3968  diff=+7.5mV  rpk_prev=-8.0ms  eff_d=703.0ms
+    beat 19: rr= 755.6ms  f1=0.2979  py=-0.0016  sf=0.4039  ewma=0.3968  diff=+7.1mV  rpk_prev=-6.4ms  eff_d=707.0ms
+    beat 20: rr= 752.8ms  f1=0.2982  py=-0.0042  sf=0.4043  ewma=0.3968  diff=+7.6mV  rpk_prev=-5.3ms  eff_d=703.0ms
+    beat 21: rr= 769.4ms  f1=0.2969  py=+0.0129  sf=0.4019  ewma=0.3968  diff=+5.1mV  rpk_prev=-10.2ms  eff_d=724.7ms
+    beat 22: rr= 772.2ms  f1=0.2969  py=+0.0144  sf=0.4018  ewma=0.3966  diff=+5.1mV  rpk_prev=-8.6ms  eff_d=725.8ms
+    beat 23: rr= 750.0ms  f1=0.2985  py=-0.0093  sf=0.4045  ewma=0.3964  diff=+8.1mV  rpk_prev=-6.3ms  eff_d=701.3ms
+    beat 24: rr= 786.1ms  f1=0.2965  py=+0.0278  sf=0.4007  ewma=0.3965  diff=+4.3mV  rpk_prev=-3.9ms  eff_d=735.0ms
+    beat 25: rr= 763.9ms  f1=0.2976  py=+0.0028  sf=0.4026  ewma=0.3961  diff=+6.5mV  rpk_prev=-9.2ms  eff_d=718.1ms
+    beat 26: rr= 758.3ms  f1=0.2980  py=-0.0031  sf=0.4033  ewma=0.3961  diff=+7.3mV  rpk_prev=-8.0ms  eff_d=711.3ms
+    beat 27: rr= 769.4ms  f1=0.2975  py=+0.0083  sf=0.4023  ewma=0.3961  diff=+6.2mV  rpk_prev=-6.9ms  eff_d=721.4ms
+    beat 28: rr= 758.3ms  f1=0.2981  py=-0.0036  sf=0.4034  ewma=0.3960  diff=+7.4mV  rpk_prev=-8.0ms  eff_d=711.3ms
+    beat 29: rr= 761.1ms  f1=0.2980  py=-0.0005  sf=0.4031  ewma=0.3960  diff=+7.2mV  rpk_prev=-7.4ms  eff_d=713.5ms
+    beat 30: rr= 780.6ms  f1=0.2969  py=+0.0190  sf=0.4011  ewma=0.3960  diff=+5.1mV  rpk_prev=-6.2ms  eff_d=731.8ms
+    beat 31: rr= 755.6ms  f1=0.2985  py=-0.0079  sf=0.4038  ewma=0.3957  diff=+8.1mV  rpk_prev=-7.0ms  eff_d=707.5ms
+    beat 32: rr= 758.3ms  f1=0.2982  py=-0.0043  sf=0.4034  ewma=0.3958  diff=+7.6mV  rpk_prev=-7.6ms  eff_d=711.0ms
+    beat 33: rr= 772.2ms  f1=0.2974  py=+0.0100  sf=0.4019  ewma=0.3959  diff=+6.0mV  rpk_prev=-7.8ms  eff_d=725.0ms
+    beat 34: rr= 750.0ms  f1=0.2987  py=-0.0132  sf=0.4043  ewma=0.3957  diff=+8.6mV  rpk_prev=-8.3ms  eff_d=703.3ms
+  F1 Pearson r=-0.9779  Spearman rho=-0.9609  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9799  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9708  rpk_range=9.0ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9910  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9744  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.43004 ecg_sim=0.43080 delta=-0.76mV  tfall=R+2.3ms
+    beat  6: cv=0.42203 ecg_sim=0.42471 delta=-2.69mV  tfall=R-0.8ms
+    beat  7: cv=0.44262 ecg_sim=0.44244 delta=+0.18mV  tfall=R+0.6ms
+    beat  8: cv=0.41425 ecg_sim=0.41375 delta=+0.50mV  tfall=R+4.5ms
+    beat  9: cv=0.44348 ecg_sim=0.44097 delta=+2.52mV  tfall=R-0.7ms
+    beat 10: cv=0.44753 ecg_sim=0.44798 delta=-0.45mV  tfall=R+1.4ms
+    beat 11: cv=0.44452 ecg_sim=0.44521 delta=-0.69mV  tfall=R-2.1ms
+    beat 12: cv=0.43926 ecg_sim=0.43875 delta=+0.51mV  tfall=R-0.7ms
+    beat 13: cv=0.44008 ecg_sim=0.44001 delta=+0.07mV  tfall=R-4.2ms
+    beat 14: cv=0.43459 ecg_sim=0.43586 delta=-1.26mV  tfall=R-1.2ms
+  F8 rho sim_ecg=0.9853  ecg_at_time=0.9853
+  F1:rr_ratio      rho=0.9609  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9788  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.3853)  (fall=0.8807 sdiff=0.8526)
+  F4:bi_L1         rho=0.9910  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9040)  (fall=0.9789 sdiff=0.9737)
+  F5:pwave         rho=0.9880  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.1488)
+  F6:width         rho=0.9985  [PASS]  trigger=ANALOG wid  (fixed_ref=0.5776)
+  F7:slope         rho=0.9995  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.6759)  (fall_ref=0.9951)
+  F8:symmetry      rho=0.9853  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.5160)  (ecgref=0.9853)
+
+--- Record 118 ---
+  35 beats, gain=0.0675
+  rpeak pos_thresh: 0.3200V (frac=50% of median) detectable: pos=23/35 min_rpk=0.2939V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3895V  avg_rr=826ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 243s, 1257 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.2981 ewma=0.3870 thresh=0.4070 cmp@-30=0.9000 esamp=0.2981 esamp_ok=0.0000 trig_max=0.9000
+    beat 4: timer=0.2068 ewma=0.3865 thresh=0.4065 cmp@-30=0.9000 esamp=0.2068 esamp_ok=0.0000 trig_max=0.9000
+    beat 5: timer=0.1210 ewma=0.3853 thresh=0.4053 cmp@-30=0.9000 esamp=0.1210 esamp_ok=0.0000 trig_max=0.9000
+    beat 6: timer=0.3435 ewma=0.3851 thresh=0.4051 cmp@-30=0.9000 esamp=0.3435 esamp_ok=0.0000 trig_max=0.9000
+    beat 7: timer=0.3937 ewma=0.3847 thresh=0.4047 cmp@-30=0.9000 esamp=0.3937 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3963 ewma=0.3847 thresh=0.4047 cmp@-30=0.8999 esamp=0.3963 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3076 ewma=0.3842 thresh=0.4042 cmp@-30=0.9000 esamp=0.3076 esamp_ok=0.0000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3908 pwb_max=0.900 pwp_max=0.900 tpwb=R-205ms tpwp=R-130ms gap=76ms sf2@pwb=0.4094 th@pwb=0.4110 sf2@pwp=0.4013 th@pwp=0.4025
+    beat 3: sf2=0.2972 pwb_max=0.000 pwp_max=0.000 tpwb=R+1856ms tpwp=R+1932ms gap=76ms sf2@pwb=0.4075 th@pwb=0.4089 sf2@pwp=0.3992 th@pwp=0.4004
+    beat 4: sf2=0.2059 pwb_max=0.000 pwp_max=0.000 tpwb=R+1014ms tpwp=R+1090ms gap=76ms sf2@pwb=0.4075 th@pwb=0.4089 sf2@pwp=0.3992 th@pwp=0.4004
+    beat 5: sf2=0.1201 pwb_max=0.000 pwp_max=0.000 tpwb=R+203ms tpwp=R+279ms gap=76ms sf2@pwb=0.4075 th@pwb=0.4089 sf2@pwp=0.3992 th@pwp=0.4004
+    beat 6: sf2=0.3427 pwb_max=0.000 pwp_max=0.000 tpwb=R+672ms tpwp=R+748ms gap=76ms sf2@pwb=0.4066 th@pwb=0.4082 sf2@pwp=0.3983 th@pwp=0.3997
+    beat 7: sf2=0.3929 pwb_max=0.900 pwp_max=0.900 tpwb=R-161ms tpwp=R-86ms gap=76ms sf2@pwb=0.4066 th@pwb=0.4082 sf2@pwp=0.3983 th@pwp=0.3997
+    beat 8: sf2=0.3955 pwb_max=0.900 pwp_max=0.900 tpwb=R-137ms tpwp=R-62ms gap=75ms sf2@pwb=0.4070 th@pwb=0.4082 sf2@pwp=0.3983 th@pwp=0.3997
+    beat 9: sf2=0.3067 pwb_max=0.000 pwp_max=0.000 tpwb=R+5787ms tpwp=R+5863ms gap=75ms sf2@pwb=0.3997 th@pwb=0.4014 sf2@pwp=0.3918 th@pwp=0.3930
+  rpeak valid: 18/35, rpk_delayed valid: 19/35, delay_timer valid: 18/35
+    beat 7: rpk=4.4, rpk_del=10.3, s14=23.7, wid=37.6, s69=79.3 ms from R
+    beat 14: rpk=0.8, rpk_del=6.6, s14=20.0, wid=34.9, s69=76.0 ms from R
+    beat 15: rpk=2.7, rpk_del=8.6, s14=21.9, wid=35.8, s69=77.4 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 841.7ms  f1=0.2688  py=+0.0057  sf=0.1070  ewma=0.3782  diff=-271.3mV  rpk_prev=0.8ms  eff_d=787.4ms
+    beat 16: rr= 800.0ms  f1=0.2799  py=-0.0366  sf=0.3397  ewma=0.3780  diff=-38.4mV  rpk_prev=2.7ms  eff_d=747.7ms
+    beat 17: rr= 813.9ms  f1=0.3056  py=-0.0190  sf=0.3976  ewma=0.3775  diff=+20.1mV  rpk_prev=2.6ms  eff_d=761.5ms
+    beat 25: rr= 797.2ms  f1=0.2688  py=-0.0220  sf=0.1276  ewma=0.3675  diff=-239.8mV  rpk_prev=2.6ms  eff_d=744.8ms
+    beat 26: rr= 802.8ms  f1=0.2868  py=-0.0142  sf=0.3503  ewma=0.3673  diff=-17.1mV  rpk_prev=4.4ms  eff_d=752.1ms
+    beat 27: rr= 822.2ms  f1=0.3119  py=+0.0066  sf=0.3965  ewma=0.3668  diff=+29.7mV  rpk_prev=1.9ms  eff_d=769.1ms
+    beat 28: rr= 794.4ms  f1=0.3142  py=-0.0218  sf=0.3994  ewma=0.3662  diff=+33.2mV  rpk_prev=-0.2ms  eff_d=739.7ms
+    beat 29: rr= 838.9ms  f1=0.3115  py=+0.0248  sf=0.3946  ewma=0.3656  diff=+29.1mV  rpk_prev=1.8ms  eff_d=785.7ms
+    beat 30: rr= 833.3ms  f1=0.3123  py=+0.0168  sf=0.3953  ewma=0.3649  diff=+30.3mV  rpk_prev=2.0ms  eff_d=780.4ms
+    beat 31: rr= 830.6ms  f1=0.3129  py=+0.0123  sf=0.3954  ewma=0.3642  diff=+31.1mV  rpk_prev=-0.2ms  eff_d=775.8ms
+    beat 32: rr= 861.1ms  f1=0.3110  py=+0.0416  sf=0.3918  ewma=0.3636  diff=+28.3mV  rpk_prev=-0.5ms  eff_d=806.6ms
+    beat 33: rr= 841.7ms  f1=0.3130  py=+0.0180  sf=0.3943  ewma=0.3629  diff=+31.3mV  rpk_prev=1.5ms  eff_d=788.2ms
+    beat 34: rr= 838.9ms  f1=0.3136  py=+0.0135  sf=0.3945  ewma=0.3623  diff=+32.2mV  rpk_prev=0.5ms  eff_d=784.4ms
+  F1 Pearson r=0.5347  Spearman rho=0.3956  n=13
+  SF vs annotation_RR: Spearman |rho|=0.2149  n=13
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9862  rpk_range=5.7ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.1978  n=13
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.3626  n=13
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.30254 ecg_sim=0.30336 delta=-0.82mV  tfall=R+11.8ms
+    beat  6: cv=0.29758 ecg_sim=0.29732 delta=+0.27mV  tfall=R+12.1ms
+    beat  7: cv=0.29914 ecg_sim=0.29926 delta=-0.12mV  tfall=R+10.9ms
+    beat 14: cv=0.34463 ecg_sim=0.33377 delta=+10.86mV  tfall=R+7.1ms
+    beat 15: cv=0.32371 ecg_sim=0.32372 delta=-0.01mV  tfall=R+9.2ms
+    beat 16: cv=0.31123 ecg_sim=0.31178 delta=-0.56mV  tfall=R+9.4ms
+    beat 17: cv=0.30179 ecg_sim=0.30191 delta=-0.12mV  tfall=R+10.9ms
+    beat 24: cv=0.31013 ecg_sim=0.31066 delta=-0.53mV  tfall=R+9.4ms
+    beat 25: cv=0.29985 ecg_sim=0.29996 delta=-0.11mV  tfall=R+10.9ms
+    beat 27: cv=0.32408 ecg_sim=0.32372 delta=+0.36mV  tfall=R+6.4ms
+  F8 rho sim_ecg=0.9926  ecg_at_time=0.9951
+  F1:rr_ratio      rho=0.3956  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.0947  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9912  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7547)  (fall=0.9000 sdiff=0.9727)
+  F4:bi_L1         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.3538)  (fall=0.9273 sdiff=1.0000)
+  F5:pwave         rho=0.9221  [WARN]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.2495)
+  F6:width         rho=1.0000  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9278)
+  F7:slope         rho=0.9882  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.1915)  (fall_ref=0.9794)
+  F8:symmetry      rho=0.9926  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.8081)  (ecgref=0.9951)
+
+--- Record 205 ---
+  35 beats, gain=0.1693
+  rpeak pos_thresh: 0.3715V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4228V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.4072V  avg_rr=669ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 268s, 1294 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.4101 ewma=0.4070 thresh=0.4270 cmp@-30=0.8999 esamp=0.4102 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.4106 ewma=0.4069 thresh=0.4269 cmp@-30=0.8999 esamp=0.4106 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.4111 ewma=0.4069 thresh=0.4269 cmp@-30=0.8999 esamp=0.4112 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.4139 ewma=0.4070 thresh=0.4270 cmp@-30=0.8999 esamp=0.4139 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.4104 ewma=0.4069 thresh=0.4269 cmp@-30=0.8999 esamp=0.4104 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.4088 ewma=0.4069 thresh=0.4269 cmp@-30=0.8999 esamp=0.4088 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.4103 ewma=0.4067 thresh=0.4267 cmp@-30=0.8999 esamp=0.4104 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.4111 pwb_max=0.900 pwp_max=0.900 tpwb=R-197ms tpwp=R-122ms gap=75ms sf2@pwb=0.4289 th@pwb=0.4304 sf2@pwp=0.4205 th@pwp=0.4219
+    beat 3: sf2=0.4093 pwb_max=0.900 pwp_max=0.900 tpwb=R-214ms tpwp=R-138ms gap=75ms sf2@pwb=0.4289 th@pwb=0.4305 sf2@pwp=0.4207 th@pwp=0.4220
+    beat 4: sf2=0.4098 pwb_max=0.900 pwp_max=0.900 tpwb=R-209ms tpwp=R-134ms gap=75ms sf2@pwb=0.4289 th@pwb=0.4304 sf2@pwp=0.4204 th@pwp=0.4219
+    beat 5: sf2=0.4103 pwb_max=0.900 pwp_max=0.900 tpwb=R-203ms tpwp=R-128ms gap=75ms sf2@pwb=0.4293 th@pwb=0.4304 sf2@pwp=0.4206 th@pwp=0.4219
+    beat 6: sf2=0.4131 pwb_max=0.900 pwp_max=0.900 tpwb=R-179ms tpwp=R-104ms gap=75ms sf2@pwb=0.4288 th@pwb=0.4304 sf2@pwp=0.4204 th@pwp=0.4219
+    beat 7: sf2=0.4096 pwb_max=0.900 pwp_max=0.900 tpwb=R-210ms tpwp=R-135ms gap=75ms sf2@pwb=0.4290 th@pwb=0.4304 sf2@pwp=0.4206 th@pwp=0.4219
+    beat 8: sf2=0.4080 pwb_max=0.900 pwp_max=0.900 tpwb=R-224ms tpwp=R-149ms gap=75ms sf2@pwb=0.4287 th@pwb=0.4304 sf2@pwp=0.4205 th@pwp=0.4219
+    beat 9: sf2=0.4095 pwb_max=0.900 pwp_max=0.900 tpwb=R-209ms tpwp=R-133ms gap=75ms sf2@pwb=0.4288 th@pwb=0.4301 sf2@pwp=0.4200 th@pwp=0.4217
+  rpeak valid: 35/35, rpk_delayed valid: 33/35, delay_timer valid: 31/35
+    beat 5: rpk=-6.0, rpk_del=0.0, s14=13.1, wid=27.5, s69=68.7 ms from R
+    beat 6: rpk=-3.8, rpk_del=2.0, s14=15.4, wid=29.8, s69=70.9 ms from R
+    beat 7: rpk=-4.1, rpk_del=2.0, s14=14.9, wid=29.3, s69=70.5 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 677.8ms  f1=0.2970  py=+0.0102  sf=0.4126  ewma=0.4072  diff=+5.4mV  rpk_prev=-6.5ms  eff_d=629.2ms
+    beat 16: rr= 666.7ms  f1=0.2977  py=-0.0019  sf=0.4139  ewma=0.4071  diff=+6.8mV  rpk_prev=-6.2ms  eff_d=617.9ms
+    beat 17: rr= 658.3ms  f1=0.2982  py=-0.0101  sf=0.4149  ewma=0.4071  diff=+7.8mV  rpk_prev=-5.5ms  eff_d=608.8ms
+    beat 18: rr= 680.6ms  f1=0.2969  py=+0.0131  sf=0.4125  ewma=0.4072  diff=+5.2mV  rpk_prev=-4.9ms  eff_d=630.5ms
+    beat 19: rr= 702.8ms  f1=0.2957  py=+0.0341  sf=0.4099  ewma=0.4071  diff=+2.9mV  rpk_prev=-5.4ms  eff_d=653.2ms
+    beat 20: rr= 675.0ms  f1=0.2974  py=+0.0029  sf=0.4129  ewma=0.4066  diff=+6.3mV  rpk_prev=-6.3ms  eff_d=626.3ms
+    beat 21: rr= 669.4ms  f1=0.2979  py=-0.0030  sf=0.4138  ewma=0.4066  diff=+7.2mV  rpk_prev=-4.3ms  eff_d=618.7ms
+    beat 22: rr= 666.7ms  f1=0.2979  py=-0.0055  sf=0.4139  ewma=0.4067  diff=+7.2mV  rpk_prev=-6.1ms  eff_d=617.8ms
+    beat 23: rr= 669.4ms  f1=0.2978  py=-0.0021  sf=0.4135  ewma=0.4066  diff=+6.9mV  rpk_prev=-6.7ms  eff_d=621.1ms
+    beat 24: rr= 672.2ms  f1=0.2976  py=+0.0009  sf=0.4132  ewma=0.4067  diff=+6.5mV  rpk_prev=-6.3ms  eff_d=623.5ms
+    beat 25: rr= 686.1ms  f1=0.2968  py=+0.0147  sf=0.4118  ewma=0.4067  diff=+5.1mV  rpk_prev=-5.1ms  eff_d=636.3ms
+    beat 26: rr= 666.7ms  f1=0.2981  py=-0.0062  sf=0.4140  ewma=0.4066  diff=+7.4mV  rpk_prev=-5.2ms  eff_d=616.8ms
+    beat 27: rr= 661.1ms  f1=0.2982  py=-0.0112  sf=0.4144  ewma=0.4067  diff=+7.7mV  rpk_prev=-7.1ms  eff_d=613.2ms
+    beat 28: rr= 658.3ms  f1=0.2986  py=-0.0128  sf=0.4152  ewma=0.4068  diff=+8.4mV  rpk_prev=-4.9ms  eff_d=608.3ms
+    beat 29: rr= 675.0ms  f1=0.2973  py=+0.0051  sf=0.4129  ewma=0.4070  diff=+5.9mV  rpk_prev=-6.6ms  eff_d=626.6ms
+    beat 30: rr= 661.1ms  f1=0.2981  py=-0.0093  sf=0.4145  ewma=0.4069  diff=+7.6mV  rpk_prev=-6.0ms  eff_d=612.1ms
+    beat 31: rr= 663.9ms  f1=0.2979  py=-0.0056  sf=0.4142  ewma=0.4071  diff=+7.1mV  rpk_prev=-6.1ms  eff_d=615.0ms
+    beat 32: rr= 647.2ms  f1=0.2989  py=-0.0217  sf=0.4162  ewma=0.4072  diff=+9.1mV  rpk_prev=-4.8ms  eff_d=597.0ms
+    beat 33: rr= 663.9ms  f1=0.2978  py=-0.0029  sf=0.4143  ewma=0.4074  diff=+7.0mV  rpk_prev=-4.8ms  eff_d=613.7ms
+    beat 34: rr= 650.0ms  f1=0.2985  py=-0.0165  sf=0.4157  ewma=0.4075  diff=+8.3mV  rpk_prev=-6.5ms  eff_d=601.5ms
+  F1 Pearson r=-0.9955  Spearman rho=-0.9910  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9966  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9913  rpk_range=4.5ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=1.0000  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9910  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.44572 ecg_sim=0.44318 delta=+2.54mV  tfall=R+0.4ms
+    beat  6: cv=0.42941 ecg_sim=0.43316 delta=-3.75mV  tfall=R+2.5ms
+    beat  7: cv=0.42535 ecg_sim=0.42665 delta=-1.30mV  tfall=R+2.5ms
+    beat  8: cv=0.42802 ecg_sim=0.42805 delta=-0.03mV  tfall=R+2.1ms
+    beat  9: cv=0.42592 ecg_sim=0.42646 delta=-0.54mV  tfall=R+1.5ms
+    beat 11: cv=0.45701 ecg_sim=0.45643 delta=+0.58mV  tfall=R+0.4ms
+    beat 12: cv=0.44915 ecg_sim=0.45128 delta=-2.13mV  tfall=R-0.3ms
+    beat 13: cv=0.43966 ecg_sim=0.44236 delta=-2.70mV  tfall=R+1.5ms
+    beat 14: cv=0.44247 ecg_sim=0.44302 delta=-0.55mV  tfall=R-0.1ms
+    beat 15: cv=0.45016 ecg_sim=0.44982 delta=+0.34mV  tfall=R+0.4ms
+  F8 rho sim_ecg=0.9792  ecg_at_time=0.9803
+  F1:rr_ratio      rho=0.9910  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9824  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9980  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.5101)  (fall=0.7442 sdiff=0.7156)
+  F4:bi_L1         rho=0.9019  [WARN]  trigger=DELAYED rpk  (fixed_ref=0.5569)  (fall=0.9104 sdiff=0.9156)
+  F5:pwave         rho=0.9947  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.1988)
+  F6:width         rho=0.9951  [PASS]  trigger=ANALOG wid  (fixed_ref=0.8987)
+  F7:slope         rho=0.9989  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.2748)  (fall_ref=0.9485)
+  F8:symmetry      rho=0.9792  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7564)  (ecgref=0.9803)
+
+--- Record 214 ---
+  35 beats, gain=0.0767
+  rpeak pos_thresh: 0.3731V (frac=50% of median) detectable: pos=35/35 min_rpk=0.3771V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3920V  avg_rr=805ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 325s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3871 ewma=0.3891 thresh=0.4091 cmp@-30=0.9000 esamp=0.3871 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3861 ewma=0.3884 thresh=0.4084 cmp@-30=0.9000 esamp=0.3861 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3923 ewma=0.3875 thresh=0.4075 cmp@-30=0.9000 esamp=0.3923 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.4123 ewma=0.3876 thresh=0.4076 cmp@-30=-0.0000 esamp=0.3852 esamp_ok=0.9000 trig_max=0.0000
+    beat 7: timer=0.3794 ewma=0.3869 thresh=0.4069 cmp@-30=0.9000 esamp=0.3794 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3982 ewma=0.3853 thresh=0.4053 cmp@-30=0.8999 esamp=0.3982 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3863 ewma=0.3861 thresh=0.4061 cmp@-30=0.9000 esamp=0.3863 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3860 pwb_max=0.000 pwp_max=0.900 tpwb=R-271ms tpwp=R-196ms gap=75ms sf2@pwb=0.4120 th@pwb=0.4136 sf2@pwp=0.4038 th@pwp=0.4051
+    beat 3: sf2=0.3863 pwb_max=0.000 pwp_max=0.900 tpwb=R-260ms tpwp=R-185ms gap=75ms sf2@pwb=0.4111 th@pwb=0.4126 sf2@pwp=0.4027 th@pwp=0.4041
+    beat 4: sf2=0.3853 pwb_max=0.000 pwp_max=0.900 tpwb=R-262ms tpwp=R-186ms gap=76ms sf2@pwb=0.4105 th@pwb=0.4118 sf2@pwp=0.4016 th@pwp=0.4034
+    beat 5: sf2=0.3914 pwb_max=0.900 pwp_max=0.900 tpwb=R-199ms tpwp=R-124ms gap=76ms sf2@pwb=0.4095 th@pwb=0.4110 sf2@pwp=0.4010 th@pwp=0.4025
+    beat 6: sf2=0.4123 pwb_max=0.900 pwp_max=0.000 tpwb=R-13ms tpwp=R+722ms gap=735ms sf2@pwb=0.4093 th@pwb=0.4109 sf2@pwp=0.4002 th@pwp=0.4019
+    beat 7: sf2=0.3786 pwb_max=0.000 pwp_max=0.900 tpwb=R+647ms tpwp=R-233ms gap=-880ms sf2@pwb=0.4072 th@pwb=0.4087 sf2@pwp=0.4002 th@pwp=0.4019
+    beat 8: sf2=0.3974 pwb_max=0.900 pwp_max=0.900 tpwb=R-126ms tpwp=R-50ms gap=76ms sf2@pwb=0.4072 th@pwb=0.4087 sf2@pwp=0.3986 th@pwp=0.4002
+    beat 9: sf2=0.3855 pwb_max=0.900 pwp_max=0.900 tpwb=R-239ms tpwp=R-164ms gap=75ms sf2@pwb=0.4080 th@pwb=0.4095 sf2@pwp=0.3993 th@pwp=0.4011
+  rpeak valid: 35/35, rpk_delayed valid: 32/35, delay_timer valid: 32/35
+    beat 5: rpk=-15.6, rpk_del=-9.6, s14=3.8, wid=17.7, s69=59.3 ms from R
+    beat 6: rpk=0.2, rpk_del=6.1, s14=19.4, wid=33.6, s69=74.7 ms from R
+    beat 7: rpk=-15.3, rpk_del=-9.1, s14=3.8, wid=18.2, s69=59.3 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 758.3ms  f1=0.3026  py=-0.0507  sf=0.4030  ewma=0.3877  diff=+15.3mV  rpk_prev=-11.3ms  eff_d=714.7ms
+    beat 16: rr= 763.9ms  f1=0.3017  py=-0.0401  sf=0.4021  ewma=0.3883  diff=+13.8mV  rpk_prev=-13.6ms  eff_d=722.4ms
+    beat 17: rr= 775.0ms  f1=0.3008  py=-0.0250  sf=0.4011  ewma=0.3889  diff=+12.2mV  rpk_prev=-11.5ms  eff_d=731.5ms
+    beat 18: rr= 880.6ms  f1=0.2943  py=+0.0831  sf=0.3893  ewma=0.3893  diff=-0.0mV  rpk_prev=-11.8ms  eff_d=837.4ms
+    beat 19: rr= 894.4ms  f1=0.2935  py=+0.0887  sf=0.3866  ewma=0.3884  diff=-1.8mV  rpk_prev=-21.4ms  eff_d=860.8ms
+    beat 20: rr= 747.2ms  f1=0.3032  py=-0.0674  sf=0.4037  ewma=0.3874  diff=+16.3mV  rpk_prev=-13.6ms  eff_d=705.9ms
+    beat 21: rr= 722.2ms  f1=0.3024  py=-0.0857  sf=0.4033  ewma=0.3882  diff=+15.0mV  rpk_prev=-8.9ms  eff_d=676.1ms
+    beat 22: rr= 727.8ms  f1=0.3035  py=-0.0716  sf=0.4061  ewma=0.3893  diff=+16.8mV  rpk_prev=-10.8ms  eff_d=683.6ms
+    beat 23: rr= 780.6ms  f1=0.2997  py=-0.0116  sf=0.4004  ewma=0.3902  diff=+10.3mV  rpk_prev=-12.1ms  eff_d=737.6ms
+    beat 24: rr= 816.7ms  f1=0.2976  py=+0.0257  sf=0.3962  ewma=0.3898  diff=+6.3mV  rpk_prev=-13.9ms  eff_d=775.6ms
+    beat 25: rr= 819.4ms  f1=0.2977  py=+0.0259  sf=0.3962  ewma=0.3897  diff=+6.5mV  rpk_prev=-11.4ms  eff_d=775.8ms
+    beat 26: rr= 802.8ms  f1=0.2986  py=+0.0066  sf=0.3977  ewma=0.3895  diff=+8.2mV  rpk_prev=-14.3ms  eff_d=762.1ms
+    beat 27: rr= 833.3ms  f1=0.2968  py=+0.0365  sf=0.3943  ewma=0.3895  diff=+4.7mV  rpk_prev=-14.2ms  eff_d=792.5ms
+    beat 28: rr= 766.7ms  f1=0.3012  py=-0.0338  sf=0.4020  ewma=0.3892  diff=+12.9mV  rpk_prev=-11.6ms  eff_d=723.3ms
+    beat 29: rr= 713.9ms  f1=0.3033  py=-0.0832  sf=0.4062  ewma=0.3896  diff=+16.5mV  rpk_prev=-10.6ms  eff_d=669.5ms
+    beat 30: rr= 747.2ms  f1=0.3016  py=-0.0416  sf=0.4042  ewma=0.3907  diff=+13.6mV  rpk_prev=-11.5ms  eff_d=703.7ms
+    beat 31: rr= 780.6ms  f1=0.2989  py=-0.0041  sf=0.4000  ewma=0.3912  diff=+8.8mV  rpk_prev=-15.7ms  eff_d=741.3ms
+    beat 32: rr= 825.0ms  f1=0.2961  py=+0.0408  sf=0.3950  ewma=0.3914  diff=+3.6mV  rpk_prev=-15.8ms  eff_d=785.8ms
+    beat 33: rr= 861.1ms  f1=0.2945  py=+0.0728  sf=0.3912  ewma=0.3910  diff=+0.2mV  rpk_prev=-13.7ms  eff_d=819.8ms
+    beat 34: rr= 825.0ms  f1=0.2971  py=+0.0294  sf=0.3956  ewma=0.3901  diff=+5.4mV  rpk_prev=-11.0ms  eff_d=781.0ms
+  F1 Pearson r=-0.9888  Spearman rho=-0.9805  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9898  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9974  rpk_range=21.6ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9910  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9805  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.40961 ecg_sim=0.41485 delta=-5.24mV  tfall=R-9.1ms
+    beat  6: cv=0.37331 ecg_sim=0.37297 delta=+0.34mV  tfall=R+7.0ms
+    beat  7: cv=0.43269 ecg_sim=0.42570 delta=+6.99mV  tfall=R-8.6ms
+    beat  9: cv=0.41219 ecg_sim=0.41371 delta=-1.52mV  tfall=R-9.6ms
+    beat 10: cv=0.39393 ecg_sim=0.39415 delta=-0.23mV  tfall=R-4.1ms
+    beat 11: cv=0.43438 ecg_sim=0.41825 delta=+16.13mV  tfall=R-11.9ms
+    beat 13: cv=0.42798 ecg_sim=0.42825 delta=-0.27mV  tfall=R-4.9ms
+    beat 14: cv=0.42448 ecg_sim=0.42600 delta=-1.52mV  tfall=R-4.8ms
+    beat 15: cv=0.40954 ecg_sim=0.41548 delta=-5.94mV  tfall=R-6.9ms
+    beat 16: cv=0.42931 ecg_sim=0.42809 delta=+1.22mV  tfall=R-5.2ms
+  F8 rho sim_ecg=0.8602  ecg_at_time=0.8578
+  F1:rr_ratio      rho=0.9805  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9807  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9980  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.3855)  (fall=0.8610 sdiff=0.8078)
+  F4:bi_L1         rho=0.9872  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9236)  (fall=0.9870 sdiff=0.9766)
+  F5:pwave         rho=0.9982  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.3683)
+  F6:width         rho=0.9973  [PASS]  trigger=ANALOG wid  (fixed_ref=0.8690)
+  F7:slope         rho=1.0000  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.5110)  (fall_ref=0.9639)
+  F8:symmetry      rho=0.8602  [WARN]  trigger=DELAYED rpk  (fixed_ref=0.4633)  (ecgref=0.8578)
+
+--- Record 219 ---
+  35 beats, gain=0.0847
+  rpeak pos_thresh: 0.3745V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4376V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3888V  avg_rr=833ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 339s, 1285 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.4188 ewma=0.3874 thresh=0.4074 cmp@-30=0.0000 esamp=0.3854 esamp_ok=0.9000 trig_max=0.0000
+    beat 4: timer=0.3946 ewma=0.3868 thresh=0.4068 cmp@-30=0.9000 esamp=0.3946 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.4174 ewma=0.3871 thresh=0.4071 cmp@-30=0.0000 esamp=0.3848 esamp_ok=0.9000 trig_max=0.0000
+    beat 6: timer=0.3974 ewma=0.3865 thresh=0.4065 cmp@-30=0.8999 esamp=0.3974 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.4010 ewma=0.3870 thresh=0.4070 cmp@-30=0.8999 esamp=0.4010 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.4079 ewma=0.3879 thresh=0.4079 cmp@-30=0.0010 esamp=0.3855 esamp_ok=0.9000 trig_max=0.9003
+    beat 9: timer=0.3959 ewma=0.3891 thresh=0.4091 cmp@-30=0.9000 esamp=0.3959 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3853 pwb_max=0.000 pwp_max=0.900 tpwb=R-259ms tpwp=R-183ms gap=75ms sf2@pwb=0.4099 th@pwb=0.4115 sf2@pwp=0.4014 th@pwp=0.4031
+    beat 3: sf2=0.4188 pwb_max=0.000 pwp_max=0.000 tpwb=R+637ms tpwp=R+712ms gap=75ms sf2@pwb=0.4088 th@pwb=0.4102 sf2@pwp=0.4005 th@pwp=0.4018
+    beat 4: sf2=0.3938 pwb_max=0.900 pwp_max=0.900 tpwb=R-172ms tpwp=R-96ms gap=75ms sf2@pwb=0.4088 th@pwb=0.4102 sf2@pwp=0.4005 th@pwp=0.4018
+    beat 5: sf2=0.4174 pwb_max=0.000 pwp_max=0.000 tpwb=R+643ms tpwp=R+718ms gap=75ms sf2@pwb=0.4088 th@pwb=0.4099 sf2@pwp=0.4000 th@pwp=0.4014
+    beat 6: sf2=0.3966 pwb_max=0.900 pwp_max=0.900 tpwb=R-143ms tpwp=R-68ms gap=75ms sf2@pwb=0.4088 th@pwb=0.4099 sf2@pwp=0.4000 th@pwp=0.4014
+    beat 7: sf2=0.4002 pwb_max=0.900 pwp_max=0.900 tpwb=R-116ms tpwp=R-41ms gap=75ms sf2@pwb=0.4091 th@pwb=0.4104 sf2@pwp=0.4007 th@pwp=0.4020
+    beat 8: sf2=0.4079 pwb_max=0.900 pwp_max=0.000 tpwb=R-55ms tpwp=R+692ms gap=746ms sf2@pwb=0.4101 th@pwb=0.4113 sf2@pwp=0.4024 th@pwp=0.4041
+    beat 9: sf2=0.3951 pwb_max=0.900 pwp_max=0.900 tpwb=R-181ms tpwp=R-105ms gap=75ms sf2@pwb=0.4114 th@pwb=0.4126 sf2@pwp=0.4024 th@pwp=0.4041
+  rpeak valid: 35/35, rpk_delayed valid: 32/35, delay_timer valid: 34/35
+    beat 5: rpk=-10.2, rpk_del=782.6, s14=8.9, wid=23.2, s69=64.3 ms from R
+    beat 6: rpk=-9.7, rpk_del=-3.6, s14=9.7, wid=23.7, s69=64.9 ms from R
+    beat 7: rpk=-10.1, rpk_del=-4.1, s14=8.9, wid=23.2, s69=64.8 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 897.2ms  f1=0.2974  py=+0.0655  sf=0.3875  ewma=0.3816  diff=+5.9mV  rpk_prev=-10.4ms  eff_d=852.6ms
+    beat 16: rr= 838.9ms  f1=0.3012  py=+0.0006  sf=0.3941  ewma=0.3813  diff=+12.7mV  rpk_prev=-10.5ms  eff_d=794.4ms
+    beat 17: rr=1016.7ms  f1=0.2911  py=+0.1783  sf=0.3740  ewma=0.3809  diff=-6.9mV  rpk_prev=-12.1ms  eff_d=973.8ms
+    beat 18: rr= 766.7ms  f1=0.3067  py=-0.0895  sf=0.4013  ewma=0.3795  diff=+21.9mV  rpk_prev=-11.0ms  eff_d=722.6ms
+    beat 19: rr= 588.9ms  f1=0.3190  py=-0.2584  sf=0.4213  ewma=0.3809  diff=+40.4mV  rpk_prev=-10.4ms  eff_d=544.3ms
+    beat 20: rr= 822.2ms  f1=0.3028  py=+0.0008  sf=0.3957  ewma=0.3803  diff=+15.5mV  rpk_prev=-11.6ms  eff_d=778.8ms
+    beat 21: rr= 922.2ms  f1=0.2962  py=+0.1007  sf=0.3846  ewma=0.3809  diff=+3.6mV  rpk_prev=-11.8ms  eff_d=879.1ms
+    beat 22: rr=1197.2ms  f1=0.2835  py=+0.3657  sf=0.3543  ewma=0.3805  diff=-26.2mV  rpk_prev=-9.4ms  eff_d=1151.6ms
+    beat 23: rr= 747.2ms  f1=0.3077  py=-0.1209  sf=0.4038  ewma=0.3803  diff=+23.5mV  rpk_prev=-8.1ms  eff_d=700.3ms
+    beat 24: rr=1147.2ms  f1=0.2852  py=+0.2912  sf=0.3597  ewma=0.3811  diff=-21.4mV  rpk_prev=-9.9ms  eff_d=1102.1ms
+    beat 25: rr=1144.4ms  f1=0.2864  py=+0.2593  sf=0.3600  ewma=0.3782  diff=-18.2mV  rpk_prev=-10.6ms  eff_d=1100.1ms
+    beat 26: rr= 655.6ms  f1=0.3175  py=-0.2555  sf=0.4139  ewma=0.3758  diff=+38.1mV  rpk_prev=-10.1ms  eff_d=610.6ms
+    beat 27: rr= 783.3ms  f1=0.3080  py=-0.1022  sf=0.3993  ewma=0.3754  diff=+24.0mV  rpk_prev=-11.6ms  eff_d=740.0ms
+    beat 28: rr= 722.2ms  f1=0.3127  py=-0.1531  sf=0.4063  ewma=0.3752  diff=+31.2mV  rpk_prev=-10.5ms  eff_d=677.7ms
+    beat 29: rr= 683.3ms  f1=0.3161  py=-0.1767  sf=0.4108  ewma=0.3748  diff=+36.0mV  rpk_prev=-9.7ms  eff_d=638.0ms
+    beat 30: rr= 850.0ms  f1=0.3030  py=+0.0077  sf=0.3900  ewma=0.3743  diff=+15.7mV  rpk_prev=-9.4ms  eff_d=804.4ms
+    beat 31: rr= 944.4ms  f1=0.2981  py=+0.1013  sf=0.3825  ewma=0.3754  diff=+7.1mV  rpk_prev=-8.1ms  eff_d=897.6ms
+    beat 32: rr= 980.6ms  f1=0.2959  py=+0.1273  sf=0.3784  ewma=0.3754  diff=+2.9mV  rpk_prev=-9.3ms  eff_d=934.8ms
+    beat 33: rr= 825.0ms  f1=0.3054  py=-0.0410  sf=0.3948  ewma=0.3751  diff=+19.8mV  rpk_prev=-10.6ms  eff_d=780.6ms
+    beat 34: rr= 719.4ms  f1=0.3122  py=-0.1424  sf=0.4067  ewma=0.3764  diff=+30.3mV  rpk_prev=-10.0ms  eff_d=674.5ms
+  F1 Pearson r=-0.9921  Spearman rho=-0.9880  n=20
+  SF vs annotation_RR: Spearman |rho|=1.0000  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=1.0000  rpk_range=4.5ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=1.0000  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9955  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  6: cv=0.44322 ecg_sim=0.44355 delta=-0.33mV  tfall=R-3.0ms
+    beat  7: cv=0.43910 ecg_sim=0.44109 delta=-1.99mV  tfall=R-3.6ms
+    beat  8: cv=0.43245 ecg_sim=0.43553 delta=-3.09mV  tfall=R-4.1ms
+    beat  9: cv=0.43474 ecg_sim=0.43482 delta=-0.08mV  tfall=R-6.3ms
+    beat 10: cv=0.43987 ecg_sim=0.44008 delta=-0.21mV  tfall=R-3.2ms
+    beat 11: cv=0.43368 ecg_sim=0.43617 delta=-2.49mV  tfall=R-3.1ms
+    beat 12: cv=0.43133 ecg_sim=0.43316 delta=-1.83mV  tfall=R-3.6ms
+    beat 13: cv=0.44121 ecg_sim=0.44154 delta=-0.33mV  tfall=R-1.3ms
+    beat 14: cv=0.43500 ecg_sim=0.43811 delta=-3.11mV  tfall=R-4.1ms
+    beat 15: cv=0.44015 ecg_sim=0.43873 delta=+1.42mV  tfall=R-4.0ms
+  F8 rho sim_ecg=0.9579  ecg_at_time=0.9573
+  F1:rr_ratio      rho=0.9880  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.7193  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9990  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.2195)  (fall=0.8826 sdiff=0.8769)
+  F4:bi_L1         rho=0.9980  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9306)  (fall=0.9763 sdiff=0.9842)
+  F5:pwave         rho=0.9889  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.2086)
+  F6:width         rho=0.9929  [PASS]  trigger=ANALOG wid  (fixed_ref=0.4835)
+  F7:slope         rho=0.9991  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.5308)  (fall_ref=0.9755)
+  F8:symmetry      rho=0.9579  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.4794)  (ecgref=0.9573)
+
+--- Record 220 ---
+  35 beats, gain=0.0928
+  rpeak pos_thresh: 0.3723V (frac=50% of median) detectable: pos=35/35 min_rpk=0.4132V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3887V  avg_rr=834ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 321s, 1293 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3936 ewma=0.3874 thresh=0.4074 cmp@-30=0.9000 esamp=0.3936 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3914 ewma=0.3874 thresh=0.4074 cmp@-30=0.9000 esamp=0.3914 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3934 ewma=0.3871 thresh=0.4071 cmp@-30=0.9000 esamp=0.3934 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3912 ewma=0.3871 thresh=0.4071 cmp@-30=0.9000 esamp=0.3912 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.3914 ewma=0.3868 thresh=0.4068 cmp@-30=0.9000 esamp=0.3914 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3930 ewma=0.3867 thresh=0.4067 cmp@-30=0.9000 esamp=0.3930 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3916 ewma=0.3867 thresh=0.4067 cmp@-30=0.9000 esamp=0.3916 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.3907 pwb_max=0.900 pwp_max=0.900 tpwb=R-208ms tpwp=R-133ms gap=75ms sf2@pwb=0.4096 th@pwb=0.4113 sf2@pwp=0.4013 th@pwp=0.4028
+    beat 3: sf2=0.3928 pwb_max=0.900 pwp_max=0.900 tpwb=R-186ms tpwp=R-111ms gap=75ms sf2@pwb=0.4093 th@pwb=0.4109 sf2@pwp=0.4008 th@pwp=0.4024
+    beat 4: sf2=0.3906 pwb_max=0.900 pwp_max=0.900 tpwb=R-206ms tpwp=R-130ms gap=76ms sf2@pwb=0.4096 th@pwb=0.4108 sf2@pwp=0.4007 th@pwp=0.4024
+    beat 5: sf2=0.3925 pwb_max=0.900 pwp_max=0.900 tpwb=R-186ms tpwp=R-111ms gap=75ms sf2@pwb=0.4090 th@pwb=0.4106 sf2@pwp=0.4007 th@pwp=0.4021
+    beat 6: sf2=0.3904 pwb_max=0.900 pwp_max=0.900 tpwb=R-205ms tpwp=R-129ms gap=75ms sf2@pwb=0.4093 th@pwb=0.4105 sf2@pwp=0.4005 th@pwp=0.4021
+    beat 7: sf2=0.3906 pwb_max=0.900 pwp_max=0.900 tpwb=R-201ms tpwp=R-125ms gap=75ms sf2@pwb=0.4090 th@pwb=0.4103 sf2@pwp=0.4004 th@pwp=0.4018
+    beat 8: sf2=0.3922 pwb_max=0.900 pwp_max=0.900 tpwb=R-185ms tpwp=R-110ms gap=75ms sf2@pwb=0.4084 th@pwb=0.4101 sf2@pwp=0.4003 th@pwp=0.4017
+    beat 9: sf2=0.3908 pwb_max=0.900 pwp_max=0.900 tpwb=R-197ms tpwp=R-122ms gap=76ms sf2@pwb=0.4087 th@pwb=0.4101 sf2@pwp=0.4004 th@pwp=0.4017
+  rpeak valid: 35/35, rpk_delayed valid: 32/35, delay_timer valid: 33/35
+    beat 5: rpk=-2.8, rpk_del=3.0, s14=16.4, wid=30.3, s69=71.8 ms from R
+    beat 6: rpk=-6.1, rpk_del=-0.3, s14=13.1, wid=27.4, s69=68.7 ms from R
+    beat 7: rpk=-3.3, rpk_del=2.5, s14=15.9, wid=29.8, s69=71.3 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 836.1ms  f1=0.2989  py=+0.0093  sf=0.3950  ewma=0.3862  diff=+8.7mV  rpk_prev=-5.0ms  eff_d=786.1ms
+    beat 16: rr= 822.2ms  f1=0.2998  py=-0.0055  sf=0.3966  ewma=0.3862  diff=+10.4mV  rpk_prev=-4.7ms  eff_d=772.0ms
+    beat 17: rr= 850.0ms  f1=0.2980  py=+0.0228  sf=0.3935  ewma=0.3863  diff=+7.1mV  rpk_prev=-5.0ms  eff_d=800.0ms
+    beat 18: rr= 852.8ms  f1=0.2982  py=+0.0233  sf=0.3934  ewma=0.3860  diff=+7.4mV  rpk_prev=-2.8ms  eff_d=800.5ms
+    beat 19: rr= 813.9ms  f1=0.3007  py=-0.0179  sf=0.3977  ewma=0.3858  diff=+11.9mV  rpk_prev=-3.2ms  eff_d=762.1ms
+    beat 20: rr= 850.0ms  f1=0.2984  py=+0.0200  sf=0.3938  ewma=0.3860  diff=+7.8mV  rpk_prev=-2.0ms  eff_d=797.0ms
+    beat 21: rr= 827.8ms  f1=0.2997  py=-0.0042  sf=0.3960  ewma=0.3859  diff=+10.1mV  rpk_prev=-4.7ms  eff_d=777.5ms
+    beat 22: rr= 844.4ms  f1=0.2988  py=+0.0129  sf=0.3945  ewma=0.3859  diff=+8.5mV  rpk_prev=-1.4ms  eff_d=790.9ms
+    beat 23: rr= 838.9ms  f1=0.2991  py=+0.0060  sf=0.3949  ewma=0.3858  diff=+9.0mV  rpk_prev=-3.3ms  eff_d=787.1ms
+    beat 24: rr= 811.1ms  f1=0.3007  py=-0.0224  sf=0.3978  ewma=0.3858  diff=+11.9mV  rpk_prev=-5.1ms  eff_d=761.3ms
+    beat 25: rr= 847.2ms  f1=0.2983  py=+0.0160  sf=0.3937  ewma=0.3861  diff=+7.6mV  rpk_prev=-5.5ms  eff_d=797.7ms
+    beat 26: rr= 838.9ms  f1=0.2989  py=+0.0061  sf=0.3946  ewma=0.3860  diff=+8.6mV  rpk_prev=-5.8ms  eff_d=789.7ms
+    beat 27: rr= 825.0ms  f1=0.2998  py=-0.0084  sf=0.3963  ewma=0.3860  diff=+10.4mV  rpk_prev=-4.1ms  eff_d=774.1ms
+    beat 28: rr= 830.6ms  f1=0.2994  py=-0.0020  sf=0.3957  ewma=0.3861  diff=+9.5mV  rpk_prev=-4.7ms  eff_d=780.2ms
+    beat 29: rr= 830.6ms  f1=0.2994  py=-0.0018  sf=0.3958  ewma=0.3861  diff=+9.7mV  rpk_prev=-3.1ms  eff_d=778.7ms
+    beat 30: rr= 847.2ms  f1=0.2983  py=+0.0150  sf=0.3938  ewma=0.3862  diff=+7.6mV  rpk_prev=-4.8ms  eff_d=797.0ms
+    beat 31: rr= 819.4ms  f1=0.3000  py=-0.0143  sf=0.3967  ewma=0.3860  diff=+10.7mV  rpk_prev=-6.0ms  eff_d=770.4ms
+    beat 32: rr= 822.2ms  f1=0.2998  py=-0.0101  sf=0.3965  ewma=0.3862  diff=+10.3mV  rpk_prev=-5.3ms  eff_d=772.6ms
+    beat 33: rr= 844.4ms  f1=0.2984  py=+0.0132  sf=0.3940  ewma=0.3863  diff=+7.7mV  rpk_prev=-5.3ms  eff_d=794.7ms
+    beat 34: rr= 830.6ms  f1=0.2994  py=-0.0020  sf=0.3957  ewma=0.3861  diff=+9.5mV  rpk_prev=-4.5ms  eff_d=780.1ms
+  F1 Pearson r=-0.9816  Spearman rho=-0.9759  n=20
+  SF vs annotation_RR: Spearman |rho|=0.9936  n=20
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9921  rpk_range=4.9ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=1.0000  n=20
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9940  n=20
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.43732 ecg_sim=0.43725 delta=+0.07mV  tfall=R+3.7ms
+    beat  6: cv=0.44318 ecg_sim=0.44321 delta=-0.03mV  tfall=R+0.6ms
+    beat  7: cv=0.44152 ecg_sim=0.44163 delta=-0.11mV  tfall=R+3.3ms
+    beat  8: cv=0.44987 ecg_sim=0.44883 delta=+1.04mV  tfall=R+2.0ms
+    beat  9: cv=0.44919 ecg_sim=0.44979 delta=-0.60mV  tfall=R+2.6ms
+    beat 10: cv=0.44337 ecg_sim=0.44359 delta=-0.23mV  tfall=R+3.3ms
+    beat 11: cv=0.44082 ecg_sim=0.44024 delta=+0.58mV  tfall=R+2.1ms
+    beat 12: cv=0.44755 ecg_sim=0.44757 delta=-0.02mV  tfall=R+1.0ms
+    beat 13: cv=0.43859 ecg_sim=0.43967 delta=-1.08mV  tfall=R+1.5ms
+    beat 14: cv=0.43956 ecg_sim=0.43948 delta=+0.08mV  tfall=R+1.6ms
+  F8 rho sim_ecg=0.9560  ecg_at_time=0.9560
+  F1:rr_ratio      rho=0.9759  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9939  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9989  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.1361)  (fall=0.8662 sdiff=0.7519)
+  F4:bi_L1         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.2943)  (fall=0.9023 sdiff=0.9624)
+  F5:pwave         rho=0.9969  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.2669)
+  F6:width         rho=0.9962  [PASS]  trigger=ANALOG wid  (fixed_ref=0.6484)
+  F7:slope         rho=0.9995  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.2251)  (fall_ref=0.9513)
+  F8:symmetry      rho=0.9560  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.2915)  (ecgref=0.9560)
+
+--- Record 222 ---
+  35 beats, gain=0.1798
+  rpeak pos_thresh: 0.3449V (frac=50% of median) detectable: pos=32/35 min_rpk=0.3081V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3922V  avg_rr=803ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 296s, 1290 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.3919 ewma=0.3927 thresh=0.4127 cmp@-30=0.9000 esamp=0.3919 esamp_ok=0.9000 trig_max=0.9000
+    beat 4: timer=0.3958 ewma=0.3919 thresh=0.4119 cmp@-30=0.9000 esamp=0.3958 esamp_ok=0.9000 trig_max=0.9000
+    beat 5: timer=0.3932 ewma=0.3917 thresh=0.4117 cmp@-30=0.9000 esamp=0.3932 esamp_ok=0.9000 trig_max=0.9000
+    beat 6: timer=0.3942 ewma=0.3913 thresh=0.4113 cmp@-30=0.9000 esamp=0.3942 esamp_ok=0.9000 trig_max=0.9000
+    beat 7: timer=0.4039 ewma=0.3910 thresh=0.4110 cmp@-30=0.8999 esamp=0.4039 esamp_ok=0.9000 trig_max=0.9000
+    beat 8: timer=0.3894 ewma=0.3917 thresh=0.4117 cmp@-30=0.9000 esamp=0.3894 esamp_ok=0.9000 trig_max=0.9000
+    beat 9: timer=0.3944 ewma=0.3907 thresh=0.4107 cmp@-30=0.9000 esamp=0.3944 esamp_ok=0.9000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.4084 pwb_max=0.900 pwp_max=0.000 tpwb=R-82ms tpwp=R+663ms gap=746ms sf2@pwb=0.4133 th@pwb=0.4148 sf2@pwp=0.4066 th@pwp=0.4077
+    beat 3: sf2=0.3911 pwb_max=0.900 pwp_max=0.900 tpwb=R-248ms tpwp=R-173ms gap=75ms sf2@pwb=0.4149 th@pwb=0.4161 sf2@pwp=0.4066 th@pwp=0.4077
+    beat 4: sf2=0.3949 pwb_max=0.900 pwp_max=0.900 tpwb=R-207ms tpwp=R-131ms gap=75ms sf2@pwb=0.4139 th@pwb=0.4153 sf2@pwp=0.4052 th@pwp=0.4069
+    beat 5: sf2=0.3924 pwb_max=0.900 pwp_max=0.900 tpwb=R-228ms tpwp=R-152ms gap=75ms sf2@pwb=0.4135 th@pwb=0.4152 sf2@pwp=0.4050 th@pwp=0.4067
+    beat 6: sf2=0.3933 pwb_max=0.900 pwp_max=0.900 tpwb=R-216ms tpwp=R-140ms gap=75ms sf2@pwb=0.4135 th@pwb=0.4147 sf2@pwp=0.4051 th@pwp=0.4063
+    beat 7: sf2=0.4031 pwb_max=0.900 pwp_max=0.900 tpwb=R-126ms tpwp=R-50ms gap=75ms sf2@pwb=0.4132 th@pwb=0.4144 sf2@pwp=0.4048 th@pwp=0.4059
+    beat 8: sf2=0.3885 pwb_max=0.000 pwp_max=0.900 tpwb=R-262ms tpwp=R-187ms gap=75ms sf2@pwb=0.4140 th@pwb=0.4151 sf2@pwp=0.4053 th@pwp=0.4067
+    beat 9: sf2=0.3936 pwb_max=0.900 pwp_max=0.900 tpwb=R-209ms tpwp=R-133ms gap=75ms sf2@pwb=0.4130 th@pwb=0.4142 sf2@pwp=0.4040 th@pwp=0.4057
+  rpeak valid: 31/35, rpk_delayed valid: 29/35, delay_timer valid: 27/35
+    beat 5: rpk=-7.0, rpk_del=-0.8, s14=12.1, wid=26.5, s69=67.7 ms from R
+    beat 6: rpk=-6.2, rpk_del=-0.3, s14=13.1, wid=27.0, s69=68.4 ms from R
+    beat 7: rpk=-8.2, rpk_del=-2.2, s14=10.8, wid=25.1, s69=66.4 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 15: rr= 791.7ms  f1=0.2997  py=-0.0101  sf=0.3997  ewma=0.3895  diff=+10.2mV  rpk_prev=-7.4ms  eff_d=744.1ms
+    beat 16: rr= 791.7ms  f1=0.3001  py=-0.0091  sf=0.4005  ewma=0.3896  diff=+11.0mV  rpk_prev=-0.1ms  eff_d=736.7ms
+    beat 17: rr= 722.2ms  f1=0.3494  py=-0.0776  sf=0.4756  ewma=0.3897  diff=+86.0mV  rpk_prev=-7.8ms  eff_d=675.1ms
+    beat 18: rr= 933.3ms  f1=0.2918  py=+0.1412  sf=0.3838  ewma=0.3891  diff=-5.3mV  rpk_prev=-7.7ms  eff_d=886.0ms
+    beat 19: rr= 891.7ms  f1=0.2950  py=+0.0854  sf=0.3889  ewma=0.3876  diff=+1.4mV  rpk_prev=-3.6ms  eff_d=840.3ms
+    beat 20: rr= 836.1ms  f1=0.2988  py=+0.0213  sf=0.3951  ewma=0.3866  diff=+8.5mV  rpk_prev=-4.4ms  eff_d=785.5ms
+    beat 23: rr= 708.3ms  f1=0.3067  py=-0.1072  sf=0.4083  ewma=0.3863  diff=+22.0mV  rpk_prev=-5.9ms  eff_d=659.3ms
+    beat 26: rr= 791.7ms  f1=0.3016  py=-0.0125  sf=0.4013  ewma=0.3878  diff=+13.5mV  rpk_prev=-2.0ms  eff_d=738.7ms
+    beat 27: rr= 850.0ms  f1=0.2970  py=+0.0471  sf=0.3934  ewma=0.3882  diff=+5.2mV  rpk_prev=-5.5ms  eff_d=800.5ms
+    beat 28: rr= 775.0ms  f1=0.3020  py=-0.0326  sf=0.4020  ewma=0.3878  diff=+14.2mV  rpk_prev=-4.2ms  eff_d=724.2ms
+    beat 31: rr= 697.2ms  f1=0.3072  py=-0.1031  sf=0.4108  ewma=0.3879  diff=+22.8mV  rpk_prev=1.7ms  eff_d=643.9ms
+    beat 32: rr= 861.1ms  f1=0.2959  py=+0.0711  sf=0.3923  ewma=0.3891  diff=+3.1mV  rpk_prev=-4.7ms  eff_d=810.8ms
+  F1 Pearson r=-0.5887  Spearman rho=-0.9650  n=12
+  SF vs annotation_RR: Spearman |rho|=0.9719  n=12
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9930  rpk_range=11.2ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=0.9720  n=12
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.9790  n=12
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.43064 ecg_sim=0.43330 delta=-2.66mV  tfall=R-0.3ms
+    beat  6: cv=0.44283 ecg_sim=0.44275 delta=+0.08mV  tfall=R+0.6ms
+    beat  7: cv=0.44079 ecg_sim=0.44239 delta=-1.61mV  tfall=R-1.3ms
+    beat  8: cv=0.36201 ecg_sim=0.36219 delta=-0.17mV  tfall=R+4.6ms
+    beat  9: cv=0.34738 ecg_sim=0.34809 delta=-0.71mV  tfall=R+6.4ms
+    beat 10: cv=0.41224 ecg_sim=0.41146 delta=+0.78mV  tfall=R+1.3ms
+    beat 11: cv=0.42629 ecg_sim=0.42575 delta=+0.54mV  tfall=R-0.3ms
+    beat 12: cv=0.38064 ecg_sim=0.38088 delta=-0.24mV  tfall=R+4.1ms
+    beat 13: cv=0.42924 ecg_sim=0.42866 delta=+0.58mV  tfall=R-3.0ms
+    beat 14: cv=0.40579 ecg_sim=0.41383 delta=-8.04mV  tfall=R-0.8ms
+  F8 rho sim_ecg=0.9913  ecg_at_time=0.9913
+  F1:rr_ratio      rho=0.9650  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.9720  [PASS]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=1.0000  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.7263)  (fall=0.9736 sdiff=0.9341)
+  F4:bi_L1         rho=0.9702  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.4704)  (fall=0.9648 sdiff=0.9604)
+  F5:pwave         rho=0.9982  [PASS]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.1394)
+  F6:width         rho=1.0000  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9928)
+  F7:slope         rho=0.9991  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.6826)  (fall_ref=0.9965)
+  F8:symmetry      rho=0.9913  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9108)  (ecgref=0.9913)
+
+--- Record 232 ---
+  35 beats, gain=0.2353
+  rpeak pos_thresh: 0.3447V (frac=50% of median) detectable: pos=33/35 min_rpk=0.3353V
+  SF_DECAY_RATE=0.1120 mV/ms  ic_ewma=0.3702V  avg_rr=1014ms
+  pwave offsets: pwb=23.4mV (target R-206ms) pwp=15.0mV (target R-131ms) rrc=20.0mV
+  Sim time: 342s, 1263 measurements
+  rr_cap analog diagnostics (esamp validity gate):
+    beat 3: timer=0.4085 ewma=0.3680 thresh=0.3880 cmp@-30=0.0000 esamp=0.2769 esamp_ok=0.0000 trig_max=0.0000
+    beat 4: timer=0.4062 ewma=0.3678 thresh=0.3878 cmp@-30=0.0000 esamp=0.2741 esamp_ok=0.0000 trig_max=0.0000
+    beat 5: timer=0.2793 ewma=0.3672 thresh=0.3872 cmp@-30=0.9000 esamp=0.2793 esamp_ok=0.0000 trig_max=0.9000
+    beat 6: timer=0.4116 ewma=0.3672 thresh=0.3872 cmp@-30=0.0000 esamp=0.2733 esamp_ok=0.0000 trig_max=0.0000
+    beat 7: timer=0.3004 ewma=0.3666 thresh=0.3866 cmp@-30=0.9000 esamp=0.3004 esamp_ok=0.0000 trig_max=0.9000
+    beat 8: timer=0.2273 ewma=0.3662 thresh=0.3862 cmp@-30=0.9000 esamp=0.2273 esamp_ok=0.0000 trig_max=0.9000
+    beat 9: timer=0.3087 ewma=0.3658 thresh=0.3858 cmp@-30=0.9000 esamp=0.3087 esamp_ok=0.0000 trig_max=0.9000
+  Pwave trigger diagnostics (sf2_out isolated timer, body=vdd fix):
+    beat 2: sf2=0.2815 pwb_max=0.000 pwp_max=0.000 tpwb=R+2210ms tpwp=R+2286ms gap=76ms sf2@pwb=0.3896 th@pwb=0.3908 sf2@pwp=0.3807 th@pwp=0.3823
+    beat 3: sf2=0.4085 pwb_max=0.000 pwp_max=0.000 tpwb=R+1532ms tpwp=R+1608ms gap=76ms sf2@pwb=0.3896 th@pwb=0.3908 sf2@pwp=0.3807 th@pwp=0.3823
+    beat 4: sf2=0.4062 pwb_max=0.000 pwp_max=0.000 tpwb=R+829ms tpwp=R+905ms gap=76ms sf2@pwb=0.3896 th@pwb=0.3908 sf2@pwp=0.3807 th@pwp=0.3823
+    beat 5: sf2=0.2785 pwb_max=0.000 pwp_max=0.000 tpwb=R+1486ms tpwp=R+1562ms gap=76ms sf2@pwb=0.3885 th@pwb=0.3902 sf2@pwp=0.3801 th@pwp=0.3817
+    beat 6: sf2=0.4116 pwb_max=0.000 pwp_max=0.000 tpwb=R+827ms tpwp=R+903ms gap=76ms sf2@pwb=0.3885 th@pwb=0.3902 sf2@pwp=0.3801 th@pwp=0.3817
+    beat 7: sf2=0.2996 pwb_max=0.000 pwp_max=0.000 tpwb=R+1584ms tpwp=R+1660ms gap=76ms sf2@pwb=0.3877 th@pwb=0.3894 sf2@pwp=0.3795 th@pwp=0.3810
+    beat 8: sf2=0.2265 pwb_max=0.000 pwp_max=0.000 tpwb=R+912ms tpwp=R+988ms gap=76ms sf2@pwb=0.3877 th@pwb=0.3894 sf2@pwp=0.3795 th@pwp=0.3810
+    beat 9: sf2=0.3078 pwb_max=0.900 pwp_max=0.000 tpwb=R+2ms tpwp=R+1582ms gap=1580ms sf2@pwb=0.3877 th@pwb=0.3888 sf2@pwp=0.3791 th@pwp=0.3803
+  rpeak valid: 32/35, rpk_delayed valid: 32/35, delay_timer valid: 29/35
+    beat 5: rpk=0.1, rpk_del=6.1, s14=19.2, wid=33.3, s69=74.7 ms from R
+    beat 6: rpk=-0.0, rpk_del=5.8, s14=19.2, wid=33.1, s69=74.2 ms from R
+    beat 8: rpk=2.4, rpk_del=8.3, s14=21.4, wid=45.9, s69=87.6 ms from R
+  F1 per-beat (measured at R-55ms):
+    beat 17: rr= 694.4ms  f1=0.3238  py=-0.2861  sf=0.4105  ewma=0.3639  diff=+46.6mV  rpk_prev=-2.7ms  eff_d=642.1ms
+    beat 18: rr= 725.0ms  f1=0.3212  py=-0.2269  sf=0.4066  ewma=0.3636  diff=+43.0mV  rpk_prev=-5.1ms  eff_d=675.1ms
+    beat 19: rr= 725.0ms  f1=0.3213  py=-0.2042  sf=0.4066  ewma=0.3634  diff=+43.2mV  rpk_prev=-5.9ms  eff_d=675.9ms
+    beat 20: rr= 691.7ms  f1=0.3242  py=-0.2171  sf=0.4103  ewma=0.3631  diff=+47.1mV  rpk_prev=-6.7ms  eff_d=643.4ms
+    beat 21: rr= 700.0ms  f1=0.3239  py=-0.1871  sf=0.4096  ewma=0.3629  diff=+46.7mV  rpk_prev=-3.6ms  eff_d=648.6ms
+    beat 22: rr=1905.6ms  f1=0.2722  py=+1.0372  sf=0.2769  ewma=0.3624  diff=-85.5mV  rpk_prev=-3.5ms  eff_d=1854.0ms
+    beat 23: rr=2636.1ms  f1=0.2692  py=+1.6640  sf=0.1986  ewma=0.3615  diff=-162.9mV  rpk_prev=-3.9ms  eff_d=2585.0ms
+    beat 24: rr=1125.0ms  f1=0.2908  py=-0.0135  sf=0.3538  ewma=0.3615  diff=-7.7mV  rpk_prev=0.3ms  eff_d=1070.3ms
+    beat 25: rr= 680.6ms  f1=0.3268  py=-0.4566  sf=0.4118  ewma=0.3614  diff=+50.5mV  rpk_prev=-3.1ms  eff_d=628.7ms
+    beat 26: rr= 711.1ms  f1=0.3246  py=-0.3804  sf=0.4087  ewma=0.3611  diff=+47.6mV  rpk_prev=-0.4ms  eff_d=656.5ms
+    beat 27: rr=1850.0ms  f1=0.2731  py=+0.7965  sf=0.2835  ewma=0.3607  diff=-77.3mV  rpk_prev=1.1ms  eff_d=1796.1ms
+    beat 28: rr= 672.2ms  f1=0.3284  py=-0.4609  sf=0.4133  ewma=0.3607  diff=+52.6mV  rpk_prev=-1.9ms  eff_d=619.1ms
+    beat 29: rr= 750.0ms  f1=0.3214  py=-0.3370  sf=0.4037  ewma=0.3605  diff=+43.2mV  rpk_prev=-6.3ms  eff_d=701.3ms
+    beat 30: rr= 730.6ms  f1=0.3231  py=-0.3228  sf=0.4057  ewma=0.3602  diff=+45.4mV  rpk_prev=-7.5ms  eff_d=683.1ms
+    beat 31: rr= 708.3ms  f1=0.3252  py=-0.3127  sf=0.4083  ewma=0.3600  diff=+48.3mV  rpk_prev=-6.8ms  eff_d=660.1ms
+    beat 32: rr= 708.3ms  f1=0.3256  py=-0.2814  sf=0.4086  ewma=0.3597  diff=+48.9mV  rpk_prev=-4.0ms  eff_d=657.3ms
+    beat 33: rr= 711.1ms  f1=0.3259  py=-0.2505  sf=0.4087  ewma=0.3594  diff=+49.3mV  rpk_prev=-0.4ms  eff_d=656.6ms
+    beat 34: rr= 725.0ms  f1=0.3250  py=-0.2116  sf=0.4072  ewma=0.3592  diff=+48.0mV  rpk_prev=-0.4ms  eff_d=670.4ms
+  F1 Pearson r=-0.9328  Spearman rho=-0.7276  n=18
+  SF vs annotation_RR: Spearman |rho|=0.9783  n=18
+  Detected_RR vs annotation_RR: Spearman |rho|=0.9933  rpk_range=10.1ms
+  SF vs eff_decay (ann_rr+|rpk[j-1]|-55): Spearman |rho|=1.0000  n=18
+  F1 vs eff_decay EWMA ref: Spearman |rho|=0.7131  n=18
+  F8 cv vs sim_ecg_at_cap diagnostic:
+    beat  5: cv=0.33723 ecg_sim=0.33741 delta=-0.18mV  tfall=R+7.1ms
+    beat  6: cv=0.34477 ecg_sim=0.34482 delta=-0.05mV  tfall=R+6.4ms
+    beat  8: cv=0.33348 ecg_sim=0.33452 delta=-1.05mV  tfall=R+8.9ms
+    beat  9: cv=0.35283 ecg_sim=0.35312 delta=-0.29mV  tfall=R+7.6ms
+    beat 10: cv=0.34927 ecg_sim=0.34904 delta=+0.22mV  tfall=R+6.6ms
+    beat 11: cv=0.26274 ecg_sim=0.26409 delta=-1.35mV  tfall=R+14.5ms
+    beat 12: cv=0.36919 ecg_sim=0.36767 delta=+1.52mV  tfall=R+7.1ms
+    beat 13: cv=0.39558 ecg_sim=0.39484 delta=+0.74mV  tfall=R+5.3ms
+    beat 14: cv=0.32128 ecg_sim=0.32228 delta=-1.00mV  tfall=R+9.1ms
+    beat 16: cv=0.39147 ecg_sim=0.39164 delta=-0.17mV  tfall=R+4.2ms
+  F8 rho sim_ecg=0.9995  ecg_at_time=0.9995
+  F1:rr_ratio      rho=0.7276  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F2:rr_asym       rho=0.5877  [FAIL]  trigger=ANALOG rpk+ANALOG rrc
+  F3:bi_L0         rho=0.9991  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.8482)  (fall=0.9872 sdiff=0.9812)
+  F4:bi_L1         rho=0.9696  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.0675)  (fall=0.9595 sdiff=0.9585)
+  F5:pwave         rho=0.7936  [FAIL]  trigger=ANALOG pw(S&H ref)  (fixed_ref=0.5072)
+  F6:width         rho=0.9991  [PASS]  trigger=ANALOG wid  (fixed_ref=0.9058)
+  F7:slope         rho=0.9757  [PASS]  trigger=ANALOG s14/s69  (fixed_ref=0.4451)  (fall_ref=0.9470)
+  F8:symmetry      rho=0.9995  [PASS]  trigger=DELAYED rpk  (fixed_ref=0.9419)  (ecgref=0.9995)
+
+
+======================================================================
+SUMMARY: Fully Analog AFE — Integration Test Results (16 records)
+======================================================================
+  Feature            101    102    105    106    107    108    114    115    116    118    205    214    219    220    222    232   MIN    AVG
+  ---------------------------------------------------------------------------------------------------------------------------------------------
+  F1:rr_ratio      0.994  0.872  0.786  0.788  0.677  0.000  0.000  0.997  0.961  0.396  0.991  0.980  0.988  0.976  0.965  0.728  0.000  0.756
+  F2:rr_asym       0.990  0.788  0.971  0.993  0.292  0.000  0.000  0.990  0.979  0.095  0.982  0.981  0.719  0.994  0.972  0.588  0.000  0.708
+  F3:bi_L0         0.998  1.000  1.000  1.000  1.000  0.000  0.000  0.999  1.000  0.991  0.998  0.998  0.999  0.999  1.000  0.999  0.000  0.874
+  F4:bi_L1         1.000  0.999  0.997  0.999  0.999  0.000  0.000  1.000  0.991  1.000  0.902  0.987  0.998  1.000  0.970  0.970  0.000  0.863
+  F5:pwave         0.999  0.996  0.999  0.998  0.948  1.000  0.566  0.997  0.988  0.922  0.995  0.998  0.989  0.997  0.998  0.794  0.566  0.949
+  F6:width         1.000  1.000  0.999  0.999  1.000  0.000  0.000  0.997  0.999  1.000  0.995  0.997  0.993  0.996  1.000  0.999  0.000  0.873
+  F7:slope         1.000  0.999  0.999  1.000  1.000  0.000  0.000  0.999  1.000  0.988  0.999  1.000  0.999  0.999  0.999  0.976  0.000  0.872
+  F8:symmetry      0.992  0.910  0.938  0.976  0.959  0.000  0.000  0.978  0.985  0.993  0.979  0.860  0.958  0.956  0.991  0.999  0.000  0.842
+======================================================================
+
+Threshold info:
+  rpeak_offset = 6.6ms, pg_width = 0.7ms
+  vth_14(fast) = 0.2740V
+  vth_28(main) = 0.4681V
+  vth_69(main) = 0.4466V
+  vth_300(main)= 0.3292V
+  vth_10(fast) = 0.3095V
+  vth_rpk_del(fast) = 0.4375V

@@ -1,0 +1,1432 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: integ_118
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 83782
+
+  Measurements for Transient Analysis
+
+
+Error: measure  tpwp_fall_19  when(WHEN) : out of interval
+ .meas tran tpwp_fall_19 when v(trig_pw_peak)=0.45 fall=1 td=16.3361111 failed!
+
+
+Error: measure  tpwp_fall_20  when(WHEN) : out of interval
+ .meas tran tpwp_fall_20 when v(trig_pw_peak)=0.45 fall=1 td=17.1527778 failed!
+
+
+Error: measure  tpwp_fall_21  when(WHEN) : out of interval
+ .meas tran tpwp_fall_21 when v(trig_pw_peak)=0.45 fall=1 td=17.9666667 failed!
+
+
+Error: measure  tpwp_fall_22  when(WHEN) : out of interval
+ .meas tran tpwp_fall_22 when v(trig_pw_peak)=0.45 fall=1 td=18.7583333 failed!
+
+
+Error: measure  tpwp_fall_23  when(WHEN) : out of interval
+ .meas tran tpwp_fall_23 when v(trig_pw_peak)=0.45 fall=1 td=19.5527778 failed!
+
+
+Error: measure  tpwp_fall_24  when(WHEN) : out of interval
+ .meas tran tpwp_fall_24 when v(trig_pw_peak)=0.45 fall=1 td=20.3611111 failed!
+
+
+Error: measure  tpwp_fall_25  when(WHEN) : out of interval
+ .meas tran tpwp_fall_25 when v(trig_pw_peak)=0.45 fall=1 td=21.1583333 failed!
+
+
+Error: measure  trrc_26  when(WHEN) : out of interval
+ .meas tran trrc_26 when v(trig_rr_cap)=0.45 rise=1 td=22.2111111 failed!
+
+
+Error: measure  tpwp_fall_26  when(WHEN) : out of interval
+ .meas tran tpwp_fall_26 when v(trig_pw_peak)=0.45 fall=1 td=21.9611111 failed!
+
+
+Error: measure  trrc_27  when(WHEN) : out of interval
+ .meas tran trrc_27 when v(trig_rr_cap)=0.45 rise=1 td=23.0333333 failed!
+
+
+Error: measure  trrc_fall_27  when(WHEN) : out of interval
+ .meas tran trrc_fall_27 when v(trig_rr_cap)=0.45 fall=1 td=23.0333333 failed!
+
+
+Error: measure  tpwp_fall_27  when(WHEN) : out of interval
+ .meas tran tpwp_fall_27 when v(trig_pw_peak)=0.45 fall=1 td=22.7833333 failed!
+
+
+Error: measure  trrc_28  when(WHEN) : out of interval
+ .meas tran trrc_28 when v(trig_rr_cap)=0.45 rise=1 td=23.8277778 failed!
+
+
+Error: measure  trrc_fall_28  when(WHEN) : out of interval
+ .meas tran trrc_fall_28 when v(trig_rr_cap)=0.45 fall=1 td=23.8277778 failed!
+
+
+Error: measure  tpwp_fall_28  when(WHEN) : out of interval
+ .meas tran tpwp_fall_28 when v(trig_pw_peak)=0.45 fall=1 td=23.5777778 failed!
+
+
+Error: measure  trrc_29  when(WHEN) : out of interval
+ .meas tran trrc_29 when v(trig_rr_cap)=0.45 rise=1 td=24.6666667 failed!
+
+
+Error: measure  trrc_fall_29  when(WHEN) : out of interval
+ .meas tran trrc_fall_29 when v(trig_rr_cap)=0.45 fall=1 td=24.6666667 failed!
+
+
+Error: measure  tpwp_fall_29  when(WHEN) : out of interval
+ .meas tran tpwp_fall_29 when v(trig_pw_peak)=0.45 fall=1 td=24.4166667 failed!
+
+
+Error: measure  trrc_30  when(WHEN) : out of interval
+ .meas tran trrc_30 when v(trig_rr_cap)=0.45 rise=1 td=25.5000000 failed!
+
+
+Error: measure  trrc_fall_30  when(WHEN) : out of interval
+ .meas tran trrc_fall_30 when v(trig_rr_cap)=0.45 fall=1 td=25.5000000 failed!
+
+
+Error: measure  tpwp_fall_30  when(WHEN) : out of interval
+ .meas tran tpwp_fall_30 when v(trig_pw_peak)=0.45 fall=1 td=25.2500000 failed!
+
+
+Error: measure  trrc_31  when(WHEN) : out of interval
+ .meas tran trrc_31 when v(trig_rr_cap)=0.45 rise=1 td=26.3305556 failed!
+
+
+Error: measure  trrc_fall_31  when(WHEN) : out of interval
+ .meas tran trrc_fall_31 when v(trig_rr_cap)=0.45 fall=1 td=26.3305556 failed!
+
+
+Error: measure  tpwp_fall_31  when(WHEN) : out of interval
+ .meas tran tpwp_fall_31 when v(trig_pw_peak)=0.45 fall=1 td=26.0805556 failed!
+
+
+Error: measure  trrc_32  when(WHEN) : out of interval
+ .meas tran trrc_32 when v(trig_rr_cap)=0.45 rise=1 td=27.1916667 failed!
+
+
+Error: measure  trrc_fall_32  when(WHEN) : out of interval
+ .meas tran trrc_fall_32 when v(trig_rr_cap)=0.45 fall=1 td=27.1916667 failed!
+
+
+Error: measure  tpwp_fall_32  when(WHEN) : out of interval
+ .meas tran tpwp_fall_32 when v(trig_pw_peak)=0.45 fall=1 td=26.9416667 failed!
+
+
+Error: measure  trrc_33  when(WHEN) : out of interval
+ .meas tran trrc_33 when v(trig_rr_cap)=0.45 rise=1 td=28.0333333 failed!
+
+
+Error: measure  trrc_fall_33  when(WHEN) : out of interval
+ .meas tran trrc_fall_33 when v(trig_rr_cap)=0.45 fall=1 td=28.0333333 failed!
+
+
+Error: measure  tpwb_fall_33  when(WHEN) : out of interval
+ .meas tran tpwb_fall_33 when v(trig_pw_base)=0.45 fall=1 td=27.7833333 failed!
+
+
+Error: measure  tpwp_fall_33  when(WHEN) : out of interval
+ .meas tran tpwp_fall_33 when v(trig_pw_peak)=0.45 fall=1 td=27.7833333 failed!
+
+
+Error: measure  ts14_34  when(WHEN) : out of interval
+ .meas tran ts14_34 when v(trig_s14)=0.45 rise=1 td=28.8722222 failed!
+
+
+Error: measure  ts14_fall_34  when(WHEN) : out of interval
+ .meas tran ts14_fall_34 when v(trig_s14)=0.45 fall=1 td=28.8722222 failed!
+
+
+Error: measure  trrc_34  when(WHEN) : out of interval
+ .meas tran trrc_34 when v(trig_rr_cap)=0.45 rise=1 td=28.8722222 failed!
+
+
+Error: measure  trrc_fall_34  when(WHEN) : out of interval
+ .meas tran trrc_fall_34 when v(trig_rr_cap)=0.45 fall=1 td=28.8722222 failed!
+
+
+Error: measure  tpwb_fall_34  when(WHEN) : out of interval
+ .meas tran tpwb_fall_34 when v(trig_pw_base)=0.45 fall=1 td=28.6222222 failed!
+
+
+Error: measure  tpwp_fall_34  when(WHEN) : out of interval
+ .meas tran tpwp_fall_34 when v(trig_pw_peak)=0.45 fall=1 td=28.6222222 failed!
+
+rrc_cmp_3           =  8.999995e-01
+rrc_cmp2_3          =  8.999996e-01
+rrc_timer_3         =  2.980548e-01
+rrc_ewma_3          =  3.870462e-01
+rrc_thresh_3        =  4.070462e-01
+rrc_trig_3          =  9.000000e-01
+rrc_rpklvl_3        =  1.080033e-11
+rrc_esamp_3         =  2.980549e-01
+rrc_esamp_ok_3      =  2.095918e-11
+rrc_cmp_max_3       =  8.999996e-01 at=  3.382306e+00
+rrc_trig_max_3      =  9.000000e-01 at=  3.341139e+00
+rrc_cmp_4           =  9.000000e-01
+rrc_cmp2_4          =  9.000000e-01
+rrc_timer_4         =  2.067919e-01
+rrc_ewma_4          =  3.865298e-01
+rrc_thresh_4        =  4.065298e-01
+rrc_trig_4          =  9.000000e-01
+rrc_rpklvl_4        =  8.840777e-12
+rrc_esamp_4         =  2.067919e-01
+rrc_esamp_ok_4      =  1.995286e-11
+rrc_cmp_max_4       =  9.000000e-01 at=  4.223972e+00
+rrc_trig_max_4      =  9.000000e-01 at=  4.196194e+00
+rrc_cmp_5           =  9.000000e-01
+rrc_cmp2_5          =  9.000000e-01
+rrc_timer_5         =  1.209666e-01
+rrc_ewma_5          =  3.852513e-01
+rrc_thresh_5        =  4.052513e-01
+rrc_trig_5          =  9.000000e-01
+rrc_rpklvl_5        =  1.159547e-11
+rrc_esamp_5         =  1.209666e-01
+rrc_esamp_ok_5      =  1.988795e-11
+rrc_cmp_max_5       =  9.000000e-01 at=  5.035083e+00
+rrc_trig_max_5      =  9.000000e-01 at=  5.019594e+00
+rrc_cmp_6           =  8.999976e-01
+rrc_cmp2_6          =  8.999978e-01
+rrc_timer_6         =  3.434925e-01
+rrc_ewma_6          =  3.851072e-01
+rrc_thresh_6        =  4.051072e-01
+rrc_trig_6          =  9.000000e-01
+rrc_rpklvl_6        =  1.384138e-11
+rrc_esamp_6         =  3.434929e-01
+rrc_esamp_ok_6      =  6.666302e-11
+rrc_cmp_max_6       =  8.999979e-01 at=  5.857306e+00
+rrc_trig_max_6      =  9.000000e-01 at=  5.842417e+00
+rrc_cmp_7           =  8.999525e-01
+rrc_cmp2_7          =  8.999626e-01
+rrc_timer_7         =  3.936848e-01
+rrc_ewma_7          =  3.846762e-01
+rrc_thresh_7        =  4.046762e-01
+rrc_trig_7          =  9.000000e-01
+rrc_rpklvl_7        =  9.992851e-12
+rrc_esamp_7         =  3.936870e-01
+rrc_esamp_ok_7      =  8.999848e-01
+rrc_cmp_max_7       =  8.999679e-01 at=  6.690420e+00
+rrc_trig_max_7      =  9.000000e-01 at=  6.656806e+00
+rrc_cmp_8           =  8.999328e-01
+rrc_cmp2_8          =  8.999501e-01
+rrc_timer_8         =  3.963472e-01
+rrc_ewma_8          =  3.846963e-01
+rrc_thresh_8        =  4.046963e-01
+rrc_trig_8          =  9.000000e-01
+rrc_rpklvl_8        =  1.397780e-11
+rrc_esamp_8         =  3.963496e-01
+rrc_esamp_ok_8      =  8.999853e-01
+rrc_cmp_max_8       =  8.999584e-01 at=  7.498972e+00
+rrc_trig_max_8      =  9.000000e-01 at=  7.434583e+00
+rrc_cmp_9           =  8.999994e-01
+rrc_cmp2_9          =  8.999994e-01
+rrc_timer_9         =  3.076067e-01
+rrc_ewma_9          =  3.842079e-01
+rrc_thresh_9        =  4.042079e-01
+rrc_trig_9          =  9.000000e-01
+rrc_rpklvl_9        =  1.503917e-11
+rrc_esamp_9         =  3.076069e-01
+rrc_esamp_ok_9      =  2.140760e-11
+rrc_cmp_max_9       =  8.999994e-01 at=  8.298972e+00
+rrc_trig_max_9      =  9.000000e-01 at=  8.261083e+00
+tpwb_2              =   2.32803e+00
+tpwp_2              =   2.40378e+00
+tpwb_cmp_2          =   2.32821e+00
+tpwp_cmp_2          =   2.40389e+00
+pwb_sf_at_2         =  4.094174e-01
+pwb_th_2            =  4.110135e-01
+pwp_sf_at_2         =  4.013358e-01
+pwp_th_2            =  4.025342e-01
+pwb_max_2           =  9.000000e-01 at=  2.328393e+00
+pwp_max_2           =  9.000007e-01 at=  2.404028e+00
+sf2_at30_2          =  3.907844e-01
+tpwb_3              =   5.23388e+00
+tpwp_3              =   5.30983e+00
+tpwb_cmp_3          =   5.23413e+00
+tpwp_cmp_3          =   5.30994e+00
+pwb_sf_at_3         =  4.074863e-01
+pwb_th_3            =  4.089241e-01
+pwp_sf_at_3         =  3.992324e-01
+pwp_th_3            =  4.004348e-01
+pwb_max_3           =  1.739625e-07 at=  3.350050e+00
+pwp_max_3           =  1.739625e-07 at=  3.350050e+00
+sf2_at30_3          =  2.972145e-01
+tpwb_4              =   5.23388e+00
+tpwp_4              =   5.30983e+00
+tpwb_cmp_4          =   5.23413e+00
+tpwp_cmp_4          =   5.30994e+00
+pwb_sf_at_4         =  4.074863e-01
+pwb_th_4            =  4.089241e-01
+pwp_sf_at_4         =  3.992324e-01
+pwp_th_4            =  4.004348e-01
+pwb_max_4           =  1.739634e-07 at=  4.216717e+00
+pwp_max_4           =  1.739634e-07 at=  4.216717e+00
+sf2_at30_4          =  2.059484e-01
+tpwb_5              =   5.23388e+00
+tpwp_5              =   5.30983e+00
+tpwb_cmp_5          =   5.23413e+00
+tpwp_cmp_5          =   5.30994e+00
+pwb_sf_at_5         =  4.074863e-01
+pwb_th_5            =  4.089241e-01
+pwp_sf_at_5         =  3.992324e-01
+pwp_th_5            =  4.004348e-01
+pwb_max_5           =  1.739624e-07 at=  5.030606e+00
+pwp_max_5           =  1.739624e-07 at=  5.030606e+00
+sf2_at30_5          =  1.201145e-01
+tpwb_6              =   6.52478e+00
+tpwp_6              =   6.60055e+00
+tpwb_cmp_6          =   6.52496e+00
+tpwp_cmp_6          =   6.60072e+00
+pwb_sf_at_6         =  4.065994e-01
+pwb_th_6            =  4.081701e-01
+pwp_sf_at_6         =  3.982572e-01
+pwp_th_6            =  3.996851e-01
+pwb_max_6           =  1.739632e-07 at=  5.825050e+00
+pwp_max_6           =  1.739632e-07 at=  5.825050e+00
+sf2_at30_6          =  3.426571e-01
+tpwb_7              =   6.52478e+00
+tpwp_7              =   6.60055e+00
+tpwb_cmp_7          =   6.52496e+00
+tpwp_cmp_7          =   6.60072e+00
+pwb_sf_at_7         =  4.065994e-01
+pwb_th_7            =  4.081701e-01
+pwp_sf_at_7         =  3.982572e-01
+pwp_th_7            =  3.996851e-01
+pwb_max_7           =  9.000001e-01 at=  6.525000e+00
+pwp_max_7           =  9.000000e-01 at=  6.600937e+00
+sf2_at30_7          =  3.928770e-01
+tpwb_8              =   7.35706e+00
+tpwp_8              =   7.43256e+00
+tpwb_cmp_8          =   7.35716e+00
+tpwp_cmp_8          =   7.43281e+00
+pwb_sf_at_8         =  4.070063e-01
+pwb_th_8            =  4.081661e-01
+pwp_sf_at_8         =  3.982601e-01
+pwp_th_8            =  3.996761e-01
+pwb_max_8           =  8.999998e-01 at=  7.357306e+00
+pwp_max_8           =  8.999998e-01 at=  7.432806e+00
+sf2_at30_8          =  3.955437e-01
+tpwb_9              =   1.40816e+01
+tpwp_9              =   1.41571e+01
+tpwb_cmp_9          =   1.40818e+01
+tpwp_cmp_9          =   1.41572e+01
+pwb_sf_at_9         =  3.996828e-01
+pwb_th_9            =  4.014014e-01
+pwp_sf_at_9         =  3.917598e-01
+pwp_th_9            =  3.929621e-01
+pwb_max_9           =  1.739649e-07 at=  8.288939e+00
+pwp_max_9           =  1.739649e-07 at=  8.288939e+00
+sf2_at30_9          =  3.067486e-01
+f1_5                =  2.687332e-01
+f1_sf_5             =  1.235741e-01
+f1_ewma_5           =  3.852792e-01
+f2_5                =  2.943773e-01
+f3_5                =  2.997413e-01
+f4_5                =  2.957214e-01
+f5_5                =  2.952765e-01
+f6_5                =  1.620492e-01
+f7_5                =  3.514194e-01
+f8_5                =  3.025377e-01
+f1_6                =  2.797903e-01
+f1_sf_6             =  3.462932e-01
+f1_ewma_6           =  3.851214e-01
+f2_6                =  3.593254e-01
+f3_6                =  2.934921e-01
+f4_6                =  3.060787e-01
+f5_6                =  3.027674e-01
+f6_6                =  1.726452e-01
+f7_6                =  3.530637e-01
+f8_6                =  2.975835e-01
+f1_7                =  3.006132e-01
+f1_sf_7             =  3.964775e-01
+f1_ewma_7           =  3.846990e-01
+f2_7                =  3.202422e-01
+f3_7                =  2.961040e-01
+f4_7                =  2.951239e-01
+f5_7                =  2.948016e-01
+f6_7                =  1.650598e-01
+f7_7                =  3.509506e-01
+f8_7                =  2.991437e-01
+f1_8                =  3.021547e-01
+f1_sf_8             =  3.991751e-01
+f1_ewma_8           =  3.847163e-01
+f2_8                =  2.945463e-01
+f3_8                =  2.946979e-01
+f4_8                =  2.945690e-01
+f5_8                =  3.001595e-01
+f6_8                =  1.612316e-01
+f7_8                =  3.512556e-01
+f8_8                =  2.992531e-01
+f1_9                =  2.733398e-01
+f1_sf_9             =  3.103243e-01
+f1_ewma_9           =  3.842317e-01
+f2_9                =  2.954843e-01
+f3_9                =  2.947045e-01
+f4_9                =  2.945729e-01
+f5_9                =  3.002630e-01
+f6_9                =  1.574644e-01
+f7_9                =  3.515961e-01
+f8_9                =  2.993604e-01
+f1_10               =  2.690892e-01
+f1_sf_10            =  2.167169e-01
+f1_ewma_10          =  3.837700e-01
+f2_10               =  3.071367e-01
+f3_10               =  2.947327e-01
+f4_10               =  2.945999e-01
+f5_10               =  3.004103e-01
+f6_10               =  1.534296e-01
+f7_10               =  3.520367e-01
+f8_10               =  2.994670e-01
+f1_11               =  2.687463e-01
+f1_sf_11            =  1.253887e-01
+f1_ewma_11          =  3.827423e-01
+f2_11               =  3.613935e-01
+f3_11               =  2.947255e-01
+f4_11               =  2.945917e-01
+f5_11               =  3.005432e-01
+f6_11               =  1.494252e-01
+f7_11               =  3.525131e-01
+f8_11               =  2.995701e-01
+f1_12               =  2.687200e-01
+f1_sf_12            =  4.185459e-02
+f1_ewma_12          =  3.824949e-01
+f2_12               =  4.110749e-01
+f3_12               =  2.947410e-01
+f4_12               =  2.946053e-01
+f5_12               =  3.007143e-01
+f6_12               =  1.455388e-01
+f7_12               =  3.530679e-01
+f8_12               =  2.996750e-01
+f1_13               =  2.687222e-01
+f1_sf_13            =  4.650088e-03
+f1_ewma_13          =  3.816582e-01
+f2_13               =  4.200212e-01
+f3_13               =  2.947505e-01
+f4_13               =  2.946115e-01
+f5_13               =  3.009021e-01
+f6_13               =  1.416990e-01
+f7_13               =  3.536938e-01
+f8_13               =  2.997853e-01
+f1_14               =  2.687295e-01
+f1_sf_14            =  3.890213e-04
+f1_ewma_14          =  3.791065e-01
+f2_14               =  3.150537e-01
+f3_14               =  3.364283e-01
+f4_14               =  2.830563e-01
+f5_14               =  3.011111e-01
+f6_14               =  1.890875e-01
+f7_14               =  3.714702e-01
+f8_14               =  3.446266e-01
+f1_15               =  2.687642e-01
+f1_sf_15            =  1.069538e-01
+f1_ewma_15          =  3.782430e-01
+f2_15               =  2.944141e-01
+f3_15               =  2.885324e-01
+f4_15               =  3.058198e-01
+f5_15               =  3.013753e-01
+f6_15               =  1.833738e-01
+f7_15               =  3.614663e-01
+f8_15               =  3.237082e-01
+f1_16               =  2.799358e-01
+f1_sf_16            =  3.396567e-01
+f1_ewma_16          =  3.780313e-01
+f2_16               =  3.664144e-01
+f3_16               =  2.897373e-01
+f4_16               =  2.979462e-01
+f5_16               =  3.621317e-01
+f6_16               =  1.778995e-01
+f7_16               =  3.600955e-01
+f8_16               =  3.112269e-01
+f1_17               =  3.055853e-01
+f1_sf_17            =  3.975657e-01
+f1_ewma_17          =  3.774747e-01
+f2_17               =  3.174816e-01
+f3_17               =  2.903620e-01
+f4_17               =  2.954721e-01
+f5_17               =  3.380026e-01
+f6_17               =  1.657169e-01
+f7_17               =  3.531187e-01
+f8_17               =  3.017917e-01
+f1_18               =  3.037433e-01
+f1_sf_18            =  3.933800e-01
+f1_ewma_18          =  3.768660e-01
+f2_18               =  2.945779e-01
+f3_18               =  2.941112e-01
+f4_18               =  2.946312e-01
+f5_18               =  3.278024e-01
+f6_18               =  1.617863e-01
+f7_18               =  3.534885e-01
+f8_18               =  3.018948e-01
+f1_19               =  2.738230e-01
+f1_sf_19            =  3.060711e-01
+f1_ewma_19          =  3.763146e-01
+f2_19               =  2.954766e-01
+f3_19               =  2.941325e-01
+f4_19               =  2.946534e-01
+f5_19               =  3.278402e-01
+f6_19               =  1.579186e-01
+f7_19               =  3.539299e-01
+f8_19               =  3.019963e-01
+f1_20               =  2.692192e-01
+f1_sf_20            =  2.173201e-01
+f1_ewma_20          =  3.756394e-01
+f2_20               =  3.052461e-01
+f3_20               =  2.941436e-01
+f4_20               =  2.946670e-01
+f5_20               =  3.278748e-01
+f6_20               =  1.540815e-01
+f7_20               =  3.544248e-01
+f8_20               =  3.020885e-01
+f1_21               =  2.688002e-01
+f1_sf_21            =  1.309154e-01
+f1_ewma_21          =  3.745628e-01
+f2_21               =  3.530369e-01
+f3_21               =  2.941470e-01
+f4_21               =  2.946736e-01
+f5_21               =  3.279081e-01
+f6_21               =  1.502829e-01
+f7_21               =  3.549816e-01
+f8_21               =  3.021752e-01
+f1_22               =  2.687711e-01
+f1_sf_22            =  5.109490e-02
+f1_ewma_22          =  3.732454e-01
+f2_22               =  4.060120e-01
+f3_22               =  2.941686e-01
+f4_22               =  2.946963e-01
+f5_22               =  3.279627e-01
+f6_22               =  1.466287e-01
+f7_22               =  3.556057e-01
+f8_22               =  3.022695e-01
+f1_23               =  2.687741e-01
+f1_sf_23            =  7.388364e-03
+f1_ewma_23          =  3.713196e-01
+f2_23               =  4.194515e-01
+f3_23               =  2.941679e-01
+f4_23               =  2.946959e-01
+f5_23               =  3.280020e-01
+f6_23               =  1.430007e-01
+f7_23               =  3.562905e-01
+f8_23               =  3.023682e-01
+f1_24               =  2.687888e-01
+f1_sf_24            =  6.352513e-04
+f1_ewma_24          =  3.683740e-01
+f2_24               =  3.063321e-01
+f3_24               =  3.051530e-01
+f4_24               =  3.083465e-01
+f5_24               =  3.280625e-01
+f6_24               =  1.706734e-01
+f7_24               =  3.575782e-01
+f8_24               =  3.101293e-01
+f1_25               =  2.688496e-01
+f1_sf_25            =  1.276478e-01
+f1_ewma_25          =  3.674935e-01
+f2_25               =  2.943579e-01
+f3_25               =  2.914373e-01
+f4_25               =  3.049669e-01
+f5_25               =  3.281287e-01
+f6_25               =  1.674739e-01
+f7_25               =  3.529857e-01
+f8_25               =  2.998473e-01
+f1_26               =  2.868285e-01
+f1_sf_26            =  3.502547e-01
+f1_ewma_26          =  3.673238e-01
+f2_26               =  3.561730e-01
+f3_26               =  2.942425e-01
+f4_26               =  2.950745e-01
+f5_26               =  3.027306e-01
+f6_26               =  1.808760e-01
+f7_26               =  3.654669e-01
+f8_26               =  2.999544e-01
+f1_27               =  3.118981e-01
+f1_sf_27            =  3.965388e-01
+f1_ewma_27          =  3.668006e-01
+f2_27               =  3.598935e-01
+f3_27               =  3.094958e-01
+f4_27               =  2.915711e-01
+f5_27               =  3.028205e-01
+f6_27               =  1.735898e-01
+f7_27               =  3.677055e-01
+f8_27               =  3.240761e-01
+f1_28               =  3.142321e-01
+f1_sf_28            =  3.994014e-01
+f1_ewma_28          =  3.662241e-01
+f2_28               =  3.575086e-01
+f3_28               =  2.970584e-01
+f4_28               =  2.980310e-01
+f5_28               =  3.029408e-01
+f6_28               =  1.695856e-01
+f7_28               =  3.740352e-01
+f8_28               =  3.302021e-01
+f1_29               =  3.114592e-01
+f1_sf_29            =  3.946201e-01
+f1_ewma_29          =  3.655627e-01
+f2_29               =  3.595342e-01
+f3_29               =  2.941959e-01
+f4_29               =  3.019883e-01
+f5_29               =  2.758329e-01
+f6_29               =  1.700987e-01
+f7_29               =  3.656743e-01
+f8_29               =  3.277394e-01
+f1_30               =  3.123237e-01
+f1_sf_30            =  3.952663e-01
+f1_ewma_30          =  3.649191e-01
+f2_30               =  3.610720e-01
+f3_30               =  2.976599e-01
+f4_30               =  2.881594e-01
+f5_30               =  2.758625e-01
+f6_30               =  1.740865e-01
+f7_30               =  3.805389e-01
+f8_30               =  3.325547e-01
+f1_31               =  3.128631e-01
+f1_sf_31            =  3.953712e-01
+f1_ewma_31          =  3.642437e-01
+f2_31               =  3.596533e-01
+f3_31               =  2.941806e-01
+f4_31               =  2.939824e-01
+f5_31               =  2.759043e-01
+f6_31               =  1.636993e-01
+f7_31               =  3.659568e-01
+f8_31               =  3.301008e-01
+f1_32               =  3.109650e-01
+f1_sf_32            =  3.918425e-01
+f1_ewma_32          =  3.635533e-01
+f2_32               =  3.632647e-01
+f3_32               =  2.944961e-01
+f4_32               =  3.031678e-01
+f5_32               =  2.769474e-01
+f6_32               =  1.610536e-01
+f7_32               =  3.593678e-01
+f8_32               =  3.287627e-01
+f1_33               =  3.129990e-01
+f1_sf_33            =  3.942562e-01
+f1_ewma_33          =  3.629459e-01
+f2_33               =  3.649139e-01
+f3_33               =  2.970406e-01
+f4_33               =  2.889216e-01
+f5_33               =  2.769981e-01
+f6_33               =  1.673359e-01
+f7_33               =  3.799297e-01
+f8_33               =  3.323486e-01
+f1_34               =  3.135799e-01
+f1_sf_34            =  3.945012e-01
+f1_ewma_34          =  3.623466e-01
+f3_34               =  2.989446e-01
+f4_34               =  2.929845e-01
+f5_34               =  2.770610e-01
+f6_34               =  1.644070e-01
+f7_34               =  3.689181e-01
+f8_34               =  3.393199e-01
+trpk_0              =   8.39339e-01
+ts14_0              =   8.58433e-01
+ts69_0              =   9.13989e-01
+twid_0              =   8.72772e-01
+trpk_del_0          =   8.45242e-01
+ts14_fall_0         =   8.59329e-01
+ts69_fall_0         =   9.15259e-01
+twid_fall_0         =   8.73710e-01
+trpk_del_fall_0     =   8.45967e-01
+trrc_0              =   1.50764e+00
+trrc_fall_0         =   8.39339e-01
+sh14_0              =  1.940024e-01
+sh69_0              =  1.880075e-01
+bi0_curr_0          =  2.993441e-01
+bi0_prev_0          =  2.983601e-01
+bi1_curr_0          =  3.224569e-01
+bi1_prev_0          =  2.983735e-01
+ecg_at_f8cap_0      =  3.001187e-01
+pw_shb_0            =  3.156105e-01
+pw_shp_0            =  2.264939e-01
+tpwb_fall_0         =   6.38611e-01
+tpwp_fall_0         =   7.14439e-01
+trpk_1              =   1.68690e+00
+ts14_1              =   1.70611e+00
+ts69_1              =   1.76171e+00
+twid_1              =   1.72044e+00
+trpk_del_1          =   1.69293e+00
+ts14_fall_1         =   1.70706e+00
+ts69_fall_1         =   1.76296e+00
+twid_fall_1         =   1.72144e+00
+trpk_del_fall_1     =   1.69364e+00
+trrc_1              =   2.35927e+00
+trrc_fall_1         =   1.68690e+00
+sh14_1              =  1.847580e-01
+sh69_1              =  1.928827e-01
+bi0_curr_1          =  2.997259e-01
+bi0_prev_1          =  2.980062e-01
+bi1_curr_1          =  3.171545e-01
+bi1_prev_1          =  3.186188e-01
+ecg_at_f8cap_1      =  3.003057e-01
+pw_shb_1            =  2.201327e-01
+pw_shp_1            =  2.391940e-01
+tpwb_fall_1         =   1.47650e+00
+tpwp_fall_1         =   1.55256e+00
+trpk_2              =   5.03590e+00
+ts14_2              =   5.05478e+00
+ts69_2              =   5.11311e+00
+twid_2              =   5.07194e+00
+trpk_del_2          =   5.04177e+00
+ts14_fall_2         =   5.05534e+00
+ts69_fall_2         =   5.11444e+00
+twid_fall_2         =   5.07277e+00
+trpk_del_fall_2     =   5.04239e+00
+trrc_2              =   5.26548e+00
+trrc_fall_2         =   5.03590e+00
+sh14_2              =  1.806780e-01
+sh69_2              =  1.887798e-01
+bi0_curr_2          =  2.979883e-01
+bi0_prev_2          =  2.983014e-01
+bi1_curr_2          =  3.154168e-01
+bi1_prev_2          =  3.159163e-01
+ecg_at_f8cap_2      =  3.033575e-01
+pw_shb_2            =  2.476239e-01
+pw_shp_2            =  2.387723e-01
+tpwb_fall_2         =   2.32895e+00
+tpwp_fall_2         =   2.40428e+00
+trpk_3              =   5.03590e+00
+ts14_3              =   5.05478e+00
+ts69_3              =   5.11311e+00
+twid_3              =   5.07194e+00
+trpk_del_3          =   5.04177e+00
+ts14_fall_3         =   5.05534e+00
+ts69_fall_3         =   5.11444e+00
+twid_fall_3         =   5.07277e+00
+trpk_del_fall_3     =   5.04239e+00
+trrc_3              =   5.26548e+00
+trrc_fall_3         =   5.03590e+00
+sh14_3              =  1.766384e-01
+sh69_3              =  1.847145e-01
+bi0_curr_3          =  2.962612e-01
+bi0_prev_3          =  2.965800e-01
+bi1_curr_3          =  3.136914e-01
+bi1_prev_3          =  3.141918e-01
+ecg_at_f8cap_3      =  3.033575e-01
+pw_shb_3            =  2.434730e-01
+pw_shp_3            =  2.346282e-01
+tpwb_fall_3         =   5.23483e+00
+tpwp_fall_3         =   5.31033e+00
+trpk_4              =   5.03590e+00
+ts14_4              =   5.05478e+00
+ts69_4              =   5.11311e+00
+twid_4              =   5.07194e+00
+trpk_del_4          =   5.04177e+00
+ts14_fall_4         =   5.05534e+00
+ts69_fall_4         =   5.11444e+00
+twid_fall_4         =   5.07277e+00
+trpk_del_fall_4     =   5.04239e+00
+trrc_4              =   5.26548e+00
+trrc_fall_4         =   5.03590e+00
+sh14_4              =  1.726319e-01
+sh69_4              =  1.806794e-01
+bi0_curr_4          =  2.945420e-01
+bi0_prev_4          =  2.948646e-01
+bi1_curr_4          =  3.119718e-01
+bi1_prev_4          =  3.124733e-01
+ecg_at_f8cap_4      =  3.033575e-01
+pw_shb_4            =  2.393434e-01
+pw_shp_4            =  2.305058e-01
+tpwb_fall_4         =   5.23483e+00
+tpwp_fall_4         =   5.31033e+00
+trpk_5              =   5.03590e+00
+ts14_5              =   5.05478e+00
+ts69_5              =   5.11311e+00
+twid_5              =   5.07194e+00
+trpk_del_5          =   5.04177e+00
+ts14_fall_5         =   5.05534e+00
+ts69_fall_5         =   5.11444e+00
+twid_fall_5         =   5.07277e+00
+trpk_del_fall_5     =   5.04239e+00
+trrc_5              =   5.26548e+00
+trrc_fall_5         =   5.03590e+00
+sh14_5              =  1.866825e-01
+sh69_5              =  2.170776e-01
+bi0_curr_5          =  3.024549e-01
+bi0_prev_5          =  2.932169e-01
+bi1_curr_5          =  3.127598e-01
+bi1_prev_5          =  3.108187e-01
+ecg_at_f8cap_5      =  3.033575e-01
+pw_shb_5            =  2.353649e-01
+pw_shp_5            =  2.265349e-01
+tpwb_fall_5         =   5.23483e+00
+tpwp_fall_5         =   5.31033e+00
+trpk_6              =   5.85806e+00
+ts14_6              =   5.87700e+00
+ts69_6              =   5.93256e+00
+twid_6              =   5.89139e+00
+trpk_del_6          =   5.86402e+00
+ts14_fall_6         =   5.87750e+00
+ts69_fall_6         =   5.93388e+00
+twid_fall_6         =   5.89267e+00
+trpk_del_fall_6     =   5.86487e+00
+trrc_6              =   6.55614e+00
+trrc_fall_6         =   5.85806e+00
+sh14_6              =  1.929644e-01
+sh69_6              =  2.172733e-01
+bi0_curr_6          =  2.975028e-01
+bi0_prev_6          =  3.002329e-01
+bi1_curr_6          =  3.315215e-01
+bi1_prev_6          =  3.113464e-01
+ecg_at_f8cap_6      =  2.973178e-01
+pw_shb_6            =  2.190460e-01
+pw_shp_6            =  2.253635e-01
+tpwb_fall_6         =   6.52542e+00
+tpwp_fall_6         =   6.60144e+00
+trpk_7              =   6.69048e+00
+ts14_7              =   6.70983e+00
+ts69_7              =   6.76539e+00
+twid_7              =   6.72372e+00
+trpk_del_7          =   6.69644e+00
+ts14_fall_7         =   6.71033e+00
+ts69_fall_7         =   6.76633e+00
+twid_fall_7         =   6.72510e+00
+trpk_del_fall_7     =   6.69701e+00
+trrc_7              =   7.38835e+00
+trrc_fall_7         =   6.69048e+00
+sh14_7              =  1.892596e-01
+sh69_7              =  2.205027e-01
+bi0_curr_7          =  2.990593e-01
+bi0_prev_7          =  2.965726e-01
+bi1_curr_7          =  3.289862e-01
+bi1_prev_7          =  3.280024e-01
+ecg_at_f8cap_7      =  2.992591e-01
+pw_shb_7            =  2.473461e-01
+pw_shp_7            =  2.382087e-01
+tpwb_fall_7         =   6.52542e+00
+tpwp_fall_7         =   6.60144e+00
+trpk_8              =   1.25341e+01
+ts14_8              =   1.25533e+01
+ts69_8              =   1.26093e+01
+twid_8              =   1.25682e+01
+trpk_del_8          =   1.25399e+01
+ts14_fall_8         =   1.25537e+01
+ts69_fall_8         =   1.26108e+01
+twid_fall_8         =   1.25692e+01
+trpk_del_fall_8     =   1.25404e+01
+trrc_8              =   1.25444e+01
+trrc_fall_8         =   1.25341e+01
+sh14_8              =  1.853702e-01
+sh69_8              =  2.165583e-01
+bi0_curr_8          =  2.974091e-01
+bi0_prev_8          =  2.976969e-01
+bi1_curr_8          =  3.273326e-01
+bi1_prev_8          =  3.274635e-01
+ecg_at_f8cap_8      =  3.337685e-01
+pw_shb_8            =  2.381739e-01
+pw_shp_8            =  2.405031e-01
+tpwb_fall_8         =   7.35756e+00
+tpwp_fall_8         =   7.43306e+00
+trpk_9              =   1.25341e+01
+ts14_9              =   1.25533e+01
+ts69_9              =   1.26093e+01
+twid_9              =   1.25682e+01
+trpk_del_9          =   1.25399e+01
+ts14_fall_9         =   1.25537e+01
+ts69_fall_9         =   1.26108e+01
+twid_fall_9         =   1.25692e+01
+trpk_del_fall_9     =   1.25404e+01
+trrc_9              =   1.25444e+01
+trrc_fall_9         =   1.25341e+01
+sh14_9              =  1.815307e-01
+sh69_9              =  2.126584e-01
+bi0_curr_9          =  2.957745e-01
+bi0_prev_9          =  2.960662e-01
+bi1_curr_9          =  3.256956e-01
+bi1_prev_9          =  3.258278e-01
+ecg_at_f8cap_9      =  3.337685e-01
+pw_shb_9            =  2.342518e-01
+pw_shp_9            =  2.365792e-01
+tpwb_fall_9         =   1.40825e+01
+tpwp_fall_9         =   1.41576e+01
+trpk_10             =   1.25341e+01
+ts14_10             =   1.25533e+01
+ts69_10             =   1.26093e+01
+twid_10             =   1.25682e+01
+trpk_del_10         =   1.25399e+01
+ts14_fall_10        =   1.25537e+01
+ts69_fall_10        =   1.26108e+01
+twid_fall_10        =   1.25692e+01
+trpk_del_fall_10    =   1.25404e+01
+trrc_10             =   1.25444e+01
+trrc_fall_10        =   1.25341e+01
+sh14_10             =  1.774027e-01
+sh69_10             =  2.084578e-01
+bi0_curr_10         =  2.940118e-01
+bi0_prev_10         =  2.943113e-01
+bi1_curr_10         =  3.239340e-01
+bi1_prev_10         =  3.240676e-01
+ecg_at_f8cap_10     =  3.337685e-01
+pw_shb_10           =  2.300252e-01
+pw_shp_10           =  2.323505e-01
+tpwb_fall_10        =   1.40825e+01
+tpwp_fall_10        =   1.41576e+01
+trpk_11             =   1.25341e+01
+ts14_11             =   1.25533e+01
+ts69_11             =   1.26093e+01
+twid_11             =   1.25682e+01
+trpk_del_11         =   1.25399e+01
+ts14_fall_11        =   1.25537e+01
+ts69_fall_11        =   1.26108e+01
+twid_fall_11        =   1.25692e+01
+trpk_del_fall_11    =   1.25404e+01
+trrc_11             =   1.25444e+01
+trrc_fall_11        =   1.25341e+01
+sh14_11             =  1.732870e-01
+sh69_11             =  2.042600e-01
+bi0_curr_11         =  2.922480e-01
+bi0_prev_11         =  2.925566e-01
+bi1_curr_11         =  3.221723e-01
+bi1_prev_11         =  3.223076e-01
+ecg_at_f8cap_11     =  3.337685e-01
+pw_shb_11           =  2.257989e-01
+pw_shp_11           =  2.281220e-01
+tpwb_fall_11        =   1.40825e+01
+tpwp_fall_11        =   1.41576e+01
+trpk_12             =   1.25341e+01
+ts14_12             =   1.25533e+01
+ts69_12             =   1.26093e+01
+twid_12             =   1.25682e+01
+trpk_del_12         =   1.25399e+01
+ts14_fall_12        =   1.25537e+01
+ts69_fall_12        =   1.26108e+01
+twid_fall_12        =   1.25692e+01
+trpk_del_fall_12    =   1.25404e+01
+trrc_12             =   1.25444e+01
+trrc_fall_12        =   1.25341e+01
+sh14_12             =  1.692725e-01
+sh69_12             =  2.001550e-01
+bi0_curr_12         =  2.905203e-01
+bi0_prev_12         =  2.908363e-01
+bi1_curr_12         =  3.204452e-01
+bi1_prev_12         =  3.205820e-01
+ecg_at_f8cap_12     =  3.337685e-01
+pw_shb_12           =  2.216629e-01
+pw_shp_12           =  2.239835e-01
+tpwb_fall_12        =   1.40825e+01
+tpwp_fall_12        =   1.41576e+01
+trpk_13             =   1.25341e+01
+ts14_13             =   1.25533e+01
+ts69_13             =   1.26093e+01
+twid_13             =   1.25682e+01
+trpk_del_13         =   1.25399e+01
+ts14_fall_13        =   1.25537e+01
+ts69_fall_13        =   1.26108e+01
+twid_fall_13        =   1.25692e+01
+trpk_del_fall_13    =   1.25404e+01
+trrc_13             =   1.25444e+01
+trrc_fall_13        =   1.25341e+01
+sh14_13             =  1.652829e-01
+sh69_13             =  1.960635e-01
+bi0_curr_13         =  2.887952e-01
+bi0_prev_13         =  2.891163e-01
+bi1_curr_13         =  3.187183e-01
+bi1_prev_13         =  3.188568e-01
+ecg_at_f8cap_13     =  3.337685e-01
+pw_shb_13           =  2.175369e-01
+pw_shp_13           =  2.198549e-01
+tpwb_fall_13        =   1.40825e+01
+tpwp_fall_13        =   1.41576e+01
+trpk_14             =   1.25341e+01
+ts14_14             =   1.25533e+01
+ts69_14             =   1.26093e+01
+twid_14             =   1.25682e+01
+trpk_del_14         =   1.25399e+01
+ts14_fall_14        =   1.25537e+01
+ts69_fall_14        =   1.26108e+01
+twid_fall_14        =   1.25692e+01
+trpk_del_fall_14    =   1.25404e+01
+trrc_14             =   1.25444e+01
+trrc_fall_14        =   1.25341e+01
+sh14_14             =  2.251068e-01
+sh69_14             =  2.063820e-01
+bi0_curr_14         =  3.492382e-01
+bi0_prev_14         =  2.874715e-01
+bi1_curr_14         =  2.884451e-01
+bi1_prev_14         =  3.171538e-01
+ecg_at_f8cap_14     =  3.337685e-01
+pw_shb_14           =  2.135016e-01
+pw_shp_14           =  2.158167e-01
+tpwb_fall_14        =   1.40825e+01
+tpwp_fall_14        =   1.41576e+01
+trpk_15             =   1.33777e+01
+ts14_15             =   1.33969e+01
+ts69_15             =   1.34524e+01
+twid_15             =   1.34108e+01
+trpk_del_15         =   1.33836e+01
+ts14_fall_15        =   1.33978e+01
+ts69_fall_15        =   1.34535e+01
+twid_fall_15        =   1.34121e+01
+trpk_del_fall_15    =   1.33842e+01
+trrc_15             =   1.35911e+01
+trrc_fall_15        =   1.33777e+01
+sh14_15             =  2.100194e-01
+sh69_15             =  2.115601e-01
+bi0_curr_15         =  3.226562e-01
+bi0_prev_15         =  3.359708e-01
+bi1_curr_15         =  3.078838e-01
+bi1_prev_15         =  2.883659e-01
+ecg_at_f8cap_15     =  3.237213e-01
+pw_shb_15           =  2.094060e-01
+pw_shp_15           =  2.117180e-01
+tpwb_fall_15        =   1.40825e+01
+tpwp_fall_15        =   1.41576e+01
+trpk_16             =   1.41776e+01
+ts14_16             =   1.50126e+01
+ts69_16             =   1.42523e+01
+twid_16             =   1.42108e+01
+trpk_del_16         =   1.41836e+01
+ts14_fall_16        =   1.50132e+01
+ts69_fall_16        =   1.42534e+01
+twid_fall_16        =   1.42121e+01
+trpk_del_fall_16    =   1.41844e+01
+trrc_16             =   1.49411e+01
+trrc_fall_16        =   1.41776e+01
+sh14_16             =  2.061343e-01
+sh69_16             =  2.111190e-01
+bi0_curr_16         =  3.111327e-01
+bi0_prev_16         =  3.218017e-01
+bi1_curr_16         =  3.120547e-01
+bi1_prev_16         =  3.059410e-01
+ecg_at_f8cap_16     =  3.117830e-01
+pw_shb_16           =  2.398042e-01
+pw_shp_16           =  3.299262e-01
+tpwb_fall_16        =   1.40825e+01
+tpwp_fall_16        =   1.41576e+01
+trpk_17             =   1.49934e+01
+ts14_17             =   1.50126e+01
+ts69_17             =   1.50682e+01
+twid_17             =   1.50269e+01
+trpk_del_17         =   1.49992e+01
+ts14_fall_17        =   1.50132e+01
+ts69_fall_17        =   1.50691e+01
+twid_fall_17        =   1.50279e+01
+trpk_del_fall_17    =   1.49998e+01
+trrc_17             =   1.49411e+01
+trrc_fall_17        =   1.49934e+01
+sh14_17             =  1.872445e-01
+sh69_17             =  2.126340e-01
+bi0_curr_17         =  3.017036e-01
+bi0_prev_17         =  3.110921e-01
+bi1_curr_17         =  3.115819e-01
+bi1_prev_17         =  3.101441e-01
+ecg_at_f8cap_17     =  3.019078e-01
+pw_shb_17           =  2.372575e-01
+pw_shp_17           =  2.980014e-01
+tpwb_fall_17        =   1.49100e+01
+tpwp_fall_17        =   1.49859e+01
+trpk_18             =   2.06637e+01
+ts14_18             =   2.06829e+01
+ts69_18             =   2.07417e+01
+twid_18             =   2.07005e+01
+trpk_del_18         =   2.06696e+01
+ts14_fall_18        =   2.06834e+01
+ts69_fall_18        =   2.07430e+01
+twid_fall_18        =   2.07015e+01
+trpk_del_fall_18    =   2.06705e+01
+trrc_18             =   2.06705e+01
+trrc_fall_18        =   2.06637e+01
+sh14_18             =  1.832605e-01
+sh69_18             =  2.085984e-01
+bi0_curr_18         =  3.000047e-01
+bi0_prev_18         =  3.014076e-01
+bi1_curr_18         =  3.098914e-01
+bi1_prev_18         =  3.101043e-01
+ecg_at_f8cap_18     =  3.106637e-01
+pw_shb_18           =  2.300605e-01
+pw_shp_18           =  2.772408e-01
+tpwb_fall_18        =   1.57311e+01
+tpwp_fall_18        =   1.58071e+01
+trpk_19             =   2.06637e+01
+ts14_19             =   2.06829e+01
+ts69_19             =   2.07417e+01
+twid_19             =   2.07005e+01
+trpk_del_19         =   2.06696e+01
+ts14_fall_19        =   2.06834e+01
+ts69_fall_19        =   2.07430e+01
+twid_fall_19        =   2.07015e+01
+trpk_del_fall_19    =   2.06705e+01
+trrc_19             =   2.06705e+01
+trrc_fall_19        =   2.06637e+01
+sh14_19             =  1.793286e-01
+sh69_19             =  2.046090e-01
+bi0_curr_19         =  2.983274e-01
+bi0_prev_19         =  2.997367e-01
+bi1_curr_19         =  3.082175e-01
+bi1_prev_19         =  3.084319e-01
+ecg_at_f8cap_19     =  3.106637e-01
+pw_shb_19           =  2.260439e-01
+pw_shp_19           =  2.731928e-01
+tpwb_fall_19        =   2.22055e+01
+trpk_20             =   2.06637e+01
+ts14_20             =   2.06829e+01
+ts69_20             =   2.07417e+01
+twid_20             =   2.07005e+01
+trpk_del_20         =   2.06696e+01
+ts14_fall_20        =   2.06834e+01
+ts69_fall_20        =   2.07430e+01
+twid_fall_20        =   2.07015e+01
+trpk_del_fall_20    =   2.06705e+01
+trrc_20             =   2.06705e+01
+trrc_fall_20        =   2.06637e+01
+sh14_20             =  1.754144e-01
+sh69_20             =  2.006309e-01
+bi0_curr_20         =  2.966524e-01
+bi0_prev_20         =  2.980716e-01
+bi1_curr_20         =  3.065495e-01
+bi1_prev_20         =  3.067654e-01
+ecg_at_f8cap_20     =  3.106637e-01
+pw_shb_20           =  2.220360e-01
+pw_shp_20           =  2.691517e-01
+tpwb_fall_20        =   2.22055e+01
+trpk_21             =   2.06637e+01
+ts14_21             =   2.06829e+01
+ts69_21             =   2.07417e+01
+twid_21             =   2.07005e+01
+trpk_del_21         =   2.06696e+01
+ts14_fall_21        =   2.06834e+01
+ts69_fall_21        =   2.07430e+01
+twid_fall_21        =   2.07015e+01
+trpk_del_fall_21    =   2.06705e+01
+trrc_21             =   2.06705e+01
+trrc_fall_21        =   2.06637e+01
+sh14_21             =  1.715239e-01
+sh69_21             =  1.966685e-01
+bi0_curr_21         =  2.949814e-01
+bi0_prev_21         =  2.964126e-01
+bi1_curr_21         =  3.048871e-01
+bi1_prev_21         =  3.051048e-01
+ecg_at_f8cap_21     =  3.106637e-01
+pw_shb_21           =  2.180407e-01
+pw_shp_21           =  2.651216e-01
+tpwb_fall_21        =   2.22055e+01
+trpk_22             =   2.06637e+01
+ts14_22             =   2.06829e+01
+ts69_22             =   2.07417e+01
+twid_22             =   2.07005e+01
+trpk_del_22         =   2.06696e+01
+ts14_fall_22        =   2.06834e+01
+ts69_fall_22        =   2.07430e+01
+twid_fall_22        =   2.07015e+01
+trpk_del_fall_22    =   2.06705e+01
+trrc_22             =   2.06705e+01
+trrc_fall_22        =   2.06637e+01
+sh14_22             =  1.677659e-01
+sh69_22             =  1.928323e-01
+bi0_curr_22         =  2.933603e-01
+bi0_prev_22         =  2.947991e-01
+bi1_curr_22         =  3.032704e-01
+bi1_prev_22         =  3.034899e-01
+ecg_at_f8cap_22     =  3.106637e-01
+pw_shb_22           =  2.141692e-01
+pw_shp_22           =  2.612134e-01
+tpwb_fall_22        =   2.22055e+01
+trpk_23             =   2.06637e+01
+ts14_23             =   2.06829e+01
+ts69_23             =   2.07417e+01
+twid_23             =   2.07005e+01
+trpk_del_23         =   2.06696e+01
+ts14_fall_23        =   2.06834e+01
+ts69_fall_23        =   2.07430e+01
+twid_fall_23        =   2.07015e+01
+trpk_del_fall_23    =   2.06705e+01
+trrc_23             =   2.06705e+01
+trrc_fall_23        =   2.06637e+01
+sh14_23             =  1.640168e-01
+sh69_23             =  1.889957e-01
+bi0_curr_23         =  2.917356e-01
+bi0_prev_23         =  2.931803e-01
+bi1_curr_23         =  3.016486e-01
+bi1_prev_23         =  3.018696e-01
+ecg_at_f8cap_23     =  3.106637e-01
+pw_shb_23           =  2.102931e-01
+pw_shp_23           =  2.572978e-01
+tpwb_fall_23        =   2.22055e+01
+trpk_24             =   2.06637e+01
+ts14_24             =   2.06829e+01
+ts69_24             =   2.07417e+01
+twid_24             =   2.07005e+01
+trpk_del_24         =   2.06696e+01
+ts14_fall_24        =   2.06834e+01
+ts69_fall_24        =   2.07430e+01
+twid_fall_24        =   2.07015e+01
+trpk_del_fall_24    =   2.06705e+01
+trrc_24             =   2.06705e+01
+trrc_fall_24        =   2.06637e+01
+sh14_24             =  2.014558e-01
+sh69_24             =  2.127828e-01
+bi0_curr_24         =  3.100214e-01
+bi0_prev_24         =  2.915446e-01
+bi1_curr_24         =  3.238862e-01
+bi1_prev_24         =  3.002350e-01
+ecg_at_f8cap_24     =  3.106637e-01
+pw_shb_24           =  2.063573e-01
+pw_shp_24           =  2.533187e-01
+tpwb_fall_24        =   2.22055e+01
+trpk_25             =   2.14627e+01
+ts14_25             =   2.14816e+01
+ts69_25             =   2.15403e+01
+twid_25             =   2.14987e+01
+trpk_del_25         =   2.14687e+01
+ts14_fall_25        =   2.14821e+01
+ts69_fall_25        =   2.15415e+01
+twid_fall_25        =   2.15001e+01
+trpk_del_fall_25    =   2.14692e+01
+trrc_25             =   2.18704e+01
+trrc_fall_25        =   2.14627e+01
+sh14_25             =  1.886945e-01
+sh69_25             =  2.141083e-01
+bi0_curr_25         =  2.997607e-01
+bi0_prev_25         =  3.067874e-01
+bi1_curr_25         =  3.385360e-01
+bi1_prev_25         =  3.200662e-01
+ecg_at_f8cap_25     =  2.999596e-01
+pw_shb_25           =  2.024831e-01
+pw_shp_25           =  2.493982e-01
+tpwb_fall_25        =   2.22055e+01
+trpk_26             =   2.22630e+01
+ts14_26             =   2.22821e+01
+ts69_26             =   2.23376e+01
+twid_26             =   2.22964e+01
+trpk_del_26         =   2.30891e+01
+ts14_fall_26        =   2.22826e+01
+ts69_fall_26        =   2.23390e+01
+twid_fall_26        =   2.22975e+01
+trpk_del_fall_26    =   2.30897e+01
+trrc_fall_26        =   2.22630e+01
+sh14_26             =  2.108926e-01
+sh69_26             =  2.043939e-01
+bi0_curr_26         =  2.981168e-01
+bi0_prev_26         =  2.993059e-01
+bi1_curr_26         =  3.368995e-01
+bi1_prev_26         =  3.359279e-01
+ecg_at_f8cap_26     =  3.237181e-01
+pw_shb_26           =  2.380037e-01
+pw_shp_26           =  2.454853e-01
+tpwb_fall_26        =   2.22055e+01
+trpk_27             =   2.30831e+01
+ts14_27             =   2.31020e+01
+ts69_27             =   2.31576e+01
+twid_27             =   2.31164e+01
+trpk_del_27         =   2.30891e+01
+ts14_fall_27        =   2.31025e+01
+ts69_fall_27        =   2.31589e+01
+twid_fall_27        =   2.31177e+01
+trpk_del_fall_27    =   2.30897e+01
+sh14_27             =  2.146581e-01
+sh69_27             =  2.035482e-01
+bi0_curr_27         =  3.242043e-01
+bi0_prev_27         =  2.987795e-01
+bi1_curr_27         =  3.290852e-01
+bi1_prev_27         =  3.353814e-01
+ecg_at_f8cap_27     =  3.237181e-01
+pw_shb_27           =  2.339725e-01
+pw_shp_27           =  2.414484e-01
+tpwb_fall_27        =   2.47187e+01
+trpk_28             =   2.38796e+01
+ts14_28             =   2.38987e+01
+ts69_28             =   2.39543e+01
+twid_28             =   2.39131e+01
+trpk_del_28         =   2.38854e+01
+ts14_fall_28        =   2.38992e+01
+ts69_fall_28        =   2.39553e+01
+twid_fall_28        =   2.39141e+01
+trpk_del_fall_28    =   2.38862e+01
+sh14_28             =  2.150824e-01
+sh69_28             =  1.931076e-01
+bi0_curr_28         =  3.301107e-01
+bi0_prev_28         =  3.254179e-01
+bi1_curr_28         =  3.332593e-01
+bi1_prev_28         =  3.267328e-01
+ecg_at_f8cap_28     =  3.307237e-01
+pw_shb_28           =  2.300796e-01
+pw_shp_28           =  2.375495e-01
+tpwb_fall_28        =   2.47187e+01
+trpk_29             =   2.47187e+01
+ts14_29             =   2.47376e+01
+ts69_29             =   2.47932e+01
+twid_29             =   2.47520e+01
+trpk_del_29         =   2.47247e+01
+ts14_fall_29        =   2.47381e+01
+ts69_fall_29        =   2.47945e+01
+twid_fall_29        =   2.47533e+01
+trpk_del_fall_29    =   2.47256e+01
+sh14_29             =  2.192067e-01
+sh69_29             =  2.113870e-01
+bi0_curr_29         =  3.276367e-01
+bi0_prev_29         =  3.285185e-01
+bi1_curr_29         =  3.448886e-01
+bi1_prev_29         =  3.312889e-01
+ecg_at_f8cap_29     =  3.283920e-01
+pw_shb_29           =  3.302603e-01
+pw_shp_29           =  2.336057e-01
+tpwb_fall_29        =   2.47187e+01
+trpk_30             =   2.55498e+01
+ts14_30             =   2.55692e+01
+ts69_30             =   2.56247e+01
+twid_30             =   2.55831e+01
+trpk_del_30         =   2.55558e+01
+ts14_fall_30        =   2.55697e+01
+ts69_fall_30        =   2.56256e+01
+twid_fall_30        =   2.55843e+01
+trpk_del_fall_30    =   2.55565e+01
+sh14_30             =  2.128034e-01
+sh69_30             =  1.809557e-01
+bi0_curr_30         =  3.324388e-01
+bi0_prev_30         =  3.265954e-01
+bi1_curr_30         =  3.280949e-01
+bi1_prev_30         =  3.422241e-01
+ecg_at_f8cap_30     =  3.331030e-01
+pw_shb_30           =  3.261243e-01
+pw_shp_30           =  2.295228e-01
+tpwb_fall_30        =   2.72376e+01
+trpk_31             =   2.63801e+01
+ts14_31             =   2.63992e+01
+ts69_31             =   2.64548e+01
+twid_31             =   2.64136e+01
+trpk_del_31         =   2.63858e+01
+ts14_fall_31        =   2.63997e+01
+ts69_fall_31        =   2.64558e+01
+twid_fall_31        =   2.64144e+01
+trpk_del_fall_31    =   2.63867e+01
+sh14_31             =  1.997615e-01
+sh69_31             =  1.940727e-01
+bi0_curr_31         =  3.299942e-01
+bi0_prev_31         =  3.308759e-01
+bi1_curr_31         =  3.266893e-01
+bi1_prev_31         =  3.280084e-01
+ecg_at_f8cap_31     =  3.307542e-01
+pw_shb_31           =  3.220024e-01
+pw_shp_31           =  2.254559e-01
+tpwb_fall_31        =   2.72376e+01
+trpk_32             =   2.72432e+01
+ts14_32             =   2.72621e+01
+ts69_32             =   2.73177e+01
+twid_32             =   2.72765e+01
+trpk_del_32         =   2.72492e+01
+ts14_fall_32        =   2.72627e+01
+ts69_fall_32        =   2.73191e+01
+twid_fall_32        =   2.72775e+01
+trpk_del_fall_32    =   2.72498e+01
+sh14_32             =  1.948158e-01
+sh69_32             =  2.032985e-01
+bi0_curr_32         =  3.286577e-01
+bi0_prev_32         =  3.289083e-01
+bi1_curr_32         =  3.409759e-01
+bi1_prev_32         =  3.254197e-01
+ecg_at_f8cap_32     =  3.289066e-01
+pw_shb_32           =  3.058779e-01
+pw_shp_32           =  2.212216e-01
+tpwb_fall_32        =   2.72376e+01
+trpk_33             =   2.80838e+01
+ts14_33             =   2.81030e+01
+ts69_33             =   2.81586e+01
+twid_33             =   2.81172e+01
+trpk_del_33         =   2.80899e+01
+ts14_fall_33        =   2.81036e+01
+ts69_fall_33        =   2.81597e+01
+twid_fall_33        =   2.81182e+01
+trpk_del_fall_33    =   2.80905e+01
+sh14_33             =  2.081669e-01
+sh69_33             =  1.778824e-01
+bi0_curr_33         =  3.322044e-01
+bi0_prev_33         =  3.275072e-01
+bi1_curr_33         =  3.259075e-01
+bi1_prev_33         =  3.382322e-01
+ecg_at_f8cap_33     =  3.329112e-01
+pw_shb_33           =  3.017089e-01
+pw_shp_33           =  2.171082e-01
+trpk_34             =   2.89210e+01
+ts69_34             =   2.89959e+01
+twid_34             =   2.89543e+01
+trpk_del_34         =   2.89270e+01
+ts69_fall_34        =   2.89969e+01
+twid_fall_34        =   2.89556e+01
+trpk_del_fall_34    =   2.89276e+01
+sh14_34             =  2.041015e-01
+sh69_34             =  1.923079e-01
+bi0_curr_34         =  3.391571e-01
+bi0_prev_34         =  3.309150e-01
+bi1_curr_34         =  3.217388e-01
+bi1_prev_34         =  3.251621e-01
+ecg_at_f8cap_34     =  3.394207e-01
+pw_shb_34           =  2.975565e-01
+pw_shp_34           =  2.130145e-01
+rpk_amp_5           =  9.028006e-11 at=  5.028128e+00
+rpk_raw_5           =  1.739548e-07 at=  5.025750e+00
+ecg_at_rpk_5        =  2.925467e-01
+sh_sym_5            =  3.002419e-01
+bi_out_5            =  2.997413e-01
+ecg_at_s14_5        =  2.839453e-01
+rpk_amp_6           =  9.026652e-11 at=  5.848972e+00
+rpk_raw_6           =  1.739548e-07 at=  5.847972e+00
+ecg_at_rpk_6        =  2.924456e-01
+sh_sym_6            =  3.026365e-01
+bi_out_6            =  2.934921e-01
+ecg_at_s14_6        =  2.795709e-01
+rpk_amp_7           =  9.026328e-11 at=  6.684083e+00
+rpk_raw_7           =  1.739548e-07 at=  6.677928e+00
+ecg_at_rpk_7        =  2.932081e-01
+sh_sym_7            =  2.976876e-01
+bi_out_7            =  2.961040e-01
+ecg_at_s14_7        =  2.697820e-01
+rpk_amp_8           =  9.026312e-11 at=  7.489639e+00
+rpk_raw_8           =  1.739548e-07 at=  7.491639e+00
+ecg_at_rpk_8        =  2.859170e-01
+sh_sym_8            =  2.992427e-01
+bi_out_8            =  2.946979e-01
+ecg_at_s14_8        =  2.708624e-01
+rpk_amp_9           =  9.026882e-11 at=  8.288861e+00
+rpk_raw_9           =  1.739548e-07 at=  8.291667e+00
+ecg_at_rpk_9        =  2.834866e-01
+sh_sym_9            =  2.993506e-01
+bi_out_9            =  2.947045e-01
+ecg_at_s14_9        =  2.551729e-01
+rpk_amp_10          =  9.027486e-11 at=  9.152250e+00
+rpk_raw_10          =  1.739548e-07 at=  9.152778e+00
+ecg_at_rpk_10       =  2.682158e-01
+sh_sym_10           =  2.994642e-01
+bi_out_10           =  2.947327e-01
+ecg_at_s14_10       =  2.472325e-01
+rpk_amp_11          =  9.028002e-11 at=  1.001336e+01
+rpk_raw_11          =  1.739548e-07 at=  1.001008e+01
+ecg_at_rpk_11       =  2.670141e-01
+sh_sym_11           =  2.995678e-01
+bi_out_11           =  2.947255e-01
+ecg_at_s14_11       =  2.569819e-01
+rpk_amp_12          =  9.028335e-11 at=  1.085731e+01
+rpk_raw_12          =  1.739548e-07 at=  1.085283e+01
+ecg_at_rpk_12       =  2.762361e-01
+sh_sym_12           =  2.996702e-01
+bi_out_12           =  2.947410e-01
+ecg_at_s14_12       =  2.755749e-01
+rpk_amp_13          =  9.028302e-11 at=  1.170175e+01
+rpk_raw_13          =  1.739548e-07 at=  1.169727e+01
+ecg_at_rpk_13       =  2.789029e-01
+sh_sym_13           =  2.997763e-01
+bi_out_13           =  2.947505e-01
+ecg_at_s14_13       =  2.618015e-01
+rpk_amp_14          =  9.027873e-11 at=  1.252775e+01
+rpk_raw_14          =  1.739548e-07 at=  1.252500e+01
+ecg_at_rpk_14       =  3.025380e-01
+sh_sym_14           =  2.998862e-01
+bi_out_14           =  3.364283e-01
+ecg_at_s14_14       =  2.843644e-01
+
+
+Total analysis time (seconds) = 203.264
+
+Total elapsed time (seconds) = 242.498 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1607.004 MB.
+Maximum ngspice program size =  277.246 MB.
+Current ngspice program size =  277.246 MB.
+
