@@ -1,0 +1,48 @@
+* ============================================================
+* R-PEAK HOLD CIRCUIT — Debounce for NEG-polarity QRS chatter
+* ============================================================
+*
+* Problem: For inverted (NEG) QRS morphology, rpeak_level can
+*   toggle multiple times during the QRS valley as the ECG
+*   briefly crosses back above threshold. Each toggle fires a
+*   new rpeak_pulse, recharging the delay timer and destroying
+*   timing accuracy.
+*
+* Solution: Once rpeak_level goes HIGH, a cap charges to VDD
+*   and holds the output HIGH for ~80ms regardless of input
+*   chatter. The downstream pulse_gen sees only ONE rising edge
+*   per beat.
+*
+* Topology:
+*   1. Inverter converts input for PMOS gate control
+*   2. PMOS quickly charges hold_cap to VDD when input=HIGH
+*   3. Weak NFET slowly discharges hold_cap (~5mV/ms)
+*   4. Two-inverter buffer outputs clean rail-to-rail level
+*
+* Hold time: ~150ms (from VDD to inverter threshold ~0.45V)
+*   Cap = ~3pF (MIM W=55 L=55), discharge ~26pA @ vbias
+*   Measured hold: ~150ms (enough to cover 50ms QRS chatter,
+*   releases well before shortest RR ~300ms)
+*
+* Pin: input output vdd vss vbias
+* ============================================================
+
+.subckt rpeak_hold input output vdd vss vbias
+
+* Invert input for PMOS control (LOW gate = PMOS ON)
+Xinv_ctrl input inp_bar vdd vss inverter_sub
+
+* Fast precharge: PMOS charges hold_cap to VDD when input=HIGH
+XMpre hold_cap inp_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+
+* Slow discharge: weak NFET (~26pA), sets hold duration
+XMdis hold_cap vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* Hold cap: ~3pF MIM (55*55 fF)
+XChold hold_cap vss sky130_fd_pr__cap_mim_m3_1 W=55 L=55
+
+* Two-inverter buffer: sharp rail-to-rail output
+Xinv_buf1 hold_cap buf_mid vdd vss inverter_sub
+Xinv_buf2 buf_mid output vdd vss inverter_sub
+
+.ends rpeak_hold

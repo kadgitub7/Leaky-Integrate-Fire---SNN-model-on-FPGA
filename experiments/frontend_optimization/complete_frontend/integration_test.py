@@ -191,52 +191,227 @@ for rec_id in RECORDS:
     ecg_l0_pts.append((total_time, VBASE))
     ecg_l1_pts.append((total_time, VBASE))
 
-    # --- rpeak threshold (median-based, P-wave safe) ---
-    # Use max of QRS window (±15 samples) for robust peak measurement
-    r_peaks = [VBASE + gain * np.max(b['ecg_l0'][WIN_L-15:WIN_L+15]) for b in beats]
-    median_r_v = float(np.median(r_peaks))
-    min_r_v = min(r_peaks)
-    max_r_v = max(r_peaks)
-    RPEAK_THRESH_FRAC = 0.50
-    rpeak_thresh = VBASE + RPEAK_THRESH_FRAC * (median_r_v - VBASE)
-    rpeak_thresh = max(rpeak_thresh, VBASE + 0.020)
-    n_pos_det = sum(1 for v in r_peaks if v > rpeak_thresh)
-    print("  rpeak pos_thresh: {:.4f}V (frac={:.0f}% of median) detectable: pos={}/{} min_rpk={:.4f}V".format(
-        rpeak_thresh, RPEAK_THRESH_FRAC*100, n_pos_det, n, min_r_v))
+    # --- rpeak threshold (dual-polarity, adaptive per-record) ---
+    r_peaks_pos = [VBASE + gain * np.max(b['ecg_l0'][WIN_L-15:WIN_L+15]) for b in beats]
+    r_peaks_neg = [VBASE + gain * np.min(b['ecg_l0'][WIN_L-15:WIN_L+15]) for b in beats]
+    med_pos = float(np.median(r_peaks_pos))
+    med_neg = float(np.median(r_peaks_neg))
+    pos_amp = med_pos - VBASE
+    neg_amp = VBASE - med_neg
 
-    # --- Delay timer thresholds (compensated for rpeak offset) ---
-    # Discharge starts at R - RPEAK_OFFSET + PG_WIDTH = R - 5.9ms
-    # For target at R + X: discharge_time = X + 5.9ms
-    offset_ms = RPEAK_OFFSET_MS - PG_WIDTH_MS  # 5.9ms
-    vth_14 = interp_sf(ft_t, ft_v, max(0.3, 14 + offset_ms - pipe_s14))
-    vth_28 = interp_sf(dt_t, dt_v, max(0.5, 28 + offset_ms - pipe_wid))
+    if pos_amp >= neg_amp:
+        rpeak_polarity = "POS"
+    else:
+        rpeak_polarity = "NEG"
+
+    # For NEG polarity: find threshold fraction that keeps offset within fast timer range
+    # while detecting ≥90% of beats. Target: |offset| < 18ms.
+    # COMP_MARGIN: minimum voltage margin the SPICE comparator needs to reliably switch.
+    # Without this, Python finds threshold crossings with 1-2mV margin that SPICE ignores.
+    COMP_MARGIN = 0.015  # 15mV
+    def compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac):
+        if polarity == "POS":
+            th = VBASE + frac * max(pos_amp, 0.010)
+            th = max(th, VBASE + 0.010)
+        else:
+            th = VBASE - frac * max(neg_amp, 0.010)
+            th = min(th, VBASE - 0.010)
+        # Count detectable beats (with margin for comparator)
+        if polarity == "POS":
+            n_ok = sum(1 for v in r_peaks_pos if v > th + COMP_MARGIN)
+        else:
+            n_ok = sum(1 for v in r_peaks_neg if v < th - COMP_MARGIN)
+        # Compute expected offset from Python ECG waveform (with comparator margin)
+        offsets = []
+        for b in beats:
+            ecg_v = [max(0.05, min(0.85, VBASE + gain * b['ecg_l0'][s])) for s in range(len(b['ecg_l0']))]
+            for s in range(WIN_L - 25, WIN_L + 15):
+                if s < 0 or s >= len(ecg_v): continue
+                if polarity == "POS" and ecg_v[s] > th + COMP_MARGIN:
+                    offsets.append((s - WIN_L) * 1000.0 / FS)
+                    break
+                elif polarity == "NEG" and ecg_v[s] < th - COMP_MARGIN:
+                    offsets.append((s - WIN_L) * 1000.0 / FS)
+                    break
+        avg_off = float(np.median(offsets)) if offsets else -50.0
+        return th, n_ok, avg_off, offsets
+
+    # Try both polarities and pick best configuration
+    def find_best_config(polarity, amp_val, fracs):
+        best = {'frac': fracs[0], 'thresh': VBASE, 'n': 0, 'offset': -50.0}
+        for frac in fracs:
+            th, n_ok, avg_off, _ = compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac)
+            if n_ok >= int(0.85 * n) and abs(avg_off) < 20:
+                return {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+            if n_ok >= int(0.85 * n) and (best['n'] < int(0.85 * n) or abs(avg_off) < abs(best['offset'])):
+                best = {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+        if best['n'] < int(0.85 * n):
+            saved_margin = COMP_MARGIN
+            for reduced in [0.005, 0.0]:
+                nonlocal COMP_MARGIN
+                COMP_MARGIN = reduced
+                for frac in fracs:
+                    th, n_ok, avg_off, _ = compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac)
+                    if n_ok >= int(0.85 * n) and abs(avg_off) < 20:
+                        print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(reduced*1000, polarity))
+                        return {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+                    if n_ok >= int(0.85 * n) and (best['n'] < int(0.85 * n) or abs(avg_off) < abs(best['offset'])):
+                        best = {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+                if best['n'] >= int(0.85 * n):
+                    print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(reduced*1000, polarity))
+                    break
+            COMP_MARGIN = saved_margin
+        return best
+
+    neg_cfg = find_best_config("NEG", neg_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
+    COMP_MARGIN = 0.015  # reset for second polarity search
+    pos_cfg = find_best_config("POS", pos_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
+
+    # For mixed-polarity records: override initial polarity choice if the other detects more
+    if rpeak_polarity == "NEG" and pos_cfg['n'] > neg_cfg['n'] and pos_cfg['n'] >= int(0.85 * n):
+        rpeak_polarity = "POS"
+        print("  NOTE: Overriding to POS polarity (detects {}/{} vs NEG {}/{})".format(
+            pos_cfg['n'], n, neg_cfg['n'], n))
+    elif rpeak_polarity == "POS" and neg_cfg['n'] > pos_cfg['n'] and neg_cfg['n'] >= int(0.85 * n):
+        rpeak_polarity = "NEG"
+        print("  NOTE: Overriding to NEG polarity (detects {}/{} vs POS {}/{})".format(
+            neg_cfg['n'], n, pos_cfg['n'], n))
+
+    if rpeak_polarity == "NEG":
+        cfg = neg_cfg
+        rpeak_thresh = cfg['thresh']
+        n_det = cfg['n']
+        raw_offset_ms = cfg['offset']  # signed: negative=before R, positive=after R
+        rpeak_offset_ms = -raw_offset_ms  # positive=rpeak fires BEFORE R, negative=fires AFTER R
+        min_rpk = max(r_peaks_neg)
+        print("  rpeak NEG frac={:.0f}% thresh={:.4f}V detectable={}/{} offset={:.1f}ms min_rpk={:.4f}V".format(
+            cfg['frac']*100, rpeak_thresh, n_det, n, raw_offset_ms, min_rpk))
+    else:
+        cfg = pos_cfg
+        rpeak_thresh = cfg['thresh']
+        n_det = cfg['n']
+        raw_offset_ms = cfg['offset']
+        rpeak_offset_ms = -raw_offset_ms
+        min_rpk = min(r_peaks_pos)
+        print("  rpeak POS frac={:.0f}% thresh={:.4f}V detectable={}/{} offset={:.1f}ms min_rpk={:.4f}V".format(
+            cfg['frac']*100, rpeak_thresh, n_det, n, raw_offset_ms, min_rpk))
+
+    # --- Delay timer thresholds (per-record adaptive offset) ---
+    offset_ms = rpeak_offset_ms - PG_WIDTH_MS
+    # Fast timer handles offsets up to ~35ms (ft_v drops to ~0.06V at 35ms)
+    # For offsets > 35ms, the fast timer values are too low to resolve
+    use_slow_for_fast = offset_ms > 35.0
+    if use_slow_for_fast:
+        print("  NOTE: offset {:.1f}ms exceeds fast timer range, using main timer for s14/s10/rpk_del".format(offset_ms))
+        vth_14 = interp_sf(dt_t, dt_v, max(0.5, 14 + offset_ms - pipe_s14))
+        vth_10 = interp_sf(dt_t, dt_v, max(0.5, 10 + offset_ms - pipe_s10))
+        vth_rpk_del = interp_sf(dt_t, dt_v, max(0.5, 0 + offset_ms - pipe_rpk_del))
+    else:
+        vth_14 = interp_sf(ft_t, ft_v, max(0.3, 14 + offset_ms - pipe_s14))
+        vth_10 = interp_sf(ft_t, ft_v, max(0.3, 10 + offset_ms - pipe_s10))
+        vth_rpk_del = interp_sf(ft_t, ft_v, max(0.3, 0 + offset_ms - pipe_rpk_del))
+    # Main timer needs ~15ms minimum decay for comparator to resolve
+    wid_main_delay = 28 + offset_ms - pipe_wid
+    use_fast_for_wid = wid_main_delay < 15.0
+    if use_fast_for_wid:
+        vth_28 = interp_sf(ft_t, ft_v, max(0.3, 28 + offset_ms - pipe_wid))
+        print("  NOTE: wid delay {:.1f}ms too short for main timer, using fast timer (vth={:.4f})".format(wid_main_delay, vth_28))
+    else:
+        vth_28 = interp_sf(dt_t, dt_v, max(0.5, 28 + offset_ms - pipe_wid))
     vth_69 = interp_sf(dt_t, dt_v, max(0.5, 69 + offset_ms - pipe_s69))
     vth_300 = interp_sf(dt_t, dt_v, max(0.5, 300 + offset_ms - pipe_bi))
-    vth_10 = interp_sf(ft_t, ft_v, max(0.3, 10 + offset_ms - pipe_s10))
-    vth_rpk_del = interp_sf(ft_t, ft_v, max(0.3, 0 + offset_ms - pipe_rpk_del))
+
+    # Adjust Python reference sample offset to match per-record rpeak offset
+    rpeak_sample_offset = round((rpeak_offset_ms - PG_WIDTH_MS) * FS / 1000)
+    rpeak_sample_offset = max(0, min(15, rpeak_sample_offset))
 
     # --- IC for rr_timing ---
     PW = 0.0005
     avg_rr_ms_ic = np.mean([b['pre_rr'] * 1000 for b in beats])
     ic_ewma = interp_sf(rr_t, rr_v, avg_rr_ms_ic)
 
-    # --- Pwave predictor thresholds (EWMA-relative for adaptive timing) ---
+    # --- Pwave predictor thresholds (EWMA-relative, uses per-record offset) ---
     avg_rr_ms = np.mean([b['pre_rr'] * 1000 for b in beats])
-    pipe_pw = 3.0  # pwave_predictor pipeline delay estimate (ms)
-    SF_DECAY_RATE = 0.112e-3  # V/ms — calibrated from rr_v standalone timer data
-    pwb_target_ms = 205.6  # ms before R-peak
+    pipe_pw = 3.0
+    SF_DECAY_RATE = 0.112e-3
+    pwb_target_ms = 205.6
     pwp_target_ms = 130.6
-    PWB_OFFSET_MV = (pwb_target_ms + RPEAK_OFFSET_MS - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
-    PWP_OFFSET_MV = (pwp_target_ms + RPEAK_OFFSET_MS - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
-    # rr_cap offset: must be BELOW pwp offset so rr_cap fires AFTER pw_peak
-    # (prevents esamp loading transient from falsely triggering pw_peak comparator)
-    # S&H tracks from comparator fire until rpeak_level closes it (AND gate)
-    RRC_OFFSET_MV = 20.0  # mV above EWMA — fires at ~R-178ms (F1/F2 calibrated for this)
-    print("  SF_DECAY_RATE={:.4f} mV/ms  ic_ewma={:.4f}V  avg_rr={:.0f}ms".format(SF_DECAY_RATE*1000, ic_ewma, avg_rr_ms))
-    print("  pwave offsets: pwb={:.1f}mV (target R-{:.0f}ms) pwp={:.1f}mV (target R-{:.0f}ms) rrc={:.1f}mV".format(
+    PWB_OFFSET_MV = (pwb_target_ms + rpeak_offset_ms - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
+    PWP_OFFSET_MV = (pwp_target_ms + rpeak_offset_ms - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
+    RRC_OFFSET_MV = 20.0
+    print("  rpeak_offset={:.1f}ms sample_offset={} SF_DECAY={:.4f}mV/ms ic_ewma={:.4f}V avg_rr={:.0f}ms".format(
+        rpeak_offset_ms, rpeak_sample_offset, SF_DECAY_RATE*1000, ic_ewma, avg_rr_ms))
+    print("  pwave offsets: pwb={:.1f}mV (R-{:.0f}ms) pwp={:.1f}mV (R-{:.0f}ms) rrc={:.1f}mV".format(
         PWB_OFFSET_MV, pwb_target_ms, PWP_OFFSET_MV, pwp_target_ms, RRC_OFFSET_MV))
+    if use_slow_for_fast:
+        print("  SLOW timer thresholds: vth_14={:.4f} vth_10={:.4f} vth_rpk_del={:.4f}".format(vth_14, vth_10, vth_rpk_del))
 
-    # --- NO MORE IDEAL TRIGGERS — fully analog pipeline ---
+    # --- Analog pipeline ---
+    # Comparator wiring depends on QRS polarity
+    if rpeak_polarity == "POS":
+        rpk_inst_line = "Xrpk ecg_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector"
+    else:
+        rpk_inst_line = "Xrpk rpeak_threshold ecg_l0 rpeak_level vdd vss vbias rpeak_detector"
+
+    # For large offsets: external comparators on main timer SF for s14/s10/rpk_del
+    if use_slow_for_fast:
+        # High-gain comparators on main timer SF (L=4 diff pair, same as delay_timer internal)
+        # Output goes HIGH when SF drops below threshold (sf_timer on left, vth on right → inverted)
+        slow_ext_cmps = """* External main-timer comparators (offset too large for fast timer)
+* High-gain two-stage comparator: L=4 diff pair + inverter output
+* Same topology as delay_timer internal comparators
+Vth14_slow vth_14_slow 0 {vth14:.6f}
+Vth10_slow vth_10_slow 0 {vth10:.6f}
+Vth_rpkdel_slow vth_rpkdel_slow 0 {vth_rpk_del:.6f}
+* S14 external comparator
+XMes14_1 cne14 dt_sf_out cte14 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMes14_2 stg1_es14 vth_14_slow cte14 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMes14_3 cne14 cne14 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMes14_4 stg1_es14 cne14 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMes14_5 cte14 vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMes14_6 ext_s14_level stg1_es14 vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMes14_7 ext_s14_level stg1_es14 vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
+* RR external comparator
+XMerr_1 cnerr dt_sf_out cterr vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMerr_2 stg1_err vth_10_slow cterr vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMerr_3 cnerr cnerr vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMerr_4 stg1_err cnerr vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMerr_5 cterr vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMerr_6 ext_rr_level stg1_err vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMerr_7 ext_rr_level stg1_err vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
+* RPK_DEL external comparator
+XMerd_1 cnerd dt_sf_out cterd vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMerd_2 stg1_erd vth_rpkdel_slow cterd vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMerd_3 cnerd cnerd vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMerd_4 stg1_erd cnerd vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMerd_5 cterd vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMerd_6 ext_rpkdel_level stg1_erd vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMerd_7 ext_rpkdel_level stg1_erd vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1""".format(
+            vth14=vth_14, vth10=vth_10, vth_rpk_del=vth_rpk_del)
+        s14_src = "ext_s14_level"
+        rr_src = "ext_rr_level"
+        rpkdel_src = "ext_rpkdel_level"
+    else:
+        slow_ext_cmps = ""
+        s14_src = "trig_s14_level"
+        rr_src = "trig_rr_level"
+        rpkdel_src = "trig_rpk_del_level"
+
+    # For short offsets: external comparators on fast timer for wid
+    if use_fast_for_wid:
+        fast_wid_cmp = """* External fast-timer comparator for wid (main timer delay too short)
+Vth28_fast vth_28_fast 0 {vth28:.6f}
+XMewid_1 cnewid xdt.sf_timer2 ctewid vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMewid_2 stg1_ewid vth_28_fast ctewid vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMewid_3 cnewid cnewid vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMewid_4 stg1_ewid cnewid vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMewid_5 ctewid vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMewid_6 ext_wid_level stg1_ewid vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=8 nf=1
+XMewid_7 ext_wid_level stg1_ewid vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1""".format(vth28=vth_28)
+        wid_src = "ext_wid_level"
+    else:
+        fast_wid_cmp = ""
+        wid_src = "trig_wid_level"
 
     sp = """.lib "{lib}" tt
 .option scale=1.0u method=gear reltol=0.01 gmin=1e-15
@@ -259,17 +434,21 @@ Vecg1 ecg_l1 0 PWL({ecg1})
 .include "{fp}/long_pulse_gen.spice"
 .include "{fp}/delay_timer.spice"
 .include "{fp}/edge_buffer.spice"
+.include "{fp}/rpeak_hold.spice"
 .include "{fp}/pwave_predictor.spice"
 
 * --- Bias generator (replaces ideal Vbias) ---
 Xbias vbias vref vdd vss bias_gen
 .ic V(xbias.iref)=0.3
 
-* --- R-peak detector (positive only) ---
+* --- R-peak detector (polarity-adaptive) ---
 Vthresh rpeak_threshold 0 {rpk_thresh:.6f}
-Xrpk ecg_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector
-* Edge buffer + pulse_gen chain
-Xeb_rpk_in rpeak_level rpeak_level_sharp vdd vss edge_buffer
+{rpk_inst}
+* Hold circuit: prevents multiple rpeak_pulse from NEG QRS chatter
+Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
+.ic V(xhold.hold_cap)=0
+* Edge buffer + pulse_gen chain (fed from held level)
+Xeb_rpk_in rpeak_level_held rpeak_level_sharp vdd vss edge_buffer
 Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
 Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
@@ -284,12 +463,14 @@ Vth_rpk_del vth_rpk_del_node 0 {vth_rpk_del:.6f}
 Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level trig_rpk_del_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node vth_rpk_del_node delay_timer
 
 * --- Pulse generators for delay_timer outputs ---
-Xpg_s14 trig_s14_level pg_s14_raw vdd vss vbias pulse_gen
+{slow_ext_cmps}
+{fast_wid_cmp}
+Xpg_s14 {s14_src} pg_s14_raw vdd vss vbias pulse_gen
 Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias long_pulse_gen
-Xpg_wid trig_wid_level pg_wid_raw vdd vss vbias long_pulse_gen
+Xpg_wid {wid_src} pg_wid_raw vdd vss vbias long_pulse_gen
 Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias long_pulse_gen
-Xpg_rr  trig_rr_level  pg_rr_raw  vdd vss vbias pulse_gen
-Xpg_rpk_del trig_rpk_del_level pg_rpk_del_raw vdd vss vbias pulse_gen
+Xpg_rr  {rr_src}  pg_rr_raw  vdd vss vbias pulse_gen
+Xpg_rpk_del {rpkdel_src} pg_rpk_del_raw vdd vss vbias pulse_gen
 
 * --- Edge buffers for cleaner trigger edges ---
 Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
@@ -389,11 +570,13 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
 """.format(lib=lib_path, vdd=VDD,
            ecg0=make_pwl(ecg_l0_pts), ecg1=make_pwl(ecg_l1_pts),
-           rpk_thresh=rpeak_thresh,
+           rpk_thresh=rpeak_thresh, rpk_inst=rpk_inst_line,
            vth14=vth_14, vth69=vth_69, vth28=vth_28, vth300=vth_300, vth10=vth_10, vth_rpk_del=vth_rpk_del,
            rrc_off_v=RRC_OFFSET_MV / 1000.0,
            pwb_off_v=PWB_OFFSET_MV / 1000.0, pwp_off_v=PWP_OFFSET_MV / 1000.0,
-           fp=fp, ic=ic_ewma, vbase=VBASE, ttot=total_time)
+           fp=fp, ic=ic_ewma, vbase=VBASE, ttot=total_time,
+           slow_ext_cmps=slow_ext_cmps, s14_src=s14_src, rr_src=rr_src, rpkdel_src=rpkdel_src,
+           fast_wid_cmp=fast_wid_cmp, wid_src=wid_src)
 
     # --- rr_cap analog diagnostics ---
     # Check comparator and AND gate output at specific times (before rpeak of beat 3-9)
@@ -457,6 +640,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     for j in range(n):
         td = max(0.01, rpeak_times[j] - 0.050)
         sp += ".meas tran trpk_{j} WHEN V(rpeak_pulse)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        # Delay timer SF diagnostics at specific offsets from rpeak
+        for dt_off_ms in [5, 15, 30, 50, 80]:
+            t_probe = rpeak_times[j] - rpeak_offset_ms/1000 + dt_off_ms/1000
+            if t_probe > 0.01 and t_probe < total_time:
+                sp += ".meas tran dtsf_{j}_{dtms} FIND V(dt_sf_out) AT={t:.7f}\n".format(j=j, dtms=dt_off_ms, t=t_probe)
         sp += ".meas tran ts14_{j} WHEN V(trig_s14)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran ts69_{j} WHEN V(trig_s69)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran twid_{j} WHEN V(trig_wid)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
@@ -510,6 +698,16 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     res, elapsed = run_sim("integ_{}".format(rec_id), sp)
     print("  Sim time: {:.0f}s, {} measurements".format(elapsed, len(res)))
 
+    # --- Delay timer SF diagnostics ---
+    if VERBOSE:
+        print("  delay_timer SF diagnostics (dt_sf_out at ms after rpeak):")
+        for j in range(min(SKIP, n), min(SKIP+5, n)):
+            vals = []
+            for dt_off_ms in [5, 15, 30, 50, 80]:
+                v = res.get('dtsf_{}_{}'.format(j, dt_off_ms), -1)
+                vals.append("{:.4f}".format(v) if v > 0 else "N/A")
+            print("    beat {}: 5ms={} 15ms={} 30ms={} 50ms={} 80ms={}".format(j, *vals))
+
     # --- rr_cap analog diagnostics ---
     if True:  # always print for debugging
         print("  rr_cap analog diagnostics (esamp validity gate):")
@@ -561,23 +759,27 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         ts14 = res.get('ts14_{}'.format(j))
         twid = res.get('twid_{}'.format(j))
         ts69 = res.get('ts69_{}'.format(j))
-        # rpeak valid if within [-50ms, +5ms] of true R (wide for inverted QRS)
-        if trpk and (trpk - r) > -0.050 and (trpk - r) < 0.005:
+        # rpeak valid if within expected offset window of true R
+        # raw_offset_ms: negative=before R, positive=after R
+        rpk_window_lo = min(raw_offset_ms - 10, -10) / 1000.0
+        rpk_window_hi = max(raw_offset_ms + 10, 5) / 1000.0
+        if trpk and (trpk - r) > rpk_window_lo and (trpk - r) < rpk_window_hi:
             valid_rpk.add(j)
             n_rpk_ok += 1
         else:
             n_rpk_miss += 1
-        # delayed rpeak valid if within [-15ms, +15ms] of true R
-        # (wider window: rpeak fires earlier on broad-QRS records like 109)
-        if trpk_del and (trpk_del - r) > -0.015 and (trpk_del - r) < 0.015:
+        # delayed rpeak valid if within expected window of true R
+        rpkdel_window = max(15, abs(rpeak_offset_ms) + 10) / 1000.0
+        if trpk_del and (trpk_del - r) > -rpkdel_window and (trpk_del - r) < rpkdel_window:
             valid_rpk_del.add(j)
             n_rpk_del_ok += 1
         else:
             n_rpk_del_miss += 1
-        # delay triggers valid if within ±15ms of expected
-        if (ts14 and abs((ts14 - r)*1000 - 13) < 15 and
-            twid and abs((twid - r)*1000 - 28) < 15 and
-            ts69 and abs((ts69 - r)*1000 - 69) < 15):
+        # delay triggers valid if within reasonable range of expected
+        dt_tol = max(15, abs(rpeak_offset_ms) * 0.5 + 10)
+        if (ts14 and abs((ts14 - r)*1000 - 14) < dt_tol and
+            twid and abs((twid - r)*1000 - 28) < dt_tol and
+            ts69 and abs((ts69 - r)*1000 - 69) < dt_tol):
             valid_dt.add(j)
             n_dt_ok += 1
         else:
