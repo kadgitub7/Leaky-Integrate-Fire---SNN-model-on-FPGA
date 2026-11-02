@@ -1488,12 +1488,12 @@ bi_out_14           =  3.350324e-01
 ecg_at_s14_14       =  3.436042e-01
 
 
-Total analysis time (seconds) = 127.192
+Total analysis time (seconds) = 271.93
 
-Total elapsed time (seconds) = 147.884 
+Total elapsed time (seconds) = 301.343 
 
 Total DRAM available = 15982.191 MB.
-DRAM currently available = 1567.797 MB.
-Maximum ngspice program size =  283.594 MB.
-Current ngspice program size =  283.594 MB.
+DRAM currently available = 2643.777 MB.
+Maximum ngspice program size =  283.957 MB.
+Current ngspice program size =  283.957 MB.
 

@@ -162,7 +162,8 @@ print("=" * 70)
 lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")
 fp = FRONTEND_DIR.replace("\\", "/")
 
-RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
+RECORDS = ['107', '115', '232', '118']  # TEMP: diagnose weak F1/F2/F8 records
+#RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
 all_results = {}
 
 for rec_id in RECORDS:
@@ -209,62 +210,51 @@ for rec_id in RECORDS:
     # COMP_MARGIN: minimum voltage margin the SPICE comparator needs to reliably switch.
     # Without this, Python finds threshold crossings with 1-2mV margin that SPICE ignores.
     COMP_MARGIN = 0.015  # 15mV
-    def compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac):
+    def compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac, margin=None):
+        if margin is None:
+            margin = COMP_MARGIN
         if polarity == "POS":
             th = VBASE + frac * max(pos_amp, 0.010)
             th = max(th, VBASE + 0.010)
         else:
             th = VBASE - frac * max(neg_amp, 0.010)
             th = min(th, VBASE - 0.010)
-        # Count detectable beats (with margin for comparator)
         if polarity == "POS":
-            n_ok = sum(1 for v in r_peaks_pos if v > th + COMP_MARGIN)
+            n_ok = sum(1 for v in r_peaks_pos if v > th + margin)
         else:
-            n_ok = sum(1 for v in r_peaks_neg if v < th - COMP_MARGIN)
-        # Compute expected offset from Python ECG waveform (with comparator margin)
+            n_ok = sum(1 for v in r_peaks_neg if v < th - margin)
         offsets = []
         for b in beats:
             ecg_v = [max(0.05, min(0.85, VBASE + gain * b['ecg_l0'][s])) for s in range(len(b['ecg_l0']))]
             for s in range(WIN_L - 25, WIN_L + 15):
                 if s < 0 or s >= len(ecg_v): continue
-                if polarity == "POS" and ecg_v[s] > th + COMP_MARGIN:
+                if polarity == "POS" and ecg_v[s] > th + margin:
                     offsets.append((s - WIN_L) * 1000.0 / FS)
                     break
-                elif polarity == "NEG" and ecg_v[s] < th - COMP_MARGIN:
+                elif polarity == "NEG" and ecg_v[s] < th - margin:
                     offsets.append((s - WIN_L) * 1000.0 / FS)
                     break
         avg_off = float(np.median(offsets)) if offsets else -50.0
         return th, n_ok, avg_off, offsets
 
-    # Try both polarities and pick best configuration
     def find_best_config(polarity, amp_val, fracs):
         best = {'frac': fracs[0], 'thresh': VBASE, 'n': 0, 'offset': -50.0}
-        for frac in fracs:
-            th, n_ok, avg_off, _ = compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac)
-            if n_ok >= int(0.85 * n) and abs(avg_off) < 20:
-                return {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
-            if n_ok >= int(0.85 * n) and (best['n'] < int(0.85 * n) or abs(avg_off) < abs(best['offset'])):
-                best = {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
-        if best['n'] < int(0.85 * n):
-            saved_margin = COMP_MARGIN
-            for reduced in [0.005, 0.0]:
-                nonlocal COMP_MARGIN
-                COMP_MARGIN = reduced
-                for frac in fracs:
-                    th, n_ok, avg_off, _ = compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac)
-                    if n_ok >= int(0.85 * n) and abs(avg_off) < 20:
-                        print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(reduced*1000, polarity))
-                        return {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
-                    if n_ok >= int(0.85 * n) and (best['n'] < int(0.85 * n) or abs(avg_off) < abs(best['offset'])):
-                        best = {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
-                if best['n'] >= int(0.85 * n):
-                    print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(reduced*1000, polarity))
-                    break
-            COMP_MARGIN = saved_margin
+        for margin in [COMP_MARGIN, 0.005, 0.0]:
+            for frac in fracs:
+                th, n_ok, avg_off, _ = compute_thresh_and_offset(polarity, pos_amp, neg_amp, frac, margin)
+                if n_ok >= int(0.85 * n) and abs(avg_off) < 20:
+                    if margin < COMP_MARGIN:
+                        print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(margin*1000, polarity))
+                    return {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+                if n_ok >= int(0.85 * n) and (best['n'] < int(0.85 * n) or abs(avg_off) < abs(best['offset'])):
+                    best = {'frac': frac, 'thresh': th, 'n': n_ok, 'offset': avg_off}
+            if best['n'] >= int(0.85 * n):
+                if margin < COMP_MARGIN:
+                    print("  NOTE: Reduced COMP_MARGIN to {:.0f}mV for {} (small QRS amplitude)".format(margin*1000, polarity))
+                break
         return best
 
     neg_cfg = find_best_config("NEG", neg_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
-    COMP_MARGIN = 0.015  # reset for second polarity search
     pos_cfg = find_best_config("POS", pos_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
 
     # For mixed-polarity records: override initial polarity choice if the other detects more
