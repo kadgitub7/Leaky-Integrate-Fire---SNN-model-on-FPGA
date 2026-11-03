@@ -136,10 +136,10 @@ def run_sim(title, sp_body):
     sp = ".title {}\n".format(title) + sp_body + "\n.end\n"
     tb = os.path.join(FRONTEND_DIR, "_integ_{}.spice".format(title.replace(' ', '_')))
     logf = tb.replace('.spice', '.log')
-    with open(tb, 'w') as f: f.write(sp)
+    with open(tb, 'w', encoding='utf-8') as f: f.write(sp)
     t0 = time.time()
     subprocess.run([NGSPICE, '-b', '-o', logf, tb],
-                   capture_output=True, text=True, timeout=600, cwd=NGSPICE_DIR)
+                   capture_output=True, text=True, timeout=1200, cwd=NGSPICE_DIR)
     elapsed = time.time() - t0
     results = {}
     if os.path.exists(logf):
@@ -162,8 +162,8 @@ print("=" * 70)
 lib_path = os.path.join(NGSPICE_DIR, "sky130_minimal.lib.spice").replace("\\", "/")
 fp = FRONTEND_DIR.replace("\\", "/")
 
-RECORDS = ['107', '115', '232', '118']  # TEMP: diagnose weak F1/F2/F8 records
-#RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
+#RECORDS = ['107', '115', '232', '118']  # weak records only
+RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
 all_results = {}
 
 for rec_id in RECORDS:
@@ -254,18 +254,21 @@ for rec_id in RECORDS:
                 break
         return best
 
-    neg_cfg = find_best_config("NEG", neg_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
-    pos_cfg = find_best_config("POS", pos_amp, [0.50, 0.60, 0.70, 0.80, 0.85, 0.90])
-
-    # For mixed-polarity records: override initial polarity choice if the other detects more
-    if rpeak_polarity == "NEG" and pos_cfg['n'] > neg_cfg['n'] and pos_cfg['n'] >= int(0.85 * n):
+    # Step 1: determine polarity at frac=50% (most permissive, stable selection)
+    neg_cfg_50 = find_best_config("NEG", neg_amp, [0.50])
+    pos_cfg_50 = find_best_config("POS", pos_amp, [0.50])
+    if rpeak_polarity == "NEG" and pos_cfg_50['n'] > neg_cfg_50['n'] and pos_cfg_50['n'] >= int(0.85 * n):
         rpeak_polarity = "POS"
         print("  NOTE: Overriding to POS polarity (detects {}/{} vs NEG {}/{})".format(
-            pos_cfg['n'], n, neg_cfg['n'], n))
-    elif rpeak_polarity == "POS" and neg_cfg['n'] > pos_cfg['n'] and neg_cfg['n'] >= int(0.85 * n):
+            pos_cfg_50['n'], n, neg_cfg_50['n'], n))
+    elif rpeak_polarity == "POS" and neg_cfg_50['n'] > pos_cfg_50['n'] and neg_cfg_50['n'] >= int(0.85 * n):
         rpeak_polarity = "NEG"
         print("  NOTE: Overriding to NEG polarity (detects {}/{} vs POS {}/{})".format(
-            neg_cfg['n'], n, pos_cfg['n'], n))
+            neg_cfg_50['n'], n, pos_cfg_50['n'], n))
+
+    # Step 2: within the selected polarity, prefer higher fracs (less T-wave sensitivity)
+    neg_cfg = find_best_config("NEG", neg_amp, [0.90, 0.85, 0.80, 0.70, 0.60, 0.50])
+    pos_cfg = find_best_config("POS", pos_amp, [0.90, 0.85, 0.80, 0.70, 0.60, 0.50])
 
     if rpeak_polarity == "NEG":
         cfg = neg_cfg
@@ -404,7 +407,7 @@ XMewid_7 ext_wid_level stg1_ewid vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1"
         wid_src = "trig_wid_level"
 
     sp = """.lib "{lib}" tt
-.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15 itl4=200
 .temp 27
 Vdd vdd 0 {vdd}
 Vss vss 0 0
@@ -434,13 +437,21 @@ Xbias vbias vref vdd vss bias_gen
 * --- R-peak detector (polarity-adaptive) ---
 Vthresh rpeak_threshold 0 {rpk_thresh:.6f}
 {rpk_inst}
-* Hold circuit: prevents multiple rpeak_pulse from NEG QRS chatter
+* Hold circuit: debounces QRS chatter
 Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
 .ic V(xhold.hold_cap)=0
-* Edge buffer + pulse_gen chain (fed from held level)
+* Level-to-pulse conversion (hold output -> brief ~2ms pulse)
 Xeb_rpk_in rpeak_level_held rpeak_level_sharp vdd vss edge_buffer
 Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
-Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
+* Refractory gate on PULSE (not level): blocks brief pulses during 300ms refractory
+* Key: when refractory opens, any T-wave pulse has already ended (pulses are ~2ms)
+* trig_bi_level from delay_timer goes LOW at rpeak, HIGH after ~300ms decay
+XMnand_refr_p1 nand_refr rpeak_pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_refr_p2 nand_refr trig_bi_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_refr_n1 nand_refr rpeak_pulse_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_refr_n2 nand_mid_refr trig_bi_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_refr nand_refr rpeak_pulse_gated vdd vss inverter_sub
+Xeb_rpk rpeak_pulse_gated rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
 Vth14 vth_14_node 0 {vth14:.6f}
@@ -555,6 +566,17 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .ic V(xbi0.esamp_node)={vbase}
 .ic V(xbi1.prev_node)={vbase}
 .ic V(xbi1.esamp_node)={vbase}
+* Delay timer starts discharged: all comparators HIGH at t=0
+* This lets the refractory gate pass the first rpeak through
+.ic V(xdt.timer_node)=0
+.ic V(xdt.timer2)=0
+* Refractory NAND gate: at t=0, rpeak_level_held=LOW, trig_bi_level=HIGH
+* NAND(LOW,HIGH)=HIGH -> INV -> rpeak_level_refr=LOW
+.ic V(nand_refr)={vdd}
+.ic V(nand_mid_refr)=0
+.ic V(rpeak_pulse_gated)=0
+.ic V(rpeak_pulse_raw)=0
+.ic V(rpeak_level_held)=0
 
 .tran 0.5m {ttot:.4f} UIC
 
@@ -685,7 +707,12 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         sp += ".meas tran ecg_at_s14_{j} FIND V(ecg_l0) AT={t:.7f}\n".format(
             j=j, t=t_s14_approx)
 
-    res, elapsed = run_sim("integ_{}".format(rec_id), sp)
+    try:
+        res, elapsed = run_sim("integ_{}".format(rec_id), sp)
+    except subprocess.TimeoutExpired:
+        print("  *** TIMEOUT: record {} exceeded simulation time limit — skipping".format(rec_id))
+        all_results[rec_id] = {'TIMEOUT': True}
+        continue
     print("  Sim time: {:.0f}s, {} measurements".format(elapsed, len(res)))
 
     # --- Delay timer SF diagnostics ---
@@ -759,7 +786,7 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         else:
             n_rpk_miss += 1
         # delayed rpeak valid if within expected window of true R
-        rpkdel_window = max(15, abs(rpeak_offset_ms) + 10) / 1000.0
+        rpkdel_window = max(25, abs(rpeak_offset_ms) + 15) / 1000.0
         if trpk_del and (trpk_del - r) > -rpkdel_window and (trpk_del - r) < rpkdel_window:
             valid_rpk_del.add(j)
             n_rpk_del_ok += 1

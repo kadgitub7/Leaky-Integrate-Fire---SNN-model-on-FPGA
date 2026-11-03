@@ -1,6 +1,6 @@
 .title integ_108
 .lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
-.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15 itl4=200
 .temp 27
 Vdd vdd 0 0.9
 Vss vss 0 0
@@ -28,23 +28,31 @@ Xbias vbias vref vdd vss bias_gen
 .ic V(xbias.iref)=0.3
 
 * --- R-peak detector (polarity-adaptive) ---
-Vthresh rpeak_threshold 0 0.207704
+Vthresh rpeak_threshold 0 0.194519
 Xrpk rpeak_threshold ecg_l0 rpeak_level vdd vss vbias rpeak_detector
-* Hold circuit: prevents multiple rpeak_pulse from NEG QRS chatter
+* Hold circuit: debounces QRS chatter
 Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
 .ic V(xhold.hold_cap)=0
-* Edge buffer + pulse_gen chain (fed from held level)
+* Level-to-pulse conversion (hold output -> brief ~2ms pulse)
 Xeb_rpk_in rpeak_level_held rpeak_level_sharp vdd vss edge_buffer
 Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
-Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
+* Refractory gate on PULSE (not level): blocks brief pulses during 300ms refractory
+* Key: when refractory opens, any T-wave pulse has already ended (pulses are ~2ms)
+* trig_bi_level from delay_timer goes LOW at rpeak, HIGH after ~300ms decay
+XMnand_refr_p1 nand_refr rpeak_pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_refr_p2 nand_refr trig_bi_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMnand_refr_n1 nand_refr rpeak_pulse_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMnand_refr_n2 nand_mid_refr trig_bi_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_refr nand_refr rpeak_pulse_gated vdd vss inverter_sub
+Xeb_rpk rpeak_pulse_gated rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
-Vth14 vth_14_node 0 0.185833
-Vth69 vth_69_node 0 0.442928
-Vth28 vth_28_node 0 0.464255
-Vth300 vth_300_node 0 0.325541
-Vth10 vth_10_node 0 0.220633
-Vth_rpk_del vth_rpk_del_node 0 0.345698
+Vth14 vth_14_node 0 0.252796
+Vth69 vth_69_node 0 0.445761
+Vth28 vth_28_node 0 0.467199
+Vth300 vth_300_node 0 0.328330
+Vth10 vth_10_node 0 0.288272
+Vth_rpk_del vth_rpk_del_node 0 0.415457
 
 Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level trig_rpk_del_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node vth_rpk_del_node delay_timer
 
@@ -89,8 +97,8 @@ XMsf2 vdd net_timer2 sf2_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMsf2_bias sf2_out vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 * rr_cap comparator on ORIGINAL timer (esamp dip helps fast comparator reset)
 Vrrc_off rrc_threshold rr_ewma 0.02
-Vpwb_off vth_pw_base_node rr_ewma 0.024168355555555555
-Vpwp_off vth_pw_peak_node rr_ewma 0.015768355555555554
+Vpwb_off vth_pw_base_node rr_ewma 0.023546133333333333
+Vpwp_off vth_pw_peak_node rr_ewma 0.015146133333333334
 Xpwpred_rrc rr_timer rrc_threshold rrc_pwb_unused rrc_pwp_unused rr_cap_level vth_pw_base_node vth_pw_peak_node vdd vss vbias pwave_predictor
 * pw_base/pw_peak comparators on ISOLATED timer (no esamp transient)
 Xpwpred_pw sf2_out rrc_threshold pw_base_cmp pw_peak_cmp pw_rrc_unused vth_pw_base_node vth_pw_peak_node vdd vss vbias pwave_predictor
@@ -136,7 +144,7 @@ Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
 * F7: qrs_slope (ANALOG s14, s69 triggers)
 Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
 
-* F8: qrs_symmetry (DELAYED rpeak pulse — captures near true R-peak)
+* F8: qrs_symmetry (DELAYED rpeak pulse â€” captures near true R-peak)
 Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
 * ============================================================
@@ -151,6 +159,17 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .ic V(xbi0.esamp_node)=0.3
 .ic V(xbi1.prev_node)=0.3
 .ic V(xbi1.esamp_node)=0.3
+* Delay timer starts discharged: all comparators HIGH at t=0
+* This lets the refractory gate pass the first rpeak through
+.ic V(xdt.timer_node)=0
+.ic V(xdt.timer2)=0
+* Refractory NAND gate: at t=0, rpeak_level_held=LOW, trig_bi_level=HIGH
+* NAND(LOW,HIGH)=HIGH -> INV -> rpeak_level_refr=LOW
+.ic V(nand_refr)=0.9
+.ic V(nand_mid_refr)=0
+.ic V(rpeak_pulse_gated)=0
+.ic V(rpeak_pulse_raw)=0
+.ic V(rpeak_level_held)=0
 
 .tran 0.5m 35.9667 UIC
 
@@ -619,11 +638,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran f7_34 FIND V(f7_slope) AT=35.5666667
 .meas tran f8_34 FIND V(f8_symmetry) AT=35.5666667
 .meas tran trpk_0 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=0.9333333
-.meas tran dtsf_0_5 FIND V(dt_sf_out) AT=0.9744444
-.meas tran dtsf_0_15 FIND V(dt_sf_out) AT=0.9844444
-.meas tran dtsf_0_30 FIND V(dt_sf_out) AT=0.9994444
-.meas tran dtsf_0_50 FIND V(dt_sf_out) AT=1.0194444
-.meas tran dtsf_0_80 FIND V(dt_sf_out) AT=1.0494444
+.meas tran dtsf_0_5 FIND V(dt_sf_out) AT=0.9800000
+.meas tran dtsf_0_15 FIND V(dt_sf_out) AT=0.9900000
+.meas tran dtsf_0_30 FIND V(dt_sf_out) AT=1.0050000
+.meas tran dtsf_0_50 FIND V(dt_sf_out) AT=1.0250000
+.meas tran dtsf_0_80 FIND V(dt_sf_out) AT=1.0550000
 .meas tran ts14_0 WHEN V(trig_s14)=0.45 RISE=1 TD=0.9333333
 .meas tran ts69_0 WHEN V(trig_s69)=0.45 RISE=1 TD=0.9333333
 .meas tran twid_0 WHEN V(trig_wid)=0.45 RISE=1 TD=0.9333333
@@ -646,11 +665,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_0 WHEN V(trig_pw_base)=0.45 FALL=1 TD=0.6833333
 .meas tran tpwp_fall_0 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=0.6833333
 .meas tran trpk_1 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=1.8972222
-.meas tran dtsf_1_5 FIND V(dt_sf_out) AT=1.9383333
-.meas tran dtsf_1_15 FIND V(dt_sf_out) AT=1.9483333
-.meas tran dtsf_1_30 FIND V(dt_sf_out) AT=1.9633333
-.meas tran dtsf_1_50 FIND V(dt_sf_out) AT=1.9833333
-.meas tran dtsf_1_80 FIND V(dt_sf_out) AT=2.0133333
+.meas tran dtsf_1_5 FIND V(dt_sf_out) AT=1.9438889
+.meas tran dtsf_1_15 FIND V(dt_sf_out) AT=1.9538889
+.meas tran dtsf_1_30 FIND V(dt_sf_out) AT=1.9688889
+.meas tran dtsf_1_50 FIND V(dt_sf_out) AT=1.9888889
+.meas tran dtsf_1_80 FIND V(dt_sf_out) AT=2.0188889
 .meas tran ts14_1 WHEN V(trig_s14)=0.45 RISE=1 TD=1.8972222
 .meas tran ts69_1 WHEN V(trig_s69)=0.45 RISE=1 TD=1.8972222
 .meas tran twid_1 WHEN V(trig_wid)=0.45 RISE=1 TD=1.8972222
@@ -673,11 +692,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_1 WHEN V(trig_pw_base)=0.45 FALL=1 TD=1.6472222
 .meas tran tpwp_fall_1 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=1.6472222
 .meas tran trpk_2 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=2.9138889
-.meas tran dtsf_2_5 FIND V(dt_sf_out) AT=2.9550000
-.meas tran dtsf_2_15 FIND V(dt_sf_out) AT=2.9650000
-.meas tran dtsf_2_30 FIND V(dt_sf_out) AT=2.9800000
-.meas tran dtsf_2_50 FIND V(dt_sf_out) AT=3.0000000
-.meas tran dtsf_2_80 FIND V(dt_sf_out) AT=3.0300000
+.meas tran dtsf_2_5 FIND V(dt_sf_out) AT=2.9605556
+.meas tran dtsf_2_15 FIND V(dt_sf_out) AT=2.9705556
+.meas tran dtsf_2_30 FIND V(dt_sf_out) AT=2.9855556
+.meas tran dtsf_2_50 FIND V(dt_sf_out) AT=3.0055556
+.meas tran dtsf_2_80 FIND V(dt_sf_out) AT=3.0355556
 .meas tran ts14_2 WHEN V(trig_s14)=0.45 RISE=1 TD=2.9138889
 .meas tran ts69_2 WHEN V(trig_s69)=0.45 RISE=1 TD=2.9138889
 .meas tran twid_2 WHEN V(trig_wid)=0.45 RISE=1 TD=2.9138889
@@ -700,11 +719,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_2 WHEN V(trig_pw_base)=0.45 FALL=1 TD=2.6638889
 .meas tran tpwp_fall_2 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=2.6638889
 .meas tran trpk_3 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=3.8527778
-.meas tran dtsf_3_5 FIND V(dt_sf_out) AT=3.8938889
-.meas tran dtsf_3_15 FIND V(dt_sf_out) AT=3.9038889
-.meas tran dtsf_3_30 FIND V(dt_sf_out) AT=3.9188889
-.meas tran dtsf_3_50 FIND V(dt_sf_out) AT=3.9388889
-.meas tran dtsf_3_80 FIND V(dt_sf_out) AT=3.9688889
+.meas tran dtsf_3_5 FIND V(dt_sf_out) AT=3.8994444
+.meas tran dtsf_3_15 FIND V(dt_sf_out) AT=3.9094444
+.meas tran dtsf_3_30 FIND V(dt_sf_out) AT=3.9244444
+.meas tran dtsf_3_50 FIND V(dt_sf_out) AT=3.9444444
+.meas tran dtsf_3_80 FIND V(dt_sf_out) AT=3.9744444
 .meas tran ts14_3 WHEN V(trig_s14)=0.45 RISE=1 TD=3.8527778
 .meas tran ts69_3 WHEN V(trig_s69)=0.45 RISE=1 TD=3.8527778
 .meas tran twid_3 WHEN V(trig_wid)=0.45 RISE=1 TD=3.8527778
@@ -727,11 +746,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_3 WHEN V(trig_pw_base)=0.45 FALL=1 TD=3.6027778
 .meas tran tpwp_fall_3 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=3.6027778
 .meas tran trpk_4 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=4.7638889
-.meas tran dtsf_4_5 FIND V(dt_sf_out) AT=4.8050000
-.meas tran dtsf_4_15 FIND V(dt_sf_out) AT=4.8150000
-.meas tran dtsf_4_30 FIND V(dt_sf_out) AT=4.8300000
-.meas tran dtsf_4_50 FIND V(dt_sf_out) AT=4.8500000
-.meas tran dtsf_4_80 FIND V(dt_sf_out) AT=4.8800000
+.meas tran dtsf_4_5 FIND V(dt_sf_out) AT=4.8105556
+.meas tran dtsf_4_15 FIND V(dt_sf_out) AT=4.8205556
+.meas tran dtsf_4_30 FIND V(dt_sf_out) AT=4.8355556
+.meas tran dtsf_4_50 FIND V(dt_sf_out) AT=4.8555556
+.meas tran dtsf_4_80 FIND V(dt_sf_out) AT=4.8855556
 .meas tran ts14_4 WHEN V(trig_s14)=0.45 RISE=1 TD=4.7638889
 .meas tran ts69_4 WHEN V(trig_s69)=0.45 RISE=1 TD=4.7638889
 .meas tran twid_4 WHEN V(trig_wid)=0.45 RISE=1 TD=4.7638889
@@ -754,11 +773,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_4 WHEN V(trig_pw_base)=0.45 FALL=1 TD=4.5138889
 .meas tran tpwp_fall_4 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=4.5138889
 .meas tran trpk_5 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=5.6972222
-.meas tran dtsf_5_5 FIND V(dt_sf_out) AT=5.7383333
-.meas tran dtsf_5_15 FIND V(dt_sf_out) AT=5.7483333
-.meas tran dtsf_5_30 FIND V(dt_sf_out) AT=5.7633333
-.meas tran dtsf_5_50 FIND V(dt_sf_out) AT=5.7833333
-.meas tran dtsf_5_80 FIND V(dt_sf_out) AT=5.8133333
+.meas tran dtsf_5_5 FIND V(dt_sf_out) AT=5.7438889
+.meas tran dtsf_5_15 FIND V(dt_sf_out) AT=5.7538889
+.meas tran dtsf_5_30 FIND V(dt_sf_out) AT=5.7688889
+.meas tran dtsf_5_50 FIND V(dt_sf_out) AT=5.7888889
+.meas tran dtsf_5_80 FIND V(dt_sf_out) AT=5.8188889
 .meas tran ts14_5 WHEN V(trig_s14)=0.45 RISE=1 TD=5.6972222
 .meas tran ts69_5 WHEN V(trig_s69)=0.45 RISE=1 TD=5.6972222
 .meas tran twid_5 WHEN V(trig_wid)=0.45 RISE=1 TD=5.6972222
@@ -781,11 +800,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_5 WHEN V(trig_pw_base)=0.45 FALL=1 TD=5.4472222
 .meas tran tpwp_fall_5 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=5.4472222
 .meas tran trpk_6 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=6.6972222
-.meas tran dtsf_6_5 FIND V(dt_sf_out) AT=6.7383333
-.meas tran dtsf_6_15 FIND V(dt_sf_out) AT=6.7483333
-.meas tran dtsf_6_30 FIND V(dt_sf_out) AT=6.7633333
-.meas tran dtsf_6_50 FIND V(dt_sf_out) AT=6.7833333
-.meas tran dtsf_6_80 FIND V(dt_sf_out) AT=6.8133333
+.meas tran dtsf_6_5 FIND V(dt_sf_out) AT=6.7438889
+.meas tran dtsf_6_15 FIND V(dt_sf_out) AT=6.7538889
+.meas tran dtsf_6_30 FIND V(dt_sf_out) AT=6.7688889
+.meas tran dtsf_6_50 FIND V(dt_sf_out) AT=6.7888889
+.meas tran dtsf_6_80 FIND V(dt_sf_out) AT=6.8188889
 .meas tran ts14_6 WHEN V(trig_s14)=0.45 RISE=1 TD=6.6972222
 .meas tran ts69_6 WHEN V(trig_s69)=0.45 RISE=1 TD=6.6972222
 .meas tran twid_6 WHEN V(trig_wid)=0.45 RISE=1 TD=6.6972222
@@ -808,11 +827,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_6 WHEN V(trig_pw_base)=0.45 FALL=1 TD=6.4472222
 .meas tran tpwp_fall_6 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=6.4472222
 .meas tran trpk_7 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=7.7305556
-.meas tran dtsf_7_5 FIND V(dt_sf_out) AT=7.7716667
-.meas tran dtsf_7_15 FIND V(dt_sf_out) AT=7.7816667
-.meas tran dtsf_7_30 FIND V(dt_sf_out) AT=7.7966667
-.meas tran dtsf_7_50 FIND V(dt_sf_out) AT=7.8166667
-.meas tran dtsf_7_80 FIND V(dt_sf_out) AT=7.8466667
+.meas tran dtsf_7_5 FIND V(dt_sf_out) AT=7.7772222
+.meas tran dtsf_7_15 FIND V(dt_sf_out) AT=7.7872222
+.meas tran dtsf_7_30 FIND V(dt_sf_out) AT=7.8022222
+.meas tran dtsf_7_50 FIND V(dt_sf_out) AT=7.8222222
+.meas tran dtsf_7_80 FIND V(dt_sf_out) AT=7.8522222
 .meas tran ts14_7 WHEN V(trig_s14)=0.45 RISE=1 TD=7.7305556
 .meas tran ts69_7 WHEN V(trig_s69)=0.45 RISE=1 TD=7.7305556
 .meas tran twid_7 WHEN V(trig_wid)=0.45 RISE=1 TD=7.7305556
@@ -835,11 +854,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_7 WHEN V(trig_pw_base)=0.45 FALL=1 TD=7.4805556
 .meas tran tpwp_fall_7 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=7.4805556
 .meas tran trpk_8 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=8.7000000
-.meas tran dtsf_8_5 FIND V(dt_sf_out) AT=8.7411111
-.meas tran dtsf_8_15 FIND V(dt_sf_out) AT=8.7511111
-.meas tran dtsf_8_30 FIND V(dt_sf_out) AT=8.7661111
-.meas tran dtsf_8_50 FIND V(dt_sf_out) AT=8.7861111
-.meas tran dtsf_8_80 FIND V(dt_sf_out) AT=8.8161111
+.meas tran dtsf_8_5 FIND V(dt_sf_out) AT=8.7466667
+.meas tran dtsf_8_15 FIND V(dt_sf_out) AT=8.7566667
+.meas tran dtsf_8_30 FIND V(dt_sf_out) AT=8.7716667
+.meas tran dtsf_8_50 FIND V(dt_sf_out) AT=8.7916667
+.meas tran dtsf_8_80 FIND V(dt_sf_out) AT=8.8216667
 .meas tran ts14_8 WHEN V(trig_s14)=0.45 RISE=1 TD=8.7000000
 .meas tran ts69_8 WHEN V(trig_s69)=0.45 RISE=1 TD=8.7000000
 .meas tran twid_8 WHEN V(trig_wid)=0.45 RISE=1 TD=8.7000000
@@ -862,11 +881,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_8 WHEN V(trig_pw_base)=0.45 FALL=1 TD=8.4500000
 .meas tran tpwp_fall_8 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=8.4500000
 .meas tran trpk_9 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=9.6861111
-.meas tran dtsf_9_5 FIND V(dt_sf_out) AT=9.7272222
-.meas tran dtsf_9_15 FIND V(dt_sf_out) AT=9.7372222
-.meas tran dtsf_9_30 FIND V(dt_sf_out) AT=9.7522222
-.meas tran dtsf_9_50 FIND V(dt_sf_out) AT=9.7722222
-.meas tran dtsf_9_80 FIND V(dt_sf_out) AT=9.8022222
+.meas tran dtsf_9_5 FIND V(dt_sf_out) AT=9.7327778
+.meas tran dtsf_9_15 FIND V(dt_sf_out) AT=9.7427778
+.meas tran dtsf_9_30 FIND V(dt_sf_out) AT=9.7577778
+.meas tran dtsf_9_50 FIND V(dt_sf_out) AT=9.7777778
+.meas tran dtsf_9_80 FIND V(dt_sf_out) AT=9.8077778
 .meas tran ts14_9 WHEN V(trig_s14)=0.45 RISE=1 TD=9.6861111
 .meas tran ts69_9 WHEN V(trig_s69)=0.45 RISE=1 TD=9.6861111
 .meas tran twid_9 WHEN V(trig_wid)=0.45 RISE=1 TD=9.6861111
@@ -889,11 +908,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_9 WHEN V(trig_pw_base)=0.45 FALL=1 TD=9.4361111
 .meas tran tpwp_fall_9 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=9.4361111
 .meas tran trpk_10 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=10.6055556
-.meas tran dtsf_10_5 FIND V(dt_sf_out) AT=10.6466667
-.meas tran dtsf_10_15 FIND V(dt_sf_out) AT=10.6566667
-.meas tran dtsf_10_30 FIND V(dt_sf_out) AT=10.6716667
-.meas tran dtsf_10_50 FIND V(dt_sf_out) AT=10.6916667
-.meas tran dtsf_10_80 FIND V(dt_sf_out) AT=10.7216667
+.meas tran dtsf_10_5 FIND V(dt_sf_out) AT=10.6522222
+.meas tran dtsf_10_15 FIND V(dt_sf_out) AT=10.6622222
+.meas tran dtsf_10_30 FIND V(dt_sf_out) AT=10.6772222
+.meas tran dtsf_10_50 FIND V(dt_sf_out) AT=10.6972222
+.meas tran dtsf_10_80 FIND V(dt_sf_out) AT=10.7272222
 .meas tran ts14_10 WHEN V(trig_s14)=0.45 RISE=1 TD=10.6055556
 .meas tran ts69_10 WHEN V(trig_s69)=0.45 RISE=1 TD=10.6055556
 .meas tran twid_10 WHEN V(trig_wid)=0.45 RISE=1 TD=10.6055556
@@ -916,11 +935,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_10 WHEN V(trig_pw_base)=0.45 FALL=1 TD=10.3555556
 .meas tran tpwp_fall_10 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=10.3555556
 .meas tran trpk_11 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=11.1083333
-.meas tran dtsf_11_5 FIND V(dt_sf_out) AT=11.1494444
-.meas tran dtsf_11_15 FIND V(dt_sf_out) AT=11.1594444
-.meas tran dtsf_11_30 FIND V(dt_sf_out) AT=11.1744444
-.meas tran dtsf_11_50 FIND V(dt_sf_out) AT=11.1944444
-.meas tran dtsf_11_80 FIND V(dt_sf_out) AT=11.2244444
+.meas tran dtsf_11_5 FIND V(dt_sf_out) AT=11.1550000
+.meas tran dtsf_11_15 FIND V(dt_sf_out) AT=11.1650000
+.meas tran dtsf_11_30 FIND V(dt_sf_out) AT=11.1800000
+.meas tran dtsf_11_50 FIND V(dt_sf_out) AT=11.2000000
+.meas tran dtsf_11_80 FIND V(dt_sf_out) AT=11.2300000
 .meas tran ts14_11 WHEN V(trig_s14)=0.45 RISE=1 TD=11.1083333
 .meas tran ts69_11 WHEN V(trig_s69)=0.45 RISE=1 TD=11.1083333
 .meas tran twid_11 WHEN V(trig_wid)=0.45 RISE=1 TD=11.1083333
@@ -943,11 +962,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_11 WHEN V(trig_pw_base)=0.45 FALL=1 TD=10.8583333
 .meas tran tpwp_fall_11 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=10.8583333
 .meas tran trpk_12 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=12.4888889
-.meas tran dtsf_12_5 FIND V(dt_sf_out) AT=12.5300000
-.meas tran dtsf_12_15 FIND V(dt_sf_out) AT=12.5400000
-.meas tran dtsf_12_30 FIND V(dt_sf_out) AT=12.5550000
-.meas tran dtsf_12_50 FIND V(dt_sf_out) AT=12.5750000
-.meas tran dtsf_12_80 FIND V(dt_sf_out) AT=12.6050000
+.meas tran dtsf_12_5 FIND V(dt_sf_out) AT=12.5355556
+.meas tran dtsf_12_15 FIND V(dt_sf_out) AT=12.5455556
+.meas tran dtsf_12_30 FIND V(dt_sf_out) AT=12.5605556
+.meas tran dtsf_12_50 FIND V(dt_sf_out) AT=12.5805556
+.meas tran dtsf_12_80 FIND V(dt_sf_out) AT=12.6105556
 .meas tran ts14_12 WHEN V(trig_s14)=0.45 RISE=1 TD=12.4888889
 .meas tran ts69_12 WHEN V(trig_s69)=0.45 RISE=1 TD=12.4888889
 .meas tran twid_12 WHEN V(trig_wid)=0.45 RISE=1 TD=12.4888889
@@ -970,11 +989,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_12 WHEN V(trig_pw_base)=0.45 FALL=1 TD=12.2388889
 .meas tran tpwp_fall_12 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=12.2388889
 .meas tran trpk_13 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=13.5138889
-.meas tran dtsf_13_5 FIND V(dt_sf_out) AT=13.5550000
-.meas tran dtsf_13_15 FIND V(dt_sf_out) AT=13.5650000
-.meas tran dtsf_13_30 FIND V(dt_sf_out) AT=13.5800000
-.meas tran dtsf_13_50 FIND V(dt_sf_out) AT=13.6000000
-.meas tran dtsf_13_80 FIND V(dt_sf_out) AT=13.6300000
+.meas tran dtsf_13_5 FIND V(dt_sf_out) AT=13.5605556
+.meas tran dtsf_13_15 FIND V(dt_sf_out) AT=13.5705556
+.meas tran dtsf_13_30 FIND V(dt_sf_out) AT=13.5855556
+.meas tran dtsf_13_50 FIND V(dt_sf_out) AT=13.6055556
+.meas tran dtsf_13_80 FIND V(dt_sf_out) AT=13.6355556
 .meas tran ts14_13 WHEN V(trig_s14)=0.45 RISE=1 TD=13.5138889
 .meas tran ts69_13 WHEN V(trig_s69)=0.45 RISE=1 TD=13.5138889
 .meas tran twid_13 WHEN V(trig_wid)=0.45 RISE=1 TD=13.5138889
@@ -997,11 +1016,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_13 WHEN V(trig_pw_base)=0.45 FALL=1 TD=13.2638889
 .meas tran tpwp_fall_13 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=13.2638889
 .meas tran trpk_14 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=14.5666667
-.meas tran dtsf_14_5 FIND V(dt_sf_out) AT=14.6077778
-.meas tran dtsf_14_15 FIND V(dt_sf_out) AT=14.6177778
-.meas tran dtsf_14_30 FIND V(dt_sf_out) AT=14.6327778
-.meas tran dtsf_14_50 FIND V(dt_sf_out) AT=14.6527778
-.meas tran dtsf_14_80 FIND V(dt_sf_out) AT=14.6827778
+.meas tran dtsf_14_5 FIND V(dt_sf_out) AT=14.6133333
+.meas tran dtsf_14_15 FIND V(dt_sf_out) AT=14.6233333
+.meas tran dtsf_14_30 FIND V(dt_sf_out) AT=14.6383333
+.meas tran dtsf_14_50 FIND V(dt_sf_out) AT=14.6583333
+.meas tran dtsf_14_80 FIND V(dt_sf_out) AT=14.6883333
 .meas tran ts14_14 WHEN V(trig_s14)=0.45 RISE=1 TD=14.5666667
 .meas tran ts69_14 WHEN V(trig_s69)=0.45 RISE=1 TD=14.5666667
 .meas tran twid_14 WHEN V(trig_wid)=0.45 RISE=1 TD=14.5666667
@@ -1024,11 +1043,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_14 WHEN V(trig_pw_base)=0.45 FALL=1 TD=14.3166667
 .meas tran tpwp_fall_14 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=14.3166667
 .meas tran trpk_15 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=15.5805556
-.meas tran dtsf_15_5 FIND V(dt_sf_out) AT=15.6216667
-.meas tran dtsf_15_15 FIND V(dt_sf_out) AT=15.6316667
-.meas tran dtsf_15_30 FIND V(dt_sf_out) AT=15.6466667
-.meas tran dtsf_15_50 FIND V(dt_sf_out) AT=15.6666667
-.meas tran dtsf_15_80 FIND V(dt_sf_out) AT=15.6966667
+.meas tran dtsf_15_5 FIND V(dt_sf_out) AT=15.6272222
+.meas tran dtsf_15_15 FIND V(dt_sf_out) AT=15.6372222
+.meas tran dtsf_15_30 FIND V(dt_sf_out) AT=15.6522222
+.meas tran dtsf_15_50 FIND V(dt_sf_out) AT=15.6722222
+.meas tran dtsf_15_80 FIND V(dt_sf_out) AT=15.7022222
 .meas tran ts14_15 WHEN V(trig_s14)=0.45 RISE=1 TD=15.5805556
 .meas tran ts69_15 WHEN V(trig_s69)=0.45 RISE=1 TD=15.5805556
 .meas tran twid_15 WHEN V(trig_wid)=0.45 RISE=1 TD=15.5805556
@@ -1051,11 +1070,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_15 WHEN V(trig_pw_base)=0.45 FALL=1 TD=15.3305556
 .meas tran tpwp_fall_15 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=15.3305556
 .meas tran trpk_16 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=16.6916667
-.meas tran dtsf_16_5 FIND V(dt_sf_out) AT=16.7327778
-.meas tran dtsf_16_15 FIND V(dt_sf_out) AT=16.7427778
-.meas tran dtsf_16_30 FIND V(dt_sf_out) AT=16.7577778
-.meas tran dtsf_16_50 FIND V(dt_sf_out) AT=16.7777778
-.meas tran dtsf_16_80 FIND V(dt_sf_out) AT=16.8077778
+.meas tran dtsf_16_5 FIND V(dt_sf_out) AT=16.7383333
+.meas tran dtsf_16_15 FIND V(dt_sf_out) AT=16.7483333
+.meas tran dtsf_16_30 FIND V(dt_sf_out) AT=16.7633333
+.meas tran dtsf_16_50 FIND V(dt_sf_out) AT=16.7833333
+.meas tran dtsf_16_80 FIND V(dt_sf_out) AT=16.8133333
 .meas tran ts14_16 WHEN V(trig_s14)=0.45 RISE=1 TD=16.6916667
 .meas tran ts69_16 WHEN V(trig_s69)=0.45 RISE=1 TD=16.6916667
 .meas tran twid_16 WHEN V(trig_wid)=0.45 RISE=1 TD=16.6916667
@@ -1078,11 +1097,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_16 WHEN V(trig_pw_base)=0.45 FALL=1 TD=16.4416667
 .meas tran tpwp_fall_16 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=16.4416667
 .meas tran trpk_17 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=17.7027778
-.meas tran dtsf_17_5 FIND V(dt_sf_out) AT=17.7438889
-.meas tran dtsf_17_15 FIND V(dt_sf_out) AT=17.7538889
-.meas tran dtsf_17_30 FIND V(dt_sf_out) AT=17.7688889
-.meas tran dtsf_17_50 FIND V(dt_sf_out) AT=17.7888889
-.meas tran dtsf_17_80 FIND V(dt_sf_out) AT=17.8188889
+.meas tran dtsf_17_5 FIND V(dt_sf_out) AT=17.7494444
+.meas tran dtsf_17_15 FIND V(dt_sf_out) AT=17.7594444
+.meas tran dtsf_17_30 FIND V(dt_sf_out) AT=17.7744444
+.meas tran dtsf_17_50 FIND V(dt_sf_out) AT=17.7944444
+.meas tran dtsf_17_80 FIND V(dt_sf_out) AT=17.8244444
 .meas tran ts14_17 WHEN V(trig_s14)=0.45 RISE=1 TD=17.7027778
 .meas tran ts69_17 WHEN V(trig_s69)=0.45 RISE=1 TD=17.7027778
 .meas tran twid_17 WHEN V(trig_wid)=0.45 RISE=1 TD=17.7027778
@@ -1105,11 +1124,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_17 WHEN V(trig_pw_base)=0.45 FALL=1 TD=17.4527778
 .meas tran tpwp_fall_17 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=17.4527778
 .meas tran trpk_18 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=18.8333333
-.meas tran dtsf_18_5 FIND V(dt_sf_out) AT=18.8744444
-.meas tran dtsf_18_15 FIND V(dt_sf_out) AT=18.8844444
-.meas tran dtsf_18_30 FIND V(dt_sf_out) AT=18.8994444
-.meas tran dtsf_18_50 FIND V(dt_sf_out) AT=18.9194444
-.meas tran dtsf_18_80 FIND V(dt_sf_out) AT=18.9494444
+.meas tran dtsf_18_5 FIND V(dt_sf_out) AT=18.8800000
+.meas tran dtsf_18_15 FIND V(dt_sf_out) AT=18.8900000
+.meas tran dtsf_18_30 FIND V(dt_sf_out) AT=18.9050000
+.meas tran dtsf_18_50 FIND V(dt_sf_out) AT=18.9250000
+.meas tran dtsf_18_80 FIND V(dt_sf_out) AT=18.9550000
 .meas tran ts14_18 WHEN V(trig_s14)=0.45 RISE=1 TD=18.8333333
 .meas tran ts69_18 WHEN V(trig_s69)=0.45 RISE=1 TD=18.8333333
 .meas tran twid_18 WHEN V(trig_wid)=0.45 RISE=1 TD=18.8333333
@@ -1132,11 +1151,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_18 WHEN V(trig_pw_base)=0.45 FALL=1 TD=18.5833333
 .meas tran tpwp_fall_18 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=18.5833333
 .meas tran trpk_19 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=19.9472222
-.meas tran dtsf_19_5 FIND V(dt_sf_out) AT=19.9883333
-.meas tran dtsf_19_15 FIND V(dt_sf_out) AT=19.9983333
-.meas tran dtsf_19_30 FIND V(dt_sf_out) AT=20.0133333
-.meas tran dtsf_19_50 FIND V(dt_sf_out) AT=20.0333333
-.meas tran dtsf_19_80 FIND V(dt_sf_out) AT=20.0633333
+.meas tran dtsf_19_5 FIND V(dt_sf_out) AT=19.9938889
+.meas tran dtsf_19_15 FIND V(dt_sf_out) AT=20.0038889
+.meas tran dtsf_19_30 FIND V(dt_sf_out) AT=20.0188889
+.meas tran dtsf_19_50 FIND V(dt_sf_out) AT=20.0388889
+.meas tran dtsf_19_80 FIND V(dt_sf_out) AT=20.0688889
 .meas tran ts14_19 WHEN V(trig_s14)=0.45 RISE=1 TD=19.9472222
 .meas tran ts69_19 WHEN V(trig_s69)=0.45 RISE=1 TD=19.9472222
 .meas tran twid_19 WHEN V(trig_wid)=0.45 RISE=1 TD=19.9472222
@@ -1159,11 +1178,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_19 WHEN V(trig_pw_base)=0.45 FALL=1 TD=19.6972222
 .meas tran tpwp_fall_19 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=19.6972222
 .meas tran trpk_20 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=21.0583333
-.meas tran dtsf_20_5 FIND V(dt_sf_out) AT=21.0994444
-.meas tran dtsf_20_15 FIND V(dt_sf_out) AT=21.1094444
-.meas tran dtsf_20_30 FIND V(dt_sf_out) AT=21.1244444
-.meas tran dtsf_20_50 FIND V(dt_sf_out) AT=21.1444444
-.meas tran dtsf_20_80 FIND V(dt_sf_out) AT=21.1744444
+.meas tran dtsf_20_5 FIND V(dt_sf_out) AT=21.1050000
+.meas tran dtsf_20_15 FIND V(dt_sf_out) AT=21.1150000
+.meas tran dtsf_20_30 FIND V(dt_sf_out) AT=21.1300000
+.meas tran dtsf_20_50 FIND V(dt_sf_out) AT=21.1500000
+.meas tran dtsf_20_80 FIND V(dt_sf_out) AT=21.1800000
 .meas tran ts14_20 WHEN V(trig_s14)=0.45 RISE=1 TD=21.0583333
 .meas tran ts69_20 WHEN V(trig_s69)=0.45 RISE=1 TD=21.0583333
 .meas tran twid_20 WHEN V(trig_wid)=0.45 RISE=1 TD=21.0583333
@@ -1186,11 +1205,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_20 WHEN V(trig_pw_base)=0.45 FALL=1 TD=20.8083333
 .meas tran tpwp_fall_20 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=20.8083333
 .meas tran trpk_21 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=22.0833333
-.meas tran dtsf_21_5 FIND V(dt_sf_out) AT=22.1244444
-.meas tran dtsf_21_15 FIND V(dt_sf_out) AT=22.1344444
-.meas tran dtsf_21_30 FIND V(dt_sf_out) AT=22.1494444
-.meas tran dtsf_21_50 FIND V(dt_sf_out) AT=22.1694444
-.meas tran dtsf_21_80 FIND V(dt_sf_out) AT=22.1994444
+.meas tran dtsf_21_5 FIND V(dt_sf_out) AT=22.1300000
+.meas tran dtsf_21_15 FIND V(dt_sf_out) AT=22.1400000
+.meas tran dtsf_21_30 FIND V(dt_sf_out) AT=22.1550000
+.meas tran dtsf_21_50 FIND V(dt_sf_out) AT=22.1750000
+.meas tran dtsf_21_80 FIND V(dt_sf_out) AT=22.2050000
 .meas tran ts14_21 WHEN V(trig_s14)=0.45 RISE=1 TD=22.0833333
 .meas tran ts69_21 WHEN V(trig_s69)=0.45 RISE=1 TD=22.0833333
 .meas tran twid_21 WHEN V(trig_wid)=0.45 RISE=1 TD=22.0833333
@@ -1213,11 +1232,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_21 WHEN V(trig_pw_base)=0.45 FALL=1 TD=21.8333333
 .meas tran tpwp_fall_21 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=21.8333333
 .meas tran trpk_22 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=23.1277778
-.meas tran dtsf_22_5 FIND V(dt_sf_out) AT=23.1688889
-.meas tran dtsf_22_15 FIND V(dt_sf_out) AT=23.1788889
-.meas tran dtsf_22_30 FIND V(dt_sf_out) AT=23.1938889
-.meas tran dtsf_22_50 FIND V(dt_sf_out) AT=23.2138889
-.meas tran dtsf_22_80 FIND V(dt_sf_out) AT=23.2438889
+.meas tran dtsf_22_5 FIND V(dt_sf_out) AT=23.1744444
+.meas tran dtsf_22_15 FIND V(dt_sf_out) AT=23.1844444
+.meas tran dtsf_22_30 FIND V(dt_sf_out) AT=23.1994444
+.meas tran dtsf_22_50 FIND V(dt_sf_out) AT=23.2194444
+.meas tran dtsf_22_80 FIND V(dt_sf_out) AT=23.2494444
 .meas tran ts14_22 WHEN V(trig_s14)=0.45 RISE=1 TD=23.1277778
 .meas tran ts69_22 WHEN V(trig_s69)=0.45 RISE=1 TD=23.1277778
 .meas tran twid_22 WHEN V(trig_wid)=0.45 RISE=1 TD=23.1277778
@@ -1240,11 +1259,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_22 WHEN V(trig_pw_base)=0.45 FALL=1 TD=22.8777778
 .meas tran tpwp_fall_22 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=22.8777778
 .meas tran trpk_23 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=24.1611111
-.meas tran dtsf_23_5 FIND V(dt_sf_out) AT=24.2022222
-.meas tran dtsf_23_15 FIND V(dt_sf_out) AT=24.2122222
-.meas tran dtsf_23_30 FIND V(dt_sf_out) AT=24.2272222
-.meas tran dtsf_23_50 FIND V(dt_sf_out) AT=24.2472222
-.meas tran dtsf_23_80 FIND V(dt_sf_out) AT=24.2772222
+.meas tran dtsf_23_5 FIND V(dt_sf_out) AT=24.2077778
+.meas tran dtsf_23_15 FIND V(dt_sf_out) AT=24.2177778
+.meas tran dtsf_23_30 FIND V(dt_sf_out) AT=24.2327778
+.meas tran dtsf_23_50 FIND V(dt_sf_out) AT=24.2527778
+.meas tran dtsf_23_80 FIND V(dt_sf_out) AT=24.2827778
 .meas tran ts14_23 WHEN V(trig_s14)=0.45 RISE=1 TD=24.1611111
 .meas tran ts69_23 WHEN V(trig_s69)=0.45 RISE=1 TD=24.1611111
 .meas tran twid_23 WHEN V(trig_wid)=0.45 RISE=1 TD=24.1611111
@@ -1267,11 +1286,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_23 WHEN V(trig_pw_base)=0.45 FALL=1 TD=23.9111111
 .meas tran tpwp_fall_23 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=23.9111111
 .meas tran trpk_24 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=25.2500000
-.meas tran dtsf_24_5 FIND V(dt_sf_out) AT=25.2911111
-.meas tran dtsf_24_15 FIND V(dt_sf_out) AT=25.3011111
-.meas tran dtsf_24_30 FIND V(dt_sf_out) AT=25.3161111
-.meas tran dtsf_24_50 FIND V(dt_sf_out) AT=25.3361111
-.meas tran dtsf_24_80 FIND V(dt_sf_out) AT=25.3661111
+.meas tran dtsf_24_5 FIND V(dt_sf_out) AT=25.2966667
+.meas tran dtsf_24_15 FIND V(dt_sf_out) AT=25.3066667
+.meas tran dtsf_24_30 FIND V(dt_sf_out) AT=25.3216667
+.meas tran dtsf_24_50 FIND V(dt_sf_out) AT=25.3416667
+.meas tran dtsf_24_80 FIND V(dt_sf_out) AT=25.3716667
 .meas tran ts14_24 WHEN V(trig_s14)=0.45 RISE=1 TD=25.2500000
 .meas tran ts69_24 WHEN V(trig_s69)=0.45 RISE=1 TD=25.2500000
 .meas tran twid_24 WHEN V(trig_wid)=0.45 RISE=1 TD=25.2500000
@@ -1294,11 +1313,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_24 WHEN V(trig_pw_base)=0.45 FALL=1 TD=25.0000000
 .meas tran tpwp_fall_24 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=25.0000000
 .meas tran trpk_25 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=26.3333333
-.meas tran dtsf_25_5 FIND V(dt_sf_out) AT=26.3744444
-.meas tran dtsf_25_15 FIND V(dt_sf_out) AT=26.3844444
-.meas tran dtsf_25_30 FIND V(dt_sf_out) AT=26.3994444
-.meas tran dtsf_25_50 FIND V(dt_sf_out) AT=26.4194444
-.meas tran dtsf_25_80 FIND V(dt_sf_out) AT=26.4494444
+.meas tran dtsf_25_5 FIND V(dt_sf_out) AT=26.3800000
+.meas tran dtsf_25_15 FIND V(dt_sf_out) AT=26.3900000
+.meas tran dtsf_25_30 FIND V(dt_sf_out) AT=26.4050000
+.meas tran dtsf_25_50 FIND V(dt_sf_out) AT=26.4250000
+.meas tran dtsf_25_80 FIND V(dt_sf_out) AT=26.4550000
 .meas tran ts14_25 WHEN V(trig_s14)=0.45 RISE=1 TD=26.3333333
 .meas tran ts69_25 WHEN V(trig_s69)=0.45 RISE=1 TD=26.3333333
 .meas tran twid_25 WHEN V(trig_wid)=0.45 RISE=1 TD=26.3333333
@@ -1321,11 +1340,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_25 WHEN V(trig_pw_base)=0.45 FALL=1 TD=26.0833333
 .meas tran tpwp_fall_25 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=26.0833333
 .meas tran trpk_26 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=27.3805556
-.meas tran dtsf_26_5 FIND V(dt_sf_out) AT=27.4216667
-.meas tran dtsf_26_15 FIND V(dt_sf_out) AT=27.4316667
-.meas tran dtsf_26_30 FIND V(dt_sf_out) AT=27.4466667
-.meas tran dtsf_26_50 FIND V(dt_sf_out) AT=27.4666667
-.meas tran dtsf_26_80 FIND V(dt_sf_out) AT=27.4966667
+.meas tran dtsf_26_5 FIND V(dt_sf_out) AT=27.4272222
+.meas tran dtsf_26_15 FIND V(dt_sf_out) AT=27.4372222
+.meas tran dtsf_26_30 FIND V(dt_sf_out) AT=27.4522222
+.meas tran dtsf_26_50 FIND V(dt_sf_out) AT=27.4722222
+.meas tran dtsf_26_80 FIND V(dt_sf_out) AT=27.5022222
 .meas tran ts14_26 WHEN V(trig_s14)=0.45 RISE=1 TD=27.3805556
 .meas tran ts69_26 WHEN V(trig_s69)=0.45 RISE=1 TD=27.3805556
 .meas tran twid_26 WHEN V(trig_wid)=0.45 RISE=1 TD=27.3805556
@@ -1348,11 +1367,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_26 WHEN V(trig_pw_base)=0.45 FALL=1 TD=27.1305556
 .meas tran tpwp_fall_26 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=27.1305556
 .meas tran trpk_27 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=28.3861111
-.meas tran dtsf_27_5 FIND V(dt_sf_out) AT=28.4272222
-.meas tran dtsf_27_15 FIND V(dt_sf_out) AT=28.4372222
-.meas tran dtsf_27_30 FIND V(dt_sf_out) AT=28.4522222
-.meas tran dtsf_27_50 FIND V(dt_sf_out) AT=28.4722222
-.meas tran dtsf_27_80 FIND V(dt_sf_out) AT=28.5022222
+.meas tran dtsf_27_5 FIND V(dt_sf_out) AT=28.4327778
+.meas tran dtsf_27_15 FIND V(dt_sf_out) AT=28.4427778
+.meas tran dtsf_27_30 FIND V(dt_sf_out) AT=28.4577778
+.meas tran dtsf_27_50 FIND V(dt_sf_out) AT=28.4777778
+.meas tran dtsf_27_80 FIND V(dt_sf_out) AT=28.5077778
 .meas tran ts14_27 WHEN V(trig_s14)=0.45 RISE=1 TD=28.3861111
 .meas tran ts69_27 WHEN V(trig_s69)=0.45 RISE=1 TD=28.3861111
 .meas tran twid_27 WHEN V(trig_wid)=0.45 RISE=1 TD=28.3861111
@@ -1375,11 +1394,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_27 WHEN V(trig_pw_base)=0.45 FALL=1 TD=28.1361111
 .meas tran tpwp_fall_27 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=28.1361111
 .meas tran trpk_28 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=29.4166667
-.meas tran dtsf_28_5 FIND V(dt_sf_out) AT=29.4577778
-.meas tran dtsf_28_15 FIND V(dt_sf_out) AT=29.4677778
-.meas tran dtsf_28_30 FIND V(dt_sf_out) AT=29.4827778
-.meas tran dtsf_28_50 FIND V(dt_sf_out) AT=29.5027778
-.meas tran dtsf_28_80 FIND V(dt_sf_out) AT=29.5327778
+.meas tran dtsf_28_5 FIND V(dt_sf_out) AT=29.4633333
+.meas tran dtsf_28_15 FIND V(dt_sf_out) AT=29.4733333
+.meas tran dtsf_28_30 FIND V(dt_sf_out) AT=29.4883333
+.meas tran dtsf_28_50 FIND V(dt_sf_out) AT=29.5083333
+.meas tran dtsf_28_80 FIND V(dt_sf_out) AT=29.5383333
 .meas tran ts14_28 WHEN V(trig_s14)=0.45 RISE=1 TD=29.4166667
 .meas tran ts69_28 WHEN V(trig_s69)=0.45 RISE=1 TD=29.4166667
 .meas tran twid_28 WHEN V(trig_wid)=0.45 RISE=1 TD=29.4166667
@@ -1402,11 +1421,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_28 WHEN V(trig_pw_base)=0.45 FALL=1 TD=29.1666667
 .meas tran tpwp_fall_28 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=29.1666667
 .meas tran trpk_29 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=29.9166667
-.meas tran dtsf_29_5 FIND V(dt_sf_out) AT=29.9577778
-.meas tran dtsf_29_15 FIND V(dt_sf_out) AT=29.9677778
-.meas tran dtsf_29_30 FIND V(dt_sf_out) AT=29.9827778
-.meas tran dtsf_29_50 FIND V(dt_sf_out) AT=30.0027778
-.meas tran dtsf_29_80 FIND V(dt_sf_out) AT=30.0327778
+.meas tran dtsf_29_5 FIND V(dt_sf_out) AT=29.9633333
+.meas tran dtsf_29_15 FIND V(dt_sf_out) AT=29.9733333
+.meas tran dtsf_29_30 FIND V(dt_sf_out) AT=29.9883333
+.meas tran dtsf_29_50 FIND V(dt_sf_out) AT=30.0083333
+.meas tran dtsf_29_80 FIND V(dt_sf_out) AT=30.0383333
 .meas tran ts14_29 WHEN V(trig_s14)=0.45 RISE=1 TD=29.9166667
 .meas tran ts69_29 WHEN V(trig_s69)=0.45 RISE=1 TD=29.9166667
 .meas tran twid_29 WHEN V(trig_wid)=0.45 RISE=1 TD=29.9166667
@@ -1429,11 +1448,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_29 WHEN V(trig_pw_base)=0.45 FALL=1 TD=29.6666667
 .meas tran tpwp_fall_29 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=29.6666667
 .meas tran trpk_30 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=31.5194444
-.meas tran dtsf_30_5 FIND V(dt_sf_out) AT=31.5605556
-.meas tran dtsf_30_15 FIND V(dt_sf_out) AT=31.5705556
-.meas tran dtsf_30_30 FIND V(dt_sf_out) AT=31.5855556
-.meas tran dtsf_30_50 FIND V(dt_sf_out) AT=31.6055556
-.meas tran dtsf_30_80 FIND V(dt_sf_out) AT=31.6355556
+.meas tran dtsf_30_5 FIND V(dt_sf_out) AT=31.5661111
+.meas tran dtsf_30_15 FIND V(dt_sf_out) AT=31.5761111
+.meas tran dtsf_30_30 FIND V(dt_sf_out) AT=31.5911111
+.meas tran dtsf_30_50 FIND V(dt_sf_out) AT=31.6111111
+.meas tran dtsf_30_80 FIND V(dt_sf_out) AT=31.6411111
 .meas tran ts14_30 WHEN V(trig_s14)=0.45 RISE=1 TD=31.5194444
 .meas tran ts69_30 WHEN V(trig_s69)=0.45 RISE=1 TD=31.5194444
 .meas tran twid_30 WHEN V(trig_wid)=0.45 RISE=1 TD=31.5194444
@@ -1456,11 +1475,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_30 WHEN V(trig_pw_base)=0.45 FALL=1 TD=31.2694444
 .meas tran tpwp_fall_30 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=31.2694444
 .meas tran trpk_31 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=32.5361111
-.meas tran dtsf_31_5 FIND V(dt_sf_out) AT=32.5772222
-.meas tran dtsf_31_15 FIND V(dt_sf_out) AT=32.5872222
-.meas tran dtsf_31_30 FIND V(dt_sf_out) AT=32.6022222
-.meas tran dtsf_31_50 FIND V(dt_sf_out) AT=32.6222222
-.meas tran dtsf_31_80 FIND V(dt_sf_out) AT=32.6522222
+.meas tran dtsf_31_5 FIND V(dt_sf_out) AT=32.5827778
+.meas tran dtsf_31_15 FIND V(dt_sf_out) AT=32.5927778
+.meas tran dtsf_31_30 FIND V(dt_sf_out) AT=32.6077778
+.meas tran dtsf_31_50 FIND V(dt_sf_out) AT=32.6277778
+.meas tran dtsf_31_80 FIND V(dt_sf_out) AT=32.6577778
 .meas tran ts14_31 WHEN V(trig_s14)=0.45 RISE=1 TD=32.5361111
 .meas tran ts69_31 WHEN V(trig_s69)=0.45 RISE=1 TD=32.5361111
 .meas tran twid_31 WHEN V(trig_wid)=0.45 RISE=1 TD=32.5361111
@@ -1483,11 +1502,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_31 WHEN V(trig_pw_base)=0.45 FALL=1 TD=32.2861111
 .meas tran tpwp_fall_31 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=32.2861111
 .meas tran trpk_32 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=33.5222222
-.meas tran dtsf_32_5 FIND V(dt_sf_out) AT=33.5633333
-.meas tran dtsf_32_15 FIND V(dt_sf_out) AT=33.5733333
-.meas tran dtsf_32_30 FIND V(dt_sf_out) AT=33.5883333
-.meas tran dtsf_32_50 FIND V(dt_sf_out) AT=33.6083333
-.meas tran dtsf_32_80 FIND V(dt_sf_out) AT=33.6383333
+.meas tran dtsf_32_5 FIND V(dt_sf_out) AT=33.5688889
+.meas tran dtsf_32_15 FIND V(dt_sf_out) AT=33.5788889
+.meas tran dtsf_32_30 FIND V(dt_sf_out) AT=33.5938889
+.meas tran dtsf_32_50 FIND V(dt_sf_out) AT=33.6138889
+.meas tran dtsf_32_80 FIND V(dt_sf_out) AT=33.6438889
 .meas tran ts14_32 WHEN V(trig_s14)=0.45 RISE=1 TD=33.5222222
 .meas tran ts69_32 WHEN V(trig_s69)=0.45 RISE=1 TD=33.5222222
 .meas tran twid_32 WHEN V(trig_wid)=0.45 RISE=1 TD=33.5222222
@@ -1510,11 +1529,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_32 WHEN V(trig_pw_base)=0.45 FALL=1 TD=33.2722222
 .meas tran tpwp_fall_32 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=33.2722222
 .meas tran trpk_33 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=34.4527778
-.meas tran dtsf_33_5 FIND V(dt_sf_out) AT=34.4938889
-.meas tran dtsf_33_15 FIND V(dt_sf_out) AT=34.5038889
-.meas tran dtsf_33_30 FIND V(dt_sf_out) AT=34.5188889
-.meas tran dtsf_33_50 FIND V(dt_sf_out) AT=34.5388889
-.meas tran dtsf_33_80 FIND V(dt_sf_out) AT=34.5688889
+.meas tran dtsf_33_5 FIND V(dt_sf_out) AT=34.4994444
+.meas tran dtsf_33_15 FIND V(dt_sf_out) AT=34.5094444
+.meas tran dtsf_33_30 FIND V(dt_sf_out) AT=34.5244444
+.meas tran dtsf_33_50 FIND V(dt_sf_out) AT=34.5444444
+.meas tran dtsf_33_80 FIND V(dt_sf_out) AT=34.5744444
 .meas tran ts14_33 WHEN V(trig_s14)=0.45 RISE=1 TD=34.4527778
 .meas tran ts69_33 WHEN V(trig_s69)=0.45 RISE=1 TD=34.4527778
 .meas tran twid_33 WHEN V(trig_wid)=0.45 RISE=1 TD=34.4527778
@@ -1537,11 +1556,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .meas tran tpwb_fall_33 WHEN V(trig_pw_base)=0.45 FALL=1 TD=34.2027778
 .meas tran tpwp_fall_33 WHEN V(trig_pw_peak)=0.45 FALL=1 TD=34.2027778
 .meas tran trpk_34 WHEN V(rpeak_pulse)=0.45 RISE=1 TD=35.4166667
-.meas tran dtsf_34_5 FIND V(dt_sf_out) AT=35.4577778
-.meas tran dtsf_34_15 FIND V(dt_sf_out) AT=35.4677778
-.meas tran dtsf_34_30 FIND V(dt_sf_out) AT=35.4827778
-.meas tran dtsf_34_50 FIND V(dt_sf_out) AT=35.5027778
-.meas tran dtsf_34_80 FIND V(dt_sf_out) AT=35.5327778
+.meas tran dtsf_34_5 FIND V(dt_sf_out) AT=35.4633333
+.meas tran dtsf_34_15 FIND V(dt_sf_out) AT=35.4733333
+.meas tran dtsf_34_30 FIND V(dt_sf_out) AT=35.4883333
+.meas tran dtsf_34_50 FIND V(dt_sf_out) AT=35.5083333
+.meas tran dtsf_34_80 FIND V(dt_sf_out) AT=35.5383333
 .meas tran ts14_34 WHEN V(trig_s14)=0.45 RISE=1 TD=35.4166667
 .meas tran ts69_34 WHEN V(trig_s69)=0.45 RISE=1 TD=35.4166667
 .meas tran twid_34 WHEN V(trig_wid)=0.45 RISE=1 TD=35.4166667
