@@ -30,7 +30,7 @@ PW_S = 16; PW_MID = 43
 EWMA_ALPHA = 0.10
 SKIP = 5
 SKIP_BI = 10  # beat_instability needs more EWMA settling (prev_node converges by beat ~8)
-VERBOSE = True  # set True for per-beat diagnostics (<=3 records)
+VERBOSE = False  # set True for per-beat diagnostics (<=3 records)
 
 aami_map = {}
 for s in 'NLRej': aami_map[s] = 'N'
@@ -164,7 +164,7 @@ fp = FRONTEND_DIR.replace("\\", "/")
 
 #RECORDS = ['107', '115', '232', '118']  # weak records only
 #RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
-RECORDS = ['232', '114']  # diagnostic: F2 and F6 worst records
+RECORDS = ['100', '101', '102', '104', '105', '106', '107', '108', '109', '111', '114', '115', '116', '117', '118', '119', '200', '205', '207', '208', '212', '214', '215', '219', '220', '222', '228', '231', '232', '234']
 all_results = {}
 
 for rec_id in RECORDS:
@@ -346,11 +346,10 @@ for rec_id in RECORDS:
 
     # --- Analog pipeline ---
     # Comparator wiring depends on QRS polarity
-    # Output goes to rpeak_raw; refractory gate produces rpeak_level
     if rpeak_polarity == "POS":
-        rpk_inst_line = "Xrpk ecg_l0 rpeak_threshold rpeak_raw vdd vss vbias rpeak_detector"
+        rpk_inst_line = "Xrpk ecg_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector"
     else:
-        rpk_inst_line = "Xrpk rpeak_threshold ecg_l0 rpeak_raw vdd vss vbias rpeak_detector"
+        rpk_inst_line = "Xrpk rpeak_threshold ecg_l0 rpeak_level vdd vss vbias rpeak_detector"
 
     # For large offsets: external comparators on main timer SF for s14/s10/rpk_del
     if use_slow_for_fast:
@@ -443,16 +442,7 @@ Xbias vbias vref vdd vss bias_gen
 * --- R-peak detector (polarity-adaptive) ---
 Vthresh rpeak_threshold 0 {rpk_thresh:.6f}
 {rpk_inst}
-* Refractory gate: suppress rpeak_raw while hold is active
-* Prevents T-wave retriggering from extending hold beyond 300ms
-* rpeak_level = rpeak_raw AND NOT(rpeak_level_held)
-Xinv_held rpeak_level_held held_bar vdd vss inverter_sub
-XMng_p1 nand_refr rpeak_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMng_p2 nand_refr held_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMng_n1 nand_refr rpeak_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-XMng_n2 nand_mid_refr held_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-Xinv_nand_refr nand_refr rpeak_level vdd vss inverter_sub
-* Hold circuit: debounces QRS chatter (exactly 300ms, no T-wave extension)
+* Hold circuit: debounces QRS chatter
 Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
 .ic V(xhold.hold_cap)=0
 * Level-to-pulse conversion (hold output -> brief ~2ms pulse)
@@ -488,10 +478,8 @@ Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
 Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
 Xeb_rr  pg_rr_raw  trig_rr_copy_raw vdd vss edge_buffer
 * Esamp validity gate: block rr_copy when esamp holds deeply decayed value
-* Valid esamp range: 0.27-0.43V depending on RR interval. Threshold: 0.20V
-* (lowered from 0.35V to support long-RR records like 232 where SF@1000ms=0.37V
-*  and pwave-predictor phase skips cause esamp to capture at 2x RR ~0.26V)
-Vth_esamp_ok esamp_ok_thresh 0 0.20
+* Valid esamp range: 0.38-0.43V. Invalid (missed beats): <0.30V. Threshold: 0.35V
+Vth_esamp_ok esamp_ok_thresh 0 0.35
 Xesamp_chk xrr.esamp_node esamp_ok_thresh esamp_ok_level vdd vss vbias rpeak_detector
 * AND: trig_rr_copy = trig_rr_copy_raw AND esamp_ok_level
 XMnand_rrc_p1 nand_rrc2 trig_rr_copy_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
