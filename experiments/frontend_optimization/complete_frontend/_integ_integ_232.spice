@@ -29,22 +29,24 @@ Xbias vbias vref vdd vss bias_gen
 
 * --- R-peak detector (polarity-adaptive) ---
 Vthresh rpeak_threshold 0 0.206118
-Xrpk rpeak_threshold ecg_l0 rpeak_level vdd vss vbias rpeak_detector
-* Hold circuit: debounces QRS chatter
+Xrpk rpeak_threshold ecg_l0 rpeak_raw vdd vss vbias rpeak_detector
+* Refractory gate: suppress rpeak_raw while hold is active
+* Prevents T-wave retriggering from extending hold beyond 300ms
+* rpeak_level = rpeak_raw AND NOT(rpeak_level_held)
+Xinv_held rpeak_level_held held_bar vdd vss inverter_sub
+XMng_p1 nand_refr rpeak_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMng_p2 nand_refr held_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMng_n1 nand_refr rpeak_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMng_n2 nand_mid_refr held_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+Xinv_nand_refr nand_refr rpeak_level vdd vss inverter_sub
+* Hold circuit: debounces QRS chatter (exactly 300ms, no T-wave extension)
 Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
 .ic V(xhold.hold_cap)=0
 * Level-to-pulse conversion (hold output -> brief ~2ms pulse)
 Xeb_rpk_in rpeak_level_held rpeak_level_sharp vdd vss edge_buffer
 Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
-* Refractory gate on PULSE (not level): blocks brief pulses during 300ms refractory
-* Key: when refractory opens, any T-wave pulse has already ended (pulses are ~2ms)
-* trig_bi_level from delay_timer goes LOW at rpeak, HIGH after ~300ms decay
-XMnand_refr_p1 nand_refr rpeak_pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMnand_refr_p2 nand_refr trig_bi_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMnand_refr_n1 nand_refr rpeak_pulse_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-XMnand_refr_n2 nand_mid_refr trig_bi_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-Xinv_nand_refr nand_refr rpeak_pulse_gated vdd vss inverter_sub
-Xeb_rpk rpeak_pulse_gated rpeak_pulse vdd vss edge_buffer
+* Direct connection: no refractory gate (hold circuit provides debounce)
+Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
 Vth14 vth_14_node 0 0.481000
@@ -81,8 +83,10 @@ Xeb_wid pg_wid_raw trig_wid vdd vss edge_buffer
 Xeb_bi  pg_bi_raw  trig_bi_copy vdd vss edge_buffer
 Xeb_rr  pg_rr_raw  trig_rr_copy_raw vdd vss edge_buffer
 * Esamp validity gate: block rr_copy when esamp holds deeply decayed value
-* Valid esamp range: 0.38-0.43V. Invalid (missed beats): <0.30V. Threshold: 0.35V
-Vth_esamp_ok esamp_ok_thresh 0 0.35
+* Valid esamp range: 0.27-0.43V depending on RR interval. Threshold: 0.20V
+* (lowered from 0.35V to support long-RR records like 232 where SF@1000ms=0.37V
+*  and pwave-predictor phase skips cause esamp to capture at 2x RR ~0.26V)
+Vth_esamp_ok esamp_ok_thresh 0 0.20
 Xesamp_chk xrr.esamp_node esamp_ok_thresh esamp_ok_level vdd vss vbias rpeak_detector
 * AND: trig_rr_copy = trig_rr_copy_raw AND esamp_ok_level
 XMnand_rrc_p1 nand_rrc2 trig_rr_copy_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
@@ -171,11 +175,6 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 * This lets the refractory gate pass the first rpeak through
 .ic V(xdt.timer_node)=0
 .ic V(xdt.timer2)=0
-* Refractory NAND gate: at t=0, rpeak_level_held=LOW, trig_bi_level=HIGH
-* NAND(LOW,HIGH)=HIGH -> INV -> rpeak_level_refr=LOW
-.ic V(nand_refr)=0.9
-.ic V(nand_mid_refr)=0
-.ic V(rpeak_pulse_gated)=0
 .ic V(rpeak_pulse_raw)=0
 .ic V(rpeak_level_held)=0
 

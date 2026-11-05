@@ -36,15 +36,8 @@ Xhold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
 * Level-to-pulse conversion (hold output -> brief ~2ms pulse)
 Xeb_rpk_in rpeak_level_held rpeak_level_sharp vdd vss edge_buffer
 Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
-* Refractory gate on PULSE (not level): blocks brief pulses during 300ms refractory
-* Key: when refractory opens, any T-wave pulse has already ended (pulses are ~2ms)
-* trig_bi_level from delay_timer goes LOW at rpeak, HIGH after ~300ms decay
-XMnand_refr_p1 nand_refr rpeak_pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMnand_refr_p2 nand_refr trig_bi_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMnand_refr_n1 nand_refr rpeak_pulse_raw nand_mid_refr vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-XMnand_refr_n2 nand_mid_refr trig_bi_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-Xinv_nand_refr nand_refr rpeak_pulse_gated vdd vss inverter_sub
-Xeb_rpk rpeak_pulse_gated rpeak_pulse vdd vss edge_buffer
+* Direct connection: no refractory gate (hold circuit provides debounce)
+Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
 * --- Delay timer (triggered by analog rpeak pulse) ---
 Vth14 vth_14_node 0 0.219167
@@ -163,11 +156,6 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 * This lets the refractory gate pass the first rpeak through
 .ic V(xdt.timer_node)=0
 .ic V(xdt.timer2)=0
-* Refractory NAND gate: at t=0, rpeak_level_held=LOW, trig_bi_level=HIGH
-* NAND(LOW,HIGH)=HIGH -> INV -> rpeak_level_refr=LOW
-.ic V(nand_refr)=0.9
-.ic V(nand_mid_refr)=0
-.ic V(rpeak_pulse_gated)=0
 .ic V(rpeak_pulse_raw)=0
 .ic V(rpeak_level_held)=0
 

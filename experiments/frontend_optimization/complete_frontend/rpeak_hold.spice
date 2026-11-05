@@ -19,10 +19,10 @@
 *   3. Weak NFET slowly discharges hold_cap (~5mV/ms)
 *   4. Two-inverter buffer outputs clean rail-to-rail level
 *
-* Hold time: ~150ms (from VDD to inverter threshold ~0.45V)
-*   Cap = ~3pF (MIM W=55 L=55), discharge ~26pA @ vbias
-*   Measured hold: ~150ms (enough to cover 50ms QRS chatter,
-*   releases well before shortest RR ~300ms)
+* Hold time: ~300ms (from VDD to inverter threshold ~0.45V)
+*   Cap = ~12pF (MIM W=78 L=78), discharge ~26pA @ vbias
+*   Extended from 150ms to 300ms to blank T-wave retriggering
+*   on NEG polarity records (T-waves at 200-300ms post-QRS)
 *
 * Pin: input output vdd vss vbias
 * ============================================================
@@ -38,8 +38,8 @@ XMpre hold_cap inp_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
 * Slow discharge: weak NFET (~26pA), sets hold duration
 XMdis hold_cap vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
-* Hold cap: ~3pF MIM (55*55 fF)
-XChold hold_cap vss sky130_fd_pr__cap_mim_m3_1 W=55 L=55
+* Hold cap: ~12pF MIM (78*78*2e-3) — 300ms T-wave blanking
+XChold hold_cap vss sky130_fd_pr__cap_mim_m3_1 W=78 L=78
 
 * Two-inverter buffer: sharp rail-to-rail output
 Xinv_buf1 hold_cap buf_mid vdd vss inverter_sub
