@@ -93,6 +93,31 @@ def load_analog_cache(records):
     return X, y, py
 
 
+def load_paired_calibration_data(records):
+    """Load paired (circuit_features, py_features) for calibration.
+
+    Only includes beats where ngspice succeeded (not fallback beats).
+    circuit_features = analog voltages in FRONTEND order
+    py_features = raw digital feature values in FRONTEND order
+    """
+    all_circuit, all_py = [], []
+    for rec in records:
+        cache_file = os.path.join(CACHE_DIR, f"{rec}.json")
+        if not os.path.exists(cache_file) or os.path.getsize(cache_file) == 0:
+            continue
+        with open(cache_file) as f:
+            data = json.load(f)
+        if 'circuit_features' in data and 'py_features' in data:
+            cf = np.array(data['circuit_features'])
+            pf = np.array(data['py_features'])
+            if cf.shape == pf.shape and len(cf) > 0:
+                all_circuit.append(cf)
+                all_py.append(pf)
+    X_circuit = np.vstack(all_circuit) if all_circuit else np.empty((0, 8))
+    X_py = np.vstack(all_py) if all_py else np.empty((0, 8))
+    return X_circuit, X_py
+
+
 def reorder_frontend_to_classifier(X_frontend):
     """Reorder features from frontend order to classifier order."""
     return X_frontend[:, FRONTEND_TO_CLASSIFIER]
@@ -102,17 +127,21 @@ def reorder_frontend_to_classifier(X_frontend):
 # PHASE 2: Calibrate per-feature affine transforms
 # ==========================================================================
 
-def calibrate_analog_to_digital(X_analog_frontend, X_digital_cache_classifier):
+def calibrate_analog_to_digital(X_circuit_frontend, X_py_frontend, mu_std, sd_std):
     """
-    Find per-feature affine transform: feat_dig_i = alpha_i * V_analog_i + beta_i
+    Find per-feature affine transform: feat_standardized_i = alpha_i * V_analog_i + beta_i
 
-    X_analog_frontend: (N, 8) in frontend order
-    X_digital_cache_classifier: (N, 8) in classifier order
+    Uses paired data from cache (circuit_features ↔ py_features), both in frontend order.
+    py_features are raw → standardized with mu_std, sd_std before calibration.
+    Returns alpha, beta in CLASSIFIER order.
 
-    Returns alpha (8,), beta (8,) in CLASSIFIER order.
-    Also returns per-feature Pearson r and Spearman rho.
+    X_circuit_frontend: (N, 8) analog voltages, frontend order
+    X_py_frontend: (N, 8) raw digital features, frontend order
+    mu_std, sd_std: (8,) standardization params in CLASSIFIER order
     """
-    X_analog_classifier = reorder_frontend_to_classifier(X_analog_frontend)
+    X_analog_cls = reorder_frontend_to_classifier(X_circuit_frontend)
+    X_py_cls = reorder_frontend_to_classifier(X_py_frontend)
+    X_std_cls = (X_py_cls - mu_std) / sd_std
 
     alpha = np.zeros(8)
     beta = np.zeros(8)
@@ -120,12 +149,12 @@ def calibrate_analog_to_digital(X_analog_frontend, X_digital_cache_classifier):
     spearman_rho = np.zeros(8)
 
     for i in range(8):
-        v_analog = X_analog_classifier[:, i]
-        f_digital = X_digital_cache_classifier[:, i]
+        v_analog = X_analog_cls[:, i]
+        f_std = X_std_cls[:, i]
 
-        mask = np.isfinite(v_analog) & np.isfinite(f_digital)
+        mask = np.isfinite(v_analog) & np.isfinite(f_std)
         va = v_analog[mask]
-        fd = f_digital[mask]
+        fd = f_std[mask]
 
         A = np.vstack([va, np.ones(len(va))]).T
         result = np.linalg.lstsq(A, fd, rcond=None)
@@ -189,8 +218,8 @@ def generate_integrated_classifier(A_vcvs, B_vcvs, output_path):
 
     lines = []
     lines.append("* =================================================================")
-    lines.append("* INTEGRATED CLASSIFIER: Analog Frontend Voltages → Class Output")
-    lines.append("* Architecture: 8 → 64 → 5 MLP on ReRAM Crossbar")
+    lines.append("* INTEGRATED CLASSIFIER: Analog Frontend Voltages -> Class Output")
+    lines.append("* Architecture: 8 -> 64 -> 5 MLP on ReRAM Crossbar")
     lines.append("* VCVS calibrated for analog frontend voltage inputs")
     lines.append("* =================================================================")
     lines.append("*")
@@ -251,7 +280,7 @@ def generate_integrated_classifier(A_vcvs, B_vcvs, output_path):
     lines.append("")
 
     # L1→L2 MAC connections (CCCS)
-    lines.append("* ===== L1 CROSSBAR → INTERSTAGE CONNECTIONS =====")
+    lines.append("* ===== L1 CROSSBAR -> INTERSTAGE CONNECTIONS =====")
     for j in range(64):
         lines.append(f"Fmac1p_{j} nmac1_{j} 0 Vspl1_{j} 1.0")
         lines.append(f"Fmac1n_{j} 0 nmac1_{j} Vsnl1_{j} 1.0")
@@ -260,7 +289,7 @@ def generate_integrated_classifier(A_vcvs, B_vcvs, output_path):
     # Interstage: bias + ReLU + output mirrors (64 channels)
     RELU_W, RELU_L = 4.0, 0.5
     BIAS_W, BIAS_L = 2.0, 0.5
-    lines.append("* ===== L1→L2 INTERSTAGE: BIAS + ReLU + OUTPUT (64 channels) =====")
+    lines.append("* ===== L1->L2 INTERSTAGE: BIAS + ReLU + OUTPUT (64 channels) =====")
     for j in range(64):
         I_bias = b1[j] / scale1
         lines.append(f"* --- Ch {j}: b1={b1[j]:+.4f}, I_bias={I_bias*1e6:+.3f}uA ---")
@@ -305,14 +334,14 @@ def generate_integrated_classifier(A_vcvs, B_vcvs, output_path):
     lines.append("")
 
     # L2→WTA MAC connections
-    lines.append("* ===== L2 CROSSBAR → WTA CONNECTIONS =====")
+    lines.append("* ===== L2 CROSSBAR -> WTA CONNECTIONS =====")
     for k in range(5):
         lines.append(f"Fmac2p_{k} nwta_{k} 0 Vspl2_{k} 1.0")
         lines.append(f"Fmac2n_{k} 0 nwta_{k} Vsnl2_{k} 1.0")
     lines.append("")
 
     # L2 bias injection (5 channels)
-    lines.append("* ===== L2→WTA BIAS INJECTION (5 channels) =====")
+    lines.append("* ===== L2->WTA BIAS INJECTION (5 channels) =====")
     for k in range(5):
         I_bias = b2[k] / scale2
         lines.append(f"* --- Class {CLASS_NAMES[k]}: b2={b2[k]:+.4f}, I_bias={I_bias*1e6:+.3f}uA ---")
@@ -441,13 +470,13 @@ def classify_software_emulated(X_analog_frontend, alpha, beta):
 
 def main():
     print("=" * 74)
-    print("  END-TO-END INTEGRATION: Analog Frontend → ReRAM Crossbar Classifier")
+    print("  END-TO-END INTEGRATION: Analog Frontend -> ReRAM Crossbar Classifier")
     print("=" * 74)
     print(f"  Strategy: Preserve trained weights (96.04%), calibrate VCVS only")
     print(f"  Protocol: De Chazal DS1 train / DS2 test (44 records)")
     print()
 
-    # ── Step 1: Load digital feature cache (for calibration reference) ──
+    # ── Step 1: Load digital feature cache (for accuracy reference) ──
     print("[Step 1] Loading digital feature cache...")
     d = np.load(DIGITAL_CACHE)
     X_tr_dig, y_tr_dig = d['X_tr'], d['y_tr']
@@ -460,48 +489,63 @@ def main():
     X_te_ana, y_te_ana, py_te = load_analog_cache(DS2)
     print(f"  Analog: train={X_tr_ana.shape}, test={X_te_ana.shape}")
 
-    if X_tr_ana.shape[0] == 0 or X_te_ana.shape[0] == 0:
-        print("\n  ERROR: Analog feature cache is incomplete.")
+    if X_tr_ana.shape[0] == 0:
+        print("\n  ERROR: DS1 analog feature cache is empty.")
         print("  Run full_accuracy_test.py first to populate the cache.")
         print("  Falling back to digital-only verification...")
         verify_digital_only()
         return
 
-    # ── Step 3: Verify beat counts match ──
-    print(f"\n[Step 3] Verifying data alignment...")
-    print(f"  Analog train: {len(y_tr_ana)} beats, Digital train: {len(y_tr_dig)} beats")
-    print(f"  Analog test:  {len(y_te_ana)} beats, Digital test:  {len(y_te_dig)} beats")
-    if len(y_tr_ana) != len(y_tr_dig):
-        print("  WARNING: Beat counts differ — using analog subset for calibration")
+    # ── Step 3: Load paired calibration data and compute standardization ──
+    print(f"\n[Step 3] Loading paired calibration data (circuit <-> py_features)...")
+    X_circuit_tr, X_py_tr = load_paired_calibration_data(DS1)
+    print(f"  Paired DS1 beats: {len(X_circuit_tr)} (circuit-simulated only)")
+
+    X_py_cls = reorder_frontend_to_classifier(X_py_tr)
+    mu_std = X_py_cls.mean(axis=0)
+    sd_std = X_py_cls.std(axis=0) + 1e-8
+    print(f"  Standardization mu: {mu_std.round(4)}")
+    print(f"  Standardization sd: {sd_std.round(4)}")
 
     # ── Step 4: Calibrate per-feature affine transforms ──
-    print("\n[Step 4] Calibrating analog→digital feature transforms...")
-    # Use training set for calibration
-    n_cal = min(len(y_tr_ana), len(y_tr_dig))
+    print("\n[Step 4] Calibrating analog->standardized feature transforms...")
     alpha, beta, r_pearson, rho_spearman = calibrate_analog_to_digital(
-        X_tr_ana[:n_cal], X_tr_dig[:n_cal]
+        X_circuit_tr, X_py_tr, mu_std, sd_std
     )
     A_vcvs, B_vcvs = compute_vcvs_params(alpha, beta)
 
-    print(f"\n  {'Feature':<12} {'alpha':>10} {'beta':>10} {'Pearson r':>10} {'Spearman ρ':>10} {'A_vcvs':>12} {'B_vcvs':>12}")
-    print(f"  {'-'*76}")
+    print(f"\n  {'Feature':<12} {'alpha':>10} {'beta':>10} {'Pearson r':>10} {'Spearman rho':>12} {'A_vcvs':>12} {'B_vcvs':>12}")
+    print(f"  {'-'*78}")
     for i in range(8):
         print(f"  {FEATURE_NAMES_CLASSIFIER[i]:<12} {alpha[i]:>10.4f} {beta[i]:>10.4f} "
-              f"{r_pearson[i]:>10.4f} {rho_spearman[i]:>10.4f} {A_vcvs[i]:>12.6e} {B_vcvs[i]:>12.6e}")
+              f"{r_pearson[i]:>10.4f} {rho_spearman[i]:>12.4f} {A_vcvs[i]:>12.6e} {B_vcvs[i]:>12.6e}")
 
     # ── Step 5: Software-emulated end-to-end accuracy ──
     print("\n[Step 5] Software-emulated end-to-end accuracy (fast)...")
-    pred_te = classify_software_emulated(X_te_ana, alpha, beta)
-    acc = accuracy_score(y_te_ana, pred_te) * 100
-    f1 = f1_score(y_te_ana, pred_te, average=None, zero_division=0)
-    print(f"  Integrated accuracy: {acc:.2f}%")
-    print(f"  F1: {' '.join(f'{CLASS_NAMES[i]}={f1[i]:.3f}' for i in range(5))}")
+
+    if X_te_ana.shape[0] == 0:
+        print("  WARNING: No DS2 analog features available yet.")
+        print("  Running digital-only reference...")
+    else:
+        pred_te = classify_software_emulated(X_te_ana, alpha, beta)
+        acc = accuracy_score(y_te_ana, pred_te) * 100
+        f1 = f1_score(y_te_ana, pred_te, average=None, zero_division=0)
+        n_ds2_cached = sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json")))
+        print(f"  Integrated accuracy: {acc:.2f}% ({len(y_te_ana)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
+        print(f"  F1: {' '.join(f'{CLASS_NAMES[i]}={f1[i]:.3f}' for i in range(5))}")
+
+        cm = confusion_matrix(y_te_ana, pred_te, labels=range(5))
+        print(f"\n  Confusion matrix:")
+        print(f"  {'':>6} " + " ".join(f"{c:>6}" for c in CLASS_NAMES))
+        for i_row, row in enumerate(cm):
+            print(f"  {CLASS_NAMES[i_row]:>6} " + " ".join(f"{v:>6d}" for v in row))
 
     # Compare to digital-only
     pred_dig = classify_software_emulated_digital(X_te_dig)
     acc_dig = accuracy_score(y_te_dig, pred_dig) * 100
-    print(f"  Digital reference:   {acc_dig:.2f}%")
-    print(f"  Δaccuracy: {acc - acc_dig:+.2f}%")
+    print(f"\n  Digital reference:   {acc_dig:.2f}% ({len(y_te_dig)} DS2 beats)")
+    if X_te_ana.shape[0] > 0:
+        print(f"  Δaccuracy: {acc - acc_dig:+.2f}%")
 
     # ── Step 6: Generate integrated classifier netlist ──
     print("\n[Step 6] Generating integrated classifier netlist...")
@@ -510,12 +554,16 @@ def main():
 
     # ── Step 7: Save calibration results ──
     results = {
-        'accuracy_integrated_pct': float(acc),
+        'accuracy_integrated_pct': float(acc) if X_te_ana.shape[0] > 0 else None,
         'accuracy_digital_ref_pct': float(acc_dig),
-        'delta_accuracy_pct': float(acc - acc_dig),
-        'per_class_f1': {CLASS_NAMES[i]: float(f1[i]) for i in range(5)},
-        'n_train': int(len(y_tr_ana)),
+        'delta_accuracy_pct': float(acc - acc_dig) if X_te_ana.shape[0] > 0 else None,
+        'per_class_f1': {CLASS_NAMES[i]: float(f1[i]) for i in range(5)} if X_te_ana.shape[0] > 0 else None,
+        'n_train_analog': int(len(y_tr_ana)),
+        'n_train_paired': int(len(X_circuit_tr)),
         'n_test': int(len(y_te_ana)),
+        'n_ds2_records_cached': sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json"))),
+        'standardization_mu': mu_std.tolist(),
+        'standardization_sd': sd_std.tolist(),
         'calibration': {
             FEATURE_NAMES_CLASSIFIER[i]: {
                 'alpha': float(alpha[i]),
@@ -538,11 +586,17 @@ def main():
     print("  INTEGRATION SUMMARY")
     print("=" * 74)
     print(f"  Strategy:    Calibrated VCVS (preserve 96.04% trained weights)")
-    print(f"  Integrated:  {acc:.2f}% ({len(y_te_ana)} DS2 beats)")
-    print(f"  Digital ref: {acc_dig:.2f}% ({len(y_te_dig)} DS2 beats)")
-    print(f"  Δ accuracy:  {acc - acc_dig:+.2f}%")
-    target_met = "YES ✓" if acc >= 96.0 else "NO — needs investigation"
-    print(f"  96% target:  {target_met}")
+    if X_te_ana.shape[0] > 0:
+        n_ds2_cached = sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json")))
+        print(f"  Integrated:  {acc:.2f}% ({len(y_te_ana)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
+        print(f"  Digital ref: {acc_dig:.2f}% ({len(y_te_dig)} DS2 beats)")
+        print(f"  Delta acc:   {acc - acc_dig:+.2f}%")
+        target_met = "YES" if acc >= 96.0 else "NO — needs investigation"
+        print(f"  96% target:  {target_met}")
+        if n_ds2_cached < len(DS2):
+            print(f"  NOTE: Only {n_ds2_cached}/{len(DS2)} DS2 records cached. Re-run after cache completes.")
+    else:
+        print(f"  Digital ref: {acc_dig:.2f}% (no analog DS2 data yet)")
     print(f"  Netlist:     {netlist_path}")
     print(f"  Results:     {results_path}")
 
