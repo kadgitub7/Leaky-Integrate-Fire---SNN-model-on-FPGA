@@ -1,7 +1,7 @@
-* FEATURE 7: QRS Slope — Post-R Descent Difference
+* FEATURE 7: QRS Slope — v6 (active loads)
 *
 * Proxy: ECG@R+14ms - ECG@R+69ms (signed). Captures post-R slope asymmetry.
-* Two S&H + diode-loaded diff pair.
+* Two S&H + active-mirror-loaded diff pair. Gain ≈ 30x.
 *
 * Triggers: sample14_trig (R+14ms), sample69_trig (R+69ms)
 

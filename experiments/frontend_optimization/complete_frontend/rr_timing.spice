@@ -1,5 +1,5 @@
 * ============================================================
-* FEATURES 1 & 2: RR Timing — from validated rr_timing_v5
+* FEATURES 1 & 2: RR Timing — v6 (slow EWMA + active loads)
 *
 * Timer: 320pF MIM, VDD precharge at rpeak, ~148pA discharge
 *   V_timer ≈ 0.59-0.62V at typical HR (0.6-0.67s)
@@ -13,13 +13,13 @@
 *   rpeak_trigger: 5ms pulse at rpeak
 *     PMOS precharges timer to VDD. sf_out jumps to ~0.5V.
 *   copy_trig: 2ms pulse, 10ms after rpeak
-*     Charge-shares esamp (5pF) ↔ ewma (45pF)
-*     ewma_new = 0.1*sf_val + 0.9*ewma_old  (alpha=0.10)
+*     Charge-shares esamp (5pF) ↔ ewma (330pF)
+*     ewma_new = 0.015*sf_val + 0.985*ewma_old  (alpha≈0.015)
 *
 * Diff pair readout (valid just before capture_trig):
 *   rr_ratio: sf_out (current) vs ewma_node (average)
 *   rr_asym: sf_out (current) vs prev_node (previous beat)
-*   Diode-connected loads (gain ~1) for linear output
+*   Active mirror loads for gain ≈ gm*(ro_n||ro_p) ≈ 30x
 *
 * Pin: ecg_unused capture_trig rpeak_trigger copy_trig
 *      rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
@@ -48,22 +48,28 @@ XMesamp sf_out capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=
 XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
 * === EWMA CHARGE-SHARE at copy_trig ===
+* alpha = Cesamp/(Cesamp+Cewma) = 5/(5+330) ≈ 0.015
 XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
-XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=405 L=405
 
-* === DIFF PAIR: rr_ratio ===
-* Diode-connected loads for proportional (gain ~1) output
+* === DIFF PAIR: rr_ratio (diode loads, gain ~1) ===
+* Tail current source
 XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
-XMd1_r net_r1 sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-XMd2_r rr_ratio_out ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Input diff pair — ewma on diode side, sf_out on output side
+* so output HIGH when sf_out > ewma (positive rr deviation)
+XMd1_r net_r1 ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2_r rr_ratio_out sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Diode-connected loads — no clipping, StandardScaler handles normalization
 XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMl2_r rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
-* === DIFF PAIR: rr_asym ===
-* Diode-connected loads for proportional (gain ~1) output
+* === DIFF PAIR: rr_asym (diode loads, gain ~1) ===
+* Tail current source
 XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+* Input diff pair
 XMd1_a net_a1 sf_out tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMd2_a rr_asym_out prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Diode-connected loads
 XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 XMl2_a rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 

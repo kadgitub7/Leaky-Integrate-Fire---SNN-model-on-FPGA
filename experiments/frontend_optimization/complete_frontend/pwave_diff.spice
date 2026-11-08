@@ -1,8 +1,8 @@
-* FEATURE 5: P-wave Signed Difference — Lead 0
+* FEATURE 5: P-wave Signed Difference — v6 (active loads)
 *
 * Proxy: ECG_L0@R-131ms - ECG_L0@R-206ms (signed, no abs)
-* Two S&H capture ECG at baseline and P-wave peak, diff pair outputs difference.
-* RF accuracy: 95.11% combined (only -0.37% from Python BPF reference)
+* Two S&H capture ECG at baseline and P-wave peak.
+* Active mirror load for gain ≈ 30x.
 *
 * Triggers: sample_base_trig (R-206ms), sample_peak_trig (R-131ms)
 

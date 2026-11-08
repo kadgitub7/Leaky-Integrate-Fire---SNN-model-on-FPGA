@@ -131,13 +131,13 @@ def calibrate_analog_to_digital(X_circuit_frontend, X_py_frontend, mu_std, sd_st
     """
     Find per-feature affine transform: feat_standardized_i = alpha_i * V_analog_i + beta_i
 
-    Uses paired data from cache (circuit_features ↔ py_features), both in frontend order.
-    py_features are raw → standardized with mu_std, sd_std before calibration.
+    Uses paired data from cache (circuit_features <-> py_features), both in frontend order.
+    py_features are raw -> standardized with mu_std, sd_std before calibration.
     Returns alpha, beta in CLASSIFIER order.
 
-    X_circuit_frontend: (N, 8) analog voltages, frontend order
-    X_py_frontend: (N, 8) raw digital features, frontend order
-    mu_std, sd_std: (8,) standardization params in CLASSIFIER order
+    Outlier-robust: clips standardized digital values to [-4, +4] before fitting
+    (matching the VCVS saturation range), which prevents extreme beats from
+    distorting the linear fit.
     """
     X_analog_cls = reorder_frontend_to_classifier(X_circuit_frontend)
     X_py_cls = reorder_frontend_to_classifier(X_py_frontend)
@@ -152,9 +152,14 @@ def calibrate_analog_to_digital(X_circuit_frontend, X_py_frontend, mu_std, sd_st
         v_analog = X_analog_cls[:, i]
         f_std = X_std_cls[:, i]
 
-        mask = np.isfinite(v_analog) & np.isfinite(f_std)
+        mask = (np.isfinite(v_analog) & np.isfinite(f_std)
+                & (np.abs(f_std) <= 4.0))
         va = v_analog[mask]
         fd = f_std[mask]
+
+        n_clipped = np.sum(np.abs(X_std_cls[:, i]) > 4.0)
+        if n_clipped > 0:
+            print(f"    {FEATURE_NAMES_CLASSIFIER[i]}: clipped {n_clipped} outliers (>{4.0}sigma)")
 
         A = np.vstack([va, np.ones(len(va))]).T
         result = np.linalg.lstsq(A, fd, rcond=None)
@@ -438,7 +443,7 @@ def classify_software_emulated(X_analog_frontend, alpha, beta):
     Emulate the full analog classifier in software for fast validation.
 
     W1_eff and W2_eff are in the ORIGINAL feature space (not V_row space).
-    They were extracted so that: Z1 = X_norm @ W1_eff + b1 ≈ Z1_software.
+    They were extracted so that: Z1 = X_norm @ W1_eff + b1.
 
     Pipeline:
       1. Reorder features from frontend to classifier order
@@ -462,6 +467,71 @@ def classify_software_emulated(X_analog_frontend, alpha, beta):
 
     predictions = np.argmax(Z2, axis=1)
     return predictions
+
+
+def classify_records_properly(records, alpha, beta, mu_std, sd_std):
+    """
+    Classify records handling circuit vs fallback beats correctly.
+
+    The features[] array in the cache mixes:
+    - Circuit beats: analog voltages (~0.15-0.9V) -> apply VCVS calibration
+    - Fallback beats: raw digital values -> standardize directly
+
+    We distinguish them by checking if feature values are in the analog voltage
+    range. Analog voltages for all 8 features are bounded by the frontend
+    (VDD=0.9V, typically 0.1-0.5V), while raw digital values can be negative
+    or >1V.
+
+    Returns predictions, labels, n_circuit, n_fallback.
+    """
+    w = np.load(os.path.join(CLASSIFIER_DIR, 'full_analog_weights.npz'))
+    W1_eff, W2_eff = w['W1_eff'], w['W2_eff']
+    b1_w, b2_w = w['b1'], w['b2']
+
+    all_preds, all_labels = [], []
+    n_circuit_total, n_fallback_total = 0, 0
+
+    for rec in records:
+        cache_file = os.path.join(CACHE_DIR, f"{rec}.json")
+        if not os.path.exists(cache_file) or os.path.getsize(cache_file) == 0:
+            continue
+        with open(cache_file) as f:
+            data = json.load(f)
+
+        features = np.array(data['features'])
+        labels_str = data['labels']
+        labels = [LABEL_MAP[l] for l in labels_str]
+
+        X_cls = features[:, FRONTEND_TO_CLASSIFIER]
+        X_std = np.zeros_like(X_cls)
+
+        # Detect circuit vs fallback per beat:
+        # Circuit beats have ALL features in [0.0, 0.91] (frontend VDD=0.9V + margin)
+        # Fallback beats have raw digital values that can be negative or >1
+        is_circuit = np.all((X_cls >= -0.01) & (X_cls <= 0.91), axis=1)
+
+        n_c = int(np.sum(is_circuit))
+        n_f = len(features) - n_c
+
+        # Circuit beats: calibrate
+        if n_c > 0:
+            X_std[is_circuit] = X_cls[is_circuit] * alpha + beta
+
+        # Fallback beats: standardize raw digital directly
+        if n_f > 0:
+            X_std[~is_circuit] = (X_cls[~is_circuit] - mu_std) / sd_std
+
+        Z1 = X_std @ W1_eff + b1_w
+        H1 = np.maximum(0, Z1)
+        Z2 = H1 @ W2_eff + b2_w
+        preds = np.argmax(Z2, axis=1)
+
+        all_preds.extend(preds.tolist())
+        all_labels.extend(labels)
+        n_circuit_total += n_c
+        n_fallback_total += n_f
+
+    return np.array(all_preds), np.array(all_labels), n_circuit_total, n_fallback_total
 
 
 # ==========================================================================
@@ -523,29 +593,36 @@ def main():
     # ── Step 5: Software-emulated end-to-end accuracy ──
     print("\n[Step 5] Software-emulated end-to-end accuracy (fast)...")
 
-    if X_te_ana.shape[0] == 0:
+    n_ds2_cached = sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json")))
+    if n_ds2_cached == 0:
         print("  WARNING: No DS2 analog features available yet.")
         print("  Running digital-only reference...")
+        acc = None
     else:
-        pred_te = classify_software_emulated(X_te_ana, alpha, beta)
-        acc = accuracy_score(y_te_ana, pred_te) * 100
-        f1 = f1_score(y_te_ana, pred_te, average=None, zero_division=0)
-        n_ds2_cached = sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json")))
-        print(f"  Integrated accuracy: {acc:.2f}% ({len(y_te_ana)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
-        print(f"  F1: {' '.join(f'{CLASS_NAMES[i]}={f1[i]:.3f}' for i in range(5))}")
+        pred_te, y_te_actual, n_circ, n_fall = classify_records_properly(
+            DS2, alpha, beta, mu_std, sd_std
+        )
+        if len(pred_te) > 0:
+            acc = accuracy_score(y_te_actual, pred_te) * 100
+            f1 = f1_score(y_te_actual, pred_te, average=None, zero_division=0)
+            print(f"  Integrated accuracy: {acc:.2f}% ({len(y_te_actual)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
+            print(f"  (circuit={n_circ}, fallback={n_fall})")
+            print(f"  F1: {' '.join(f'{CLASS_NAMES[i]}={f1[i]:.3f}' for i in range(5))}")
 
-        cm = confusion_matrix(y_te_ana, pred_te, labels=range(5))
-        print(f"\n  Confusion matrix:")
-        print(f"  {'':>6} " + " ".join(f"{c:>6}" for c in CLASS_NAMES))
-        for i_row, row in enumerate(cm):
-            print(f"  {CLASS_NAMES[i_row]:>6} " + " ".join(f"{v:>6d}" for v in row))
+            cm = confusion_matrix(y_te_actual, pred_te, labels=range(5))
+            print(f"\n  Confusion matrix:")
+            print(f"  {'':>6} " + " ".join(f"{c:>6}" for c in CLASS_NAMES))
+            for i_row, row in enumerate(cm):
+                print(f"  {CLASS_NAMES[i_row]:>6} " + " ".join(f"{v:>6d}" for v in row))
+        else:
+            acc = None
 
     # Compare to digital-only
     pred_dig = classify_software_emulated_digital(X_te_dig)
     acc_dig = accuracy_score(y_te_dig, pred_dig) * 100
     print(f"\n  Digital reference:   {acc_dig:.2f}% ({len(y_te_dig)} DS2 beats)")
-    if X_te_ana.shape[0] > 0:
-        print(f"  Δaccuracy: {acc - acc_dig:+.2f}%")
+    if acc is not None:
+        print(f"  Delta accuracy: {acc - acc_dig:+.2f}%")
 
     # ── Step 6: Generate integrated classifier netlist ──
     print("\n[Step 6] Generating integrated classifier netlist...")
@@ -554,14 +631,14 @@ def main():
 
     # ── Step 7: Save calibration results ──
     results = {
-        'accuracy_integrated_pct': float(acc) if X_te_ana.shape[0] > 0 else None,
+        'accuracy_integrated_pct': float(acc) if acc is not None else None,
         'accuracy_digital_ref_pct': float(acc_dig),
-        'delta_accuracy_pct': float(acc - acc_dig) if X_te_ana.shape[0] > 0 else None,
-        'per_class_f1': {CLASS_NAMES[i]: float(f1[i]) for i in range(5)} if X_te_ana.shape[0] > 0 else None,
+        'delta_accuracy_pct': float(acc - acc_dig) if acc is not None else None,
+        'per_class_f1': {CLASS_NAMES[i]: float(f1[i]) for i in range(5)} if acc is not None else None,
         'n_train_analog': int(len(y_tr_ana)),
         'n_train_paired': int(len(X_circuit_tr)),
-        'n_test': int(len(y_te_ana)),
-        'n_ds2_records_cached': sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json"))),
+        'n_test': int(len(y_te_actual)) if acc is not None else 0,
+        'n_ds2_records_cached': n_ds2_cached,
         'standardization_mu': mu_std.tolist(),
         'standardization_sd': sd_std.tolist(),
         'calibration': {
@@ -586,12 +663,11 @@ def main():
     print("  INTEGRATION SUMMARY")
     print("=" * 74)
     print(f"  Strategy:    Calibrated VCVS (preserve 96.04% trained weights)")
-    if X_te_ana.shape[0] > 0:
-        n_ds2_cached = sum(1 for r in DS2 if os.path.exists(os.path.join(CACHE_DIR, f"{r}.json")))
-        print(f"  Integrated:  {acc:.2f}% ({len(y_te_ana)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
+    if acc is not None:
+        print(f"  Integrated:  {acc:.2f}% ({len(y_te_actual)} DS2 beats, {n_ds2_cached}/{len(DS2)} records)")
         print(f"  Digital ref: {acc_dig:.2f}% ({len(y_te_dig)} DS2 beats)")
         print(f"  Delta acc:   {acc - acc_dig:+.2f}%")
-        target_met = "YES" if acc >= 96.0 else "NO — needs investigation"
+        target_met = "YES" if acc >= 96.0 else "NO -- needs investigation"
         print(f"  96% target:  {target_met}")
         if n_ds2_cached < len(DS2):
             print(f"  NOTE: Only {n_ds2_cached}/{len(DS2)} DS2 records cached. Re-run after cache completes.")

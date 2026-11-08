@@ -1,0 +1,112 @@
+﻿======================================================================
+FULL INTER-PATIENT ACCURACY TEST — ALL ANALOG FRONTEND
+======================================================================
+  ALL 8 features from SKY130 analog circuits:
+    F1: RR diff (rr-ewma, alpha=0.10)    — rr_timing.spice
+    F2: RR asym (pre-post)               — rr_timing.spice
+    F3: Beat instability L0              — beat_instability.spice
+    F4: Beat instability L1              — beat_instability.spice
+    F5: P-wave diff (diode loads)        — pwave_diff.spice
+    F6: QRS width tail (R+28ms)          — qrs_width.spice
+    F7: QRS slope (R+14ms vs R+69ms)     — qrs_slope.spice
+    F8: QRS symmetry (R-peak)            — qrs_symmetry.spice
+  Classifier: RandomForest(n=300, depth=15, balanced)
+  Dataset:    MIT-BIH, DS1 train (22 rec) / DS2 test (22 rec)
+
+Running Python-proxy baseline (diff-based F1/F2, alpha=0.10)...
+  Python baseline: 95.45% (train=50977, test=49668, 45.1s)
+
+Running analog frontend simulations (ALL 8 features from circuits)...
+  [ 1/44] Record 101: 1769 beats (1722 circuit, 47 fallback), 7988.2s
+  [ 2/44] Record 106: 1923 beats (1872 circuit, 51 fallback), 4845.9s
+  [ 3/44] Record 108: 1672 beats (1628 circuit, 44 fallback), 4672.8s
+  [ 4/44] Record 109: 2402 beats (2338 circuit, 64 fallback), 3343.5s
+  [ 5/44] Record 112: 2409 beats (2345 circuit, 64 fallback), 4340.7s
+  [ 6/44] Record 114: 1783 beats (1736 circuit, 47 fallback), 2156.7s
+  [ 7/44] Record 115: 1853 beats (1804 circuit, 49 fallback), 2222.6s
+  [ 8/44] Record 116: 2288 beats (2227 circuit, 61 fallback), 2576.0s
+  [ 9/44] Record 118: 2162 beats (2105 circuit, 57 fallback), 2486.2s
+  [10/44] Record 119: 1885 beats (1835 circuit, 50 fallback), 2224.1s
+  [11/44] Record 122: 2350 beats (2288 circuit, 62 fallback), 2545.0s
+  [12/44] Record 124: 1535 beats (1494 circuit, 41 fallback), 1974.6s
+  [13/44] Record 201: 1862 beats (1813 circuit, 49 fallback), 2190.9s
+  [14/44] Record 203: 2828 beats (2753 circuit, 75 fallback), 2767.0s
+  [15/44] Record 205: 2520 beats (2453 circuit, 67 fallback), 2661.4s
+  [16/44] Record 207: 1764 beats (1717 circuit, 47 fallback), 2124.9s
+  [17/44] Record 208: 2805 beats (2731 circuit, 74 fallback), 2834.4s
+  [18/44] Record 209: 2850 beats (2775 circuit, 75 fallback), 2868.2s
+  [19/44] Record 215: 3192 beats (3108 circuit, 84 fallback), 55392.1s
+  [20/44] Record 220: 1942 beats (1890 circuit, 52 fallback), 4261.5s
+  [21/44] Record 223: 2470 beats (2405 circuit, 65 fallback), 2637.4s
+  [22/44] Record 230: 2140 beats (2083 circuit, 57 fallback), 2428.8s
+  [23/44] Record 100: 2157 beats (2100 circuit, 57 fallback), 2432.0s
+  [24/44] Record 103: 1976 beats (1924 circuit, 52 fallback), 2300.0s
+  [25/44] Record 105: 2440 beats (2375 circuit, 65 fallback), 2631.8s
+  [26/44] Record 111: 2014 beats (1961 circuit, 53 fallback), 2323.9s
+  [27/44] Record 113: 1703 beats (1658 circuit, 45 fallback), 2219.8s
+  [28/44] Record 117: 1455 beats (1416 circuit, 39 fallback), 1928.9s
+  [29/44] Record 121: 1767 beats (1720 circuit, 47 fallback), 2149.2s
+  [30/44] Record 123: 1440 beats (1402 circuit, 38 fallback), 1920.6s
+  [31/44] Record 200: 2469 beats (2404 circuit, 65 fallback), 2647.3s
+  [32/44] Record 202: 2026 beats (1972 circuit, 54 fallback), 2310.9s
+  [33/44] Record 210: 2514 beats (2447 circuit, 67 fallback), 2634.5s
+  [34/44] Record 212: 2608 beats (2539 circuit, 69 fallback), 5009.9s
+  [35/44] Record 213: 3085 beats (3003 circuit, 82 fallback), 3974.9s
+  [36/44] Record 214: 2146 beats (2089 circuit, 57 fallback), 5078.8s
+  [37/44] Record 219: 2044 beats (1990 circuit, 54 fallback), 4820.0s
+  [38/44] Record 221: 2303 beats (2242 circuit, 61 fallback), 4932.5s
+  [39/44] Record 222: 2356 beats (2294 circuit, 62 fallback), 2896.7s
+  [40/44] Record 228: 1947 beats (1895 circuit, 52 fallback), 2630.5s
+  [41/44] Record 231: 1489 beats (1449 circuit, 40 fallback), 2239.2s
+  [42/44] Record 232: 1688 beats (1643 circuit, 45 fallback), 2372.4s
+  [43/44] Record 233: 2923 beats (2846 circuit, 77 fallback), 3249.7s
+  [44/44] Record 234: 2613 beats (2544 circuit, 69 fallback), 3076.6s
+
+  Train: 48404 beats, Test: 47163 beats
+  Circuit features: 93035 beats (97.4%)
+  Python fallback:  2532 beats (2.6%)
+
+======================================================================
+RESULTS
+======================================================================
+  Python baseline accuracy:   95.45%
+  Analog frontend accuracy:   87.45%
+  Delta:                      -8.01%
+
+  Per-class breakdown (analog frontend):
+              precision    recall  f1-score   support
+
+           F      0.726     0.188     0.298       368
+           N      0.940     0.923     0.932     41986
+           Q      0.000     0.000     0.000         5
+           S      0.133     0.041     0.063      1750
+           V      0.439     0.762     0.557      3054
+
+    accuracy                          0.874     47163
+   macro avg      0.448     0.383     0.370     47163
+weighted avg      0.876     0.874     0.870     47163
+
+Feature importances:
+  F1:rr_ratio     0.1698
+  F4:bi_L1        0.1356
+  F6:width        0.1349
+  F2:rr_asym      0.1331
+  F3:bi_L0        0.1281
+  F8:symmetry     0.1076
+  F7:slope        0.1035
+  F5:pwave        0.0875
+
+======================================================================
+SPEARMAN RHO: Analog Circuit vs Python Reference
+======================================================================
+  Matched circuit beats: 93035
+
+  F1:rr_ratio      rho=-0.6241  p=0.00e+00  n=93035  [WARN]  rr_timing.spice
+  F2:rr_asym       rho=+0.8561  p=0.00e+00  n=93035  [OK]  rr_timing.spice
+  F3:bi_L0         rho=+0.8911  p=0.00e+00  n=93035  [OK]  beat_instability.spice
+  F4:bi_L1         rho=+0.8961  p=0.00e+00  n=93035  [OK]  beat_instability.spice
+  F5:pwave         rho=+0.9040  p=0.00e+00  n=93035  [OK]  pwave_diff.spice
+  F6:width         rho=+0.9565  p=0.00e+00  n=93035  [IDEAL]  qrs_width.spice
+  F7:slope         rho=+0.7167  p=0.00e+00  n=93035  [OK]  qrs_slope.spice
+  F8:symmetry      rho=+0.8637  p=0.00e+00  n=93035  [OK]  qrs_symmetry.spice
+======================================================================
