@@ -1,9 +1,9 @@
 * ============================================================
-* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v6 (active loads)
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v8 (hybrid loads ~1.7x)
 *
 * Captures ECG at R-peak, compares with previous via charge-share.
-* Output: signed difference (curr - prev) via active-mirror-loaded diff pair.
-* Gain ≈ gm*(ro_n||ro_p) ≈ 30x
+* Hybrid load = mirror W=2 + diode W=2 → gain ≈ 1.7x
+* Expands F3 (177mV→301mV), F4 (135mV→230mV)
 *
 * Triggers: capture_trig (at R-peak), copy_trig (R+300ms)
 * One instance per lead (L0 and L1).
@@ -25,11 +25,14 @@ XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
 XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
-* === DIFF PAIR: instability output (active mirror load) ===
+* === DIFF PAIR: instability output (hybrid load, gain ~1.7x) ===
 XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMi1 net_i1 curr_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMi2 instab_out prev_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Reference side: diode
 XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Output side: mirror + diode (Wdg=2 for ~1.7x gain)
+XMi4_mir instab_out net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMi4_dg instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
 .ends beat_instability

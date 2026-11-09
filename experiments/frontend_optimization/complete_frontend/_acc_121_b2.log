@@ -5,7 +5,7 @@ Note: Dynamic gmin stepping completed
 Note: No compatibility mode selected!
 
 
-Circuit: acc_105_b58
+Circuit: acc_121_b2
 
 Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
 
@@ -34,48 +34,48 @@ xrr.rpeak_bar                              0.9
 xrr.net_timer                              0.9
 xrr.xctimer.a                                0
 xrr.xctimer.b1                               0
-xrr.sf_out                            0.483243
-xrr.prev_node                         0.406384
+xrr.sf_out                            0.483227
+xrr.prev_node                         0.371305
 xrr.xcprev.a                                 0
 xrr.xcprev.b1                                0
-xrr.esamp_node                        0.405351
+xrr.esamp_node                        0.378401
 xrr.xcesamp.a                                0
 xrr.xcesamp.b1                               0
-xrr.ewma_node                         0.405799
+xrr.ewma_node                         0.378835
 xrr.xcewma.a                                 0
 xrr.xcewma.b1                                0
-xrr.tail_r                             0.24531
-xrr.net_r1                            0.340648
-f1_rr_ratio                           0.274151
-xrr.tail_a                            0.245377
-xrr.net_a1                            0.274232
-f2_rr_asym                            0.340175
-rr_timer                              0.483243
-rr_ewma                               0.405799
+xrr.tail_r                            0.242992
+xrr.net_r1                            0.363465
+f1_rr_ratio                           0.271396
+xrr.tail_a                            0.242574
+xrr.net_a1                            0.270897
+f2_rr_asym                            0.370103
+rr_timer                              0.483227
+rr_ewma                               0.378835
 xbi0.curr_node                       0.0711868
 xbi0.xccurr.a                                0
 xbi0.xccurr.b1                               0
-xbi0.esamp_node                       0.348755
+xbi0.esamp_node                       0.306974
 xbi0.xcesamp.a                               0
 xbi0.xcesamp.b1                              0
-xbi0.prev_node                          0.3438
+xbi0.prev_node                        0.305501
 xbi0.xcprev.a                                0
 xbi0.xcprev.b1                               0
-xbi0.tail_i                             0.1416
-xbi0.net_i1                           0.526789
-f3_bi_l0                              0.269253
+xbi0.tail_i                            0.11227
+xbi0.net_i1                           0.491498
+f3_bi_l0                               0.26962
 xbi1.curr_node                       0.0711868
 xbi1.xccurr.a                                0
 xbi1.xccurr.b1                               0
-xbi1.esamp_node                       0.291202
+xbi1.esamp_node                       0.260009
 xbi1.xcesamp.a                               0
 xbi1.xcesamp.b1                              0
-xbi1.prev_node                        0.296599
+xbi1.prev_node                        0.261645
 xbi1.xcprev.a                                0
 xbi1.xcprev.b1                               0
-xbi1.tail_i                           0.105491
-xbi1.net_i1                           0.483312
-f4_bi_l1                              0.269745
+xbi1.tail_i                           0.079176
+xbi1.net_i1                            0.45148
+f4_bi_l1                              0.270578
 xpw.shb                              0.0711868
 xpw.xcsb.a                                   0
 xpw.xcsb.b1                                  0
@@ -111,9 +111,9 @@ vpwb#branch                                  0
 vrry#branch                                  0
 vrrc#branch                                  0
 vrpk#branch                                  0
-vecg1#branch                      -2.94798e-14
-vecg0#branch                      -1.25076e-13
+vecg1#branch                      -2.94861e-14
+vecg0#branch                      -1.25077e-13
 vbias#branch                                 0
-vss#branch                         2.63713e-10
-vdd#branch                        -2.19338e-10
+vss#branch                         2.62594e-10
+vdd#branch                        -2.18243e-10
 

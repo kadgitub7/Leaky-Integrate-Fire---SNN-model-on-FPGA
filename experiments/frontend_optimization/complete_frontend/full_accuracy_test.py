@@ -213,9 +213,9 @@ Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
 Xsym ecg_l0 trig_rpeak_sh f8_symmetry vdd vss qrs_symmetry
 
 .ic V(xrr.net_timer)={ic_vals.get('rr_timer', VDD):.6f}
-.ic V(xrr.ewma_node)={ic_vals.get('rr_ewma', 0.40):.6f}
-.ic V(xrr.esamp_node)={ic_vals.get('rr_esamp', 0.40):.6f}
-.ic V(xrr.prev_node)={ic_vals.get('rr_prev', 0.40):.6f}
+.ic V(xrr.ewma_node)={ic_vals.get('rr_ewma', 0.29):.6f}
+.ic V(xrr.esamp_node)={ic_vals.get('rr_esamp', 0.29):.6f}
+.ic V(xrr.prev_node)={ic_vals.get('rr_prev', 0.29):.6f}
 .ic V(xbi0.prev_node)={ic_vals.get('bi0_prev', 0.30):.6f}
 .ic V(xbi0.esamp_node)={ic_vals.get('bi0_esamp', 0.30):.6f}
 .ic V(xbi1.prev_node)={ic_vals.get('bi1_prev', 0.30):.6f}
