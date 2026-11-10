@@ -1,0 +1,26 @@
+* FEATURE 5: P-wave Signed Difference — v8 (hybrid loads ~3x)
+*
+* Proxy: ECG_L0@R-131ms - ECG_L0@R-206ms (signed, no abs)
+* Hybrid load = mirror W=4 + diode W=1.5 → gain ≈ 3x
+* Expands 80mV → ~256mV
+*
+* Triggers: sample_base_trig (R-206ms), sample_peak_trig (R-131ms)
+
+.subckt pwave_diff ecg_in sample_base_trig sample_peak_trig pw_out vdd vss vbias
+
+XMsb ecg_in sample_base_trig shb vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsb shb vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+XMsp ecg_in sample_peak_trig shp vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsp shp vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMd1 dnet shp dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMd2 pw_out shb dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Reference side: diode
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+* Output side: mirror + diode (Wdg=1.5 for ~3x gain)
+XMd4_mir pw_out dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMd4_dg pw_out pw_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=1.5 nf=1
+
+.ends pwave_diff

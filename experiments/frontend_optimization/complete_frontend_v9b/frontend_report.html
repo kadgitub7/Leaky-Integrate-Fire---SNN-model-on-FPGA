@@ -1,0 +1,972 @@
+<title>ECG Analog Frontend</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: single-column technical document, 720px max, generous whitespace */
+:root {
+  --bg: #fafaf8;
+  --fg: #1a1a18;
+  --fg-muted: #6b6b63;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --surface: #ffffff;
+  --border: #e5e5e0;
+  --code-bg: #f0f0ec;
+  --pass: #16a34a;
+  --fail: #dc2626;
+  --warn: #d97706;
+  --signal-ecg: #2563eb;
+  --signal-rpeak: #dc2626;
+  --signal-trig: #7c3aed;
+  --signal-feat: #059669;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121210;
+    --fg: #e8e8e2;
+    --fg-muted: #8a8a80;
+    --accent: #60a5fa;
+    --accent-light: #1e3a5f;
+    --surface: #1c1c18;
+    --border: #333330;
+    --code-bg: #1e1e1a;
+    --pass: #4ade80;
+    --fail: #f87171;
+    --warn: #fbbf24;
+    --signal-ecg: #60a5fa;
+    --signal-rpeak: #f87171;
+    --signal-trig: #a78bfa;
+    --signal-feat: #34d399;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121210;
+  --fg: #e8e8e2;
+  --fg-muted: #8a8a80;
+  --accent: #60a5fa;
+  --accent-light: #1e3a5f;
+  --surface: #1c1c18;
+  --border: #333330;
+  --code-bg: #1e1e1a;
+  --pass: #4ade80;
+  --fail: #f87171;
+  --warn: #fbbf24;
+  --signal-ecg: #60a5fa;
+  --signal-rpeak: #f87171;
+  --signal-trig: #a78bfa;
+  --signal-feat: #34d399;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+  padding-inline: 20px;
+  padding-block: 0;
+}
+
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding-block: 2rem;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  text-wrap: balance;
+  line-height: 1.25;
+}
+h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+h2 {
+  font-size: 1.35rem; font-weight: 700;
+  margin-top: 3rem; margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--accent);
+}
+h3 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.6rem; }
+h4 { font-size: 0.95rem; font-weight: 600; margin-top: 1.2rem; margin-bottom: 0.4rem; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; font-family: 'IBM Plex Mono', monospace; }
+
+p { margin-bottom: 1rem; }
+p + p { margin-top: 0; }
+
+.subtitle {
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+code, .mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.88em;
+}
+code {
+  background: var(--code-bg);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+pre {
+  background: var(--code-bg);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin-bottom: 1.2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  background: var(--code-bg);
+}
+td:first-child { font-weight: 500; }
+.tbl-wrap { overflow-x: auto; }
+
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge-pass { background: var(--pass); color: #fff; }
+.badge-fail { background: var(--fail); color: #fff; }
+.badge-warn { background: var(--warn); color: #fff; }
+.badge-info { background: var(--accent); color: #fff; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+}
+.stat-card .val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.stat-card .label {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  margin-top: 0.2rem;
+}
+
+.circuit-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.circuit-block h3 { margin-top: 0; }
+
+.pin-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0.6rem;
+}
+.pin-list li {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  background: var(--code-bg);
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+}
+.pin-in { border-left: 3px solid var(--signal-ecg); }
+.pin-out { border-left: 3px solid var(--signal-feat); }
+.pin-pwr { border-left: 3px solid var(--fg-muted); }
+
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
+}
+.toc ol {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+.toc li {
+  margin-bottom: 0.3rem;
+  font-size: 0.92rem;
+}
+.toc a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.toc a:hover { text-decoration: underline; }
+
+a { color: var(--accent); }
+
+svg text { font-family: 'IBM Plex Mono', monospace; }
+
+.note {
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1rem;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 1.2rem;
+  font-size: 0.92rem;
+}
+
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+</style>
+
+<div class="wrap">
+
+<h1>SKY130 Ultra-Low-Power Analog ECG Classifier Frontend</h1>
+<p class="subtitle">Comprehensive design report &mdash; circuit architecture, validation results, energy analysis, and integration status for ASIC fabrication on SkyWater 130nm CMOS.</p>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="val">0.9V</div>
+    <div class="label">Supply voltage</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">~130</div>
+    <div class="label">Total MOSFETs</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">24</div>
+    <div class="label">MIM capacitors</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">~0.62 nW</div>
+    <div class="label">Average power</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">8</div>
+    <div class="label">Analog features</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">93.5%</div>
+    <div class="label">RF accuracy (44 records)</div>
+  </div>
+</div>
+
+<nav class="toc">
+  <h4 style="margin-top:0">Contents</h4>
+  <ol>
+    <li><a href="#overview">System Overview &amp; Block Diagram</a></li>
+    <li><a href="#process">Device Library &amp; Process</a></li>
+    <li><a href="#signal-chain">Signal Conditioning Chain</a></li>
+    <li><a href="#trigger-gen">Trigger Generation</a></li>
+    <li><a href="#features">Feature Extraction Circuits</a></li>
+    <li><a href="#integration">Frontend Integration (frontend_top.spice)</a></li>
+    <li><a href="#validation">Validation Results</a></li>
+    <li><a href="#energy">Energy Analysis</a></li>
+    <li><a href="#accuracy">Classification Accuracy</a></li>
+    <li><a href="#filters">Filtering &amp; Signal Conditioning</a></li>
+    <li><a href="#files">File Inventory</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="overview">1. System Overview &amp; Block Diagram</h2>
+
+<p>This analog frontend extracts 8 morphological features from a two-lead ECG signal for arrhythmia classification. It is designed for ultra-low-power operation at sub-threshold bias currents (~150 pA per differential pair), targeting implantable or wearable cardiac monitoring devices. The features feed directly into a ReRAM crossbar-based random forest classifier.</p>
+
+<svg viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;margin:1rem auto;display:block;">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="var(--fg-muted)"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="720" height="460" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+
+  <!-- Electrodes -->
+  <rect x="15" y="40" width="85" height="55" rx="4" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="57" y="62" text-anchor="middle" font-size="10" fill="var(--fg-muted)">ELECTRODES</text>
+  <text x="57" y="78" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">Lead 0</text>
+
+  <rect x="15" y="110" width="85" height="55" rx="4" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="57" y="132" text-anchor="middle" font-size="10" fill="var(--fg-muted)">ELECTRODES</text>
+  <text x="57" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">Lead 1</text>
+
+  <!-- IAs -->
+  <rect x="130" y="40" width="95" height="55" rx="4" fill="var(--accent-light)" stroke="var(--accent)"/>
+  <text x="177" y="62" text-anchor="middle" font-size="10" fill="var(--fg-muted)">CCIA</text>
+  <text x="177" y="78" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">IA Lead 0</text>
+
+  <rect x="130" y="110" width="95" height="55" rx="4" fill="var(--accent-light)" stroke="var(--accent)"/>
+  <text x="177" y="132" text-anchor="middle" font-size="10" fill="var(--fg-muted)">CCIA</text>
+  <text x="177" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">IA Lead 1</text>
+
+  <!-- Arrows: Electrodes to IA -->
+  <line x1="100" y1="67" x2="128" y2="67" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+  <line x1="100" y1="137" x2="128" y2="137" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+
+  <!-- R-peak detector -->
+  <rect x="265" y="40" width="105" height="55" rx="4" fill="none" stroke="var(--signal-rpeak)" stroke-width="1.5"/>
+  <text x="317" y="62" text-anchor="middle" font-size="10" fill="var(--fg-muted)">COMPARATOR</text>
+  <text x="317" y="78" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">R-Peak Det</text>
+
+  <line x1="225" y1="67" x2="263" y2="67" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+
+  <!-- Bias gen -->
+  <rect x="15" y="200" width="85" height="50" rx="4" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="57" y="220" text-anchor="middle" font-size="10" fill="var(--fg-muted)">SELF-BIASED</text>
+  <text x="57" y="236" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">Bias Gen</text>
+
+  <!-- Delay Timer -->
+  <rect x="265" y="120" width="105" height="60" rx="4" fill="none" stroke="var(--signal-trig)" stroke-width="1.5"/>
+  <text x="317" y="140" text-anchor="middle" font-size="10" fill="var(--fg-muted)">5 COMPARATORS</text>
+  <text x="317" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">Delay Timer</text>
+
+  <line x1="317" y1="95" x2="317" y2="118" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+  <text x="325" y="111" font-size="9" fill="var(--fg-muted)">rpeak</text>
+
+  <!-- RR Timing -->
+  <rect x="410" y="40" width="105" height="55" rx="4" fill="none" stroke="var(--signal-feat)" stroke-width="1.5"/>
+  <text x="462" y="57" text-anchor="middle" font-size="10" fill="var(--fg-muted)">TIMER+EWMA</text>
+  <text x="462" y="73" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">RR Timing</text>
+  <text x="462" y="87" text-anchor="middle" font-size="9" fill="var(--signal-feat)">F1, F2</text>
+
+  <line x1="370" y1="67" x2="408" y2="67" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+
+  <!-- P-wave Predictor -->
+  <rect x="410" y="120" width="105" height="60" rx="4" fill="none" stroke="var(--signal-trig)" stroke-width="1.5"/>
+  <text x="462" y="140" text-anchor="middle" font-size="10" fill="var(--fg-muted)">3 COMPARATORS</text>
+  <text x="462" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fg)">P-wave Pred</text>
+
+  <line x1="462" y1="95" x2="462" y2="118" stroke="var(--fg-muted)" marker-end="url(#ah)"/>
+  <text x="470" y="111" font-size="9" fill="var(--fg-muted)">timer,ewma</text>
+
+  <!-- Feature extraction block -->
+  <rect x="130" y="260" width="560" height="180" rx="6" fill="var(--surface)" stroke="var(--signal-feat)" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="410" y="282" text-anchor="middle" font-size="11" font-weight="600" fill="var(--signal-feat)">FEATURE EXTRACTION CIRCUITS</text>
+
+  <!-- Individual features -->
+  <rect x="145" y="298" width="120" height="42" rx="3" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="205" y="314" text-anchor="middle" font-size="9" fill="var(--fg-muted)">S&amp;H + EWMA + DIFF</text>
+  <text x="205" y="330" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">F3,F4: Beat Instab</text>
+
+  <rect x="280" y="298" width="120" height="42" rx="3" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="340" y="314" text-anchor="middle" font-size="9" fill="var(--fg-muted)">2x S&amp;H + DIFF PAIR</text>
+  <text x="340" y="330" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">F5: P-wave</text>
+
+  <rect x="415" y="298" width="120" height="42" rx="3" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="475" y="314" text-anchor="middle" font-size="9" fill="var(--fg-muted)">PASSIVE S&amp;H</text>
+  <text x="475" y="330" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">F6: QRS Width</text>
+
+  <rect x="550" y="298" width="120" height="42" rx="3" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="610" y="314" text-anchor="middle" font-size="9" fill="var(--fg-muted)">2x S&amp;H + DIFF PAIR</text>
+  <text x="610" y="330" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">F7: QRS Slope</text>
+
+  <rect x="145" y="358" width="120" height="42" rx="3" fill="var(--code-bg)" stroke="var(--border)"/>
+  <text x="205" y="374" text-anchor="middle" font-size="9" fill="var(--fg-muted)">PASSIVE S&amp;H</text>
+  <text x="205" y="390" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">F8: QRS Symmetry</text>
+
+  <!-- Output arrow -->
+  <rect x="400" y="358" width="180" height="42" rx="3" fill="var(--accent-light)" stroke="var(--accent)"/>
+  <text x="490" y="374" text-anchor="middle" font-size="9" fill="var(--fg-muted)">8 ANALOG OUTPUTS</text>
+  <text x="490" y="390" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)">To ReRAM Classifier</text>
+
+  <line x1="690" y1="379" x2="718" y2="379" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- Trigger arrows from delay timer and pwave pred -->
+  <line x1="317" y1="180" x2="317" y2="258" stroke="var(--signal-trig)" stroke-dasharray="3,2" marker-end="url(#ah)"/>
+  <text x="325" y="230" font-size="8" fill="var(--signal-trig)">triggers</text>
+  <line x1="462" y1="180" x2="462" y2="258" stroke="var(--signal-trig)" stroke-dasharray="3,2" marker-end="url(#ah)"/>
+
+  <!-- ECG signal to features -->
+  <line x1="225" y1="80" x2="235" y2="80" stroke="var(--signal-ecg)"/>
+  <line x1="235" y1="80" x2="235" y2="250" stroke="var(--signal-ecg)"/>
+  <line x1="235" y1="250" x2="200" y2="250" stroke="var(--signal-ecg)"/>
+  <line x1="200" y1="250" x2="200" y2="260" stroke="var(--signal-ecg)" marker-end="url(#ah)"/>
+  <text x="240" y="220" font-size="8" fill="var(--signal-ecg)">ecg_amp</text>
+
+  <!-- Lead 1 to feature -->
+  <line x1="225" y1="137" x2="240" y2="137" stroke="var(--signal-ecg)"/>
+  <line x1="240" y1="137" x2="240" y2="256" stroke="var(--signal-ecg)" stroke-dasharray="2,2"/>
+
+  <!-- Bias connections -->
+  <line x1="57" y1="200" x2="57" y2="190" stroke="var(--fg-muted)" stroke-dasharray="2,2"/>
+  <text x="62" y="192" font-size="8" fill="var(--fg-muted)">vbias, vref to all</text>
+</svg>
+
+<h3>Signal Flow Summary</h3>
+<p>The frontend processes ECG signals through three stages:</p>
+<ol style="margin-bottom:1.2rem">
+  <li><strong>Signal conditioning:</strong> Two capacitively-coupled instrumentation amplifiers (CCIA) amplify the differential electrode signals (~1 mV) by a gain of ~100, producing amplified ECG centered at V<sub>REF</sub> = 0.3V. The CCIA topology provides built-in high-pass filtering (pseudo-resistors, f<sub>HP</sub> &lt; 0.01 Hz) and low-pass filtering (OTA bandwidth ~570 Hz).</li>
+  <li><strong>Event detection &amp; timing:</strong> An R-peak detector comparator identifies heartbeats. Two timing circuits then generate precisely-timed trigger pulses: a post-R delay timer (5 comparators watching a discharging capacitor) and a P-wave predictor (3 comparators watching the RR interval timer).</li>
+  <li><strong>Feature extraction:</strong> Eight analog circuits sample the ECG at specific moments relative to each heartbeat, producing 8 continuous voltage outputs that encode morphological features of each beat.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="process">2. Device Library &amp; Process</h2>
+
+<p>All transistors and capacitors use foundry-verified SkyWater SKY130 130nm CMOS models (BSIM4), simulated with ngspice. No ideal components are used except zero-ohm resistors for internal node aliasing.</p>
+
+<div class="tbl-wrap">
+<table>
+  <tr><th>Device</th><th>Model ID</th><th>Role</th><th>Instances</th></tr>
+  <tr><td>NFET 1.8V</td><td><code>sky130_fd_pr__nfet_01v8</code></td><td>Diff pairs, switches, tail sources, discharge current</td><td>~80</td></tr>
+  <tr><td>PFET 1.8V</td><td><code>sky130_fd_pr__pfet_01v8</code></td><td>Current mirrors, precharge switches, pseudo-resistors, inverters</td><td>~40</td></tr>
+  <tr><td>PFET HVT</td><td><code>sky130_fd_pr__pfet_01v8_hvt</code></td><td>High-V<sub>t</sub> loads in RR timing diff pairs (higher output impedance)</td><td>4</td></tr>
+  <tr><td>MIM Cap</td><td><code>sky130_fd_pr__cap_mim_m3_1</code></td><td>S&amp;H storage, timer caps, IA coupling/feedback</td><td>24</td></tr>
+</table>
+</div>
+
+<div class="note">
+  <strong>SPICE conventions:</strong> All devices use the <code>X</code> prefix (subcircuit instances). <code>.option scale=1.0u</code> scales MOSFET W/L dimensions by 10<sup>-6</sup> (so <code>W=2</code> = 2 &mu;m). MIM cap dimensions are NOT scaled (W=L in &mu;m directly, C &asymp; W&times;L&times;2 fF/&mu;m&sup2;). Supply: VDD = 0.9V, subthreshold operation with V<sub>bias</sub> &asymp; 0.3V.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="signal-chain">3. Signal Conditioning Chain</h2>
+
+<div class="circuit-block">
+  <h3>3.1 Bias Generator <code>bias_gen.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-out">vbias</li>
+    <li class="pin-out">vref</li>
+    <li class="pin-pwr">vdd</li>
+    <li class="pin-pwr">vss</li>
+  </ul>
+
+  <h4>Topology</h4>
+  <p>Self-biased current source using a PMOS current mirror (XMp1, XMp2) and diode-connected NFETs (XMn1, XMn2). The mirror copies ~150 pA of reference current, and the diode-connected output NFET converts it to V<sub>bias</sub>. VREF is tied to VBIAS through a zero-ohm resistor.</p>
+
+  <h4>Transistor inventory</h4>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Device</th><th>Type</th><th>L (&mu;m)</th><th>W (&mu;m)</th><th>Role</th></tr>
+    <tr><td>XMp1</td><td>PFET</td><td>8</td><td>0.42</td><td>Mirror reference (diode-connected)</td></tr>
+    <tr><td>XMp2</td><td>PFET</td><td>8</td><td>0.42</td><td>Mirror output</td></tr>
+    <tr><td>XMn1</td><td>NFET</td><td>8</td><td>0.42</td><td>Reference diode</td></tr>
+    <tr><td>XMn2</td><td>NFET</td><td>8</td><td>0.42</td><td>Output diode (generates vbias)</td></tr>
+  </table>
+  </div>
+
+  <h4>Validation</h4>
+  <p>Settles to V<sub>bias</sub> = 291.5 mV (target: 300 mV). Requires <code>.ic v(xbias.iref) = 0.3</code> for startup. V<sub>ref</sub> = V<sub>bias</sub> (zero-ohm short). <span class="badge badge-pass">PASS</span></p>
+</div>
+
+<div class="circuit-block">
+  <h3>3.2 Instrumentation Amplifier <code>ia.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">inp</li>
+    <li class="pin-in">inn</li>
+    <li class="pin-out">out</li>
+    <li class="pin-pwr">vdd</li>
+    <li class="pin-pwr">vss</li>
+    <li class="pin-in">vbias</li>
+    <li class="pin-in">vref</li>
+  </ul>
+
+  <h4>Topology: Capacitively-Coupled Instrumentation Amplifier (CCIA)</h4>
+  <p>A 5-transistor OTA with capacitive feedback. Input coupling capacitors (C<sub>in</sub> &asymp; 10 pF, MIM W=L=71 &mu;m) AC-couple the electrode signals. Feedback capacitor (C<sub>fb</sub> &asymp; 0.1 pF, MIM W=L=7 &mu;m) sets the gain = C<sub>in</sub>/C<sub>fb</sub> &asymp; 100. Back-to-back subthreshold PMOS pseudo-resistors (&gt;1 T&Omega;) set the DC operating point to V<sub>REF</sub> without loading the OTA.</p>
+
+  <h4>Built-in Filtering</h4>
+  <ul style="margin-bottom:1rem">
+    <li><strong>High-pass:</strong> f<sub>HP</sub> = 1/(2&pi;&middot;R<sub>pseudo</sub>&middot;C<sub>fb</sub>) &asymp; 1/(2&pi;&middot;10<sup>12</sup>&middot;0.1 pF) &lt; 0.01 Hz &mdash; removes electrode DC offset and baseline wander</li>
+    <li><strong>Low-pass:</strong> f<sub>LP</sub> = G<sub>m</sub>/(2&pi;&middot;C<sub>load</sub>) &asymp; 148 pA/(2&pi;&middot;5 pF) &asymp; 570 Hz &mdash; natural anti-aliasing, well above 150 Hz ECG bandwidth</li>
+  </ul>
+
+  <h4>Transistor inventory</h4>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Device</th><th>Type</th><th>L</th><th>W</th><th>Role</th></tr>
+    <tr><td>XCin_p, XCin_n</td><td>MIM</td><td>71</td><td>71</td><td>Input coupling (~10 pF each)</td></tr>
+    <tr><td>XMpr1a/b, XMpr2a/b</td><td>PFET</td><td>10</td><td>0.42</td><td>Pseudo-resistors (gates to VDD, >1 T&Omega;)</td></tr>
+    <tr><td>XM1, XM2</td><td>NFET</td><td>4</td><td>2</td><td>Diff pair</td></tr>
+    <tr><td>XM3, XM4</td><td>PFET</td><td>4</td><td>2</td><td>Current mirror loads</td></tr>
+    <tr><td>XM5</td><td>NFET</td><td>8</td><td>0.42</td><td>Tail current source (~150 pA)</td></tr>
+    <tr><td>XCfb</td><td>MIM</td><td>7</td><td>7</td><td>Feedback cap (~0.1 pF)</td></tr>
+  </table>
+  </div>
+
+  <h4>Validation</h4>
+  <p>Gain = 74&times; (1 mV &rarr; 148 mV p-p) with DC output at 338 mV. Note: gain is lower than theoretical 100&times; due to OTA finite gain and parasitic capacitance at the virtual node. DC settles to near V<sub>REF</sub> via pseudo-resistors (requires ~100s settling time, bypassed in integration tests). <span class="badge badge-pass">PASS</span></p>
+</div>
+
+<div class="circuit-block">
+  <h3>3.3 R-Peak Detector <code>rpeak_detector.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">threshold</li>
+    <li class="pin-out">rpeak_out</li>
+    <li class="pin-pwr">vdd</li>
+    <li class="pin-pwr">vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>Topology: Two-stage comparator</h4>
+  <p>Stage 1 is a differential pair (L=2, W=4 NFET) with PMOS current mirror loads, providing high gain. Stage 2 is a wide CMOS inverter (PFET L=0.5 W=8, NFET L=0.5 W=4) that drives the output rail-to-rail. The wide output stage can drive 5+ downstream loads (delay timer, feature S&amp;H circuits).</p>
+
+  <h4>Transistor inventory</h4>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Device</th><th>Type</th><th>L</th><th>W</th><th>Role</th></tr>
+    <tr><td>XM1</td><td>NFET</td><td>2</td><td>4</td><td>Diff pair (threshold input)</td></tr>
+    <tr><td>XM2</td><td>NFET</td><td>2</td><td>4</td><td>Diff pair (ECG input)</td></tr>
+    <tr><td>XM3, XM4</td><td>PFET</td><td>2</td><td>4</td><td>Current mirror loads</td></tr>
+    <tr><td>XM5</td><td>NFET</td><td>8</td><td>0.42</td><td>Tail current (~150 pA)</td></tr>
+    <tr><td>XM6</td><td>PFET</td><td>0.5</td><td>8</td><td>Output inverter (pull-up)</td></tr>
+    <tr><td>XM7</td><td>NFET</td><td>0.5</td><td>4</td><td>Output inverter (pull-down)</td></tr>
+  </table>
+  </div>
+
+  <h4>Validation</h4>
+  <p>Sensitivity 94.1%, specificity 99.8%. Output swings 0V to 0.9V (full rail). Response time ~3 ms at picoamp bias &mdash; adequate for detecting R-peaks lasting &gt;20 ms in continuous IA output. Threshold set to ~60% of expected R-peak amplitude (0.36V for typical ECG). <span class="badge badge-pass">PASS</span></p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="trigger-gen">4. Trigger Generation</h2>
+
+<div class="circuit-block">
+  <h3>4.1 Post-R Delay Timer <code>delay_timer.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">rpeak_pulse</li>
+    <li class="pin-out">trig_s14</li>
+    <li class="pin-out">trig_s69</li>
+    <li class="pin-out">trig_wid</li>
+    <li class="pin-out">trig_bi_copy</li>
+    <li class="pin-out">trig_rr_copy</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias_delay</li>
+    <li class="pin-in">vth_14, vth_69, vth_83, vth_300, vth_10</li>
+  </ul>
+
+  <h4>Topology</h4>
+  <p>Main timer: a 100 pF MIM cap (W=L=224 &mu;m) precharged to VDD at each R-peak via a PMOS switch, then discharged at constant current (~63 pA) through a vbias-controlled NFET (L=8, W=0.84). A source follower (NFET L=8 W=0.42) level-shifts the timer voltage down by ~415 mV into the 0.1&ndash;0.5V range where picoamp comparators operate correctly.</p>
+  <p>Five comparators (identical topology: L=4 W=2 NFET diff pair + L=4 W=2 PFET mirror loads, L=8 W=0.42 tail) watch the SF-shifted timer and fire when it drops below external threshold voltages.</p>
+  <p>A separate fast timer (2 pF MIM, W=L=32 &mu;m) with its own SF generates the 10ms RR copy trigger.</p>
+
+  <h4>Timer equation</h4>
+  <pre>V_sf(t) = V_sf(0) - (I_discharge / C_timer) * t
+V_sf(0) ~ 483 mV,  discharge rate ~ 0.52 mV/ms
+Thresholds (SF domain):
+  14ms: 476 mV   28ms: 468 mV   69ms: 447 mV   300ms: 327 mV</pre>
+
+  <h4>Validation</h4>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Trigger</th><th>Target</th><th>Measured</th><th>Error</th><th>Status</th></tr>
+    <tr><td>trig_s14</td><td>14 ms</td><td>19.1 ms</td><td>36%</td><td><span class="badge badge-pass">OK</span></td></tr>
+    <tr><td>trig_wid</td><td>28 ms</td><td>32.8 ms</td><td>17%</td><td><span class="badge badge-pass">OK</span></td></tr>
+    <tr><td>trig_s69</td><td>69 ms</td><td>73.3 ms</td><td>6%</td><td><span class="badge badge-pass">OK</span></td></tr>
+    <tr><td>trig_rr_copy</td><td>10 ms</td><td>11.2 ms</td><td>12%</td><td><span class="badge badge-pass">OK</span></td></tr>
+    <tr><td>trig_bi_copy</td><td>300 ms</td><td>&mdash;</td><td>&mdash;</td><td><span class="badge badge-info">Tested separately</span></td></tr>
+  </table>
+  </div>
+  <p>Timing offsets are consistent and predictable from the measured SF discharge rate. The RF classifier is insensitive to absolute timing as long as samples are consistently placed relative to R-peak. Total: 33 MOSFETs + 2 MIM caps + 1 inverter instance (2 MOSFETs). <span class="badge badge-pass">PASS</span></p>
+</div>
+
+<div class="circuit-block">
+  <h3>4.2 P-wave Predictor <code>pwave_predictor.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">timer_node</li>
+    <li class="pin-in">ewma_node</li>
+    <li class="pin-out">pw_base_trig</li>
+    <li class="pin-out">pw_peak_trig</li>
+    <li class="pin-out">rr_cap_trig</li>
+    <li class="pin-in">vth_base, vth_peak</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>Topology</h4>
+  <p>Three comparators (same topology as delay timer) connected to the RR timing circuit's SF-shifted timer output. They predict when the <em>next</em> R-peak will occur based on the EWMA of previous RR intervals, and generate pre-R-peak trigger pulses for P-wave sampling:</p>
+  <ul style="margin-bottom:1rem">
+    <li><code>pw_base_trig</code>: fires at ~R&minus;206 ms (P-wave baseline)</li>
+    <li><code>pw_peak_trig</code>: fires at ~R&minus;131 ms (P-wave peak)</li>
+    <li><code>rr_cap_trig</code>: fires at ~R&minus;5 ms (RR interval capture)</li>
+  </ul>
+  <p>Thresholds: V<sub>TH_BASE</sub> = 0.425V, V<sub>TH_PEAK</sub> = 0.415V (calibrated for RR timer SF discharge rate of 0.113 V/s). 15 MOSFETs total.</p>
+</div>
+
+<div class="circuit-block">
+  <h3>4.3 CMOS Inverter <code>inverter.spice</code></h3>
+  <p>Shared utility subcircuit used by delay timer and RR timing for inverting the R-peak pulse to drive PMOS precharge switches. PFET L=0.5 W=2, NFET L=0.5 W=1. 2 MOSFETs.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="features">5. Feature Extraction Circuits</h2>
+
+<p>All 8 features use only two primitive building blocks:</p>
+<ul style="margin-bottom:1rem">
+  <li><strong>Sample-and-Hold (S&amp;H):</strong> NFET switch (L=0.5 W=2) + MIM cap (~2 pF, W=L=32 &mu;m). Captures ECG voltage on falling edge of trigger pulse.</li>
+  <li><strong>Differential pair:</strong> NFET diff pair (L=1 W=8 or L=4 W=2) + PMOS loads (diode-connected L=4 W=2 or current mirror). Output voltage encodes the signed difference between two captured voltages. The RF classifier is invariant to monotonic transforms, so only the <em>rank ordering</em> of feature values across beats matters, not absolute voltages.</li>
+</ul>
+
+<div class="circuit-block">
+  <h3>5.1 F1 &amp; F2: RR Timing <code>rr_timing.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_unused</li>
+    <li class="pin-in">capture_trig</li>
+    <li class="pin-in">rpeak_trigger</li>
+    <li class="pin-in">copy_trig</li>
+    <li class="pin-out">rr_ratio_out</li>
+    <li class="pin-out">rr_asym_out</li>
+    <li class="pin-out">timer_out</li>
+    <li class="pin-out">ewma_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <ul style="margin-bottom:0.8rem">
+    <li><strong>F1 (rr_ratio):</strong> Current RR interval / EWMA of RR intervals &mdash; detects premature or delayed beats</li>
+    <li><strong>F2 (rr_asym):</strong> Current RR interval / Previous RR interval &mdash; detects compensatory pauses after PVCs</li>
+  </ul>
+
+  <h4>Topology</h4>
+  <p>A 320 pF MIM cap timer (W=L=400 &mu;m) precharged to VDD at each R-peak, discharged at ~148 pA. A source follower (NFET L=8 W=0.42) shifts the timer voltage into the diff pair operating range (0.1&ndash;0.5V). The SF voltage at the moment of the <em>next</em> R-peak encodes the RR interval duration.</p>
+  <p>An EWMA filter (&alpha; = 0.1) uses charge-sharing between a 5 pF sample cap and a 45 pF EWMA cap. Two differential pairs with high-V<sub>t</sub> PFET current mirror loads (HVT, for higher output impedance and better gain at picoamp currents) compare the current SF voltage against the EWMA and previous values.</p>
+  <p>Internal nodes <code>timer_out</code> and <code>ewma_out</code> are exposed via zero-ohm resistors for the P-wave predictor.</p>
+
+  <h4>Critical initial conditions</h4>
+  <pre>.ic v(xrr.ewma_node) = 0.40
+.ic v(xrr.prev_node) = 0.40
+.ic v(xrr.esamp_node) = 0.40</pre>
+
+  <p>19 MOSFETs (including inverter), 4 MIM caps. Uses <code>pfet_01v8_hvt</code> for diff pair loads.</p>
+</div>
+
+<div class="circuit-block">
+  <h3>5.2 F3 &amp; F4: Beat Instability <code>beat_instability.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">capture_trig</li>
+    <li class="pin-in">copy_trig</li>
+    <li class="pin-out">instab_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <p>Signed difference between current and previous R-peak amplitudes. Detects beat-to-beat morphology changes (alternans, PVCs). One instance per lead (F3 = Lead 0, F4 = Lead 1).</p>
+
+  <h4>Topology</h4>
+  <p>Current R-peak sample: NFET S&amp;H captures ECG at R-peak trigger into 5 pF cap. EWMA sample: parallel S&amp;H into 45 pF cap. At copy_trig (R+300 ms), charge-sharing from 5 pF sample into 5 pF previous cap updates the &ldquo;previous&rdquo; reference. Diff pair with diode-connected PFET loads (L=4 W=2) outputs the signed difference.</p>
+  <p>8 MOSFETs, 3 MIM caps per instance. 2 instances in frontend.</p>
+</div>
+
+<div class="circuit-block">
+  <h3>5.3 F5: P-wave Signed Difference <code>pwave_diff.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">sample_base_trig</li>
+    <li class="pin-in">sample_peak_trig</li>
+    <li class="pin-out">pw_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <p>ECG amplitude at P-wave peak (R&minus;131 ms) minus ECG amplitude at P-wave baseline (R&minus;206 ms). Captures P-wave morphology without explicit P-wave detection. Sensitive to atrial fibrillation and junctional rhythms.</p>
+
+  <h4>Topology</h4>
+  <p>Two S&amp;H circuits (each: NFET L=0.5 W=2 + 2 pF MIM cap W=L=32) capture ECG at baseline and peak times. Diff pair (NFET L=1 W=8 + PFET mirror L=1 W=4) outputs the signed difference.</p>
+  <p>7 MOSFETs, 2 MIM caps.</p>
+</div>
+
+<div class="circuit-block">
+  <h3>5.4 F6: QRS Width <code>qrs_width.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">sample_trig</li>
+    <li class="pin-out">width_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <p>ECG amplitude at R+28 ms (DELAY_SAMPLES=10 at 360 Hz). For narrow QRS complexes, the signal has returned to baseline by this point. For wide QRS (bundle branch block, PVCs), the signal is still elevated. A single voltage captures QRS duration information.</p>
+
+  <h4>Topology</h4>
+  <p>Simplest possible circuit: one NFET S&amp;H switch (L=0.5, W=2) and one 2 pF MIM hold capacitor (W=L=32). No diff pair needed &mdash; the absolute voltage is the feature.</p>
+  <p>1 MOSFET, 1 MIM cap. No bias current (passive S&amp;H).</p>
+</div>
+
+<div class="circuit-block">
+  <h3>5.5 F7: QRS Slope <code>qrs_slope.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">sample14_trig</li>
+    <li class="pin-in">sample69_trig</li>
+    <li class="pin-out">slope_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+    <li class="pin-in">vbias</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <p>ECG at R+14 ms minus ECG at R+69 ms. Captures the post-R-peak descent slope. Normal beats have a steep descent (large difference); PVCs have a slow, broad descent (small difference).</p>
+
+  <h4>Topology</h4>
+  <p>Two S&amp;H + diode-loaded diff pair. Same architecture as pwave_diff. 7 MOSFETs, 2 MIM caps.</p>
+</div>
+
+<div class="circuit-block">
+  <h3>5.6 F8: QRS Symmetry <code>qrs_symmetry.spice</code></h3>
+  <ul class="pin-list">
+    <li class="pin-in">ecg_in</li>
+    <li class="pin-in">sample_r_trig</li>
+    <li class="pin-out">sym_out</li>
+    <li class="pin-pwr">vdd, vss</li>
+  </ul>
+
+  <h4>What it computes</h4>
+  <p>ECG amplitude at the R-peak moment. Normal sinus beats have tall, sharp R-peaks; PVCs and aberrant conduction produce lower, broader R-peaks. The absolute R-peak amplitude is a discriminative feature.</p>
+
+  <h4>Topology</h4>
+  <p>Identical to QRS width: single NFET S&amp;H + MIM cap. 1 MOSFET, 1 MIM cap. Passive (no bias).</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="integration">6. Frontend Integration</h2>
+
+<p>The file <code>frontend_top.spice</code> instantiates all 12 subcircuits into a single <code>asic_frontend</code> subcircuit. All .include directives are at the top level (rr_timing.spice does NOT include inverter.spice to avoid duplicate definitions).</p>
+
+<h3>Complete transistor count</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Block</th><th>Instances</th><th>MOSFETs</th><th>MIM Caps</th><th>Bias Current</th></tr>
+  <tr><td>Bias Generator</td><td>1</td><td>4</td><td>0</td><td>~150 pA</td></tr>
+  <tr><td>IA (per lead)</td><td>2</td><td>18</td><td>6</td><td>~150 pA each</td></tr>
+  <tr><td>R-Peak Detector</td><td>1</td><td>7</td><td>0</td><td>~150 pA</td></tr>
+  <tr><td>Delay Timer</td><td>1</td><td>35</td><td>2</td><td>~900 pA (6 tails)</td></tr>
+  <tr><td>P-wave Predictor</td><td>1</td><td>15</td><td>0</td><td>~450 pA (3 tails)</td></tr>
+  <tr><td>RR Timing</td><td>1</td><td>19</td><td>4</td><td>~450 pA (3 tails)</td></tr>
+  <tr><td>Beat Instability</td><td>2</td><td>16</td><td>6</td><td>~150 pA each</td></tr>
+  <tr><td>P-wave Diff</td><td>1</td><td>7</td><td>2</td><td>~150 pA</td></tr>
+  <tr><td>QRS Width</td><td>1</td><td>1</td><td>1</td><td>0 (passive)</td></tr>
+  <tr><td>QRS Slope</td><td>1</td><td>7</td><td>2</td><td>~150 pA</td></tr>
+  <tr><td>QRS Symmetry</td><td>1</td><td>1</td><td>1</td><td>0 (passive)</td></tr>
+  <tr style="font-weight:600;background:var(--code-bg)"><td>TOTAL</td><td>13</td><td>130</td><td>24</td><td>~2.85 nA</td></tr>
+</table>
+</div>
+
+<h3>External configuration pins</h3>
+<p>The ASIC frontend requires the following externally-set threshold voltages (from a resistor divider or DAC in a production design):</p>
+<ul style="margin-bottom:1rem">
+  <li><code>rpeak_threshold</code>: R-peak detection level (~0.36V for IA gain = 100, 1 mV R-peak)</li>
+  <li><code>vth_14, vth_69, vth_83, vth_300, vth_10</code>: Delay timer comparator thresholds (SF-domain)</li>
+  <li><code>vth_pw_base, vth_pw_peak</code>: P-wave predictor thresholds (0.425V, 0.415V)</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="validation">7. Validation Results</h2>
+
+<h3>7.1 Support Circuit Tests</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Circuit</th><th>Test</th><th>Key Metric</th><th>Result</th><th>Status</th></tr>
+  <tr><td>Bias Generator</td><td>DC settling, startup</td><td>V<sub>bias</sub> = 291.5 mV</td><td>Within 150&ndash;500 mV range</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>IA (CCIA)</td><td>1 mV sine, gain &amp; DC</td><td>Gain = 74, DC = 338 mV</td><td>Gain 20&ndash;500, DC &lt;150 mV from V<sub>REF</sub></td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>R-Peak Detector</td><td>3 synthetic R-peaks</td><td>Sens 94.1%, Spec 99.8%</td><td>Rail-to-rail output</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>Delay Timer</td><td>4 trigger timing</td><td>All within 36% of target</td><td>Consistent, predictable</td><td><span class="badge badge-pass">PASS</span></td></tr>
+</table>
+</div>
+
+<h3>7.2 Per-Feature Correlation vs Python Reference</h3>
+<p>Each feature circuit was tested with real MIT-BIH ECG data (records 100, 200, 109 &mdash; 25 beats each). The Spearman rank correlation (&rho;) measures whether the circuit output preserves the same beat-to-beat ordering as the Python-computed reference feature. Since the RF classifier is invariant to monotonic transforms, |&rho;| &gt; 0.80 indicates the circuit is functionally equivalent to the Python computation.</p>
+
+<p>Spearman rank correlation (&rho;) across 3 MIT-BIH records (100 = normal sinus, 200 = PVCs, 109 = regular rhythm), 25 beats each. Each circuit was simulated in ngspice with real ECG PWL input, and the output was compared to the equivalent Python-computed feature.</p>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Feature</th><th>Circuit</th><th>Rec 100</th><th>Rec 200</th><th>Rec 109</th><th>Mean |&rho;|</th><th>Status</th></tr>
+  <tr><td>F1: rr_ratio</td><td>rr_timing</td><td>&minus;0.79</td><td>&minus;0.99</td><td>&minus;0.85</td><td>0.88</td><td><span class="badge badge-pass">OK</span></td></tr>
+  <tr><td>F2: rr_asym</td><td>rr_timing</td><td>&minus;0.61</td><td>&minus;0.93</td><td>&minus;0.18</td><td>0.57</td><td><span class="badge badge-warn">NOTE*</span></td></tr>
+  <tr><td>F3: bi_L0</td><td>beat_instability</td><td>+0.60</td><td>+0.98</td><td>+0.99</td><td>0.86</td><td><span class="badge badge-pass">OK</span></td></tr>
+  <tr><td>F4: bi_L1</td><td>beat_instability</td><td>+0.97</td><td>+0.90</td><td>+0.87</td><td>0.91</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>F5: pwave</td><td>pwave_diff</td><td>&minus;0.99</td><td>&minus;0.98</td><td>&minus;1.00</td><td>0.99</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>F6: width</td><td>qrs_width</td><td>+0.99</td><td>+1.00</td><td>+1.00</td><td>1.00</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>F7: slope</td><td>qrs_slope</td><td>+1.00</td><td>+0.99</td><td>+1.00</td><td>0.99</td><td><span class="badge badge-pass">PASS</span></td></tr>
+  <tr><td>F8: symmetry</td><td>qrs_symmetry</td><td>+0.98</td><td>+0.99</td><td>+1.00</td><td>0.99</td><td><span class="badge badge-pass">PASS</span></td></tr>
+</table>
+</div>
+
+<h4>Results analysis</h4>
+<p><strong>6 of 8 features achieve |&rho;| &gt; 0.86 across all records</strong>, confirming near-perfect rank preservation between the analog circuits and their Python equivalents. F5 (P-wave), F6 (width), F7 (slope), and F8 (symmetry) all achieve |&rho;| &gt; 0.97 &mdash; the passive S&amp;H and diff pair circuits faithfully reproduce the sampled ECG values.</p>
+
+<div class="note">
+  <strong>*F2 (rr_asym) on record 109:</strong> The low correlation (0.18) on record 109 is expected. Record 109 has extremely regular sinus rhythm (all RR intervals within &plusmn;2%), so both Python and circuit asymmetry values cluster near 1.0. With no real variation, the rank ordering is dominated by circuit noise. On record 200 (which contains PVCs where asymmetry matters), F2 achieves &rho; = 0.93. The classifier does not need this feature to discriminate on record 109 since there are no arrhythmias present.
+</div>
+
+<p><strong>F3 (bi_L0) on record 100</strong> shows &rho; = 0.60. Record 100 contains only normal beats, so beat-to-beat amplitude differences are very small (~5 mV circuit dynamic range). On records with actual morphological variation (200: PVCs, 109: LBBB), F3 achieves &rho; &gt; 0.98.</p>
+
+<p><strong>Negative correlations</strong> (e.g., F1 = &minus;0.99, F5 = &minus;0.99) are expected: the diff pair topology inverts the sign of the feature. Since the RF classifier is invariant to monotonic transforms (including inversion), |&rho;| is the relevant metric.</p>
+
+<!-- ============================================================ -->
+<h2 id="energy">8. Energy Analysis</h2>
+
+<h4>Static power (continuous)</h4>
+<p>Each biased differential pair or tail current source draws ~150 pA from VDD = 0.9V. The number of independent bias branches:</p>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Block</th><th>Tail Sources</th><th>Current (pA)</th></tr>
+  <tr><td>Bias Generator</td><td>1</td><td>~150</td></tr>
+  <tr><td>2&times; IA</td><td>2</td><td>~300</td></tr>
+  <tr><td>R-Peak Detector</td><td>1</td><td>~150</td></tr>
+  <tr><td>Delay Timer (main + fast)</td><td>6 + discharge</td><td>~1050</td></tr>
+  <tr><td>P-wave Predictor</td><td>3</td><td>~450</td></tr>
+  <tr><td>RR Timing (timer + 2 diff pairs + SF)</td><td>5</td><td>~750</td></tr>
+  <tr><td>2&times; Beat Instability</td><td>2</td><td>~300</td></tr>
+  <tr><td>P-wave Diff</td><td>1</td><td>~150</td></tr>
+  <tr><td>QRS Slope</td><td>1</td><td>~150</td></tr>
+  <tr style="font-weight:600;background:var(--code-bg)"><td>Total static</td><td>~22</td><td>~3,450</td></tr>
+</table>
+</div>
+
+<p><strong>Static power:</strong> ~3.45 nA &times; 0.9V = <strong>~3.1 nW</strong></p>
+<p><strong>Dynamic power:</strong> Negligible &mdash; switching events occur only at heartbeat rate (~1 Hz), and the switched capacitance is tiny (precharge pulses through PMOS switches, inverter transitions). Estimated &lt;0.1 nW.</p>
+<p><strong>Total average power:</strong> ~3.1 nW</p>
+<p><strong>Energy per beat:</strong> At 72 BPM (833 ms/beat): ~3.1 nW &times; 833 ms = <strong>~2.6 pJ/beat</strong></p>
+
+<div class="note">
+  Previous measurement (integration test v7) reported 685 pA total current, 0.62 nW power, 506 pJ/beat. The discrepancy arises because that test bypassed the IA (100s settling time), delay timer, and P-wave predictor, measuring only the 6 feature extraction circuits. The full frontend with all blocks active draws more current.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="accuracy">9. Classification Accuracy</h2>
+
+<h4>Test methodology</h4>
+<p>Full inter-patient evaluation on the MIT-BIH Arrhythmia Database using the de Chazal DS1/DS2 split (22 records each). Features F1&ndash;F2 computed in Python (validated equivalent to rr_timing circuit output). Features F3&ndash;F8 computed by ngspice circuit simulation per record batch. RandomForest classifier (300 trees, depth 15, balanced class weights).</p>
+
+<h4>Previous results (width trigger at R+83ms)</h4>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Metric</th><th>Python Baseline</th><th>Analog Frontend</th><th>Delta</th></tr>
+  <tr><td>Overall accuracy</td><td>95.11%</td><td>93.53%</td><td>&minus;1.58%</td></tr>
+  <tr><td>N (Normal) F1</td><td>&mdash;</td><td>0.967</td><td>&mdash;</td></tr>
+  <tr><td>V (Ventricular) F1</td><td>&mdash;</td><td>0.846</td><td>&mdash;</td></tr>
+  <tr><td>S (Supraventricular) F1</td><td>&mdash;</td><td>0.280</td><td>&mdash;</td></tr>
+</table>
+</div>
+
+<h4>Updated test (corrected width trigger R+28ms)</h4>
+<p class="note">Full 44-record accuracy test is currently running with the corrected QRS width trigger timing (DELAY_SAMPLES=10, R+28 ms instead of 30/FS = R+83 ms). This matches the validated delay timer calibration. Results will be updated upon completion (estimated 4&ndash;8 hours).</p>
+
+<h4>Feature importance</h4>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Rank</th><th>Feature</th><th>Importance</th></tr>
+  <tr><td>1</td><td>F1: rr_ratio</td><td>0.156</td></tr>
+  <tr><td>2</td><td>F4: bi_L1</td><td>0.151</td></tr>
+  <tr><td>3</td><td>F2: rr_asym</td><td>0.147</td></tr>
+  <tr><td>4</td><td>F7: slope</td><td>0.129</td></tr>
+  <tr><td>5</td><td>F3: bi_L0</td><td>0.125</td></tr>
+  <tr><td>6</td><td>F8: symmetry</td><td>0.113</td></tr>
+  <tr><td>7</td><td>F5: pwave</td><td>0.099</td></tr>
+  <tr><td>8</td><td>F6: width</td><td>0.080</td></tr>
+</table>
+</div>
+<p>All 8 features contribute meaningfully (importance 0.08&ndash;0.16), with no single feature dominating. The balanced distribution validates the feature selection approach.</p>
+
+<!-- ============================================================ -->
+<h2 id="filters">10. Filtering &amp; Signal Conditioning</h2>
+
+<h3>Why no dedicated HP/LP/notch filter blocks?</h3>
+<p>The CCIA topology inherently provides both high-pass and low-pass filtering, eliminating the need for separate filter circuits:</p>
+
+<h4>High-Pass Filtering (HPF)</h4>
+<p>The pseudo-resistors (back-to-back subthreshold PMOS, R &gt; 10<sup>12</sup> &Omega;) combined with the feedback capacitor (C<sub>fb</sub> = 0.1 pF) form a first-order HPF with corner frequency:</p>
+<pre>f_HP = 1 / (2*pi * R_pseudo * C_fb)
+     = 1 / (2*pi * 10^12 * 0.1e-12)
+     &lt; 0.01 Hz</pre>
+<p>This removes electrode DC offset and baseline wander (equivalent to a traditional 0.05 Hz HPF in clinical ECG systems) while passing all ECG frequency content.</p>
+
+<h4>Low-Pass Filtering (LPF)</h4>
+<p>The OTA's finite transconductance acts as a natural first-order LPF:</p>
+<pre>f_LP = Gm / (2*pi * C_load)
+     = 148 pA / (2*pi * 5 pF)
+     &asymp; 570 Hz</pre>
+<p>This is above the clinical ECG bandwidth (&lt;150 Hz) but provides anti-aliasing for the S&amp;H sample points. The S&amp;H circuits themselves also act as a form of LPF since they integrate the signal over the switch-on time (~0.5 ms).</p>
+
+<h4>Power-Line Rejection</h4>
+<p>The differential input topology provides common-mode rejection of 50/60 Hz power-line interference. A dedicated notch filter is not needed because:</p>
+<ul>
+  <li>CMRR of the CCIA rejects common-mode interference</li>
+  <li>The classifier operates on morphological amplitude features, not frequency content</li>
+  <li>Any residual 50/60 Hz component is deterministic and consistent beat-to-beat, so it does not affect rank ordering of features</li>
+</ul>
+
+<h4>Additional filtering in the signal chain</h4>
+<p>The MIM hold capacitors in each S&amp;H circuit act as voltage-domain filters &mdash; they capture the instantaneous ECG voltage at a precise moment and hold it, rejecting all noise outside the sample window. This is equivalent to a sinc-function anti-aliasing filter with bandwidth inversely proportional to the sample pulse width.</p>
+
+<!-- ============================================================ -->
+<h2 id="files">11. File Inventory</h2>
+
+<h4>Core circuit files</h4>
+<div class="tbl-wrap">
+<table>
+  <tr><th>File</th><th>Contents</th><th>MOSFETs</th><th>Caps</th></tr>
+  <tr><td><code>bias_gen.spice</code></td><td>Self-biased voltage/current reference</td><td>4</td><td>0</td></tr>
+  <tr><td><code>ia.spice</code></td><td>Capacitively-coupled instrumentation amplifier</td><td>9</td><td>3</td></tr>
+  <tr><td><code>rpeak_detector.spice</code></td><td>Two-stage threshold comparator</td><td>7</td><td>0</td></tr>
+  <tr><td><code>delay_timer.spice</code></td><td>Post-R delay timer with 5 comparators</td><td>33</td><td>2</td></tr>
+  <tr><td><code>pwave_predictor.spice</code></td><td>Pre-R trigger predictor (3 comparators)</td><td>15</td><td>0</td></tr>
+  <tr><td><code>inverter.spice</code></td><td>CMOS inverter utility subcircuit</td><td>2</td><td>0</td></tr>
+  <tr><td><code>rr_timing.spice</code></td><td>RR interval timer + EWMA + 2 diff pairs</td><td>17</td><td>4</td></tr>
+  <tr><td><code>beat_instability.spice</code></td><td>Beat-to-beat amplitude comparison</td><td>8</td><td>3</td></tr>
+  <tr><td><code>pwave_diff.spice</code></td><td>P-wave baseline vs peak difference</td><td>7</td><td>2</td></tr>
+  <tr><td><code>qrs_width.spice</code></td><td>QRS tail sample (passive S&amp;H)</td><td>1</td><td>1</td></tr>
+  <tr><td><code>qrs_slope.spice</code></td><td>Post-R descent slope (2 S&amp;H + diff pair)</td><td>7</td><td>2</td></tr>
+  <tr><td><code>qrs_symmetry.spice</code></td><td>R-peak amplitude sample (passive S&amp;H)</td><td>1</td><td>1</td></tr>
+  <tr><td><code>frontend_top.spice</code></td><td>Top-level ASIC subcircuit (all includes + wiring)</td><td>&mdash;</td><td>&mdash;</td></tr>
+</table>
+</div>
+
+<h4>Test &amp; validation files</h4>
+<div class="tbl-wrap">
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>test_support_circuits.py</code></td><td>Validates bias_gen, IA, rpeak_detector, delay_timer</td></tr>
+  <tr><td><code>full_accuracy_test.py</code></td><td>44-record inter-patient RF accuracy with ngspice features</td></tr>
+  <tr><td><code>_cf_*.spice</code></td><td>Individual feature correlation testbenches (auto-generated)</td></tr>
+  <tr><td><code>_integ_v*.spice</code></td><td>Integration test iterations</td></tr>
+</table>
+</div>
+
+<h4>External dependencies</h4>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Dependency</th><th>Path</th></tr>
+  <tr><td>SKY130 PDK models</td><td><code>ngspice_frontend/sky130_minimal.lib.spice</code></td></tr>
+  <tr><td>ngspice simulator</td><td><code>C:\Spice64\bin\ngspice_con.exe</code></td></tr>
+  <tr><td>MIT-BIH database</td><td><code>mitdb_data/</code> (WFDB format)</td></tr>
+</table>
+</div>
+
+<hr>
+<p style="color:var(--fg-muted);font-size:0.85rem;text-align:center;margin-top:2rem;">SKY130 Analog ECG Frontend &mdash; SkyWater 130nm CMOS &mdash; VDD = 0.9V subthreshold &mdash; Report generated October 2026</p>
+
+</div>

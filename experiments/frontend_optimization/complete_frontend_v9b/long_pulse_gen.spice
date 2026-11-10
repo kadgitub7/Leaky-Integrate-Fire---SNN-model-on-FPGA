@@ -1,0 +1,12 @@
+* Long-pulse generator (~2ms) for EWMA charge-sharing triggers (bi_copy).
+* Same topology as pulse_gen but with reduced bleeder (W=0.42) for longer pulse.
+* Requires edge_buffer on slow comparator inputs.
+.subckt long_pulse_gen level_in pulse_out vdd vss vbias
+XCac level_in pulse_raw sky130_fd_pr__cap_mim_m3_1 W=10 L=10
+XMbleed pulse_raw vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.41 nf=1
+XMclamp vss vss pulse_raw vss sky130_fd_pr__nfet_01v8 L=0.5 W=0.42 nf=1
+XMinv1_n inv1_out pulse_raw vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMinv1_p inv1_out pulse_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMinv2_n pulse_out inv1_out vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMinv2_p pulse_out inv1_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+.ends long_pulse_gen

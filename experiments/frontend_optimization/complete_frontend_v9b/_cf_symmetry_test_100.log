@@ -1,0 +1,73 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: qrs_symmetry_cf_test_100
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+ecg_in                                     0.3
+sample_r_trig                                0
+sym_out                              0.0711864
+xsym.xcsr.a                                  0
+xsym.xcsr.b1                                 0
+vsr#branch                                   0
+vecg#branch                       -1.91803e-14
+vss#branch                         1.91803e-14
+vdd#branch                                   0
+
+
+No. of Data Rows : 281902
+
+  Measurements for Transient Analysis
+
+sym_b0              =  3.498557e-01
+sym_b1              =  3.548768e-01
+sym_b2              =  3.502414e-01
+sym_b3              =  3.504700e-01
+sym_b4              =  3.508360e-01
+sym_b5              =  3.513002e-01
+sym_b6              =  3.491128e-01
+sym_b7              =  3.463327e-01
+sym_b8              =  3.530525e-01
+sym_b9              =  3.511244e-01
+sym_b10             =  3.444323e-01
+sym_b11             =  3.485897e-01
+sym_b12             =  3.525485e-01
+sym_b13             =  3.481983e-01
+sym_b14             =  3.552927e-01
+sym_b15             =  3.525012e-01
+sym_b16             =  3.564902e-01
+sym_b17             =  3.499517e-01
+sym_b18             =  3.501760e-01
+sym_b19             =  3.526901e-01
+sym_b20             =  3.569505e-01
+sym_b21             =  3.488734e-01
+sym_b22             =  3.519194e-01
+sym_b23             =  3.524269e-01
+sym_b24             =  3.484123e-01
+sym_b25             =  3.422591e-01
+sym_b26             =  3.475922e-01
+sym_b27             =  3.598880e-01
+sym_b28             =  3.496883e-01
+sym_b29             =  3.448917e-01
+
+
+Total analysis time (seconds) = 193.171
+
+Total elapsed time (seconds) = 241.969 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1082.379 MB.
+Maximum ngspice program size =   43.430 MB.
+Current ngspice program size =   41.445 MB.
+

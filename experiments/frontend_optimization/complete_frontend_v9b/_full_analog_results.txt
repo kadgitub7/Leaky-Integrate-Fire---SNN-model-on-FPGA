@@ -1,0 +1,29 @@
+======================================================================
+FULL ANALOG AFE INTEGRATION TEST
+======================================================================
+
+Chain: ECG(MIT-BIH) -> Analog AFE -> 8 Features -> Compare vs Python
+All supplementary circuits: analog SKY130 (no digital, no ideal triggers)
+Only external: ECG input, R-peak timing (rpeak_detector), calibration Vth
+rr_cap: AND-gated comparator (closes capture before timer precharge)
+pwave: comparator -> edge_buffer -> pulse_gen (brief S&H pulse)
+delay_timer: calibrated per-comparator pipeline delays
+
+[1] Calibrating timers...
+  DT SF (main): ['0.4823', '0.4817', '0.4812', '0.4807', '0.4802', '0.4776', '0.4749', '0.4723']...
+  FT SF (fast): ['0.4466', '0.4213', '0.3962', '0.3465', '0.2251', '0.0152']
+  RR SF: ['0.4819', '0.4807', '0.4772', '0.4716', '0.4602']...
+
+======================================================================
+PHASE 1: Quick validation — Record 100, 20 beats
+======================================================================
+  Loaded 20 beats, gain=0.0589
+  RR: 814 811 789 792 789 817 653 994 844 811 789 772 ... ms
+  18 beats measured (F3-F8), 80s sim time
+  F1 beats: 18, F2 beats: 17
+  rho: 0.940 0.732 0.934 0.994 0.467 0.991 0.998 0.935
+  SOME BELOW 0.90
+
+  Phase 1 FAILED — stopping. Debug files kept:
+    _afe_phase1_100.spice / .log
+  Investigate before scaling to 16 records.

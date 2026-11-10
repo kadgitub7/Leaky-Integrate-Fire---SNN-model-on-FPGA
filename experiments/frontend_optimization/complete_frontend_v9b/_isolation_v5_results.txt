@@ -1,0 +1,58 @@
+======================================================================
+ISOLATION TEST v5: Delay timer diagnostic (F6/F7)
+======================================================================
+
+DIAGNOSTIC: F6=0.123, F7=0.358 with analog delay_timer.
+  Comparing ideal DT triggers (v3 baseline) vs analog DT chain.
+  This isolates whether delay_timer->edge_buffer->pulse_gen is the issue.
+
+[1] Loading 12 beats from record 100...
+  Loaded 12 beats
+  RR intervals: 814 811 789 792 789 817 653 994 844 811 789 772ms
+  EWMA RR:      814 814 811 809 807 808 793 813 816 815 813 809ms
+
+[2] Calibrating timers...
+  DT SF (main, 17 pts): ['0.482305', '0.481793', '0.481248', '0.480731', '0.480200', '0.477651', '0.474957', '0.472354', '0.456552', '0.430403', '0.378588', '0.327427', '0.276887', '0.227020', '0.177828', '0.129393', '0.082070']
+  DT times: [1, 2, 3, 4, 5, 10, 15, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800]
+  FT SF (fast, 6 pts): ['0.448120', '0.422863', '0.397748', '0.347997', '0.226585', '0.015635']
+  FT times: [1, 2, 3, 5, 10, 20]
+  RR SF: [0.4819092, 0.4807353, 0.4772443, 0.4715481, 0.4601835]
+  Thresholds: vth_14=0.213928 vth_28=0.470773 vth_69=0.449178 vth_300=0.330702 vth_10=0.282434
+
+[3] Config A_IDEAL_DT: ALL ideal triggers (v3 baseline reference)
+  10 beats, 17s
+  rho: 1.000 0.988 0.903 0.988 0.994 0.985 1.000 0.902
+
+[4] Config B_ANALOG_DT: Analog delay_timer + pulse_gen for F6/F7 triggers
+  10 beats, 27s
+  rho: 1.000 0.988 0.903 0.988 0.994 0.985 1.000 0.902
+  DT DEBUG: exact trigger fire times (WHEN V=0.45 RISE):
+    Targets: s14=R+13.9ms  wid=R+27.8ms  s69=R+69.4ms  bi=R+300ms  rr=R+10ms
+    beat 2 (R=2413.9ms):
+      comparator levels:  s14=13.7ms  wid=28.0ms  s69=69.6ms  bi=300.0ms  rr=10.3ms
+      pulse_gen outputs:  s14=13.7ms  wid=28.0ms  s69=69.5ms
+    beat 3 (R=3205.6ms):
+      comparator levels:  s14=13.6ms  wid=28.0ms  s69=69.6ms  bi=300.0ms  rr=10.3ms
+      pulse_gen outputs:  s14=13.6ms  wid=28.0ms  s69=69.5ms
+    beat 4 (R=3994.4ms):
+      comparator levels:  s14=13.6ms  wid=28.0ms  s69=69.6ms  bi=300.0ms  rr=10.3ms
+      pulse_gen outputs:  s14=13.6ms  wid=27.9ms  s69=69.5ms
+    beat 5 (R=4811.1ms):
+      comparator levels:  s14=13.6ms  wid=28.0ms  s69=69.6ms  bi=300.0ms  rr=10.3ms
+      pulse_gen outputs:  s14=13.6ms  wid=27.9ms  s69=69.6ms
+
+======================================================================
+RESULTS SUMMARY
+======================================================================
+  Config             F1:rr F2:asym  F3:bi0  F4:bi1   F5:pw  F6:wid  F7:slp  F8:sym
+  --------------------------------------------------------------------------------
+  A_IDEAL_DT       1.000   [92m0.988[0m 0.903   0.988   0.994   0.985   1.000   0.902  
+    (ALL ideal triggers (v3 baseline reference))
+  B_ANALOG_DT      1.000   [92m0.988[0m 0.903   0.988   0.994   0.985   1.000   0.902  
+    (Analog delay_timer + pulse_gen for F6/F7 triggers)
+
+  KEY RESULTS:
+  B: ideal 58ms window R-60 to R-2ms — expected to match baseline
+  C: same but crosses precharge — tests precharge effect
+  D: analog comparator (offset=-60) + AND gate — the fix
+  E: pwave analog debug

@@ -1,0 +1,108 @@
+.title pwave_predictor_cf_test
+.lib "C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\experiments\frontend_optimization\ngspice_frontend\sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+.include "pwave_predictor.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.35
+
+* SF-shifted timer ramp: 0.50V to 0.05V over 1.2s
+Vtimer timer_node 0 PWL(0 0.5 1.2 0.05)
+
+* Fixed EWMA node
+Vewma ewma_node 0 0.12
+
+* External thresholds
+Vth_base vth_base 0 0.215
+Vth_peak vth_peak 0 0.181
+
+Xpw timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig vth_base vth_peak vdd vss vbias pwave_predictor
+
+.tran 1m 1.2
+
+.meas tran base_-50ms FIND V(pw_base_trig) AT=0.710000
+.meas tran timer_base_-50ms FIND V(timer_node) AT=0.710000
+.meas tran base_-20ms FIND V(pw_base_trig) AT=0.740000
+.meas tran timer_base_-20ms FIND V(timer_node) AT=0.740000
+.meas tran base_-5ms FIND V(pw_base_trig) AT=0.755000
+.meas tran timer_base_-5ms FIND V(timer_node) AT=0.755000
+.meas tran base_+0ms FIND V(pw_base_trig) AT=0.760000
+.meas tran timer_base_+0ms FIND V(timer_node) AT=0.760000
+.meas tran base_+5ms FIND V(pw_base_trig) AT=0.765000
+.meas tran timer_base_+5ms FIND V(timer_node) AT=0.765000
+.meas tran base_+20ms FIND V(pw_base_trig) AT=0.780000
+.meas tran timer_base_+20ms FIND V(timer_node) AT=0.780000
+.meas tran base_+50ms FIND V(pw_base_trig) AT=0.810000
+.meas tran timer_base_+50ms FIND V(timer_node) AT=0.810000
+.meas tran peak_-50ms FIND V(pw_peak_trig) AT=0.800667
+.meas tran timer_peak_-50ms FIND V(timer_node) AT=0.800667
+.meas tran peak_-20ms FIND V(pw_peak_trig) AT=0.830667
+.meas tran timer_peak_-20ms FIND V(timer_node) AT=0.830667
+.meas tran peak_-5ms FIND V(pw_peak_trig) AT=0.845667
+.meas tran timer_peak_-5ms FIND V(timer_node) AT=0.845667
+.meas tran peak_+0ms FIND V(pw_peak_trig) AT=0.850667
+.meas tran timer_peak_+0ms FIND V(timer_node) AT=0.850667
+.meas tran peak_+5ms FIND V(pw_peak_trig) AT=0.855667
+.meas tran timer_peak_+5ms FIND V(timer_node) AT=0.855667
+.meas tran peak_+20ms FIND V(pw_peak_trig) AT=0.870667
+.meas tran timer_peak_+20ms FIND V(timer_node) AT=0.870667
+.meas tran peak_+50ms FIND V(pw_peak_trig) AT=0.900667
+.meas tran timer_peak_+50ms FIND V(timer_node) AT=0.900667
+.meas tran ewma_-50ms FIND V(pw_rr_cap_trig) AT=0.963333
+.meas tran timer_ewma_-50ms FIND V(timer_node) AT=0.963333
+.meas tran ewma_-20ms FIND V(pw_rr_cap_trig) AT=0.993333
+.meas tran timer_ewma_-20ms FIND V(timer_node) AT=0.993333
+.meas tran ewma_-5ms FIND V(pw_rr_cap_trig) AT=1.008333
+.meas tran timer_ewma_-5ms FIND V(timer_node) AT=1.008333
+.meas tran ewma_+0ms FIND V(pw_rr_cap_trig) AT=1.013333
+.meas tran timer_ewma_+0ms FIND V(timer_node) AT=1.013333
+.meas tran ewma_+5ms FIND V(pw_rr_cap_trig) AT=1.018333
+.meas tran timer_ewma_+5ms FIND V(timer_node) AT=1.018333
+.meas tran ewma_+20ms FIND V(pw_rr_cap_trig) AT=1.033333
+.meas tran timer_ewma_+20ms FIND V(timer_node) AT=1.033333
+.meas tran ewma_+50ms FIND V(pw_rr_cap_trig) AT=1.063333
+.meas tran timer_ewma_+50ms FIND V(timer_node) AT=1.063333
+.meas tran base_at600 FIND V(pw_base_trig) AT=0.6000
+.meas tran peak_at600 FIND V(pw_peak_trig) AT=0.6000
+.meas tran cap_at600 FIND V(rr_cap_trig) AT=0.6000
+.meas tran tmr_at600 FIND V(timer_node) AT=0.6000
+.meas tran base_at650 FIND V(pw_base_trig) AT=0.6500
+.meas tran peak_at650 FIND V(pw_peak_trig) AT=0.6500
+.meas tran cap_at650 FIND V(rr_cap_trig) AT=0.6500
+.meas tran tmr_at650 FIND V(timer_node) AT=0.6500
+.meas tran base_at700 FIND V(pw_base_trig) AT=0.7000
+.meas tran peak_at700 FIND V(pw_peak_trig) AT=0.7000
+.meas tran cap_at700 FIND V(rr_cap_trig) AT=0.7000
+.meas tran tmr_at700 FIND V(timer_node) AT=0.7000
+.meas tran base_at750 FIND V(pw_base_trig) AT=0.7500
+.meas tran peak_at750 FIND V(pw_peak_trig) AT=0.7500
+.meas tran cap_at750 FIND V(rr_cap_trig) AT=0.7500
+.meas tran tmr_at750 FIND V(timer_node) AT=0.7500
+.meas tran base_at800 FIND V(pw_base_trig) AT=0.8000
+.meas tran peak_at800 FIND V(pw_peak_trig) AT=0.8000
+.meas tran cap_at800 FIND V(rr_cap_trig) AT=0.8000
+.meas tran tmr_at800 FIND V(timer_node) AT=0.8000
+.meas tran base_at850 FIND V(pw_base_trig) AT=0.8500
+.meas tran peak_at850 FIND V(pw_peak_trig) AT=0.8500
+.meas tran cap_at850 FIND V(rr_cap_trig) AT=0.8500
+.meas tran tmr_at850 FIND V(timer_node) AT=0.8500
+.meas tran base_at900 FIND V(pw_base_trig) AT=0.9000
+.meas tran peak_at900 FIND V(pw_peak_trig) AT=0.9000
+.meas tran cap_at900 FIND V(rr_cap_trig) AT=0.9000
+.meas tran tmr_at900 FIND V(timer_node) AT=0.9000
+.meas tran base_at950 FIND V(pw_base_trig) AT=0.9500
+.meas tran peak_at950 FIND V(pw_peak_trig) AT=0.9500
+.meas tran cap_at950 FIND V(rr_cap_trig) AT=0.9500
+.meas tran tmr_at950 FIND V(timer_node) AT=0.9500
+.meas tran base_at1000 FIND V(pw_base_trig) AT=1.0000
+.meas tran peak_at1000 FIND V(pw_peak_trig) AT=1.0000
+.meas tran cap_at1000 FIND V(rr_cap_trig) AT=1.0000
+.meas tran tmr_at1000 FIND V(timer_node) AT=1.0000
+.meas tran base_at1050 FIND V(pw_base_trig) AT=1.0500
+.meas tran peak_at1050 FIND V(pw_peak_trig) AT=1.0500
+.meas tran cap_at1050 FIND V(rr_cap_trig) AT=1.0500
+.meas tran tmr_at1050 FIND V(timer_node) AT=1.0500
+
+.end

@@ -1,0 +1,83 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: qrs_slope_cf_test_200
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+ecg_in                                     0.3
+sample14_trig                                0
+sample69_trig                                0
+xslope.sh14                          0.0711864
+xslope.xcs14.a                               0
+xslope.xcs14.b1                              0
+xslope.sh69                          0.0711864
+xslope.xcs69.a                               0
+xslope.xcs69.b1                              0
+xslope.dtail                         0.0012937
+xslope.dnet                           0.417721
+slope_out                             0.417721
+vs69#branch                                  0
+vs14#branch                                  0
+vecg#branch                       -3.83606e-14
+vbias#branch                                 0
+vss#branch                         7.30196e-12
+vdd#branch                         -7.2636e-12
+
+
+No. of Data Rows : 239888
+
+  Measurements for Transient Analysis
+
+slope_b0            =  3.337178e-01
+slope_b1            =  2.990530e-01
+slope_b2            =  3.480418e-01
+slope_b3            =  2.998536e-01
+slope_b4            =  3.493974e-01
+slope_b5            =  2.980516e-01
+slope_b6            =  3.479997e-01
+slope_b7            =  3.012133e-01
+slope_b8            =  3.496973e-01
+slope_b9            =  2.992002e-01
+slope_b10           =  3.328847e-01
+slope_b11           =  3.415388e-01
+slope_b12           =  3.372480e-01
+slope_b13           =  3.422391e-01
+slope_b14           =  3.439113e-01
+slope_b15           =  3.500297e-01
+slope_b16           =  3.503087e-01
+slope_b17           =  3.495774e-01
+slope_b18           =  3.515245e-01
+slope_b19           =  3.485675e-01
+slope_b20           =  3.455210e-01
+slope_b21           =  3.014211e-01
+slope_b22           =  3.461346e-01
+slope_b23           =  2.996589e-01
+slope_b24           =  3.474709e-01
+slope_b25           =  2.987994e-01
+slope_b26           =  4.223942e-01
+slope_b27           =  3.413644e-01
+slope_b28           =  2.987780e-01
+slope_b29           =  3.348988e-01
+
+
+Total analysis time (seconds) = 52.125
+
+Total elapsed time (seconds) = 61.022 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1100.781 MB.
+Maximum ngspice program size =   48.340 MB.
+Current ngspice program size =   46.648 MB.
+

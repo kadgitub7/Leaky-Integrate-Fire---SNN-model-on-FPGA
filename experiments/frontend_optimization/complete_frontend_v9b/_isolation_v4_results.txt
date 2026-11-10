@@ -1,0 +1,72 @@
+======================================================================
+ISOLATION TEST v4: Comparators on rr_timing SF (0.39V at 800ms)
+======================================================================
+
+[1] Loading 12 beats from record 100...
+  Loaded 12 beats, gain=0.058932, rpeak_th=0.3415
+
+[2] Calibrating delay timer AND rr_timing SF curves...
+  Delay timer thresholds: vth_14=0.17385 vth_28=0.47025 vth_69=0.44871 vth_300=0.32947
+
+  RR timing SF curve (ms -> V):
+       10ms: 0.48191V
+       20ms: 0.48074V
+       50ms: 0.47724V
+      100ms: 0.47155V
+      200ms: 0.46018V
+      300ms: 0.44885V
+      400ms: 0.43753V
+      500ms: 0.42623V
+      600ms: 0.41496V
+      700ms: 0.40373V
+      800ms: 0.39250V
+      900ms: 0.38132V
+     1000ms: 0.37015V
+
+  Expected thresholds (ewma_rr=811.1ms):
+    pw_base: SF(596ms) = 0.41545V
+    pw_peak: SF(666ms) = 0.40759V
+    rr_cap:  SF(717ms) = 0.40186V
+
+[3] Config A_BASELINE: Phase 4 baseline (all ideal triggers)
+  10 beats measured, 57s
+  rho: 0.891 0.988 0.903 0.988 0.994 0.123 0.358 0.902
+
+[4] Config H_RRCAP: rr_cap comparator on rr_timing SF
+  10 beats measured, 66s
+  rho: 0.915 0.685 0.903 0.988 0.994 0.098 0.358 0.921
+    beat 2: rr_sf@capture=0.40258 rr_sf@F2=0.40085 prev_node@F2=0.39591
+    beat 3: rr_sf@capture=0.40286 rr_sf@F2=0.40112 prev_node@F2=0.39551
+    beat 4: rr_sf@capture=0.39975 rr_sf@F2=0.39804 prev_node@F2=0.39553
+
+[5] Config I_PWAVE: pwave comparators on rr_timing SF
+  10 beats measured, 67s
+  rho: 0.891 0.988 0.903 0.988 0.116 0.178 0.273 0.902
+
+[6] Config J_BOTH: Both rr_cap + pwave on rr_timing SF
+  10 beats measured, 72s
+  rho: 0.915 0.600 0.903 0.988 0.201 0.178 0.358 0.902
+    beat 2: rr_sf@capture=0.40255 rr_sf@F2=0.40084 prev_node@F2=0.39571
+    beat 3: rr_sf@capture=0.40291 rr_sf@F2=0.40115 prev_node@F2=0.39535
+    beat 4: rr_sf@capture=0.39974 rr_sf@F2=0.39807 prev_node@F2=0.39533
+
+[7] Config K_FULL: Full analog (except rpeak_sh ideal)
+  10 beats measured, 77s
+  rho: 0.915 0.648 0.903 0.988 0.372 0.837 0.248 0.902
+    beat 2: rr_sf@capture=0.40333 rr_sf@F2=0.40161 prev_node@F2=0.39458
+    beat 3: rr_sf@capture=0.40335 rr_sf@F2=0.39615 prev_node@F2=0.39534
+    beat 4: rr_sf@capture=0.40022 rr_sf@F2=0.39854 prev_node@F2=0.39482
+
+======================================================================
+RESULTS SUMMARY
+======================================================================
+  Config             F1:rr F2:asym  F3:bi0  F4:bi1   F5:pw  F6:wid  F7:slp  F8:sym
+  --------------------------------------------------------------------------------
+  A_BASELINE       0.891   0.988   0.903   0.988   0.994   0.123   0.358   0.902  
+  H_RRCAP          0.915++ 0.685!! 0.903   0.988   0.994   0.098 * 0.358   0.921  
+  I_PWAVE          0.891   0.988   0.903   0.988   0.116!! 0.178++ 0.273!! 0.902  
+  J_BOTH           0.915++ 0.600!! 0.903   0.988   0.201!! 0.178++ 0.358   0.902  
+  K_FULL           0.915++ 0.648!! 0.903   0.988   0.372!! 0.837++ 0.248!! 0.902  
+
+  Baseline: F2=0.988 F5=0.994
+  Target:   F2>=0.95   F5>=0.95

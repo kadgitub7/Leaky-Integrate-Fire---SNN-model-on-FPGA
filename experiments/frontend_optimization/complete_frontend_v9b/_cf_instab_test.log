@@ -1,0 +1,146 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: beat_instability_cf_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                     0.35
+ecg_in                                     0.3
+capture_trig                                 0
+copy_trig                                    0
+xinstab.curr_node                    0.0711868
+xinstab.xccurr.a                             0
+xinstab.xccurr.b1                            0
+xinstab.esamp_node                   0.0462648
+xinstab.xcesamp.a                            0
+xinstab.xcesamp.b1                           0
+xinstab.prev_node                    0.0387804
+xinstab.xcprev.a                             0
+xinstab.xcprev.b1                            0
+xinstab.tail_i                     0.000912244
+xinstab.net_i1                        0.355822
+instab_out                            0.385765
+vcopy#branch                                 0
+vcapt#branch                                 0
+vecg#branch                       -5.14615e-14
+vbias#branch                                 0
+vss#branch                         5.20763e-12
+vdd#branch                        -5.15616e-12
+
+
+No. of Data Rows : 41415
+
+  Measurements for Transient Analysis
+
+instab_b0           =  4.996328e-01
+curr_b0             =  3.892677e-01
+prev_b0             =  3.895246e-02
+instab_b1           =  2.832601e-01
+curr_b1             =  4.048127e-01
+prev_b1             =  3.526794e-01
+instab_b2           =  2.849625e-01
+curr_b2             =  4.598789e-01
+prev_b2             =  3.982517e-01
+instab_b3           =  2.441118e-01
+curr_b3             =  4.430345e-01
+prev_b3             =  4.517486e-01
+instab_b4           =  2.538864e-01
+curr_b4             =  4.566392e-01
+prev_b4             =  4.426739e-01
+instab_b5           =  2.490178e-01
+curr_b5             =  4.572872e-01
+prev_b5             =  4.538540e-01
+instab_b6           =  2.355305e-01
+curr_b6             =  4.229515e-01
+prev_b6             =  4.556125e-01
+instab_b7           =  2.426059e-01
+curr_b7             =  4.138819e-01
+prev_b7             =  4.250057e-01
+instab_b8           =  2.450393e-01
+curr_b8             =  4.080518e-01
+prev_b8             =  4.136995e-01
+instab_b9           =  2.337130e-01
+curr_b9             =  3.730761e-01
+prev_b9             =  4.072894e-01
+instab_b10          =  2.455761e-01
+curr_b10            =  3.704859e-01
+prev_b10            =  3.752317e-01
+instab_b11          =  2.494999e-01
+curr_b11            =  3.724293e-01
+prev_b11            =  3.697145e-01
+instab_b12          =  2.528356e-01
+curr_b12            =  3.795525e-01
+prev_b12            =  3.709040e-01
+instab_b13          =  2.480772e-01
+curr_b13            =  3.776099e-01
+prev_b13            =  3.774512e-01
+instab_b14          =  2.400005e-01
+curr_b14            =  3.594780e-01
+prev_b14            =  3.763953e-01
+instab_b15          =  2.461477e-01
+curr_b15            =  3.562404e-01
+prev_b15            =  3.600289e-01
+instab_b16          =  2.564398e-01
+curr_b16            =  3.698391e-01
+prev_b16            =  3.554313e-01
+instab_b17          =  2.550767e-01
+curr_b17            =  3.795525e-01
+prev_b17            =  3.671835e-01
+instab_b18          =  2.479570e-01
+curr_b18            =  3.769621e-01
+prev_b18            =  3.770362e-01
+instab_b19          =  2.422917e-01
+curr_b19            =  3.640112e-01
+prev_b19            =  3.756710e-01
+instab_b20          =  2.502278e-01
+curr_b20            =  3.678957e-01
+prev_b20            =  3.639344e-01
+instab_b21          =  2.552568e-01
+curr_b21            =  3.789046e-01
+prev_b21            =  3.662535e-01
+instab_b22          =  2.249051e-01
+curr_b22            =  2.999118e-01
+prev_b22            =  3.764356e-01
+instab_b23          =  3.083251e-01
+curr_b23            =  3.873240e-01
+prev_b23            =  3.064488e-01
+instab_b24          =  2.448422e-01
+curr_b24            =  3.717815e-01
+prev_b24            =  3.779907e-01
+instab_b25          =  2.526673e-01
+curr_b25            =  3.795525e-01
+prev_b25            =  3.711896e-01
+instab_b26          =  2.508530e-01
+curr_b26            =  3.827908e-01
+prev_b26            =  3.775232e-01
+instab_b27          =  2.532524e-01
+curr_b27            =  3.905626e-01
+prev_b27            =  3.810356e-01
+instab_b28          =  2.473991e-01
+curr_b28            =  3.873240e-01
+prev_b28            =  3.883467e-01
+instab_b29          =  2.443356e-01
+curr_b29            =  3.789046e-01
+prev_b29            =  3.860943e-01
+
+
+Total analysis time (seconds) = 51.074
+
+Total elapsed time (seconds) = 94.427 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  637.477 MB.
+Maximum ngspice program size =   45.406 MB.
+Current ngspice program size =   45.406 MB.
+

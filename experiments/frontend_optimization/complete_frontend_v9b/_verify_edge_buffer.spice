@@ -1,0 +1,15 @@
+.title edge_buffer
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/edge_buffer.spice"
+Vin vin 0 PWL(0 0 4.9e-3 0 5.0e-3 0.9 15e-3 0.9 15.1e-3 0)
+Xeb vin vout vdd vss edge_buffer
+.tran 0.01m 20m
+.meas tran eb_rise WHEN V(vout)=0.45 RISE=1
+.meas tran eb_fall WHEN V(vout)=0.45 FALL=1
+
+.end

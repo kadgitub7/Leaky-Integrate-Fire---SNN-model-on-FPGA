@@ -1,0 +1,89 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: delay_timer
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpeak_pulse                                  0
+vth_14_node                           0.230855
+vth_69_node                           0.449968
+vth_28_node                            0.47141
+vth_300_node                          0.332438
+vth_10_node                            0.30043
+xdt.sf_timer                       1.17518e-05
+sf_out                             1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483673
+xdt.ct2                            0.000104052
+xdt.stg1_s69                       0.000104288
+trig_s69                                   0.9
+xdt.cn3                               0.483668
+xdt.ct3                            0.000104052
+xdt.stg1_wid                       0.000104197
+trig_wid                                   0.9
+xdt.cn4                               0.483673
+xdt.ct4                            0.000104052
+xdt.stg1_bi                        0.000108333
+trig_bi_copy                               0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483673
+xdt.ct5                            0.000104051
+xdt.stg1_rr                        0.000113908
+trig_rr_copy                               0.9
+xdt.cn6                               0.483673
+xdt.ct6                            0.000104041
+xdt.stg1_s14                       0.000166096
+trig_s14                                   0.9
+vth10#branch                                 0
+vth300#branch                                0
+vth28#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         2.62325e-12
+vdd#branch                        -2.62347e-12
+
+
+No. of Data Rows : 1029
+
+  Measurements for Transient Analysis
+
+dt_s14              =   2.28493e-02
+dt_s69              =   7.90081e-02
+dt_wid              =   3.73125e-02
+dt_bi               =   3.09409e-01
+dt_rr               =   1.94096e-02
+sf_at_0             =  4.860196e-01
+sf_at_14            =  4.762768e-01
+sf_at_69            =  4.476303e-01
+sf_at_300           =  3.293746e-01
+
+
+Total analysis time (seconds) = 0.405
+
+Total elapsed time (seconds) = 17.409 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2658.223 MB.
+Maximum ngspice program size =   71.531 MB.
+Current ngspice program size =   71.531 MB.
+

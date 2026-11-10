@@ -1,0 +1,616 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: full_analog_chain_200
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+ecg_l0                                     0.3
+ecg_l1                                     0.3
+rpeak_threshold                         0.3325
+vth_14                                0.487607
+vth_69                                0.467091
+vth_28                                0.484256
+vth_300                               0.371637
+vth_10                                0.442177
+vth_pw_base                           0.451201
+vth_pw_peak                           0.444463
+xbias.iref                                 0.3
+vbias                                 0.283839
+vref                                  0.283839
+xrpeak.net1                           0.324298
+xrpeak.tail1                          0.130146
+xrpeak.stg1_out                       0.884837
+rpeak_raw                          2.11335e-11
+xpg_rpk.xcac.a                               0
+xpg_rpk.xcac.b1                              0
+xpg_rpk.pulse_raw                            0
+xpg_rpk.inv1_out                           0.9
+rpeak_pulse                        1.73955e-07
+xdelay.rpeak_bar                           0.9
+xdelay.timer_node                  6.95705e-06
+xdelay.xctimer.a                             0
+xdelay.xctimer.b1                            0
+xdelay.sf_timer                    1.76351e-05
+xdelay.cn1                            0.284038
+xdelay.ct1                            0.208153
+dt_s14_lev                             0.89999
+xdelay.cn2                            0.284119
+xdelay.ct2                            0.192442
+dt_s69_lev                             0.89999
+xdelay.cn3                             0.28405
+xdelay.ct3                            0.205603
+dt_wid_lev                             0.89999
+xdelay.cn4                             0.28469
+xdelay.ct4                            0.118601
+dt_bi_lev                             0.899988
+xdelay.timer2                      6.95705e-06
+xdelay.xct2.a                                0
+xdelay.xct2.b1                               0
+xdelay.sf_timer2                   1.76351e-05
+xdelay.cn5                             0.28423
+xdelay.ct5                            0.173183
+dt_rr_copy_lev                         0.89999
+dt_s14_buf1                        9.08308e-11
+dt_s14_buf                                 0.9
+dt_s69_buf1                        9.08309e-11
+dt_s69_buf                                 0.9
+dt_wid_buf1                        9.08308e-11
+dt_wid_buf                                 0.9
+dt_bi_buf1                         9.08313e-11
+dt_bi_buf                                  0.9
+dt_rrc_buf1                        9.08309e-11
+dt_rrc_buf                                 0.9
+xpg_s14.xcac.a                               0
+xpg_s14.xcac.b1                              0
+xpg_s14.pulse_raw                            0
+xpg_s14.inv1_out                           0.9
+trig_s14                           1.73955e-07
+xpg_s69.xcac.a                               0
+xpg_s69.xcac.b1                              0
+xpg_s69.pulse_raw                            0
+xpg_s69.inv1_out                           0.9
+trig_s69                           1.73955e-07
+xpg_wid.xcac.a                               0
+xpg_wid.xcac.b1                              0
+xpg_wid.pulse_raw                            0
+xpg_wid.inv1_out                           0.9
+trig_wid                           1.73955e-07
+xpg_bi.xcac.a                                0
+xpg_bi.xcac.b1                               0
+xpg_bi.pulse_raw                             0
+xpg_bi.inv1_out                            0.9
+trig_bi_copy                       1.73955e-07
+xpg_rrc.xcac.a                               0
+xpg_rrc.xcac.b1                              0
+xpg_rrc.pulse_raw                            0
+xpg_rrc.inv1_out                           0.9
+trig_rr_copy                       1.73955e-07
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      9.87765e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         1.68074e-05
+trig_pw_peak                       1.73955e-07
+xrr.prev_node                         0.444014
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                        0.444014
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                         0.444014
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                            0.229162
+xrr.net_r1                            0.287688
+f1_rr_ratio                           0.647694
+xrr.tail_a                            0.229162
+xrr.net_a1                            0.647694
+f2_rr_asym                            0.287688
+rr_timer_node                      1.68074e-05
+rr_ewma_node                          0.444014
+xpw_pred.cnb                          0.284188
+xpw_pred.ctb                           0.18017
+pw_base_lev                            0.89999
+xpw_pred.cnp                          0.284219
+xpw_pred.ctp                          0.174953
+pw_peak_lev                            0.89999
+xpw_pred.cnc                          0.284221
+xpw_pred.ctc                          0.174606
+rr_cap_lev                             0.89999
+pw_base_buf1                       9.08309e-11
+pw_base_buf                                0.9
+pw_peak_buf1                       9.08309e-11
+pw_peak_buf                                0.9
+rr_cap_buf1                        9.08309e-11
+rr_cap_buf                                 0.9
+xpg_pwb.xcac.a                               0
+xpg_pwb.xcac.b1                              0
+xpg_pwb.pulse_raw                            0
+xpg_pwb.inv1_out                           0.9
+trig_pw_base                       1.73955e-07
+xpg_pwp.xcac.a                               0
+xpg_pwp.xcac.b1                              0
+xpg_pwp.pulse_raw                            0
+xpg_pwp.inv1_out                           0.9
+xpg_rrc2.xcac.a                              0
+xpg_rrc2.xcac.b1                             0
+xpg_rrc2.pulse_raw                           0
+xpg_rrc2.inv1_out                          0.9
+trig_rr_cap                        1.73955e-07
+xbi0.cap_inv                               0.9
+xbi0.cpy_inv                               0.9
+xbi0.curr_node                        0.448967
+xbi0.xccurr.a                                0
+xbi0.xccurr.b1                               0
+xbi0.esamp_node                            0.3
+xbi0.xcesamp.a                               0
+xbi0.xcesamp.b1                              0
+xbi0.prev_node                             0.3
+xbi0.xcprev.a                                0
+xbi0.xcprev.b1                               0
+xbi0.tail_i                           0.233018
+xbi0.net_i1                           0.288103
+f3_bi_l0                              0.426106
+xbi1.cap_inv                               0.9
+xbi1.cpy_inv                               0.9
+xbi1.curr_node                        0.448967
+xbi1.xccurr.a                                0
+xbi1.xccurr.b1                               0
+xbi1.esamp_node                            0.3
+xbi1.xcesamp.a                               0
+xbi1.xcesamp.b1                              0
+xbi1.prev_node                             0.3
+xbi1.xcprev.a                                0
+xbi1.xcprev.b1                               0
+xbi1.tail_i                           0.233018
+xbi1.net_i1                           0.288103
+f4_bi_l1                              0.426106
+xpw.shb                              0.0711869
+xpw.xcsb.a                                   0
+xpw.xcsb.b1                                  0
+xpw.shp                              0.0711869
+xpw.xcsp.a                                   0
+xpw.xcsp.b1                                  0
+xpw.dtail                           0.00597307
+xpw.dnet                              0.363579
+f5_pwave                              0.363579
+f6_width                             0.0711869
+xwid.xcsh.a                                  0
+xwid.xcsh.b1                                 0
+xslp.sh14                            0.0711869
+xslp.xcs14.a                                 0
+xslp.xcs14.b1                                0
+xslp.sh69                            0.0711869
+xslp.xcs69.a                                 0
+xslp.xcs69.b1                                0
+xslp.dtail                          0.00603562
+xslp.dnet                             0.423362
+f7_slope                              0.423362
+f8_symmetry                           0.448967
+xsym.trig_inv                              0.9
+xsym.xcsr.a                                  0
+xsym.xcsr.b1                                 0
+vth_pwp#branch                               0
+vth_pwb#branch                               0
+vth_10#branch                                0
+vth_300#branch                               0
+vth_28#branch                                0
+vth_69#branch                                0
+vth_14#branch                                0
+vth_rpeak#branch                             0
+vecg1#branch                       6.04589e-16
+vecg0#branch                      -9.49937e-14
+vss#branch                         8.22846e-10
+vdd#branch                        -8.08544e-10
+
+
+No. of Data Rows : 23243
+
+  Measurements for Transient Analysis
+
+vbias_dc            =  2.914710e-01
+rpk_check_0         =  8.999862e-01
+ecg_check_0         =  3.629310e-01
+stg1_check_0        =  1.478923e-01
+rpk_check_1         =  1.998769e-11
+ecg_check_1         =  1.806680e-01
+stg1_check_1        =  8.995160e-01
+rpk_check_2         =  8.999847e-01
+ecg_check_2         =  3.590720e-01
+stg1_check_2        =  1.500231e-01
+rpk_check_3         =  1.987597e-11
+ecg_check_3         =  1.765120e-01
+stg1_check_3        =  8.995671e-01
+rpk_check_4         =  8.999859e-01
+ecg_check_4         =  3.623380e-01
+stg1_check_4        =  1.482192e-01
+rpk_check_5         =  1.970420e-11
+ecg_check_5         =  1.759180e-01
+stg1_check_5        =  8.995760e-01
+rpk_check_6         =  8.999722e-01
+ecg_check_6         =  3.531350e-01
+stg1_check_6        =  1.545412e-01
+rpk_check_7         =  2.010016e-11
+ecg_check_7         =  1.863080e-01
+stg1_check_7        =  8.994365e-01
+rpk_check_8         =  8.999867e-01
+ecg_check_8         =  3.650090e-01
+stg1_check_8        =  1.469206e-01
+rpk_check_9         =  1.995849e-11
+ecg_check_9         =  1.720590e-01
+stg1_check_9        =  8.996173e-01
+f1_5                =  2.979274e-01
+f2_5                =  3.106092e-01
+f3_5                =  2.998029e-01
+f4_5                =  3.075631e-01
+f6_5                =  3.202077e-01
+f7_5                =  3.801883e-01
+f8_5                =  3.355711e-01
+f5_5                =  2.836252e-01
+f1_6                =  2.988225e-01
+f2_6                =  3.102448e-01
+f3_6                =  3.061329e-01
+f4_6                =  3.056905e-01
+f6_6                =  2.710296e-01
+f7_6                =  3.654911e-01
+f8_6                =  3.460512e-01
+f5_6                =  3.138994e-01
+f1_7                =  2.998342e-01
+f2_7                =  2.885147e-01
+f3_7                =  3.061291e-01
+f4_7                =  3.056872e-01
+f6_7                =  2.684112e-01
+f7_7                =  3.655143e-01
+f8_7                =  3.461019e-01
+f5_7                =  3.118089e-01
+f1_8                =  3.347657e-01
+f2_8                =  3.128589e-01
+f3_8                =  3.058453e-01
+f4_8                =  3.058608e-01
+f6_8                =  2.744331e-01
+f7_8                =  3.637800e-01
+f8_8                =  3.486278e-01
+f5_8                =  3.048004e-01
+f1_9                =  2.975277e-01
+f3_9                =  3.006793e-01
+f4_9                =  3.064806e-01
+f6_9                =  3.202245e-01
+f7_9                =  3.784486e-01
+f8_9                =  3.369656e-01
+sf_at_1ms           =  4.898347e-01
+sf_at_20ms          =  4.878672e-01
+sf_at_30ms          =  4.838645e-01
+sf_at_50ms          =  4.753369e-01
+sf_at_80ms          =  4.628324e-01
+sf_at_120ms         =  4.461111e-01
+sf_at_200ms         =  4.129747e-01
+sf_at_350ms         =  3.515217e-01
+rpk_raw_0ms         =  8.999847e-01
+rpk_raw_5ms         =  8.999852e-01
+rpk_raw_10ms        =  8.999791e-01
+rpk_raw_15ms        =  6.830355e-01
+rpk_raw_20ms        =  4.484565e-11
+rpk_raw_25ms        =  2.713079e-11
+dt_s14_at_30ms      =  5.878908e-01
+dt_wid_at_30ms      =  3.091762e-01
+dt_s69_at_30ms      =  2.289314e-01
+dt_bi_at_30ms       =  1.343049e-01
+dt_s14_at_50ms      =  8.636849e-01
+dt_wid_at_50ms      =  8.529518e-01
+dt_s69_at_50ms      =  2.404538e-01
+dt_bi_at_50ms       =  1.345134e-01
+dt_s14_at_80ms      =  8.802903e-01
+dt_wid_at_80ms      =  8.774520e-01
+dt_s69_at_80ms      =  6.987326e-01
+dt_bi_at_80ms       =  1.351693e-01
+dt_s14_at_120ms     =  8.891318e-01
+dt_wid_at_120ms     =  8.878914e-01
+dt_s69_at_120ms     =  8.773610e-01
+dt_bi_at_120ms      =  1.364717e-01
+dt_s14_at_200ms     =  8.960474e-01
+dt_wid_at_200ms     =  8.956520e-01
+dt_s69_at_200ms     =  8.928029e-01
+dt_bi_at_200ms      =  1.424340e-01
+dt_s14_at_350ms     =  8.993016e-01
+dt_wid_at_350ms     =  8.992354e-01
+dt_s69_at_350ms     =  8.987761e-01
+dt_bi_at_350ms      =  8.769914e-01
+rr_timer_at_5ms     =  4.875639e-01
+rr_net_at_5ms       =  8.999931e-01
+rr_sfout_at_5ms     =  4.875639e-01
+rr_timer_at_50ms    =  4.844391e-01
+rr_net_at_50ms      =  8.961507e-01
+rr_sfout_at_50ms    =  4.844391e-01
+rr_timer_at_100ms   =  4.798958e-01
+rr_net_at_100ms     =  8.906010e-01
+rr_sfout_at_100ms   =  4.798958e-01
+rr_timer_at_200ms   =  4.708533e-01
+rr_net_at_200ms     =  8.795085e-01
+rr_sfout_at_200ms   =  4.708533e-01
+rr_timer_at_300ms   =  4.618301e-01
+rr_net_at_300ms     =  8.684284e-01
+rr_sfout_at_300ms   =  4.618301e-01
+rr_timer_at_400ms   =  4.528134e-01
+rr_net_at_400ms     =  8.573600e-01
+rr_sfout_at_400ms   =  4.528134e-01
+rr_timer_at_500ms   =  4.433683e-01
+rr_net_at_500ms     =  8.463027e-01
+rr_sfout_at_500ms   =  4.433683e-01
+rr_timer_at_600ms   =  4.348397e-01
+rr_net_at_600ms     =  8.352590e-01
+rr_sfout_at_600ms   =  4.348397e-01
+rr_timer_pw_50pct   =  4.302684e-01
+pw_base_lev_50pct   =  8.775202e-01
+pw_base_buf_50pct   =  9.000000e-01
+pw_peak_buf_50pct   =  9.000000e-01
+rr_timer_pw_65pct   =  4.773213e-01
+pw_base_lev_65pct   =  2.099841e-01
+pw_base_buf_65pct   =  9.077415e-11
+pw_peak_buf_65pct   =  9.076023e-11
+rr_timer_pw_75pct   =  4.655755e-01
+pw_base_lev_75pct   =  2.192946e-01
+pw_base_buf_75pct   =  9.084856e-11
+pw_peak_buf_75pct   =  9.082702e-11
+rr_timer_pw_85pct   =  4.538534e-01
+pw_base_lev_85pct   =  2.503621e-01
+pw_base_buf_85pct   =  9.048507e-11
+pw_peak_buf_85pct   =  9.074511e-11
+rr_timer_pw_90pct   =  4.480056e-01
+pw_base_lev_90pct   =  6.822678e-01
+pw_base_buf_90pct   =  9.000000e-01
+pw_peak_buf_90pct   =  9.068191e-11
+rr_timer_pw_95pct   =  4.421696e-01
+pw_base_lev_95pct   =  8.559685e-01
+pw_base_buf_95pct   =  9.000000e-01
+pw_peak_buf_95pct   =  9.000000e-01
+buf_s14_at_30ms     =  9.000002e-01
+buf_wid_at_30ms     =  -1.832876e-10
+buf_s69_at_30ms     =  9.463502e-11
+buf_s14_at_50ms     =  9.000000e-01
+buf_wid_at_50ms     =  9.000000e-01
+buf_s69_at_50ms     =  9.072614e-11
+buf_s14_at_80ms     =  9.000000e-01
+buf_wid_at_80ms     =  9.000000e-01
+buf_s69_at_80ms     =  9.000000e-01
+buf_s14_at_120ms    =  9.000000e-01
+buf_wid_at_120ms    =  9.000000e-01
+buf_s69_at_120ms    =  9.000000e-01
+trig_s14_at_22ms    =  1.739454e-07
+trig_wid_at_22ms    =  1.739454e-07
+trig_s69_at_22ms    =  1.739455e-07
+trig_s14_at_24ms    =  8.999997e-01
+trig_wid_at_24ms    =  1.739507e-07
+trig_s69_at_24ms    =  1.739502e-07
+trig_s14_at_26ms    =  4.878281e-01
+trig_wid_at_26ms    =  1.739516e-07
+trig_s69_at_26ms    =  1.739516e-07
+trig_s14_at_28ms    =  1.739628e-07
+trig_wid_at_28ms    =  1.739542e-07
+trig_s69_at_28ms    =  1.739542e-07
+trig_s14_at_30ms    =  1.739542e-07
+trig_wid_at_30ms    =  1.739542e-07
+trig_s69_at_30ms    =  1.739542e-07
+trig_s14_at_36ms    =  1.739573e-07
+trig_wid_at_36ms    =  1.689991e-07
+trig_s69_at_36ms    =  1.739572e-07
+trig_s14_at_38ms    =  1.739566e-07
+trig_wid_at_38ms    =  1.739566e-07
+trig_s69_at_38ms    =  1.739566e-07
+trig_s14_at_40ms    =  1.739564e-07
+trig_wid_at_40ms    =  1.739564e-07
+trig_s69_at_40ms    =  1.739564e-07
+trig_s14_at_42ms    =  1.739546e-07
+trig_wid_at_42ms    =  1.739546e-07
+trig_s69_at_42ms    =  1.739546e-07
+trig_s14_at_76ms    =  1.739555e-07
+trig_wid_at_76ms    =  1.739555e-07
+trig_s69_at_76ms    =  1.769570e-07
+trig_s14_at_78ms    =  1.739553e-07
+trig_wid_at_78ms    =  1.739553e-07
+trig_s69_at_78ms    =  1.739553e-07
+trig_s14_at_80ms    =  1.739553e-07
+trig_wid_at_80ms    =  1.739553e-07
+trig_s69_at_80ms    =  1.739553e-07
+trig_s14_at_82ms    =  1.739548e-07
+trig_wid_at_82ms    =  1.739548e-07
+trig_s69_at_82ms    =  1.739548e-07
+pw_trig_base_408ms  =  1.739553e-07
+pw_trig_peak_408ms  =  1.739549e-07
+pw_trig_cap_408ms   =  1.739548e-07
+pw_trig_base_418ms  =  1.739553e-07
+pw_trig_peak_418ms  =  1.739549e-07
+pw_trig_cap_418ms   =  1.739548e-07
+pw_trig_base_428ms  =  1.748602e-07
+pw_trig_peak_428ms  =  1.739554e-07
+pw_trig_cap_428ms   =  1.739548e-07
+pw_trig_base_438ms  =  1.739559e-07
+pw_trig_peak_438ms  =  1.739556e-07
+pw_trig_cap_438ms   =  1.739548e-07
+pw_trig_base_448ms  =  1.739544e-07
+pw_trig_peak_448ms  =  1.739540e-07
+pw_trig_cap_448ms   =  1.739548e-07
+pw_trig_base_458ms  =  1.739548e-07
+pw_trig_peak_458ms  =  1.739545e-07
+pw_trig_cap_458ms   =  1.739548e-07
+pw_trig_base_468ms  =  1.739557e-07
+pw_trig_peak_468ms  =  1.739553e-07
+pw_trig_cap_468ms   =  1.739548e-07
+pw_trig_base_478ms  =  1.739504e-07
+pw_trig_peak_478ms  =  1.739500e-07
+pw_trig_cap_478ms   =  1.739548e-07
+pw_trig_base_488ms  =  1.739386e-07
+pw_trig_peak_488ms  =  1.739382e-07
+pw_trig_cap_488ms   =  1.739548e-07
+pw_trig_base_498ms  =  1.739502e-07
+pw_trig_peak_498ms  =  1.739498e-07
+pw_trig_cap_498ms   =  1.739548e-07
+trig_bi_at_315ms    =  1.739548e-07
+buf_bi_at_315ms     =  9.000000e-01
+trig_bi_at_316ms    =  1.739548e-07
+buf_bi_at_316ms     =  9.000000e-01
+trig_bi_at_317ms    =  1.739548e-07
+buf_bi_at_317ms     =  9.000000e-01
+trig_bi_at_318ms    =  1.739548e-07
+buf_bi_at_318ms     =  9.000000e-01
+trig_bi_at_319ms    =  1.739548e-07
+buf_bi_at_319ms     =  9.000000e-01
+trig_bi_at_320ms    =  1.739548e-07
+buf_bi_at_320ms     =  9.000000e-01
+trig_bi_at_321ms    =  1.739548e-07
+buf_bi_at_321ms     =  9.000000e-01
+trig_bi_at_322ms    =  1.739548e-07
+buf_bi_at_322ms     =  9.000000e-01
+trig_bi_at_323ms    =  1.739548e-07
+buf_bi_at_323ms     =  9.000000e-01
+trig_bi_at_324ms    =  1.739548e-07
+buf_bi_at_324ms     =  9.000000e-01
+trig_bi_at_325ms    =  1.739548e-07
+buf_bi_at_325ms     =  9.000000e-01
+trig_bi_at_330ms    =  1.739548e-07
+buf_bi_at_330ms     =  9.000000e-01
+trig_bi_at_340ms    =  1.739548e-07
+buf_bi_at_340ms     =  9.000000e-01
+pw_base_trig_at_600ms=  1.739564e-07
+pw_base_buf_at_600ms=  9.000000e-01
+pw_base_trig_at_602ms=  1.739561e-07
+pw_base_buf_at_602ms=  9.000000e-01
+pw_base_trig_at_604ms=  1.739574e-07
+pw_base_buf_at_604ms=  9.000000e-01
+pw_base_trig_at_606ms=  1.739570e-07
+pw_base_buf_at_606ms=  9.000000e-01
+pw_base_trig_at_608ms=  1.739570e-07
+pw_base_buf_at_608ms=  9.000000e-01
+pw_base_trig_at_610ms=  1.739566e-07
+pw_base_buf_at_610ms=  9.000000e-01
+pw_base_trig_at_612ms=  1.739557e-07
+pw_base_buf_at_612ms=  9.000000e-01
+pw_base_trig_at_614ms=  1.739555e-07
+pw_base_buf_at_614ms=  9.000000e-01
+pw_base_trig_at_616ms=  1.739555e-07
+pw_base_buf_at_616ms=  9.000000e-01
+pw_base_trig_at_618ms=  1.739564e-07
+pw_base_buf_at_618ms=  9.000000e-01
+pw_base_trig_at_620ms=  1.739557e-07
+pw_base_buf_at_620ms=  9.000000e-01
+pw_base_trig_at_622ms=  1.739557e-07
+pw_base_buf_at_622ms=  9.000000e-01
+pw_base_trig_at_624ms=  1.739557e-07
+pw_base_buf_at_624ms=  9.000000e-01
+pw_base_trig_at_626ms=  1.739553e-07
+pw_base_buf_at_626ms=  9.000000e-01
+pw_base_trig_at_628ms=  1.739551e-07
+pw_base_buf_at_628ms=  9.000000e-01
+pw_base_trig_at_630ms=  1.739551e-07
+pw_base_buf_at_630ms=  9.000000e-01
+pw_base_trig_at_632ms=  1.739559e-07
+pw_base_buf_at_632ms=  9.000000e-01
+pw_base_trig_at_634ms=  1.739555e-07
+pw_base_buf_at_634ms=  9.000000e-01
+pw_base_trig_at_636ms=  1.739555e-07
+pw_base_buf_at_636ms=  9.000000e-01
+pw_base_trig_at_638ms=  1.739557e-07
+pw_base_buf_at_638ms=  9.000000e-01
+pw_base_trig_at_640ms=  1.739559e-07
+pw_base_buf_at_640ms=  9.000000e-01
+pw_base_trig_at_642ms=  1.739561e-07
+pw_base_buf_at_642ms=  9.000000e-01
+pw_base_trig_at_644ms=  1.739561e-07
+pw_base_buf_at_644ms=  9.000000e-01
+pw_base_trig_at_646ms=  1.739555e-07
+pw_base_buf_at_646ms=  9.000000e-01
+pw_base_trig_at_648ms=  1.739546e-07
+pw_base_buf_at_648ms=  9.000000e-01
+pw_base_trig_at_650ms=  1.739546e-07
+pw_base_buf_at_650ms=  9.000000e-01
+pw_base_trig_at_652ms=  1.739551e-07
+pw_base_buf_at_652ms=  9.000000e-01
+pw_base_trig_at_654ms=  1.739563e-07
+pw_base_buf_at_654ms=  9.000000e-01
+pw_base_trig_at_656ms=  1.739557e-07
+pw_base_buf_at_656ms=  9.000000e-01
+pw_base_trig_at_658ms=  1.739557e-07
+pw_base_buf_at_658ms=  9.000000e-01
+pw_peak_trig_at_640ms=  1.739555e-07
+pw_peak_buf_at_640ms=  9.000000e-01
+pw_peak_trig_at_642ms=  1.739558e-07
+pw_peak_buf_at_642ms=  9.000000e-01
+pw_peak_trig_at_644ms=  1.739558e-07
+pw_peak_buf_at_644ms=  9.000000e-01
+pw_peak_trig_at_646ms=  1.739551e-07
+pw_peak_buf_at_646ms=  9.000000e-01
+pw_peak_trig_at_648ms=  1.739543e-07
+pw_peak_buf_at_648ms=  9.000000e-01
+pw_peak_trig_at_650ms=  1.739541e-07
+pw_peak_buf_at_650ms=  9.000000e-01
+pw_peak_trig_at_652ms=  1.739547e-07
+pw_peak_buf_at_652ms=  9.000000e-01
+pw_peak_trig_at_654ms=  1.739560e-07
+pw_peak_buf_at_654ms=  9.000000e-01
+pw_peak_trig_at_656ms=  1.739553e-07
+pw_peak_buf_at_656ms=  9.000000e-01
+pw_peak_trig_at_658ms=  1.739553e-07
+pw_peak_buf_at_658ms=  9.000000e-01
+pw_peak_trig_at_660ms=  1.739543e-07
+pw_peak_buf_at_660ms=  9.000000e-01
+pw_peak_trig_at_662ms=  1.739547e-07
+pw_peak_buf_at_662ms=  9.000000e-01
+pw_peak_trig_at_664ms=  1.739551e-07
+pw_peak_buf_at_664ms=  9.000000e-01
+pw_peak_trig_at_666ms=  1.739551e-07
+pw_peak_buf_at_666ms=  9.000000e-01
+pw_peak_trig_at_668ms=  1.739551e-07
+pw_peak_buf_at_668ms=  9.000000e-01
+pw_peak_trig_at_670ms=  1.739555e-07
+pw_peak_buf_at_670ms=  9.000000e-01
+pw_peak_trig_at_672ms=  1.739556e-07
+pw_peak_buf_at_672ms=  9.000000e-01
+pw_peak_trig_at_674ms=  1.739564e-07
+pw_peak_buf_at_674ms=  9.000000e-01
+pw_peak_trig_at_676ms=  1.739553e-07
+pw_peak_buf_at_676ms=  9.000000e-01
+pw_peak_trig_at_678ms=  1.739551e-07
+pw_peak_buf_at_678ms=  9.000000e-01
+pw_peak_trig_at_680ms=  1.739551e-07
+pw_peak_buf_at_680ms=  9.000000e-01
+pw_peak_trig_at_682ms=  1.739545e-07
+pw_peak_buf_at_682ms=  9.000000e-01
+pw_peak_trig_at_684ms=  1.739555e-07
+pw_peak_buf_at_684ms=  9.000000e-01
+pw_peak_trig_at_686ms=  1.739555e-07
+pw_peak_buf_at_686ms=  9.000000e-01
+pw_peak_trig_at_688ms=  1.739545e-07
+pw_peak_buf_at_688ms=  9.000000e-01
+pw_peak_trig_at_690ms=  1.739547e-07
+pw_peak_buf_at_690ms=  9.000000e-01
+pw_peak_trig_at_692ms=  1.739546e-07
+pw_peak_buf_at_692ms=  9.000000e-01
+pw_peak_trig_at_694ms=  1.739547e-07
+pw_peak_buf_at_694ms=  9.000000e-01
+pw_peak_trig_at_696ms=  1.739547e-07
+pw_peak_buf_at_696ms=  9.000000e-01
+pw_peak_trig_at_698ms=  1.739545e-07
+pw_peak_buf_at_698ms=  9.000000e-01
+
+
+Total analysis time (seconds) = 21.202
+
+Total elapsed time (seconds) = 33.799 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1813.516 MB.
+Maximum ngspice program size =  204.352 MB.
+Current ngspice program size =  203.988 MB.
+

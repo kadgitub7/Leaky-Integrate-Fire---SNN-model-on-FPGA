@@ -1,0 +1,25 @@
+Subckt test 2
+.lib "C:\Users\kadhi\OneDrive\Desktop\amux\verilogLearning\Leaky-Integrate-Fire---SNN-model-on-FPGA\experiments\frontend_optimization\ngspice_frontend\sky130_minimal.lib.spice" tt
+.option scale=1.0u
+
+.include "frontend_top.spice"
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+V1 a 0 0.5
+V2 b 0 0.5
+V3 c 0 0.5
+V4 d 0 0.5
+V5 th 0 0.36
+V6 th14 0 0.47
+V7 th69 0 0.44
+V8 th83 0 0.46
+V9 th300 0 0.32
+V10 th10 0 0.22
+V11 thpb 0 0.15
+V12 thpp 0 0.11
+
+Xfe a b c d th th14 th69 th83 th300 th10 thpb thpp f1 f2 f3 f4 f5 f6 f7 f8 vdd vss asic_frontend
+
+.op
+.end

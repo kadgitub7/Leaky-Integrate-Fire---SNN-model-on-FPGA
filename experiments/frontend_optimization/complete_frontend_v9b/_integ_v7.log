@@ -1,0 +1,256 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: integration test v7 - fixed f1/f2
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 29450
+
+  Measurements for Transient Analysis
+
+f1_rr_ratio_b1      =  8.516417e-01
+f2_rr_asym_b1       =  8.527364e-01
+f3_bi_l0_b1         =  3.093748e-01
+f4_bi_l1_b1         =  3.142001e-01
+f5_pwave_b1         =  8.574361e-01
+f6_width_b1         =  2.382813e-01
+f7_slope_b1         =  3.612868e-01
+f8_symmetry_b1      =  2.345112e-01
+f1_rr_ratio_b2      =  1.769161e-01
+f2_rr_asym_b2       =  1.964760e-01
+f3_bi_l0_b2         =  2.961121e-01
+f4_bi_l1_b2         =  2.946662e-01
+f5_pwave_b2         =  8.993592e-01
+f6_width_b2         =  2.788570e-01
+f7_slope_b2         =  3.607570e-01
+f8_symmetry_b2      =  2.448384e-01
+f1_rr_ratio_b3      =  8.579886e-01
+f2_rr_asym_b3       =  8.668570e-01
+f3_bi_l0_b3         =  2.926670e-01
+f4_bi_l1_b3         =  2.959554e-01
+f5_pwave_b3         =  8.999189e-01
+f6_width_b3         =  3.115386e-01
+f7_slope_b3         =  3.603045e-01
+f8_symmetry_b3      =  3.437505e-01
+f1_rr_ratio_b4      =  8.701252e-01
+f2_rr_asym_b4       =  8.758636e-01
+f3_bi_l0_b4         =  2.958680e-01
+f4_bi_l1_b4         =  2.924930e-01
+f5_pwave_b4         =  8.998842e-01
+f6_width_b4         =  2.118354e-01
+f7_slope_b4         =  3.623128e-01
+f8_symmetry_b4      =  2.176129e-01
+f1_rr_ratio_b5      =  8.741183e-01
+f2_rr_asym_b5       =  8.795131e-01
+f3_bi_l0_b5         =  2.970301e-01
+f4_bi_l1_b5         =  2.955968e-01
+f5_pwave_b5         =  8.998563e-01
+f6_width_b5         =  3.168007e-01
+f7_slope_b5         =  3.602830e-01
+f8_symmetry_b5      =  2.221952e-01
+f1_rr_ratio_b6      =  8.767785e-01
+f2_rr_asym_b6       =  8.820536e-01
+f3_bi_l0_b6         =  2.954102e-01
+f4_bi_l1_b6         =  2.925758e-01
+f5_pwave_b6         =  8.998255e-01
+f6_width_b6         =  2.665137e-01
+f7_slope_b6         =  3.609262e-01
+f8_symmetry_b6      =  2.312818e-01
+f1_rr_ratio_b7      =  8.680561e-01
+f2_rr_asym_b7       =  8.779903e-01
+f3_bi_l0_b7         =  2.918761e-01
+f4_bi_l1_b7         =  2.964971e-01
+f5_pwave_b7         =  8.997848e-01
+f6_width_b7         =  1.952802e-01
+f7_slope_b7         =  3.635933e-01
+f8_symmetry_b7      =  3.334365e-01
+f1_rr_ratio_b8      =  8.643438e-01
+f2_rr_asym_b8       =  8.774767e-01
+f3_bi_l0_b8         =  2.972933e-01
+f4_bi_l1_b8         =  2.960381e-01
+f5_pwave_b8         =  8.997045e-01
+f6_width_b8         =  3.121642e-01
+f7_slope_b8         =  3.603044e-01
+f8_symmetry_b8      =  2.146933e-01
+f1_rr_ratio_b9      =  8.735088e-01
+f2_rr_asym_b9       =  8.824711e-01
+f3_bi_l0_b9         =  2.961548e-01
+f4_bi_l1_b9         =  2.923931e-01
+f5_pwave_b9         =  8.931284e-01
+f6_width_b9         =  2.822830e-01
+f7_slope_b9         =  3.607139e-01
+f8_symmetry_b9      =  2.145859e-01
+rrsf_50ms_b1        =  4.776425e-01
+ewma_b1_50          =  3.990755e-01
+rrsf_300ms_b1       =  4.494420e-01
+ewma_b1_300         =  3.988070e-01
+rrsf_600ms_b1       =  4.158840e-01
+ewma_b1_600         =  3.985191e-01
+rrsf_50ms_b2        =  4.777473e-01
+ewma_b2_50          =  3.795282e-01
+rrsf_300ms_b2       =  4.494883e-01
+ewma_b2_300         =  3.792376e-01
+rrsf_600ms_b2       =  4.158485e-01
+ewma_b2_600         =  3.789058e-01
+rrsf_50ms_b3        =  4.783336e-01
+ewma_b3_50          =  3.786379e-01
+rrsf_300ms_b3       =  4.501926e-01
+ewma_b3_300         =  3.784240e-01
+rrsf_600ms_b3       =  4.165668e-01
+ewma_b3_600         =  3.781826e-01
+rrsf_50ms_b4        =  4.781549e-01
+ewma_b4_50          =  3.779753e-01
+rrsf_300ms_b4       =  4.499388e-01
+ewma_b4_300         =  3.777772e-01
+rrsf_600ms_b4       =  4.163069e-01
+ewma_b4_600         =  3.775472e-01
+pwbase_b2           =  1.868546e-01
+pwpeak_b2           =  1.549916e-01
+rrcap_b2            =  1.344691e-01
+pwbase_b3           =  1.611234e-01
+pwpeak_b3           =  1.448411e-01
+rrcap_b3            =  1.337494e-01
+pwbase_b4           =  1.580191e-01
+pwpeak_b4           =  1.426183e-01
+rrcap_b4            =  1.332163e-01
+trg_s14_b1          =  8.759763e-01
+trg_s14_b2          =  8.747675e-01
+trg_s14_b3          =  8.747343e-01
+avg_idd             =  -7.175714e-10 from=  5.000000e-01 to=  8.908000e+00
+
+Using SPARSE 1.3 as Direct Linear Solver
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 29450
+
+  Measurements for Transient Analysis
+
+f1_rr_ratio_b1      =  8.516417e-01
+f2_rr_asym_b1       =  8.527364e-01
+f3_bi_l0_b1         =  3.093748e-01
+f4_bi_l1_b1         =  3.142001e-01
+f5_pwave_b1         =  8.574361e-01
+f6_width_b1         =  2.382813e-01
+f7_slope_b1         =  3.612868e-01
+f8_symmetry_b1      =  2.345112e-01
+f1_rr_ratio_b2      =  1.769161e-01
+f2_rr_asym_b2       =  1.964760e-01
+f3_bi_l0_b2         =  2.961121e-01
+f4_bi_l1_b2         =  2.946662e-01
+f5_pwave_b2         =  8.993592e-01
+f6_width_b2         =  2.788570e-01
+f7_slope_b2         =  3.607570e-01
+f8_symmetry_b2      =  2.448384e-01
+f1_rr_ratio_b3      =  8.579886e-01
+f2_rr_asym_b3       =  8.668570e-01
+f3_bi_l0_b3         =  2.926670e-01
+f4_bi_l1_b3         =  2.959554e-01
+f5_pwave_b3         =  8.999189e-01
+f6_width_b3         =  3.115386e-01
+f7_slope_b3         =  3.603045e-01
+f8_symmetry_b3      =  3.437505e-01
+f1_rr_ratio_b4      =  8.701252e-01
+f2_rr_asym_b4       =  8.758636e-01
+f3_bi_l0_b4         =  2.958680e-01
+f4_bi_l1_b4         =  2.924930e-01
+f5_pwave_b4         =  8.998842e-01
+f6_width_b4         =  2.118354e-01
+f7_slope_b4         =  3.623128e-01
+f8_symmetry_b4      =  2.176129e-01
+f1_rr_ratio_b5      =  8.741183e-01
+f2_rr_asym_b5       =  8.795131e-01
+f3_bi_l0_b5         =  2.970301e-01
+f4_bi_l1_b5         =  2.955968e-01
+f5_pwave_b5         =  8.998563e-01
+f6_width_b5         =  3.168007e-01
+f7_slope_b5         =  3.602830e-01
+f8_symmetry_b5      =  2.221952e-01
+f1_rr_ratio_b6      =  8.767785e-01
+f2_rr_asym_b6       =  8.820536e-01
+f3_bi_l0_b6         =  2.954102e-01
+f4_bi_l1_b6         =  2.925758e-01
+f5_pwave_b6         =  8.998255e-01
+f6_width_b6         =  2.665137e-01
+f7_slope_b6         =  3.609262e-01
+f8_symmetry_b6      =  2.312818e-01
+f1_rr_ratio_b7      =  8.680561e-01
+f2_rr_asym_b7       =  8.779903e-01
+f3_bi_l0_b7         =  2.918761e-01
+f4_bi_l1_b7         =  2.964971e-01
+f5_pwave_b7         =  8.997848e-01
+f6_width_b7         =  1.952802e-01
+f7_slope_b7         =  3.635933e-01
+f8_symmetry_b7      =  3.334365e-01
+f1_rr_ratio_b8      =  8.643438e-01
+f2_rr_asym_b8       =  8.774767e-01
+f3_bi_l0_b8         =  2.972933e-01
+f4_bi_l1_b8         =  2.960381e-01
+f5_pwave_b8         =  8.997045e-01
+f6_width_b8         =  3.121642e-01
+f7_slope_b8         =  3.603044e-01
+f8_symmetry_b8      =  2.146933e-01
+f1_rr_ratio_b9      =  8.735088e-01
+f2_rr_asym_b9       =  8.824711e-01
+f3_bi_l0_b9         =  2.961548e-01
+f4_bi_l1_b9         =  2.923931e-01
+f5_pwave_b9         =  8.931284e-01
+f6_width_b9         =  2.822830e-01
+f7_slope_b9         =  3.607139e-01
+f8_symmetry_b9      =  2.145859e-01
+rrsf_50ms_b1        =  4.776425e-01
+ewma_b1_50          =  3.990755e-01
+rrsf_300ms_b1       =  4.494420e-01
+ewma_b1_300         =  3.988070e-01
+rrsf_600ms_b1       =  4.158840e-01
+ewma_b1_600         =  3.985191e-01
+rrsf_50ms_b2        =  4.777473e-01
+ewma_b2_50          =  3.795282e-01
+rrsf_300ms_b2       =  4.494883e-01
+ewma_b2_300         =  3.792376e-01
+rrsf_600ms_b2       =  4.158485e-01
+ewma_b2_600         =  3.789058e-01
+rrsf_50ms_b3        =  4.783336e-01
+ewma_b3_50          =  3.786379e-01
+rrsf_300ms_b3       =  4.501926e-01
+ewma_b3_300         =  3.784240e-01
+rrsf_600ms_b3       =  4.165668e-01
+ewma_b3_600         =  3.781826e-01
+rrsf_50ms_b4        =  4.781549e-01
+ewma_b4_50          =  3.779753e-01
+rrsf_300ms_b4       =  4.499388e-01
+ewma_b4_300         =  3.777772e-01
+rrsf_600ms_b4       =  4.163069e-01
+ewma_b4_600         =  3.775472e-01
+pwbase_b2           =  1.868546e-01
+pwpeak_b2           =  1.549916e-01
+rrcap_b2            =  1.344691e-01
+pwbase_b3           =  1.611234e-01
+pwpeak_b3           =  1.448411e-01
+rrcap_b3            =  1.337494e-01
+pwbase_b4           =  1.580191e-01
+pwpeak_b4           =  1.426183e-01
+rrcap_b4            =  1.332163e-01
+trg_s14_b1          =  8.759763e-01
+trg_s14_b2          =  8.747675e-01
+trg_s14_b3          =  8.747343e-01
+avg_idd             =  -7.175714e-10 from=  5.000000e-01 to=  8.908000e+00
+
+
+Total analysis time (seconds) = 26.81
+
+Total elapsed time (seconds) = 38.791 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1695.711 MB.
+Maximum ngspice program size =  220.250 MB.
+Current ngspice program size =  220.250 MB.
+

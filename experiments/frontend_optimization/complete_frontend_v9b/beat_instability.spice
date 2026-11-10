@@ -1,0 +1,37 @@
+* ============================================================
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v9 (diode loads)
+*
+* Captures ECG at R-peak, compares with previous via charge-share.
+* Diode-connected loads, gain ~1. With EWMA IC fix, span ~370mV
+* (26 levels) — sufficient without amplification.
+* v8→v9: reverted from hybrid (1.7x, 6% clip) to diode (1x, 0% clip)
+*
+* Triggers: capture_trig (at R-peak), copy_trig (R+300ms)
+* One instance per lead (L0 and L1).
+*
+* Pin: ecg_in capture_trig copy_trig instab_out vdd vss vbias
+* ============================================================
+
+.subckt beat_instability ecg_in capture_trig copy_trig instab_out vdd vss vbias
+
+* === CURRENT PEAK CAPTURE ===
+XMcurr ecg_in capture_trig curr_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCcurr curr_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === EWMA SAMPLE (for prev update) ===
+XMesamp ecg_in capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+
+* === PREV UPDATE at copy_trig ===
+XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+* === DIFF PAIR: instability output (diode loads, gain ~1) ===
+XMi_tail tail_i vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+XMi1 net_i1 curr_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+XMi2 instab_out prev_node tail_i vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
+* Both sides: diode-connected (gain ~1, 0% clipping)
+XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+XMi4 instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+
+.ends beat_instability

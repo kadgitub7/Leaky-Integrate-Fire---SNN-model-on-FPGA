@@ -1,0 +1,64 @@
+======================================================================
+ISOLATION TEST v3: Two-stage comparator + rr_cap offset fix
+======================================================================
+
+[1] Loading 12 beats from record 100...
+  Loaded 12 beats, gain=0.058932, rpeak_th=0.3415
+
+[2] Calibrating delay timer...
+  vth_14=0.17384 vth_28=0.47024 vth_69=0.44870 vth_300=0.32946
+
+  Delay timer SF curve (ms -> V):
+       1ms: 0.48231V
+       2ms: 0.48177V
+       3ms: 0.48126V
+       4ms: 0.48072V
+       5ms: 0.48021V
+      10ms: 0.47764V
+      15ms: 0.47494V
+      20ms: 0.47234V
+      50ms: 0.45655V
+     100ms: 0.43040V
+     200ms: 0.37858V
+     300ms: 0.32741V
+     400ms: 0.27687V
+     500ms: 0.22701V
+     600ms: 0.17782V
+     700ms: 0.12939V
+     800ms: 0.08207V
+
+[3] Config A_BASELINE: Phase 4 baseline (all ideal rpeak/pw/rrcap)
+  10 beats measured, 51s
+  rho: 0.891 0.988 0.903 0.988 0.994 0.098 0.358 0.902
+
+[4] Config H_FIX_RRCAP: Two-stage rr_cap + offset=-80 (capture at next_R-80ms, before F2 at -65ms)
+  10 beats measured, 60s
+  rho: 0.891 0.673 0.903 0.988 0.994 0.105 0.273 0.902
+
+[5] Config I_FIX_PWAVE: Two-stage pwave comparators (matching delay_timer topology)
+  10 beats measured, 64s
+  rho: 0.891 0.988 0.903 0.988 0.287 0.123 0.358 0.902
+
+[6] Config J_FIX_BOTH: Both rr_cap + pwave fixes
+  10 beats measured, 70s
+  rho: 0.891 0.648 0.903 0.988 0.591 0.098 0.358 0.902
+
+[7] Config K_FULL_ANALOG: Full analog chain (except rpeak_sh ideal)
+  10 beats measured, 72s
+  rho: 0.891 0.685 0.903 0.988 0.512 0.899 0.248 0.902
+
+======================================================================
+FIX VERIFICATION RESULTS
+======================================================================
+  Config                 F1:rr F2:asym  F3:bi0  F4:bi1   F5:pw  F6:wid  F7:slp  F8:sym
+  ------------------------------------------------------------------------------------
+  A_BASELINE           0.891   0.988   0.903   0.988   0.994   0.098   0.358   0.902  
+  H_FIX_RRCAP          0.891   0.673!! 0.903   0.988   0.994   0.105   0.273!! 0.902  
+  I_FIX_PWAVE          0.891   0.988   0.903   0.988   0.287!! 0.123++ 0.358   0.902  
+  J_FIX_BOTH           0.891   0.648!! 0.903   0.988   0.591!! 0.098   0.358   0.902  
+  K_FULL_ANALOG        0.891   0.685!! 0.903   0.988   0.512!! 0.899++ 0.248!! 0.902  
+
+  Legend: ++ = improved >0.02, !! = degraded >0.05, * = degraded >0.02
+
+  Key question: Do H/I/J recover F2 and F5 to baseline levels?
+  Baseline F2=0.988, F5=0.994

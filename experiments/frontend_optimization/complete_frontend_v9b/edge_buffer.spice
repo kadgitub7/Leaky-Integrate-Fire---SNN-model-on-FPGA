@@ -1,0 +1,7 @@
+* Two-inverter edge buffer — sharpens slow comparator transitions
+* for reliable AC-coupled pulse generation.
+* Requires inverter_sub to be included by top-level netlist.
+.subckt edge_buffer vin vout vdd vss
+Xinv1 vin mid vdd vss inverter_sub
+Xinv2 mid vout vdd vss inverter_sub
+.ends edge_buffer

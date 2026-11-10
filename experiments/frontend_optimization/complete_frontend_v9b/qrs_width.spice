@@ -1,0 +1,13 @@
+* FEATURE 6: QRS Width — Tail Sample
+*
+* Proxy: ECG at R+83ms. Narrow QRS → baseline, Wide QRS → elevated/depressed.
+* Single NFET S&H captures ECG after QRS complex.
+*
+* Trigger: sample_trig (R+83ms)
+
+.subckt qrs_width ecg_in sample_trig width_out vdd vss
+
+XMsh ecg_in sample_trig width_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCsh width_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends qrs_width

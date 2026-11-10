@@ -1,0 +1,15 @@
+Bare test
+.include "bias_gen.spice"
+.include "ia.spice"
+.include "rpeak_detector.spice"
+.include "delay_timer.spice"
+.include "pwave_predictor.spice"
+.include "inverter.spice"
+.include "rr_timing.spice"
+.include "beat_instability.spice"
+.include "pwave_diff.spice"
+.include "qrs_width.spice"
+.include "qrs_slope.spice"
+.include "qrs_symmetry.spice"
+.include "frontend_top.spice"
+.end
