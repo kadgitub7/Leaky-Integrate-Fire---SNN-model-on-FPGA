@@ -1,0 +1,63 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "papers": {
+    "liu_jssc_2025": {
+      "citation": "J. Liu et al., 'A High-Accuracy and Ultra-Energy-Efficient Cardiac Arrhythmia Classification Processor for Wearable Intelligent ECG Monitoring,' IEEE JSSC, 2025. DOI: 10.1109/JSSC.2025.3555512",
+      "venue": "JSSC",
+      "year": 2025,
+      "energy": "90 nJ (processor only — feature extraction + NN inference. Does NOT include AFE: IA, filters, ADC)",
+      "accuracy": "96.6% inter-patient, 5-class MIT-BIH",
+      "technique": "Event-driven NN, shared feature extraction (60.5% MAC reduction), adaptive NN wake-up",
+      "dataset": "MIT-BIH, 5-class, inter-patient",
+      "process_node": "55nm CMOS digital",
+      "relevance": "PRIMARY",
+      "comparison_notes": "Their 90nJ excludes AFE. Our full-chain target includes AFE. Like-for-like (classifier+features only), our target is ~3-10nJ MLP, well below their 90nJ."
+    },
+    "cao_biocas_2023": {
+      "citation": "T. Cao et al., 'ECG Classification using Binary CNN on RRAM Crossbar with Nonidealities-Aware Training, Readout Compensation and CWT Preprocessing,' IEEE BioCAS 2023. DOI: 10.1109/BioCAS58349.2023.10389002",
+      "venue": "BioCAS",
+      "year": 2023,
+      "energy": "Not specified",
+      "accuracy": "98.9% on MIT-BIH (10-class), only 0.7% drop from FP32 baseline",
+      "technique": "Non-ideality-aware training, in-situ readout compensation for IR drop, binary weights, CWT preprocessing",
+      "dataset": "MIT-BIH, 10-class, intra-patient",
+      "process_node": "Unspecified RRAM (not foundry PDK)",
+      "relevance": "PRIMARY",
+      "comparison_notes": "Intra-patient only. Binary CNN not SNN. CWT features vs our cardiologist-curated. Unspecified RRAM vs our foundry PDK."
+    },
+    "chollet_embc_2017": {
+      "citation": "Chollet et al., EMBC 2017",
+      "venue": "EMBC",
+      "year": 2017,
+      "energy": "234 pJ classifier only",
+      "accuracy": "93.6% intra-patient, 3-class",
+      "process_node": "65nm analog associative",
+      "relevance": "SECONDARY"
+    },
+    "chu_tbcas_2022": {
+      "citation": "Chu et al., TBCAS 2022",
+      "venue": "TBCAS",
+      "year": 2022,
+      "energy": "750 nJ classifier only",
+      "accuracy": "98.22% intra-patient, 5-class",
+      "technique": "SNN",
+      "process_node": "40nm",
+      "relevance": "SECONDARY"
+    },
+    "zhang_tbcas_2024": {
+      "citation": "Zhang et al., TBCAS 2024",
+      "venue": "TBCAS",
+      "year": 2024,
+      "energy": "150 nJ classifier only",
+      "accuracy": "98.59% intra-patient, 5-class",
+      "technique": "Multistage NN",
+      "process_node": "65nm",
+      "relevance": "SECONDARY"
+    }
+  },
+  "our_novelty_claims": [
+    "First ECG classifier on a foundry ReRAM PDK (all prior memristor-ECG work uses lab devices or idealized models)",
+    "Full-chain energy including AFE (most competitors exclude analog frontend cost)",
+    "ADC-free fully-analog pipeline (electrodes to classification without any digital conversion)"
+  ]
+}

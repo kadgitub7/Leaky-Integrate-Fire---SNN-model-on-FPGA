@@ -1,0 +1,63 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "circuits": {
+    "diode_load_diff_pair": {
+      "topology": "NFET diff pair (L=1 W=8) + diode-connected PMOS loads (L=4 W=2)",
+      "gain": "~1x (Av = gm_n/gm_p ~ 1 for matched transconductances)",
+      "output_range": "~80-180mV typical for ECG-scale inputs",
+      "power": "<1nW at Ibias~50pA",
+      "validated_in": ["beat_instability.spice", "pwave_diff.spice", "qrs_slope.spice"],
+      "known_issues": ["Low gain limits dynamic range — may need hybrid loads for >= 225mV span"]
+    },
+    "hybrid_mirror_diode_load": {
+      "topology": "Reference side: diode PMOS. Output side: active mirror PMOS + parallel diode PMOS.",
+      "gain": "1.7-3x depending on W_mirror/W_diode ratio",
+      "design_equation": "gain ~ (gm_n * ro_mirror || (1/gm_diode)). Tune via W_diode.",
+      "per_feature_config": {
+        "F1_F2_rr_timing": "mirror W=2, diode W=0.84 -> gain ~3x",
+        "F3_F4_beat_instability": "mirror W=2, diode W=2 -> gain ~1.7x",
+        "F5_pwave_diff": "mirror W=4, diode W=1.5 -> gain ~3x",
+        "F7_qrs_slope": "mirror W=2, diode W=1.5 -> gain ~2x"
+      },
+      "validated_in": ["rr_timing v8", "beat_instability v8", "pwave_diff v8"],
+      "known_issues": ["Process variation on mirror/diode ratio affects gain +/-20%"]
+    },
+    "transmission_gate_sh": {
+      "topology": "NFET (L=0.5 W=2) + PMOS (L=0.5 W=4), 2pF MIM hold cap",
+      "charge_injection": "NFET injects -deltaQ, PMOS injects +deltaQ, partial cancellation",
+      "validated_in": ["qrs_symmetry.spice"],
+      "known_issues": ["~1-2ns propagation delay between NFET and PMOS gates — negligible at ms timescale"]
+    },
+    "nfet_pass_gate_sh": {
+      "topology": "Single NFET (L=0.5 W=2), 2pF MIM hold cap",
+      "leakage": "Sub-threshold leakage exponentially reduced with gate at 0V. Practical hold time > 100ms.",
+      "validated_in": ["qrs_width.spice"],
+      "known_issues": ["Cannot pass voltages above VDD-Vth ~ 0.45V"]
+    },
+    "self_biased_current_source": {
+      "topology": "PMOS (L=8 W=0.42) + asymmetric NFET (L=8 W=0.42 / L=12 W=0.42)",
+      "output": "vbias ~ 0.29V, vref = 0.30V, Ibias ~ 67pA",
+      "validated_in": ["bias_gen.spice"],
+      "known_issues": ["Requires .ic for simulation startup. Needs startup circuit in silicon."]
+    },
+    "ccia_instrumentation_amplifier": {
+      "topology": "5T OTA (L=8 W=2) + Cin=10pF + Cfb=0.098pF + pseudo-resistors (PMOS L=10 W=0.42)",
+      "gain": "~103 (Cin/Cfb)",
+      "bandwidth": "~570Hz (sufficient for ECG <100Hz)",
+      "hpf_corner": "<0.01Hz (removes electrode DC offset)",
+      "validated_in": ["ia.spice"],
+      "known_issues": ["Gain=103 slightly above target 100. Manufacturing variation on 0.098pF cap could shift gain +/-10%."]
+    },
+    "rc_timer_with_sf": {
+      "topology": "Dual timer: Main (100pF, ~0.52mV/ms) + Fast (~4pF, ~21mV/ms). Source follower buffer. 7 two-stage comparators.",
+      "validated_in": ["delay_timer.spice"],
+      "known_issues": ["SF decay rate depends on bias current. Per-comparator pipeline delay calibration required."]
+    },
+    "lazzaro_wta": {
+      "topology": "5 input cells with shared inhibition node. 16 transistors. NMOS input W=2 L=0.5, PFET load W=4 L=0.5.",
+      "bias": "Ibias=10uA",
+      "validated_in": ["WTA_5class.spice"],
+      "known_issues": ["10uA bias is high for ultra-low-power — but only active during brief classification phase. May not resolve margins < 1%."]
+    }
+  }
+}

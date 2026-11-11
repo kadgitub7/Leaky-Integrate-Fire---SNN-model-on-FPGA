@@ -1,0 +1,41 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "tests": {
+    "feature_correlation": {
+      "description": "Spearman rho between circuit feature outputs and Python reference, per-feature per-record",
+      "script": "experiments/frontend_optimization/complete_frontend/integration_test.py",
+      "pass_criteria": {"aggregate_rho": ">=0.97", "per_record_rho": ">=0.90"},
+      "infrastructure": ["ngspice", "MIT-BIH data", "Python scipy.stats.spearmanr"]
+    },
+    "dynamic_range": {
+      "description": "Voltage span (max-min) per feature across all cached records",
+      "script": "manual / feature_criteria.py",
+      "pass_criteria": {"span": ">=225mV"},
+      "infrastructure": ["analog feature cache"]
+    },
+    "clipping": {
+      "description": "Fraction of beats where feature voltage is within 10mV of rail",
+      "script": "manual / feature_criteria.py",
+      "pass_criteria": {"clip_fraction": "<1%"},
+      "infrastructure": ["analog feature cache"]
+    },
+    "class_separation": {
+      "description": "Cohen's d for each (class, N) pair compared to Python reference",
+      "script": "manual / feature_criteria.py",
+      "pass_criteria": {"d_preservation": ">=75% of Python d for pairs where Python d >= 0.3"},
+      "infrastructure": ["analog feature cache", "digital feature cache (features_8_cache.npz)"]
+    },
+    "end_to_end_accuracy": {
+      "description": "Train RF/MLP on DS1 analog features, test on DS2",
+      "script": "experiments/frontend_optimization/complete_frontend/full_accuracy_test.py",
+      "pass_criteria": {"overall_accuracy": ">=93%", "V_recall": ">=90%"},
+      "infrastructure": ["full analog feature cache (all 44 records)"]
+    },
+    "crossbar_fidelity": {
+      "description": "Compare SPICE crossbar output vs software MLP output",
+      "script": "experiments/Complete_imp/classifier_crossbar/crossbar_accuracy.py",
+      "pass_criteria": {"agreement": ">=99.5%"},
+      "infrastructure": ["trained weights", "ngspice", "full SKY130 PDK"]
+    }
+  }
+}

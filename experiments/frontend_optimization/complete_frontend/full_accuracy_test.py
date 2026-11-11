@@ -309,7 +309,17 @@ def process_record(record_id):
     n_circuit = 0
     n_fallback = 0
 
-    ic_vals = None
+    # EWMA IC fix: compute expected V_sf from first beat's RR interval
+    # Calibrated from standalone timer+SF simulation:
+    #   V_sf = 0.483 - 0.111 * RR  (linear fit, R²≈0.999)
+    first_rr = beats[0]['pre_rr'] if beats else 0.8
+    v_sf_est = max(0.05, min(0.85, 0.483 - 0.111 * first_rr))
+    ic_vals = {
+        'rr_ewma': v_sf_est,
+        'rr_esamp': v_sf_est,
+        'rr_prev': v_sf_est,
+        'rr_timer': VDD,
+    }
     for b_idx in range(n_batches):
         start = b_idx * BATCH_SIZE
         end = min((b_idx + 1) * BATCH_SIZE, len(beats))
@@ -426,7 +436,7 @@ print("=" * 70)
 print("FULL INTER-PATIENT ACCURACY TEST — ALL ANALOG FRONTEND")
 print("=" * 70)
 print("  ALL 8 features from SKY130 analog circuits:")
-print("    F1: RR diff (rr-ewma, alpha=0.10)    — rr_timing.spice")
+print("    F1: RR diff (rr-ewma, alpha=0.015)   — rr_timing.spice")
 print("    F2: RR asym (pre-post)               — rr_timing.spice")
 print("    F3: Beat instability L0              — beat_instability.spice")
 print("    F4: Beat instability L1              — beat_instability.spice")
@@ -438,7 +448,7 @@ print(f"  Classifier: RandomForest(n=300, depth=15, balanced)")
 print(f"  Dataset:    MIT-BIH, DS1 train ({len(DS1)} rec) / DS2 test ({len(DS2)} rec)")
 print()
 
-print("Running Python-proxy baseline (diff-based F1/F2, alpha=0.10)...")
+print("Running Python-proxy baseline (diff-based F1/F2, alpha=0.015)...")
 t0 = time.time()
 py_acc, n_tr, n_te = run_python_baseline()
 print(f"  Python baseline: {py_acc*100:.2f}% (train={n_tr}, test={n_te}, {time.time()-t0:.1f}s)")

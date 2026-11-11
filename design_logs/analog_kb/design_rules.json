@@ -1,0 +1,82 @@
+{
+  "technology": "SKY130B 130nm CMOS + ReRAM",
+  "vdd_frontend": 0.9,
+  "vdd_classifier": 1.8,
+  "last_updated": "2026-11-10T16:00:00Z",
+  "rules": [
+    {
+      "id": "DR-001",
+      "rule": "T-gates cannot pass mid-rail voltages at VDD=0.9V",
+      "reason": "Vth_n ~ 0.45V, NFET cuts off for Vin > VDD-Vth ~ 0.45V. PFET cuts off for Vin < |Vthp| ~ 0.55V. Dead zone 0.45-0.55V.",
+      "workaround": "Use bootstrapped switch, or design signals to stay below 0.4V",
+      "incident": null,
+      "verified": true
+    },
+    {
+      "id": "DR-002",
+      "rule": "EWMA via charge sharing requires capture time >> tau_SF",
+      "reason": "SF output impedance = 1/gm_sf. At 50pA bias, Rout~776MOhm. tau = Rout * Csamp. For Csamp=5pF, tau=3.88ms. Need 14*tau ~ 55ms for 99.99% settling.",
+      "workaround": "Extend capture pulse from 0.5ms to 55ms",
+      "incident": "ewma-ic-propagation-fix: 0.5ms capture gave only 12% settling, effective EWMA alpha was 0.012 instead of 0.10",
+      "verified": true
+    },
+    {
+      "id": "DR-003",
+      "rule": "Comparator pipeline delay varies with input slope",
+      "reason": "Resolution time depends on overdrive at threshold crossing. Slow SF ramp = long resolution time.",
+      "workaround": "Per-comparator calibrated pipeline delays",
+      "incident": "delay-timer-calibration: single pipe_main=3.5ms failed for several comparators",
+      "calibration_data": {
+        "pipe_s14_ms": 2.9,
+        "pipe_wid_ms": 4.5,
+        "pipe_s69_ms": 4.4,
+        "pipe_bi_ms": 5.9,
+        "pipe_s10_ms": 1.8
+      },
+      "verified": true
+    },
+    {
+      "id": "DR-004",
+      "rule": "IC propagation between simulation batches is mandatory for circuits with memory",
+      "reason": "EWMA caps, S&H caps, and timer caps carry state between beats. Resetting to default IC each batch destroys convergence.",
+      "workaround": "Use .meas to extract cap voltages at end of each batch and propagate as .ic for next batch",
+      "incident": "ewma-ic-propagation-fix: F1/F2 rho dropped to 0.29/-0.30 without IC propagation",
+      "affected_circuits": ["rr_timing.spice", "beat_instability.spice"],
+      "verified": true
+    },
+    {
+      "id": "DR-005",
+      "rule": "ReRAM conductance ratio G_MAX/G_MIN = 335:1 may be too aggressive",
+      "reason": "Typical experimental RRAM ratios are 10:1 to 100:1. PDK documents up to 8 levels (3 bits).",
+      "workaround": "Verify with actual PDK specs. May need to constrain weight mapping range.",
+      "incident": null,
+      "affected": "Weight mapping in full_analog_mlp.py",
+      "verified": false
+    },
+    {
+      "id": "DR-006",
+      "rule": "Bias generator requires startup circuit in silicon",
+      "reason": "Self-biased current mirror has stable zero-current state. .ic V(xbias.iref)=0.3 works in simulation only.",
+      "workaround": "Add startup circuit for tapeout. OK for simulation with .ic.",
+      "incident": null,
+      "affected": "bias_gen.spice",
+      "verified": true
+    },
+    {
+      "id": "DR-007",
+      "rule": "Hybrid mirror+diode loads give controllable moderate gain (1.7-3x)",
+      "reason": "Pure diode gives gain~1 (insufficient span). Pure active mirror gives gain~30 (massive clipping). Hybrid provides sweet spot.",
+      "workaround": "Adjust W_diode to tune gain. Smaller W_diode = higher gain. Min W=0.42um in SKY130.",
+      "incident": "Feature validation criteria: features failed span >= 225mV with diode-only loads",
+      "verified": true
+    },
+    {
+      "id": "DR-008",
+      "rule": "At VDD=0.9V with Vth~0.45V, cascode stacks are NOT feasible",
+      "reason": "Only headroom for one NFET + one PFET in a stack. Bias currents 10pA-1nA for <10nW power.",
+      "workaround": "Use single-transistor gain stages. Cascoding requires VDD >= 1.5V for this process.",
+      "incident": null,
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "topics": {
+    "subthreshold_mosfet": {
+      "principles": [
+        "Id = Id0 * exp((Vgs-Vth)/(n*Vt)) where Vt = kT/q ~ 26mV at 27C",
+        "gm = Id/(n*Vt) — proportional to bias current, not geometry",
+        "gm/Id ratio peaks in subthreshold (~25-30 V^-1 for SKY130 NMOS)",
+        "Output resistance ro = VA/Id where VA = Early voltage",
+        "Intrinsic gain Av = gm*ro = VA/(n*Vt) — independent of bias current in subthreshold"
+      ],
+      "sky130_specifics": [
+        "NFET Vth ~ 0.4-0.5V (increases with L due to reduced DIBL)",
+        "PFET |Vth| ~ 0.55-0.65V",
+        "Minimum L = 0.15um (digital); L >= 1um recommended for analog matching",
+        "MIM cap: 2 fF/um^2, max 400um per side",
+        "Pseudo-resistor: back-to-back PMOS L=10 W=0.42 gives > 1TOhm"
+      ],
+      "design_rules": [
+        "At VDD=0.9V with Vth~0.45V, headroom for one NFET+one PFET stack is marginal",
+        "Cascode stacks NOT feasible at VDD=0.9V subthreshold",
+        "Bias currents 10pA-1nA range for <10nW power",
+        "Sub-threshold operation means exponential sensitivity to Vth mismatch"
+      ],
+      "verified_by_simulation": true,
+      "references": ["Razavi ch.2", "Allen & Holberg ch.4", "SKY130 PDK docs"]
+    },
+    "charge_sharing_ewma": {
+      "principles": [
+        "Alpha = C_sample / (C_sample + C_ewma) — set by cap ratio",
+        "One charge-sharing event: V_ewma_new = alpha*V_sample + (1-alpha)*V_ewma_old",
+        "Requires sample cap to be fully charged before sharing — settling time critical",
+        "Settling time = 14*tau for 99.99% accuracy where tau = R_source * C_sample"
+      ],
+      "sky130_specifics": [
+        "Source follower Rout ~ 1/gm ~ 776MOhm at 50pA bias",
+        "For 5pF sample cap: tau = 776MOhm * 5pF = 3.88ms",
+        "Need 55ms capture pulse for full settling (14 * 3.88ms)",
+        "Capacitor leakage ~15pA parasitic — causes drift on large caps over seconds"
+      ],
+      "design_rules": [
+        "Always propagate IC between simulation batches for EWMA circuits",
+        "Capture pulse duration must be >> tau_SF, not just a brief clock edge",
+        "Alpha error = exp(-t_capture/tau) — at 0.5ms capture: 88% error"
+      ],
+      "verified_by_simulation": true,
+      "references": ["ewma-ic-propagation-fix memory"]
+    },
+    "diff_pair_loads": {
+      "principles": [
+        "Diode load: Av = gm_input / gm_load ~ 1 for matched devices",
+        "Active mirror load: Av = gm_input * (ro_input || ro_load) ~ 20-50 in subthreshold",
+        "Hybrid mirror+diode: Av = gm_input * (ro_mirror || 1/gm_diode) ~ 1.7-3",
+        "Gain tuning via W_diode: smaller W_diode -> less damping -> higher gain"
+      ],
+      "sky130_specifics": [
+        "For ECG features needing 225mV+ span, diode-only (gain~1) is insufficient",
+        "Active-mirror-only (gain~30) causes 33-84% rail clipping",
+        "Hybrid sweet spot: mirror W=2 + diode W=0.42-2.0 gives gain 1.7-3x"
+      ],
+      "verified_by_simulation": true,
+      "references": ["hybrid-load-topology memory", "feature-validation-criteria memory"]
+    },
+    "reram_crossbar": {
+      "principles": [
+        "1T1R cell: access NMOS in series with ReRAM",
+        "Differential encoding: W_eff = (Gp - Gn) * V_read",
+        "Column current = sum of row voltages * conductances (analog MAC)",
+        "Read voltage must be below disturb threshold"
+      ],
+      "sky130_specifics": [
+        "SKY130B HfO2 filamentary RRAM",
+        "LRS range: 30-120 uS; HRS: < 0.1 uS (> 10 MOhm)",
+        "SET: 1.7V WL / 2.4V BL, 1us pulse",
+        "READ: 0.1-0.2V (V_READ = 0.15V in current design)",
+        "Up to 3 bits (8 levels) demonstrated; 4-bit not feasible",
+        "Forming yield 92.7-99.8%, reset yield 90.8-99.4%",
+        "Conductance drift: intermediate states drift over hours"
+      ],
+      "verified_by_simulation": false,
+      "references": ["SKY130 ReRAM PDK docs", "sky130-fd-pr-reram.readthedocs.io"]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "open_issues": [
+    {
+      "id": "ISS-001",
+      "severity": "critical",
+      "category": "integration",
+      "finding": "Normalization gap — classifier weights trained on digitally-standardized features, but analog frontend produces raw voltages",
+      "status": "open",
+      "resolution_plan": "Per-feature affine VCVS calibration (integrate_frontend_classifier.py). Requires full analog feature cache.",
+      "blocker_for": "end-to-end accuracy validation"
+    },
+    {
+      "id": "ISS-002",
+      "severity": "major",
+      "category": "data",
+      "finding": "Analog feature cache is incomplete — need all 44 records simulated (~7 hours)",
+      "status": "open",
+      "resolution_plan": "Run full_accuracy_test.py for all DS1+DS2 records",
+      "blocker_for": "ISS-001, integration calibration"
+    },
+    {
+      "id": "ISS-003",
+      "severity": "major",
+      "category": "circuit",
+      "finding": "ReRAM G_MAX/G_MIN ratio of 335:1 may exceed PDK capability (typical 10:1 to 100:1)",
+      "status": "open",
+      "resolution_plan": "Verify against PDK specs. If out of range, constrain weight mapping or use multi-cell encoding.",
+      "blocker_for": "classifier accuracy in silicon"
+    },
+    {
+      "id": "ISS-004",
+      "severity": "minor",
+      "category": "simulation",
+      "finding": "Frontend uses sky130_minimal.lib.spice while classifier uses full SKY130 PDK — model mismatch",
+      "status": "open",
+      "resolution_plan": "Unify to full PDK for combined simulation. Verify frontend still works with full models.",
+      "blocker_for": "combined end-to-end simulation"
+    }
+  ],
+  "resolved_issues": []
+}

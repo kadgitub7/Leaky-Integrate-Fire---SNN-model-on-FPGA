@@ -1,0 +1,96 @@
+{
+  "last_updated": "2026-11-10T16:00:00Z",
+  "interfaces": {
+    "electrode_to_ia": {
+      "source": "ECG electrodes",
+      "sink": "ia.spice (CCIA, x2 for 2 leads)",
+      "signal_type": "differential voltage",
+      "voltage_range": "+/-2mV typical (ECG), +/-300mV max (electrode offset)",
+      "bandwidth": "0.05-100 Hz",
+      "impedance_source": "~1kOhm skin contact",
+      "impedance_load": "~10pF Cin (capacitive)",
+      "coupling": "AC via 10pF input caps",
+      "gain": "x103 (Cin/Cfb = 10pF/0.098pF)",
+      "verified": true
+    },
+    "ia_to_features": {
+      "source": "ia.spice output (2 leads)",
+      "sink": "all feature circuits (F3/F4/F5/F6/F7/F8)",
+      "signal_type": "single-ended voltage",
+      "voltage_range": "0.1-0.8V (0.45V +/- 0.35V)",
+      "bandwidth": "0-570 Hz (IA bandwidth limit)",
+      "impedance_source": "~10MOhm (IA output in subthreshold)",
+      "impedance_load": "gate capacitance (fF range, capacitive)",
+      "verified": true
+    },
+    "rpeak_to_trigger_chain": {
+      "source": "rpeak_detector.spice + rpeak_hold.spice",
+      "sink": "delay_timer, pulse_gen, feature S&H gates",
+      "signal_type": "digital pulses (0V to VDD=0.9V)",
+      "timing": "R-peak triggers delay_timer. Timer comparators fire at calibrated delays (14ms, 28ms, 69ms, 300ms). Pulse generators convert to ~0.5ms or ~2ms pulses.",
+      "critical_timing": {
+        "pipe_s14_ms": 2.9,
+        "pipe_wid_ms": 4.5,
+        "pipe_s69_ms": 4.4,
+        "pipe_bi_ms": 5.9,
+        "pipe_s10_ms": 1.8
+      },
+      "verified": true
+    },
+    "feature_outputs_to_classifier": {
+      "source": "8 feature circuit outputs (F1-F8)",
+      "sink": "classifier VCVS conditioning -> L1 crossbar rows",
+      "signal_type": "DC voltage per beat (sampled/held)",
+      "voltage_ranges": {
+        "F1_rr_ratio": "[0.27, 0.42]V",
+        "F2_rr_asym": "[0.27, 0.53]V",
+        "F3_bi_L0": "[0.27, 0.52]V",
+        "F4_bi_L1": "[0.27, 0.55]V",
+        "F5_pwave": "[0.28, 0.36]V",
+        "F6_width": "[0.14, 0.46]V",
+        "F7_slope": "[0.34, 0.52]V",
+        "F8_symmetry": "[0.14, 0.46]V"
+      },
+      "reorder_mapping": {
+        "frontend_order": ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"],
+        "classifier_row": [0, 3, 1, 4, 5, 2, 6, 7],
+        "classifier_features": ["rr_ratio", "bi_L1", "rr_asym", "pwave", "width", "bi_L0", "slope", "symmetry"]
+      },
+      "conditioning": "Per-feature affine VCVS: V_row_i = A_i * V_analog_i + B_i, clamped to [0, V_READ=0.15V]",
+      "domain_crossing": "Frontend VDD=0.9V -> Classifier VDD=1.8V absorbed by VCVS",
+      "verified": false,
+      "blocking_issue": "ISS-001 (normalization gap), ISS-002 (incomplete cache)"
+    },
+    "L1_crossbar_to_interstage": {
+      "source": "L1_crossbar_8x64.spice (64 column outputs)",
+      "sink": "interstage_bias_relu.spice",
+      "signal_type": "column currents (differential sum of G*V products)",
+      "current_range": "nA to low uA",
+      "nodes": 64,
+      "verified": true
+    },
+    "interstage_to_L2": {
+      "source": "interstage_bias_relu.spice (64 outputs)",
+      "sink": "L2_crossbar_64x5.spice (64 row inputs)",
+      "signal_type": "mirrored currents after ReLU (positive only)",
+      "current_range": "0 to ~uA",
+      "relu_gain": 1.015,
+      "mirror_gain": 0.965,
+      "verified": true
+    },
+    "L2_to_WTA": {
+      "source": "L2_crossbar_64x5.spice (5 column outputs)",
+      "sink": "WTA_5class.spice",
+      "signal_type": "5 column currents",
+      "current_range": "nA to low uA",
+      "WTA_Ibias": "10uA",
+      "verified": true
+    },
+    "WTA_output": {
+      "source": "WTA_5class.spice",
+      "sink": "classification decision",
+      "signal_type": "one-hot digital (5 lines, winner HIGH, losers LOW)",
+      "verified": true
+    }
+  }
+}
