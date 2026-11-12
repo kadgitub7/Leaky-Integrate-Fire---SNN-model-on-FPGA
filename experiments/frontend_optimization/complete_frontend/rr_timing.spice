@@ -1,17 +1,18 @@
 * ============================================================
-* FEATURES 1 & 2: RR Timing — v10 (slow EWMA + diode loads)
+* FEATURES 1 & 2: RR Timing — v11 (slow EWMA + hybrid loads)
 *
-* Timer: 320pF MIM, VDD precharge at rpeak, ~43.5pA discharge
-*   V_timer = 0.9 - 0.136*RR (calibrated, RR in seconds)
+* Timer: 200pF MIM, VDD precharge at rpeak, ~43.5pA discharge
+*   V_timer = 0.9 - 0.218*RR (faster discharge for wider range)
 *
-* Source follower: NFET L=8 W=0.42, Vgs_sf ≈ 0.38-0.41V
-*   V_sf = 0.483 - 0.111*RR (calibrated from ngspice)
+* Source follower: NFET L=8 W=0.42
+*   V_sf range: ~0.16V (RR=1.5s) to ~0.41V (RR=0.5s) = 250mV
 *
 * EWMA: alpha = Cesamp/(Cesamp+Cewma) = 5/(5+330) ≈ 0.015
 *   IC must be set to V_sf(first_RR) for fast convergence
 *
-* Diff pair readout: diode loads, gain ≈ 1
-*   Hybrid loads PROVEN UNVIABLE — bistable DC point
+* Diff pair readout: mirror+diode hybrid loads (F5-proven topology)
+*   Mirror copies ref current, parallel diode prevents bistability
+*   Gain ~3-5x in linear region
 *
 * Pin: ecg_unused capture_trig rpeak_trigger copy_trig
 *      rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
@@ -25,7 +26,7 @@ Xinv_trig rpeak_trigger rpeak_bar vdd vss inverter_sub
 * === TIMER ===
 XMrr_charge net_timer rpeak_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XMrr_drain net_timer vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
-XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
+XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=316 L=316
 
 * === SOURCE FOLLOWER ===
 XMsf vdd net_timer sf_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
@@ -44,25 +45,29 @@ XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=405 L=405
 
-* === DIFF PAIR: rr_ratio (diode loads, gain ~1) ===
+* === DIFF PAIR: rr_ratio (hybrid mirror+diode loads) ===
 * Tail current source
 XMtail_r tail_r vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 * Input diff pair — ewma on reference side, sf_out on output side
 XMd1_r net_r1 ewma_node tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMd2_r rr_ratio_out sf_out tail_r vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-* Both sides: diode-connected (gain ~1, 0% clipping, minimum energy)
-XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMl2_r rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Reference side: diode
+XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+* Output side: mirror + parallel diode (prevents bistability, gain ~3-5x)
+XMl2_r_mir rr_ratio_out net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMl2_r_dg rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
-* === DIFF PAIR: rr_asym (diode loads, gain ~1) ===
+* === DIFF PAIR: rr_asym (hybrid mirror+diode loads) ===
 * Tail current source
 XMtail_a tail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 * Input diff pair
 XMd1_a net_a1 sf_out tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMd2_a rr_asym_out prev_node tail_a vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-* Both sides: diode-connected (gain ~1, 0% clipping, minimum energy)
-XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMl2_a rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Reference side: diode
+XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+* Output side: mirror + parallel diode
+XMl2_a_mir rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMl2_a_dg rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
 * Expose internal nodes for P-wave predictor
 R_timer_out sf_out timer_out 0

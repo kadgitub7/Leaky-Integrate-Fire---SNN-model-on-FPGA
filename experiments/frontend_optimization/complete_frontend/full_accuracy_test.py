@@ -310,10 +310,10 @@ def process_record(record_id):
     n_fallback = 0
 
     # EWMA IC fix: compute expected V_sf from first beat's RR interval
-    # Calibrated from standalone timer+SF simulation:
-    #   V_sf = 0.483 - 0.111 * RR  (linear fit, R²≈0.999)
+    # Calibrated from standalone timer+SF simulation (v11, 200pF timer):
+    #   V_sf = 0.480 - 0.176 * RR  (linear fit, R²≈0.999)
     first_rr = beats[0]['pre_rr'] if beats else 0.8
-    v_sf_est = max(0.05, min(0.85, 0.483 - 0.111 * first_rr))
+    v_sf_est = max(0.05, min(0.85, 0.480 - 0.176 * first_rr))
     ic_vals = {
         'rr_ewma': v_sf_est,
         'rr_esamp': v_sf_est,

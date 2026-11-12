@@ -1,0 +1,63 @@
+{
+  "id": "OBJ-2026-11-12-001",
+  "timestamp": "2026-11-12T04:00:00Z",
+  "skill": "objectives_engineer",
+  "status": "active",
+  "title": "Fix v11 high-rail clipping while preserving span and rho gains",
+  "context": "v11 hybrid mirror+diode loads solved span (8/8 pass 225mV) but introduced VDD-rail clipping: F7=43.6%, F2=5.8%, F3=5.5%, F1=3.0%, F4=1.5%. Gain ~5x is too high for the signal ranges. F3 rho also degraded on records 113 (0.925) and 231 (0.904), likely due to clipping-induced nonlinear distortion. Must reduce gain to eliminate clipping without losing span.",
+  "supersedes": "OBJ-2026-11-11-001",
+  "success_criteria": [
+    {
+      "metric": "Clipping (all 8 features)",
+      "target": "< 1% of beats within 10mV of either rail (0V or 0.9V)",
+      "measurement_method": "comprehensive_v11.py criterion 2",
+      "current_value": "F1:3.0%, F2:5.8%, F3:5.5%, F4:1.5%, F5:0.01%, F6:0.0%, F7:43.6%, F8:0.0%",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Span (all 8 features)",
+      "target": ">= 225mV voltage range across all records",
+      "measurement_method": "comprehensive_v11.py criterion 3",
+      "current_value": "ALL PASS (271-631mV). Must NOT degrade below 225mV.",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Spearman rho (all 8 features)",
+      "target": ">= 0.97 aggregate",
+      "measurement_method": "comprehensive_v11.py criterion 1",
+      "current_value": "7/8 pass. F3=0.9597 fails. Must improve F3, must NOT degrade others.",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Per-record rho (all 8 features)",
+      "target": ">= 0.95 on every record",
+      "measurement_method": "comprehensive_v11.py criterion 5",
+      "current_value": "7/8 pass. F3 fails on 113 (0.925) and 231 (0.904).",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Cohen's d preservation",
+      "target": ">= 75% of Python d for all class pairs where Python d >= 0.3",
+      "measurement_method": "comprehensive_v11.py criterion 4",
+      "current_value": "7/11 pass. F5 S-V, F6 N-S, F7 N-S, F7 S-V fail.",
+      "priority": "target"
+    }
+  ],
+  "constraints": [
+    "All circuits must remain fully analog SKY130 130nm CMOS — no digital blocks, no lookup tables",
+    "VDD = 0.9V, subthreshold operation, .option scale=1.0u",
+    "Do NOT modify F5 (pwave_diff.spice) — it passes all criteria",
+    "Do NOT modify F6 (qrs_width.spice) or F8 (qrs_symmetry.spice) — raw S&H circuits, pass all applicable criteria",
+    "The hybrid mirror+diode topology must be preserved (not reverted to pure diode) — it is the only topology proven to give gain > 1 without bistability",
+    "IC formula (V_sf = 0.480 - 0.176*RR) must remain valid — do NOT change the timer cap or source follower",
+    "EWMA alpha = 0.015 must remain unchanged"
+  ],
+  "dependencies": [],
+  "estimated_effort": "4-6 hours (simulation-bound)",
+  "risk_factors": [
+    "Reducing mirror W may drop span below 225mV if gain is reduced too much",
+    "F3 rho issue may be structural (very small signal on L0 for records 113/231) not just clipping",
+    "Different features need different gain levels — one-size-fits-all mirror W may not work",
+    "ngspice simulation time ~2.5 hrs per record with hybrid loads — full re-validation is expensive"
+  ]
+}

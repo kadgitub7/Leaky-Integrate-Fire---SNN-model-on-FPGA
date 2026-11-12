@@ -1,0 +1,62 @@
+{
+  "id": "PLAN-2026-11-11-001",
+  "timestamp": "2026-11-11T00:30:00Z",
+  "skill": "architect_planner",
+  "objective": "OBJ-2026-11-11-001",
+  "status": "active",
+  "approach": "Hybrid mirror+diode loads on failing diff pairs + reduced timer cap",
+  "approach_rationale": "F5 already proves mirror+diode topology works (612mV span, 0.993 rho, 0.01% clip). Previous 'hybrid unviable' was mirror-ONLY without parallel diode. Parallel diode prevents bistability.",
+  "alternatives_considered": [
+    {"name": "Increased timer discharge current", "reason_rejected": "Only helps F1/F2, not F3/F7. Would need 3x wider drain NFET, changing all power budgets."},
+    {"name": "Two-stage amplification", "reason_rejected": "Adds 6+ MOSFETs per feature, complexity not justified when single-stage hybrid works for F5."},
+    {"name": "Relax span threshold", "reason_rejected": "User explicitly wants high range. F1/F2 Python d<0.3 for all class pairs, but F7 and F3 need the gain for Cohen's d."}
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "action": "Reduce rr_timing timer cap from 320pF to 200pF for 1.76x more SF sensitivity",
+      "status": "DONE",
+      "files_modified": ["complete_frontend/rr_timing.spice"],
+      "completion_criterion": "Ctimer W changed from 400 to 316",
+      "analog_specialist_notes": "V_sf = 0.480 - 0.176*RR (calibrated). Range 195mV vs 111mV before."
+    },
+    {
+      "step_number": 2,
+      "action": "Replace diode loads with hybrid mirror+diode on rr_timing F1/F2 diff pairs",
+      "status": "DONE",
+      "files_modified": ["complete_frontend/rr_timing.spice"],
+      "completion_criterion": "Mirror W=4 + diode W=2 on output side, diode W=4 on reference side"
+    },
+    {
+      "step_number": 3,
+      "action": "Replace diode loads with hybrid mirror+diode on qrs_slope F7 diff pair",
+      "status": "DONE",
+      "files_modified": ["complete_frontend/qrs_slope.spice"],
+      "completion_criterion": "Same topology as F5"
+    },
+    {
+      "step_number": 4,
+      "action": "Replace diode loads with hybrid mirror+diode on beat_instability F3/F4 diff pair",
+      "status": "DONE",
+      "files_modified": ["complete_frontend/beat_instability.spice"],
+      "completion_criterion": "Same topology as F5"
+    },
+    {
+      "step_number": 5,
+      "action": "Update IC formula in full_accuracy_test.py for new timer cap",
+      "status": "DONE",
+      "files_modified": ["complete_frontend/full_accuracy_test.py"],
+      "completion_criterion": "V_sf = 0.480 - 0.176*RR"
+    },
+    {
+      "step_number": 6,
+      "action": "Validate on record 112 (3 batches quick check)",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "step_number": 7,
+      "action": "Full 6-record test with comprehensive criteria analysis",
+      "status": "PENDING"
+    }
+  ]
+}

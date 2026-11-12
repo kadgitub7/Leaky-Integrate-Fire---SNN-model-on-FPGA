@@ -1,0 +1,47 @@
+{
+  "id": "OBJ-2026-11-11-001",
+  "timestamp": "2026-11-11T00:00:00Z",
+  "skill": "objectives_engineer",
+  "status": "active",
+  "title": "Fix span and rho failures on F1, F2, F3, F7",
+  "context": "6-record test (VER-2026-11-10-001) showed 4/5 criteria failing. Root cause: diode-only loads give gain~1, insufficient to meet 225mV span for F1(83mV), F2(104mV), F7(141mV). F3 has rho=0.895 on rec 231 (below 0.90 threshold). F5 proves that mirror+parallel-diode hybrid loads work (612mV span, 0.993 rho, 0.01% clip).",
+  "success_criteria": [
+    {
+      "metric": "Aggregate Spearman rho",
+      "target": ">= 0.97 for all 8 features",
+      "measurement_method": "comprehensive_analysis.py",
+      "current_value": "F3=0.959 FAIL, others pass",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Per-record Spearman rho",
+      "target": ">= 0.90 for all features on all records",
+      "measurement_method": "comprehensive_analysis.py",
+      "current_value": "F3 rec 231=0.895 FAIL",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Voltage span",
+      "target": ">= 225mV for all features",
+      "measurement_method": "comprehensive_analysis.py",
+      "current_value": "F1=83mV, F2=104mV, F3=221mV, F7=141mV FAIL",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Clipping",
+      "target": "< 1% for all features",
+      "measurement_method": "comprehensive_analysis.py",
+      "current_value": "ALL PASS (0%)",
+      "priority": "must_pass"
+    },
+    {
+      "metric": "Cohen's d preservation",
+      "target": ">= 75% of Python d (where Python d >= 0.3)",
+      "measurement_method": "comprehensive_analysis.py",
+      "current_value": "7/11 pass, 4 fail (F5 S-V, F6 N-S, F7 N-S, F7 N-V)",
+      "priority": "must_pass"
+    }
+  ],
+  "blocking": true,
+  "references": ["design_logs/verification/VER-2026-11-10-001.json"]
+}

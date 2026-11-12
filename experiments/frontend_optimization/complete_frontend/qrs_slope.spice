@@ -1,8 +1,10 @@
-* FEATURE 7: QRS Slope — v9 (diode loads)
+* FEATURE 7: QRS Slope — v11 (hybrid mirror+diode loads)
 *
 * Proxy: ECG@R+14ms - ECG@R+69ms (signed). Captures post-R slope asymmetry.
-* Diode-connected loads, gain ~1. v8 hybrid (2x) caused 55.8% clipping.
-* v8→v9: reverted to diode loads for 0% clipping.
+* Hybrid loads: mirror W=4 + diode W=2 for ~3-5x gain.
+* v9 diode-only had span=141mV (below 225mV threshold).
+* v8 mirror-only caused 55.8% clipping (no parallel diode).
+* v11 uses F5-proven mirror+diode topology.
 *
 * Triggers: sample14_trig (R+14ms), sample69_trig (R+69ms)
 
@@ -17,8 +19,10 @@ XCs69 sh69 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMd1 dnet sh14 dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
 XMd2 slope_out sh69 dtail vss sky130_fd_pr__nfet_01v8 L=1 W=8 nf=1
-* Both sides: diode-connected (gain ~1, 0% clipping)
-XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
-XMd4 slope_out slope_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Reference side: diode
+XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+* Output side: mirror + parallel diode (gain ~3-5x, prevents bistability)
+XMd4_mir slope_out dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMd4_dg slope_out slope_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
 
 .ends qrs_slope

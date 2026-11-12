@@ -1,0 +1,29 @@
+{
+  "records": [
+    "112",
+    "118",
+    "122",
+    "113",
+    "200",
+    "231"
+  ],
+  "n_total_beats": 12249,
+  "aggregate_rho": {
+    "F1_rr_ratio": 0.9992408337302208,
+    "F2_rr_asym": 0.990192460009033,
+    "F3_bi_L0": 0.9593105034973566,
+    "F4_bi_L1": 0.9851584524550502,
+    "F5_pwave": 0.9927872556651876,
+    "F6_width": 0.9899771019585419,
+    "F7_slope": 0.9743935265066074,
+    "F8_sym": 0.9845020602708286
+  },
+  "verdicts": {
+    "Aggregate rho >= 0.97": false,
+    "Per-record rho >= 0.90": false,
+    "Clipping < 1%": true,
+    "Span >= 225mV": false,
+    "Cohen's d >= 75%": false
+  },
+  "overall": false
+}
