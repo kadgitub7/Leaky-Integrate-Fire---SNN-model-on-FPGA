@@ -1,4 +1,4 @@
-* FEATURE 7: QRS Slope — v11 (hybrid mirror+diode loads)
+* FEATURE 7: QRS Slope — v12 (diff clamp added)
 *
 * Proxy: ECG@R+14ms - ECG@R+69ms (signed). Captures post-R slope asymmetry.
 * Hybrid loads: mirror W=4 + diode W=2 for ~3-5x gain.
@@ -24,5 +24,7 @@ XMd3 dnet dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 * Output side: mirror + parallel diode (gain ~3-5x, prevents bistability)
 XMd4_mir slope_out dnet vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 XMd4_dg slope_out slope_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Differential clamp: limits output when Vout-Vref > Vtn
+XMclamp_d slope_out slope_out dnet vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
 
 .ends qrs_slope

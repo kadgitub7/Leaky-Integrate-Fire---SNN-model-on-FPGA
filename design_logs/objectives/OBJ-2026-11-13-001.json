@@ -1,0 +1,56 @@
+{
+  "id": "OBJ-2026-11-13-001",
+  "timestamp": "2026-11-13T00:30:00Z",
+  "skill": "objectives_engineer",
+  "status": "active",
+  "title": "Verify circuit features match RF baseline; find minimum MLP architecture",
+  "context": "CRITICAL DISCOVERY: The 95.74% RF accuracy was achieved on DIGITAL-STYLE Python features (ratios, normalized values, energy), but the analog circuits compute DIFFERENT mathematical operations (amplified differences, raw voltage samples). The 8->64->5 MLP only reached 79.78% on the digital features; the MLP architecture is too small. Running a comprehensive sweep of 11 MLP architectures on BOTH feature sets to find (a) whether circuit-matching features achieve similar RF accuracy, and (b) the minimum MLP size for >95% accuracy.",
+  "supersedes": "OBJ-2026-11-12-002",
+  "key_findings": [
+    {
+      "finding": "Feature definition mismatch between Python and circuits",
+      "detail": "Python rr_ratio = pre_rr/local_rr (RATIO). Circuit F1 = sf_out - ewma (DIFFERENCE). Python beat_instability = |pk-prev|/prev (NORMALIZED). Circuit F3 = pk - prev_pk (RAW DIFF). Python pwave_energy = sum(filtered^2)/fs (ENERGY). Circuit F5 = ECG@mid - ECG@start (VOLTAGE DIFF). Python qrs_width = threshold crossing ms (WIDTH). Circuit F6 = ECG@R+83ms (RAW SAMPLE). Similar mismatch for F2, F7, F8.",
+      "impact": "The 95.74% RF accuracy is on digital-style features, not on what circuits produce. Must verify circuit-matching features achieve similar accuracy."
+    },
+    {
+      "finding": "8->64->5 MLP is too small",
+      "detail": "RF(300 trees, depth 15) = 95.74% on 8 digital features. MLP(8->64->5 no BN) = 79.78% on same features. Gap = 15.96%. The single 64-neuron hidden layer cannot learn the decision boundaries.",
+      "impact": "Even with perfect circuits, the 8->64->5 analog MLP cannot reach 96%."
+    },
+    {
+      "finding": "Cohen's d emulation was unreliable",
+      "detail": "Analog emulation MLP showed 57.68% (22% drop), but transfer functions built from only 6 records. True circuit degradation unknown.",
+      "impact": "Need actual ngspice validation, not extrapolation from 6 records."
+    }
+  ],
+  "success_criteria": [
+    {
+      "metric": "RF accuracy on circuit-matching features",
+      "target": ">= 93% (proving circuit math operations are discriminative)",
+      "measurement_method": "mlp_sweep.py RF baseline on circuit features",
+      "current_value": "PENDING",
+      "priority": "must_know"
+    },
+    {
+      "metric": "Minimum MLP architecture for >95% on circuit features",
+      "target": "Identify smallest [layers] achieving >95% with S>=50%, V>=85%",
+      "measurement_method": "mlp_sweep.py architecture sweep",
+      "current_value": "PENDING — 11 architectures x 2 feature sets x 3 seeds running",
+      "priority": "must_know"
+    }
+  ],
+  "decision_tree": [
+    "IF circuit RF >= 93%: Circuit features work. Need bigger MLP — determine minimum size for ReRAM crossbar feasibility.",
+    "IF circuit RF < 85%: Circuit features are too lossy. Must redesign circuits to compute ratios (requires analog divider) or energy (requires squarer+integrator).",
+    "IF best MLP > 256 neurons total: May exceed ReRAM crossbar capacity. Need to discuss fabrication constraints.",
+    "IF MLP 128->64 or smaller achieves >95%: Feasible on ReRAM. Redesign analog classifier."
+  ],
+  "experiments_running": [
+    {
+      "name": "mlp_sweep.py",
+      "task_id": "bt4u10db5",
+      "tests": "11 MLP architectures x 2 feature sets x 3 seeds + 2 RF baselines",
+      "architectures": ["8->32->5", "8->64->5", "8->128->5", "8->256->5", "8->32->16->5", "8->64->32->5", "8->128->64->5", "8->128->128->5", "8->256->128->5", "8->128->64->32->5", "8->256->128->64->5"]
+    }
+  ]
+}

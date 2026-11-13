@@ -1,5 +1,5 @@
 * ============================================================
-* FEATURES 1 & 2: RR Timing — v11 (slow EWMA + hybrid loads)
+* FEATURES 1 & 2: RR Timing — v12 (diff clamp added)
 *
 * Timer: 200pF MIM, VDD precharge at rpeak, ~43.5pA discharge
 *   V_timer = 0.9 - 0.218*RR (faster discharge for wider range)
@@ -10,9 +10,10 @@
 * EWMA: alpha = Cesamp/(Cesamp+Cewma) = 5/(5+330) ≈ 0.015
 *   IC must be set to V_sf(first_RR) for fast convergence
 *
-* Diff pair readout: mirror+diode hybrid loads (F5-proven topology)
-*   Mirror copies ref current, parallel diode prevents bistability
-*   Gain ~3-5x in linear region
+* Diff pair readout: mirror+diode hybrid loads + differential clamp
+*   Diode-NFET from output to ref node limits Vout when
+*   Vout-Vref > Vtn, preventing VDD-rail clipping.
+*   Gain ~17x in linear region, Vmax ~0.67V (232mV below VDD)
 *
 * Pin: ecg_unused capture_trig rpeak_trigger copy_trig
 *      rr_ratio_out rr_asym_out timer_out ewma_out vdd vss vbias
@@ -56,6 +57,8 @@ XMl1_r net_r1 net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 * Output side: mirror + parallel diode (prevents bistability, gain ~3-5x)
 XMl2_r_mir rr_ratio_out net_r1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 XMl2_r_dg rr_ratio_out rr_ratio_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Differential clamp: limits output when Vout-Vref > Vtn
+XMclamp_r rr_ratio_out rr_ratio_out net_r1 vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
 
 * === DIFF PAIR: rr_asym (hybrid mirror+diode loads) ===
 * Tail current source
@@ -68,6 +71,8 @@ XMl1_a net_a1 net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 * Output side: mirror + parallel diode
 XMl2_a_mir rr_asym_out net_a1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 XMl2_a_dg rr_asym_out rr_asym_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Differential clamp: limits output when Vout-Vref > Vtn
+XMclamp_a rr_asym_out rr_asym_out net_a1 vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
 
 * Expose internal nodes for P-wave predictor
 R_timer_out sf_out timer_out 0

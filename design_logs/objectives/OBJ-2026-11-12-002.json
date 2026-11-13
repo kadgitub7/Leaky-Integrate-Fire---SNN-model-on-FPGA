@@ -1,0 +1,53 @@
+{
+  "id": "OBJ-2026-11-12-002",
+  "timestamp": "2026-11-12T21:00:00Z",
+  "skill": "objectives_engineer",
+  "status": "active",
+  "title": "Establish Python feature ceiling and determine if circuit Cohen's d degradation matters",
+  "context": "v12 circuits achieve rho>=0.97 (7/8), 0% clipping, span>225mV (8/8), but Cohen's d fails 6/18 pairs (ratio <75%). Two parallel experiments running: (1) Python MLP baseline with exact 8->64->5 architecture on full 44 records, (2) analog emulation MLP applying empirical py->circuit transfer functions to all 44 records. Results determine whether circuit optimization is needed or whether the feature definitions themselves are the bottleneck.",
+  "supersedes": "OBJ-2026-11-12-001",
+  "success_criteria": [
+    {
+      "metric": "Python MLP baseline accuracy (8 features, 8->64->5)",
+      "target": ">= 96% on DS2 test set (inter-patient)",
+      "measurement_method": "python_mlp_baseline.py with 5 seeds",
+      "current_value": "PENDING — running",
+      "priority": "must_know"
+    },
+    {
+      "metric": "Analog emulation MLP accuracy",
+      "target": "Within 2% of Python baseline",
+      "measurement_method": "analog_emulation_mlp.py with empirical transfer functions",
+      "current_value": "PENDING — running",
+      "priority": "must_know"
+    },
+    {
+      "metric": "Cohen's d impact on classification",
+      "target": "Determine if d degradation causes >1% accuracy loss",
+      "measurement_method": "Compare Python MLP vs analog emulation MLP accuracy",
+      "current_value": "Prior 6-record test: 0.25% gap (85.36% vs 85.11%)",
+      "priority": "diagnostic"
+    }
+  ],
+  "decision_tree": [
+    "IF Python baseline < 96%: Feature definitions are the bottleneck, not circuits. Must redesign features or accept lower ceiling.",
+    "IF Python baseline >= 96% AND emulation >= 94%: Cohen's d compression is tolerable. Proceed to full ngspice validation.",
+    "IF Python baseline >= 96% AND emulation < 94%: Cohen's d compression matters. Must optimize circuits (reduce clamp compression, increase gain).",
+    "IF both results similar: v12 is sufficient. Proceed to full 44-record ngspice + MLP retraining."
+  ],
+  "constraints": [
+    "Do NOT modify circuits until both experiments complete",
+    "Use EXACT 8->64->5 MLP architecture matching analog classifier",
+    "Full 44-record inter-patient protocol (DS1 train, DS2 test)"
+  ],
+  "dependencies": [
+    "python_mlp_baseline.py (background task bxkf0qe7z)",
+    "analog_emulation_mlp.py (background task bwzy0xmr5)"
+  ],
+  "estimated_effort": "1-2 hours (compute-bound, awaiting results)",
+  "risk_factors": [
+    "Python baseline may be <<96% with only 8 features (39-feature RF was 94.1%)",
+    "Analog emulation transfer functions built from only 6 records may not generalize",
+    "MLP may be more sensitive to d compression than RF was on the 6-record test"
+  ]
+}

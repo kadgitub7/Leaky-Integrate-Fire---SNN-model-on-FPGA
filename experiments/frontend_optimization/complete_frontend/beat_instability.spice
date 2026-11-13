@@ -1,5 +1,5 @@
 * ============================================================
-* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v11 (hybrid loads)
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v12 (diff clamp added)
 *
 * Captures ECG at R-peak, compares with previous via charge-share.
 * Hybrid mirror+diode loads for ~3-5x gain.
@@ -36,5 +36,7 @@ XMi3 net_i1 net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 * Output side: mirror + parallel diode (gain ~3-5x, prevents bistability)
 XMi4_mir instab_out net_i1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
 XMi4_dg instab_out instab_out vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=2 nf=1
+* Differential clamp: limits output when Vout-Vref > Vtn
+XMclamp_i instab_out instab_out net_i1 vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
 
 .ends beat_instability
