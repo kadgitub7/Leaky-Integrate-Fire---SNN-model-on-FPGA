@@ -1,0 +1,2363 @@
+* =================================================================
+* LAYER 1 (circuit features): 8x64 Differential 1T1R ReRAM Crossbar
+* Trained on CIRCUIT-MATCHING features (analog differences, alpha=0.015)
+* Technology: SKY130 sky130_fd_pr__nfet_01v8 (W=1.0u L=0.15u)
+* =================================================================
+*
+* Conductance range: 0.296 - 99.273 uS (SKY130 ReRAM PDK)
+* V_READ = 0.15V, V_GATE = 1.8V
+* Scale factor: 1.701263e+05
+* Total 1T1R cells: 1024 (differential)
+*
+* Biases (add after current sensing):
+*   b[0] = -0.096853
+*   b[1] = -0.193053
+*   b[2] = -0.311981
+*   b[3] = 0.417632
+*   b[4] = 0.386167
+*   b[5] = 0.100687
+*   b[6] = 0.767024
+*   b[7] = 0.024898
+*   b[8] = -0.613583
+*   b[9] = -0.554008
+*   b[10] = -0.229366
+*   b[11] = 0.741658
+*   b[12] = -0.720304
+*   b[13] = 0.621754
+*   b[14] = 0.397682
+*   b[15] = 0.584104
+*   b[16] = 0.115474
+*   b[17] = -0.331603
+*   b[18] = 0.979647
+*   b[19] = -0.428521
+*   b[20] = 0.066221
+*   b[21] = 0.331739
+*   b[22] = 0.267301
+*   b[23] = -0.145383
+*   b[24] = 0.318282
+*   b[25] = -0.376879
+*   b[26] = 0.241927
+*   b[27] = -0.555084
+*   b[28] = 0.250274
+*   b[29] = -0.810719
+*   b[30] = 0.028195
+*   b[31] = 0.848577
+*   b[32] = -0.163557
+*   b[33] = 0.037470
+*   b[34] = -0.975942
+*   b[35] = 0.563542
+*   b[36] = -0.076901
+*   b[37] = -0.070415
+*   b[38] = 0.119175
+*   b[39] = 0.067931
+*   b[40] = 0.806222
+*   b[41] = 1.422546
+*   b[42] = 0.394458
+*   b[43] = -0.182117
+*   b[44] = 0.220668
+*   b[45] = 0.409206
+*   b[46] = 1.125583
+*   b[47] = 0.878950
+*   b[48] = -0.431959
+*   b[49] = 0.587375
+*   b[50] = 0.796573
+*   b[51] = 0.943175
+*   b[52] = 0.098125
+*   b[53] = 0.469936
+*   b[54] = -0.250540
+*   b[55] = 1.069827
+*   b[56] = -0.062807
+*   b[57] = 0.504087
+*   b[58] = 0.025461
+*   b[59] = 0.262195
+*   b[60] = 0.559529
+*   b[61] = 0.322818
+*   b[62] = 0.800706
+*   b[63] = 0.278207
+* =================================================================
+
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+
+Vgate gate 0 1.8
+
+* --- Row inputs ---
+Vrow0 row0 0 0.0
+Vrow1 row1 0 0.0
+Vrow2 row2 0 0.0
+Vrow3 row3 0 0.0
+Vrow4 row4 0 0.0
+Vrow5 row5 0 0.0
+Vrow6 row6 0 0.0
+Vrow7 row7 0 0.0
+
+* --- Column sense lines ---
+Vsp0 cp0 0 0
+Vsn0 cn0 0 0
+Vsp1 cp1 0 0
+Vsn1 cn1 0 0
+Vsp2 cp2 0 0
+Vsn2 cn2 0 0
+Vsp3 cp3 0 0
+Vsn3 cn3 0 0
+Vsp4 cp4 0 0
+Vsn4 cn4 0 0
+Vsp5 cp5 0 0
+Vsn5 cn5 0 0
+Vsp6 cp6 0 0
+Vsn6 cn6 0 0
+Vsp7 cp7 0 0
+Vsn7 cn7 0 0
+Vsp8 cp8 0 0
+Vsn8 cn8 0 0
+Vsp9 cp9 0 0
+Vsn9 cn9 0 0
+Vsp10 cp10 0 0
+Vsn10 cn10 0 0
+Vsp11 cp11 0 0
+Vsn11 cn11 0 0
+Vsp12 cp12 0 0
+Vsn12 cn12 0 0
+Vsp13 cp13 0 0
+Vsn13 cn13 0 0
+Vsp14 cp14 0 0
+Vsn14 cn14 0 0
+Vsp15 cp15 0 0
+Vsn15 cn15 0 0
+Vsp16 cp16 0 0
+Vsn16 cn16 0 0
+Vsp17 cp17 0 0
+Vsn17 cn17 0 0
+Vsp18 cp18 0 0
+Vsn18 cn18 0 0
+Vsp19 cp19 0 0
+Vsn19 cn19 0 0
+Vsp20 cp20 0 0
+Vsn20 cn20 0 0
+Vsp21 cp21 0 0
+Vsn21 cn21 0 0
+Vsp22 cp22 0 0
+Vsn22 cn22 0 0
+Vsp23 cp23 0 0
+Vsn23 cn23 0 0
+Vsp24 cp24 0 0
+Vsn24 cn24 0 0
+Vsp25 cp25 0 0
+Vsn25 cn25 0 0
+Vsp26 cp26 0 0
+Vsn26 cn26 0 0
+Vsp27 cp27 0 0
+Vsn27 cn27 0 0
+Vsp28 cp28 0 0
+Vsn28 cn28 0 0
+Vsp29 cp29 0 0
+Vsn29 cn29 0 0
+Vsp30 cp30 0 0
+Vsn30 cn30 0 0
+Vsp31 cp31 0 0
+Vsn31 cn31 0 0
+Vsp32 cp32 0 0
+Vsn32 cn32 0 0
+Vsp33 cp33 0 0
+Vsn33 cn33 0 0
+Vsp34 cp34 0 0
+Vsn34 cn34 0 0
+Vsp35 cp35 0 0
+Vsn35 cn35 0 0
+Vsp36 cp36 0 0
+Vsn36 cn36 0 0
+Vsp37 cp37 0 0
+Vsn37 cn37 0 0
+Vsp38 cp38 0 0
+Vsn38 cn38 0 0
+Vsp39 cp39 0 0
+Vsn39 cn39 0 0
+Vsp40 cp40 0 0
+Vsn40 cn40 0 0
+Vsp41 cp41 0 0
+Vsn41 cn41 0 0
+Vsp42 cp42 0 0
+Vsn42 cn42 0 0
+Vsp43 cp43 0 0
+Vsn43 cn43 0 0
+Vsp44 cp44 0 0
+Vsn44 cn44 0 0
+Vsp45 cp45 0 0
+Vsn45 cn45 0 0
+Vsp46 cp46 0 0
+Vsn46 cn46 0 0
+Vsp47 cp47 0 0
+Vsn47 cn47 0 0
+Vsp48 cp48 0 0
+Vsn48 cn48 0 0
+Vsp49 cp49 0 0
+Vsn49 cn49 0 0
+Vsp50 cp50 0 0
+Vsn50 cn50 0 0
+Vsp51 cp51 0 0
+Vsn51 cn51 0 0
+Vsp52 cp52 0 0
+Vsn52 cn52 0 0
+Vsp53 cp53 0 0
+Vsn53 cn53 0 0
+Vsp54 cp54 0 0
+Vsn54 cn54 0 0
+Vsp55 cp55 0 0
+Vsn55 cn55 0 0
+Vsp56 cp56 0 0
+Vsn56 cn56 0 0
+Vsp57 cp57 0 0
+Vsn57 cn57 0 0
+Vsp58 cp58 0 0
+Vsn58 cn58 0 0
+Vsp59 cp59 0 0
+Vsn59 cn59 0 0
+Vsp60 cp60 0 0
+Vsn60 cn60 0 0
+Vsp61 cp61 0 0
+Vsn61 cn61 0 0
+Vsp62 cp62 0 0
+Vsn62 cn62 0 0
+Vsp63 cp63 0 0
+Vsn63 cn63 0 0
+
+* ===== POSITIVE CONDUCTANCE ARRAY (8x64) =====
+* --- Row 0 ---
+XTp0_0 row0 gate mp0_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_0 mp0_0 cp0 3378378.3784  $ G+=0.296uS w=-0.1927
+XTp0_1 row0 gate mp0_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_1 mp0_1 cp1 23959.8400  $ G+=41.737uS w=1.0575
+XTp0_2 row0 gate mp0_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_2 mp0_2 cp2 3378378.3784  $ G+=0.296uS w=-0.2958
+XTp0_3 row0 gate mp0_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_3 mp0_3 cp3 3378378.3784  $ G+=0.296uS w=-0.8297
+XTp0_4 row0 gate mp0_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_4 mp0_4 cp4 88687.0034  $ G+=11.276uS w=0.2802
+XTp0_5 row0 gate mp0_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_5 mp0_5 cp5 224898.6095  $ G+=4.446uS w=0.1059
+XTp0_6 row0 gate mp0_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_6 mp0_6 cp6 83313.1320  $ G+=12.003uS w=0.2987
+XTp0_7 row0 gate mp0_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_7 mp0_7 cp7 258294.4994  $ G+=3.872uS w=0.0912
+XTp0_8 row0 gate mp0_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_8 mp0_8 cp8 58439.3591  $ G+=17.112uS w=0.4291
+XTp0_9 row0 gate mp0_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_9 mp0_9 cp9 86515.9819  $ G+=11.559uS w=0.2874
+XTp0_10 row0 gate mp0_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_10 mp0_10 cp10 3378378.3784  $ G+=0.296uS w=-0.0226
+XTp0_11 row0 gate mp0_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_11 mp0_11 cp11 3378378.3784  $ G+=0.296uS w=-2.2034
+XTp0_12 row0 gate mp0_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_12 mp0_12 cp12 3378378.3784  $ G+=0.296uS w=-2.5258
+XTp0_13 row0 gate mp0_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_13 mp0_13 cp13 14120.3658  $ G+=70.820uS w=1.7997
+XTp0_14 row0 gate mp0_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_14 mp0_14 cp14 287897.1010  $ G+=3.473uS w=0.0811
+XTp0_15 row0 gate mp0_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_15 mp0_15 cp15 440487.2563  $ G+=2.270uS w=0.0504
+XTp0_16 row0 gate mp0_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_16 mp0_16 cp16 3378378.3784  $ G+=0.296uS w=-1.1472
+XTp0_17 row0 gate mp0_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_17 mp0_17 cp17 58574.2693  $ G+=17.072uS w=0.4281
+XTp0_18 row0 gate mp0_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_18 mp0_18 cp18 3378378.3784  $ G+=0.296uS w=-0.3098
+XTp0_19 row0 gate mp0_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_19 mp0_19 cp19 3378378.3784  $ G+=0.296uS w=-0.6138
+XTp0_20 row0 gate mp0_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_20 mp0_20 cp20 3378378.3784  $ G+=0.296uS w=-0.5159
+XTp0_21 row0 gate mp0_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_21 mp0_21 cp21 3378378.3784  $ G+=0.296uS w=-1.3733
+XTp0_22 row0 gate mp0_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_22 mp0_22 cp22 40827.5207  $ G+=24.493uS w=0.6175
+XTp0_23 row0 gate mp0_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_23 mp0_23 cp23 3378378.3784  $ G+=0.296uS w=-0.6425
+XTp0_24 row0 gate mp0_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_24 mp0_24 cp24 3378378.3784  $ G+=0.296uS w=-0.0537
+XTp0_25 row0 gate mp0_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_25 mp0_25 cp25 140201.6445  $ G+=7.133uS w=0.1745
+XTp0_26 row0 gate mp0_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_26 mp0_26 cp26 3378378.3784  $ G+=0.296uS w=-0.2860
+XTp0_27 row0 gate mp0_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_27 mp0_27 cp27 568882.9365  $ G+=1.758uS w=0.0373
+XTp0_28 row0 gate mp0_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_28 mp0_28 cp28 3378378.3784  $ G+=0.296uS w=-0.0204
+XTp0_29 row0 gate mp0_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_29 mp0_29 cp29 189843.7318  $ G+=5.267uS w=0.1269
+XTp0_30 row0 gate mp0_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_30 mp0_30 cp30 227984.6638  $ G+=4.386uS w=0.1044
+XTp0_31 row0 gate mp0_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_31 mp0_31 cp31 181320.8834  $ G+=5.515uS w=0.1332
+XTp0_32 row0 gate mp0_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_32 mp0_32 cp32 3378378.3784  $ G+=0.296uS w=-0.2593
+XTp0_33 row0 gate mp0_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_33 mp0_33 cp33 42044.6304  $ G+=23.784uS w=0.5994
+XTp0_34 row0 gate mp0_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_34 mp0_34 cp34 3378378.3784  $ G+=0.296uS w=-1.0754
+XTp0_35 row0 gate mp0_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_35 mp0_35 cp35 52468.9846  $ G+=19.059uS w=0.4788
+XTp0_36 row0 gate mp0_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_36 mp0_36 cp36 3378378.3784  $ G+=0.296uS w=-0.2485
+XTp0_37 row0 gate mp0_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_37 mp0_37 cp37 3378378.3784  $ G+=0.296uS w=-0.2985
+XTp0_38 row0 gate mp0_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_38 mp0_38 cp38 482811.8467  $ G+=2.071uS w=0.0453
+XTp0_39 row0 gate mp0_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_39 mp0_39 cp39 3378378.3784  $ G+=0.296uS w=-0.1649
+XTp0_40 row0 gate mp0_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_40 mp0_40 cp40 3378378.3784  $ G+=0.296uS w=-1.2305
+XTp0_41 row0 gate mp0_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_41 mp0_41 cp41 3378378.3784  $ G+=0.296uS w=-0.1160
+XTp0_42 row0 gate mp0_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_42 mp0_42 cp42 3378378.3784  $ G+=0.296uS w=-1.0246
+XTp0_43 row0 gate mp0_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_43 mp0_43 cp43 3378378.3784  $ G+=0.296uS w=-0.4273
+XTp0_44 row0 gate mp0_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_44 mp0_44 cp44 169554.3073  $ G+=5.898uS w=0.1430
+XTp0_45 row0 gate mp0_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_45 mp0_45 cp45 118559.5445  $ G+=8.435uS w=0.2077
+XTp0_46 row0 gate mp0_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_46 mp0_46 cp46 3378378.3784  $ G+=0.296uS w=-0.5863
+XTp0_47 row0 gate mp0_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_47 mp0_47 cp47 58980.0288  $ G+=16.955uS w=0.4251
+XTp0_48 row0 gate mp0_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_48 mp0_48 cp48 3378378.3784  $ G+=0.296uS w=-0.4339
+XTp0_49 row0 gate mp0_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_49 mp0_49 cp49 23265.6537  $ G+=42.982uS w=1.0893
+XTp0_50 row0 gate mp0_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_50 mp0_50 cp50 112056.9394  $ G+=8.924uS w=0.2202
+XTp0_51 row0 gate mp0_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_51 mp0_51 cp51 342647.5602  $ G+=2.918uS w=0.0669
+XTp0_52 row0 gate mp0_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_52 mp0_52 cp52 3378378.3784  $ G+=0.296uS w=-0.1679
+XTp0_53 row0 gate mp0_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_53 mp0_53 cp53 159449.7049  $ G+=6.272uS w=0.1525
+XTp0_54 row0 gate mp0_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_54 mp0_54 cp54 3378378.3784  $ G+=0.296uS w=-0.2524
+XTp0_55 row0 gate mp0_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_55 mp0_55 cp55 87181.5337  $ G+=11.470uS w=0.2852
+XTp0_56 row0 gate mp0_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_56 mp0_56 cp56 3378378.3784  $ G+=0.296uS w=-0.0512
+XTp0_57 row0 gate mp0_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_57 mp0_57 cp57 3378378.3784  $ G+=0.296uS w=-0.2173
+XTp0_58 row0 gate mp0_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_58 mp0_58 cp58 86548.4909  $ G+=11.554uS w=0.2873
+XTp0_59 row0 gate mp0_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_59 mp0_59 cp59 3378378.3784  $ G+=0.296uS w=-1.0534
+XTp0_60 row0 gate mp0_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_60 mp0_60 cp60 88359.5763  $ G+=11.317uS w=0.2813
+XTp0_61 row0 gate mp0_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_61 mp0_61 cp61 3378378.3784  $ G+=0.296uS w=-1.0073
+XTp0_62 row0 gate mp0_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_62 mp0_62 cp62 62418.4466  $ G+=16.021uS w=0.4013
+XTp0_63 row0 gate mp0_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp0_63 mp0_63 cp63 3378378.3784  $ G+=0.296uS w=-1.7999
+* --- Row 1 ---
+XTp1_0 row1 gate mp1_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_0 mp1_0 cp0 683532.6894  $ G+=1.463uS w=0.0298
+XTp1_1 row1 gate mp1_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_1 mp1_1 cp1 72932.5705  $ G+=13.711uS w=0.3423
+XTp1_2 row1 gate mp1_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_2 mp1_2 cp2 3378378.3784  $ G+=0.296uS w=-0.1905
+XTp1_3 row1 gate mp1_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_3 mp1_3 cp3 52379.7473  $ G+=19.091uS w=0.4796
+XTp1_4 row1 gate mp1_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_4 mp1_4 cp4 156978.2942  $ G+=6.370uS w=0.1550
+XTp1_5 row1 gate mp1_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_5 mp1_5 cp5 499164.9408  $ G+=2.003uS w=0.0436
+XTp1_6 row1 gate mp1_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_6 mp1_6 cp6 60694.1134  $ G+=16.476uS w=0.4129
+XTp1_7 row1 gate mp1_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_7 mp1_7 cp7 158018.7014  $ G+=6.328uS w=0.1539
+XTp1_8 row1 gate mp1_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_8 mp1_8 cp8 3378378.3784  $ G+=0.296uS w=-0.0594
+XTp1_9 row1 gate mp1_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_9 mp1_9 cp9 50770.3625  $ G+=19.697uS w=0.4951
+XTp1_10 row1 gate mp1_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_10 mp1_10 cp10 3378378.3784  $ G+=0.296uS w=-0.1650
+XTp1_11 row1 gate mp1_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_11 mp1_11 cp11 3378378.3784  $ G+=0.296uS w=-0.1434
+XTp1_12 row1 gate mp1_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_12 mp1_12 cp12 3378378.3784  $ G+=0.296uS w=-0.1106
+XTp1_13 row1 gate mp1_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_13 mp1_13 cp13 3378378.3784  $ G+=0.296uS w=-0.1410
+XTp1_14 row1 gate mp1_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_14 mp1_14 cp14 637212.2341  $ G+=1.569uS w=0.0325
+XTp1_15 row1 gate mp1_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_15 mp1_15 cp15 3378378.3784  $ G+=0.296uS w=-0.7757
+XTp1_16 row1 gate mp1_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_16 mp1_16 cp16 345840.8544  $ G+=2.892uS w=0.0662
+XTp1_17 row1 gate mp1_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_17 mp1_17 cp17 3378378.3784  $ G+=0.296uS w=-0.0129
+XTp1_18 row1 gate mp1_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_18 mp1_18 cp18 33742.2465  $ G+=29.636uS w=0.7487
+XTp1_19 row1 gate mp1_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_19 mp1_19 cp19 3378378.3784  $ G+=0.296uS w=-0.7150
+XTp1_20 row1 gate mp1_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_20 mp1_20 cp20 3378378.3784  $ G+=0.296uS w=-0.0362
+XTp1_21 row1 gate mp1_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_21 mp1_21 cp21 33213.5512  $ G+=30.108uS w=0.7608
+XTp1_22 row1 gate mp1_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_22 mp1_22 cp22 47764.4722  $ G+=20.936uS w=0.5267
+XTp1_23 row1 gate mp1_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_23 mp1_23 cp23 3378378.3784  $ G+=0.296uS w=-0.7001
+XTp1_24 row1 gate mp1_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_24 mp1_24 cp24 3378378.3784  $ G+=0.296uS w=-0.2410
+XTp1_25 row1 gate mp1_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_25 mp1_25 cp25 3378378.3784  $ G+=0.296uS w=-0.9335
+XTp1_26 row1 gate mp1_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_26 mp1_26 cp26 24862.8324  $ G+=40.221uS w=1.0188
+XTp1_27 row1 gate mp1_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_27 mp1_27 cp27 546002.6860  $ G+=1.831uS w=0.0392
+XTp1_28 row1 gate mp1_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_28 mp1_28 cp28 3378378.3784  $ G+=0.296uS w=-0.3661
+XTp1_29 row1 gate mp1_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_29 mp1_29 cp29 3378378.3784  $ G+=0.296uS w=-0.3734
+XTp1_30 row1 gate mp1_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_30 mp1_30 cp30 3378378.3784  $ G+=0.296uS w=-0.8934
+XTp1_31 row1 gate mp1_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_31 mp1_31 cp31 37611.9420  $ G+=26.587uS w=0.6709
+XTp1_32 row1 gate mp1_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_32 mp1_32 cp32 126686.9021  $ G+=7.893uS w=0.1939
+XTp1_33 row1 gate mp1_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_33 mp1_33 cp33 164238.0430  $ G+=6.089uS w=0.1478
+XTp1_34 row1 gate mp1_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_34 mp1_34 cp34 28503.2069  $ G+=35.084uS w=0.8877
+XTp1_35 row1 gate mp1_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_35 mp1_35 cp35 100119.7822  $ G+=9.988uS w=0.2473
+XTp1_36 row1 gate mp1_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_36 mp1_36 cp36 125085.1657  $ G+=7.995uS w=0.1965
+XTp1_37 row1 gate mp1_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_37 mp1_37 cp37 3378378.3784  $ G+=0.296uS w=-0.0281
+XTp1_38 row1 gate mp1_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_38 mp1_38 cp38 3378378.3784  $ G+=0.296uS w=-0.6249
+XTp1_39 row1 gate mp1_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_39 mp1_39 cp39 3378378.3784  $ G+=0.296uS w=-0.2640
+XTp1_40 row1 gate mp1_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_40 mp1_40 cp40 3378378.3784  $ G+=0.296uS w=-0.1155
+XTp1_41 row1 gate mp1_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_41 mp1_41 cp41 41001.2233  $ G+=24.390uS w=0.6148
+XTp1_42 row1 gate mp1_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_42 mp1_42 cp42 3378378.3784  $ G+=0.296uS w=-0.5229
+XTp1_43 row1 gate mp1_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_43 mp1_43 cp43 3378378.3784  $ G+=0.296uS w=-0.0439
+XTp1_44 row1 gate mp1_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_44 mp1_44 cp44 3378378.3784  $ G+=0.296uS w=-0.0763
+XTp1_45 row1 gate mp1_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_45 mp1_45 cp45 3378378.3784  $ G+=0.296uS w=-0.1985
+XTp1_46 row1 gate mp1_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_46 mp1_46 cp46 118679.4672  $ G+=8.426uS w=0.2075
+XTp1_47 row1 gate mp1_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_47 mp1_47 cp47 3378378.3784  $ G+=0.296uS w=-0.4334
+XTp1_48 row1 gate mp1_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_48 mp1_48 cp48 3378378.3784  $ G+=0.296uS w=-0.5208
+XTp1_49 row1 gate mp1_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_49 mp1_49 cp49 250515.0743  $ G+=3.992uS w=0.0943
+XTp1_50 row1 gate mp1_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_50 mp1_50 cp50 3378378.3784  $ G+=0.296uS w=-0.0366
+XTp1_51 row1 gate mp1_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_51 mp1_51 cp51 3378378.3784  $ G+=0.296uS w=-0.5031
+XTp1_52 row1 gate mp1_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_52 mp1_52 cp52 24626.2287  $ G+=40.607uS w=1.0287
+XTp1_53 row1 gate mp1_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_53 mp1_53 cp53 3378378.3784  $ G+=0.296uS w=-0.2855
+XTp1_54 row1 gate mp1_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_54 mp1_54 cp54 71870.0424  $ G+=13.914uS w=0.3475
+XTp1_55 row1 gate mp1_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_55 mp1_55 cp55 53532.1107  $ G+=18.680uS w=0.4691
+XTp1_56 row1 gate mp1_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_56 mp1_56 cp56 173086.6528  $ G+=5.777uS w=0.1399
+XTp1_57 row1 gate mp1_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_57 mp1_57 cp57 2259041.8027  $ G+=0.443uS w=0.0037
+XTp1_58 row1 gate mp1_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_58 mp1_58 cp58 73991.9021  $ G+=13.515uS w=0.3373
+XTp1_59 row1 gate mp1_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_59 mp1_59 cp59 3378378.3784  $ G+=0.296uS w=-0.5432
+XTp1_60 row1 gate mp1_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_60 mp1_60 cp60 3378378.3784  $ G+=0.296uS w=-0.5965
+XTp1_61 row1 gate mp1_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_61 mp1_61 cp61 3378378.3784  $ G+=0.296uS w=-0.0105
+XTp1_62 row1 gate mp1_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_62 mp1_62 cp62 234198.8404  $ G+=4.270uS w=0.1014
+XTp1_63 row1 gate mp1_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp1_63 mp1_63 cp63 1089966.8537  $ G+=0.917uS w=0.0159
+* --- Row 2 ---
+XTp2_0 row2 gate mp2_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_0 mp2_0 cp0 3378378.3784  $ G+=0.296uS w=-0.1781
+XTp2_1 row2 gate mp2_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_1 mp2_1 cp1 3378378.3784  $ G+=0.296uS w=-0.1305
+XTp2_2 row2 gate mp2_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_2 mp2_2 cp2 3378378.3784  $ G+=0.296uS w=-0.1866
+XTp2_3 row2 gate mp2_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_3 mp2_3 cp3 33415.0422  $ G+=29.927uS w=0.7561
+XTp2_4 row2 gate mp2_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_4 mp2_4 cp4 3378378.3784  $ G+=0.296uS w=-0.4354
+XTp2_5 row2 gate mp2_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_5 mp2_5 cp5 131964.0194  $ G+=7.578uS w=0.1858
+XTp2_6 row2 gate mp2_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_6 mp2_6 cp6 3378378.3784  $ G+=0.296uS w=-0.2879
+XTp2_7 row2 gate mp2_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_7 mp2_7 cp7 104282.5854  $ G+=9.589uS w=0.2372
+XTp2_8 row2 gate mp2_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_8 mp2_8 cp8 177808.0058  $ G+=5.624uS w=0.1360
+XTp2_9 row2 gate mp2_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_9 mp2_9 cp9 180263.9787  $ G+=5.547uS w=0.1340
+XTp2_10 row2 gate mp2_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_10 mp2_10 cp10 458859.7291  $ G+=2.179uS w=0.0481
+XTp2_11 row2 gate mp2_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_11 mp2_11 cp11 3378378.3784  $ G+=0.296uS w=-0.7306
+XTp2_12 row2 gate mp2_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_12 mp2_12 cp12 3378378.3784  $ G+=0.296uS w=-0.6055
+XTp2_13 row2 gate mp2_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_13 mp2_13 cp13 3378378.3784  $ G+=0.296uS w=-0.8763
+XTp2_14 row2 gate mp2_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_14 mp2_14 cp14 3378378.3784  $ G+=0.296uS w=-0.1411
+XTp2_15 row2 gate mp2_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_15 mp2_15 cp15 3378378.3784  $ G+=0.296uS w=-0.0716
+XTp2_16 row2 gate mp2_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_16 mp2_16 cp16 23135.7967  $ G+=43.223uS w=1.0955
+XTp2_17 row2 gate mp2_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_17 mp2_17 cp17 620867.8552  $ G+=1.611uS w=0.0335
+XTp2_18 row2 gate mp2_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_18 mp2_18 cp18 3378378.3784  $ G+=0.296uS w=-0.4315
+XTp2_19 row2 gate mp2_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_19 mp2_19 cp19 3378378.3784  $ G+=0.296uS w=-0.1971
+XTp2_20 row2 gate mp2_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_20 mp2_20 cp20 3378378.3784  $ G+=0.296uS w=-0.8320
+XTp2_21 row2 gate mp2_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_21 mp2_21 cp21 175837.7626  $ G+=5.687uS w=0.1376
+XTp2_22 row2 gate mp2_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_22 mp2_22 cp22 50583.1963  $ G+=19.769uS w=0.4969
+XTp2_23 row2 gate mp2_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_23 mp2_23 cp23 132180.5140  $ G+=7.565uS w=0.1855
+XTp2_24 row2 gate mp2_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_24 mp2_24 cp24 142693.4223  $ G+=7.008uS w=0.1713
+XTp2_25 row2 gate mp2_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_25 mp2_25 cp25 3378378.3784  $ G+=0.296uS w=-0.4030
+XTp2_26 row2 gate mp2_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_26 mp2_26 cp26 182079.6193  $ G+=5.492uS w=0.1326
+XTp2_27 row2 gate mp2_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_27 mp2_27 cp27 3378378.3784  $ G+=0.296uS w=-0.5359
+XTp2_28 row2 gate mp2_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_28 mp2_28 cp28 274196.3051  $ G+=3.647uS w=0.0855
+XTp2_29 row2 gate mp2_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_29 mp2_29 cp29 3378378.3784  $ G+=0.296uS w=-0.1586
+XTp2_30 row2 gate mp2_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_30 mp2_30 cp30 3378378.3784  $ G+=0.296uS w=-0.1310
+XTp2_31 row2 gate mp2_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_31 mp2_31 cp31 3378378.3784  $ G+=0.296uS w=-0.0752
+XTp2_32 row2 gate mp2_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_32 mp2_32 cp32 3378378.3784  $ G+=0.296uS w=-1.1985
+XTp2_33 row2 gate mp2_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_33 mp2_33 cp33 3378378.3784  $ G+=0.296uS w=-0.2088
+XTp2_34 row2 gate mp2_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_34 mp2_34 cp34 3378378.3784  $ G+=0.296uS w=-0.6556
+XTp2_35 row2 gate mp2_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_35 mp2_35 cp35 242475.7154  $ G+=4.124uS w=0.0977
+XTp2_36 row2 gate mp2_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_36 mp2_36 cp36 60972.9305  $ G+=16.401uS w=0.4110
+XTp2_37 row2 gate mp2_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_37 mp2_37 cp37 245213.5608  $ G+=4.078uS w=0.0965
+XTp2_38 row2 gate mp2_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_38 mp2_38 cp38 3378378.3784  $ G+=0.296uS w=-0.0136
+XTp2_39 row2 gate mp2_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_39 mp2_39 cp39 92042.0153  $ G+=10.865uS w=0.2697
+XTp2_40 row2 gate mp2_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_40 mp2_40 cp40 3378378.3784  $ G+=0.296uS w=-0.1883
+XTp2_41 row2 gate mp2_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_41 mp2_41 cp41 177594.4042  $ G+=5.631uS w=0.1361
+XTp2_42 row2 gate mp2_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_42 mp2_42 cp42 3378378.3784  $ G+=0.296uS w=-0.3381
+XTp2_43 row2 gate mp2_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_43 mp2_43 cp43 3378378.3784  $ G+=0.296uS w=-0.5426
+XTp2_44 row2 gate mp2_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_44 mp2_44 cp44 49135.2931  $ G+=20.352uS w=0.5118
+XTp2_45 row2 gate mp2_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_45 mp2_45 cp45 3378378.3784  $ G+=0.296uS w=-0.1857
+XTp2_46 row2 gate mp2_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_46 mp2_46 cp46 3378378.3784  $ G+=0.296uS w=-0.2723
+XTp2_47 row2 gate mp2_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_47 mp2_47 cp47 1632641.9234  $ G+=0.613uS w=0.0081
+XTp2_48 row2 gate mp2_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_48 mp2_48 cp48 257373.9265  $ G+=3.885uS w=0.0916
+XTp2_49 row2 gate mp2_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_49 mp2_49 cp49 3378378.3784  $ G+=0.296uS w=-0.2405
+XTp2_50 row2 gate mp2_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_50 mp2_50 cp50 67436.9994  $ G+=14.829uS w=0.3709
+XTp2_51 row2 gate mp2_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_51 mp2_51 cp51 524309.7151  $ G+=1.907uS w=0.0411
+XTp2_52 row2 gate mp2_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_52 mp2_52 cp52 68225.2580  $ G+=14.657uS w=0.3665
+XTp2_53 row2 gate mp2_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_53 mp2_53 cp53 220420.7482  $ G+=4.537uS w=0.1082
+XTp2_54 row2 gate mp2_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_54 mp2_54 cp54 62891.3708  $ G+=15.900uS w=0.3982
+XTp2_55 row2 gate mp2_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_55 mp2_55 cp55 3378378.3784  $ G+=0.296uS w=-0.4080
+XTp2_56 row2 gate mp2_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_56 mp2_56 cp56 109238.4948  $ G+=9.154uS w=0.2261
+XTp2_57 row2 gate mp2_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_57 mp2_57 cp57 93583.7329  $ G+=10.686uS w=0.2651
+XTp2_58 row2 gate mp2_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_58 mp2_58 cp58 3378378.3784  $ G+=0.296uS w=-0.3178
+XTp2_59 row2 gate mp2_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_59 mp2_59 cp59 399386.9783  $ G+=2.504uS w=0.0563
+XTp2_60 row2 gate mp2_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_60 mp2_60 cp60 3378378.3784  $ G+=0.296uS w=-0.3076
+XTp2_61 row2 gate mp2_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_61 mp2_61 cp61 3378378.3784  $ G+=0.296uS w=-1.0524
+XTp2_62 row2 gate mp2_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_62 mp2_62 cp62 3378378.3784  $ G+=0.296uS w=-0.0710
+XTp2_63 row2 gate mp2_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp2_63 mp2_63 cp63 3378378.3784  $ G+=0.296uS w=-0.7087
+* --- Row 3 ---
+XTp3_0 row3 gate mp3_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_0 mp3_0 cp0 3378378.3784  $ G+=0.296uS w=-0.0596
+XTp3_1 row3 gate mp3_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_1 mp3_1 cp1 224269.4127  $ G+=4.459uS w=0.1062
+XTp3_2 row3 gate mp3_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_2 mp3_2 cp2 3378378.3784  $ G+=0.296uS w=-0.7133
+XTp3_3 row3 gate mp3_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_3 mp3_3 cp3 3378378.3784  $ G+=0.296uS w=-0.0487
+XTp3_4 row3 gate mp3_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_4 mp3_4 cp4 3378378.3784  $ G+=0.296uS w=-0.6313
+XTp3_5 row3 gate mp3_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_5 mp3_5 cp5 267012.2945  $ G+=3.745uS w=0.0880
+XTp3_6 row3 gate mp3_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_6 mp3_6 cp6 3378378.3784  $ G+=0.296uS w=-0.1551
+XTp3_7 row3 gate mp3_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_7 mp3_7 cp7 737630.9939  $ G+=1.356uS w=0.0270
+XTp3_8 row3 gate mp3_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_8 mp3_8 cp8 3378378.3784  $ G+=0.296uS w=-0.2310
+XTp3_9 row3 gate mp3_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_9 mp3_9 cp9 51763.6366  $ G+=19.319uS w=0.4854
+XTp3_10 row3 gate mp3_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_10 mp3_10 cp10 3378378.3784  $ G+=0.296uS w=-0.3869
+XTp3_11 row3 gate mp3_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_11 mp3_11 cp11 202232.0880  $ G+=4.945uS w=0.1186
+XTp3_12 row3 gate mp3_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_12 mp3_12 cp12 2444366.5761  $ G+=0.409uS w=0.0029
+XTp3_13 row3 gate mp3_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_13 mp3_13 cp13 133969.3788  $ G+=7.464uS w=0.1829
+XTp3_14 row3 gate mp3_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_14 mp3_14 cp14 373836.9893  $ G+=2.675uS w=0.0607
+XTp3_15 row3 gate mp3_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_15 mp3_15 cp15 2148328.0516  $ G+=0.465uS w=0.0043
+XTp3_16 row3 gate mp3_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_16 mp3_16 cp16 498218.6777  $ G+=2.007uS w=0.0437
+XTp3_17 row3 gate mp3_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_17 mp3_17 cp17 72546.3214  $ G+=13.784uS w=0.3442
+XTp3_18 row3 gate mp3_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_18 mp3_18 cp18 769708.9570  $ G+=1.299uS w=0.0256
+XTp3_19 row3 gate mp3_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_19 mp3_19 cp19 3378378.3784  $ G+=0.296uS w=-0.1068
+XTp3_20 row3 gate mp3_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_20 mp3_20 cp20 78331.9250  $ G+=12.766uS w=0.3182
+XTp3_21 row3 gate mp3_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_21 mp3_21 cp21 3378378.3784  $ G+=0.296uS w=-0.1783
+XTp3_22 row3 gate mp3_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_22 mp3_22 cp22 60179.7603  $ G+=16.617uS w=0.4165
+XTp3_23 row3 gate mp3_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_23 mp3_23 cp23 3378378.3784  $ G+=0.296uS w=-0.0396
+XTp3_24 row3 gate mp3_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_24 mp3_24 cp24 261841.9855  $ G+=3.819uS w=0.0899
+XTp3_25 row3 gate mp3_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_25 mp3_25 cp25 3378378.3784  $ G+=0.296uS w=-0.1553
+XTp3_26 row3 gate mp3_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_26 mp3_26 cp26 3378378.3784  $ G+=0.296uS w=-0.0608
+XTp3_27 row3 gate mp3_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_27 mp3_27 cp27 58488.7508  $ G+=17.097uS w=0.4288
+XTp3_28 row3 gate mp3_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_28 mp3_28 cp28 119734.8187  $ G+=8.352uS w=0.2056
+XTp3_29 row3 gate mp3_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_29 mp3_29 cp29 3378378.3784  $ G+=0.296uS w=-0.5419
+XTp3_30 row3 gate mp3_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_30 mp3_30 cp30 579335.6895  $ G+=1.726uS w=0.0365
+XTp3_31 row3 gate mp3_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_31 mp3_31 cp31 1169808.3543  $ G+=0.855uS w=0.0143
+XTp3_32 row3 gate mp3_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_32 mp3_32 cp32 51787.2731  $ G+=19.310uS w=0.4852
+XTp3_33 row3 gate mp3_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_33 mp3_33 cp33 58294.9979  $ G+=17.154uS w=0.4302
+XTp3_34 row3 gate mp3_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_34 mp3_34 cp34 3378378.3784  $ G+=0.296uS w=-0.2413
+XTp3_35 row3 gate mp3_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_35 mp3_35 cp35 49955.0647  $ G+=20.018uS w=0.5033
+XTp3_36 row3 gate mp3_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_36 mp3_36 cp36 609327.4681  $ G+=1.641uS w=0.0343
+XTp3_37 row3 gate mp3_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_37 mp3_37 cp37 270962.7714  $ G+=3.691uS w=0.0866
+XTp3_38 row3 gate mp3_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_38 mp3_38 cp38 89055.0616  $ G+=11.229uS w=0.2790
+XTp3_39 row3 gate mp3_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_39 mp3_39 cp39 341522.5539  $ G+=2.928uS w=0.0672
+XTp3_40 row3 gate mp3_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_40 mp3_40 cp40 3378378.3784  $ G+=0.296uS w=-0.2341
+XTp3_41 row3 gate mp3_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_41 mp3_41 cp41 1000558.5414  $ G+=0.999uS w=0.0180
+XTp3_42 row3 gate mp3_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_42 mp3_42 cp42 259406.3427  $ G+=3.855uS w=0.0908
+XTp3_43 row3 gate mp3_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_43 mp3_43 cp43 3378378.3784  $ G+=0.296uS w=-0.2941
+XTp3_44 row3 gate mp3_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_44 mp3_44 cp44 316185.1100  $ G+=3.163uS w=0.0732
+XTp3_45 row3 gate mp3_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_45 mp3_45 cp45 3378378.3784  $ G+=0.296uS w=-0.1134
+XTp3_46 row3 gate mp3_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_46 mp3_46 cp46 3378378.3784  $ G+=0.296uS w=-0.0124
+XTp3_47 row3 gate mp3_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_47 mp3_47 cp47 35128.4448  $ G+=28.467uS w=0.7189
+XTp3_48 row3 gate mp3_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_48 mp3_48 cp48 24277.3284  $ G+=41.191uS w=1.0436
+XTp3_49 row3 gate mp3_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_49 mp3_49 cp49 3378378.3784  $ G+=0.296uS w=-0.8608
+XTp3_50 row3 gate mp3_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_50 mp3_50 cp50 61625.0295  $ G+=16.227uS w=0.4065
+XTp3_51 row3 gate mp3_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_51 mp3_51 cp51 3378378.3784  $ G+=0.296uS w=-0.0695
+XTp3_52 row3 gate mp3_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_52 mp3_52 cp52 803528.6190  $ G+=1.245uS w=0.0242
+XTp3_53 row3 gate mp3_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_53 mp3_53 cp53 284912.1408  $ G+=3.510uS w=0.0820
+XTp3_54 row3 gate mp3_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_54 mp3_54 cp54 28073.8791  $ G+=35.620uS w=0.9014
+XTp3_55 row3 gate mp3_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_55 mp3_55 cp55 335468.6356  $ G+=2.981uS w=0.0685
+XTp3_56 row3 gate mp3_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_56 mp3_56 cp56 3378378.3784  $ G+=0.296uS w=-0.0016
+XTp3_57 row3 gate mp3_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_57 mp3_57 cp57 3378378.3784  $ G+=0.296uS w=-0.5139
+XTp3_58 row3 gate mp3_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_58 mp3_58 cp58 3378378.3784  $ G+=0.296uS w=-0.2285
+XTp3_59 row3 gate mp3_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_59 mp3_59 cp59 3378378.3784  $ G+=0.296uS w=-0.1352
+XTp3_60 row3 gate mp3_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_60 mp3_60 cp60 3378378.3784  $ G+=0.296uS w=-0.0821
+XTp3_61 row3 gate mp3_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_61 mp3_61 cp61 3378378.3784  $ G+=0.296uS w=-0.5719
+XTp3_62 row3 gate mp3_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_62 mp3_62 cp62 3378378.3784  $ G+=0.296uS w=-0.3054
+XTp3_63 row3 gate mp3_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp3_63 mp3_63 cp63 467223.6506  $ G+=2.140uS w=0.0471
+* --- Row 4 ---
+XTp4_0 row4 gate mp4_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_0 mp4_0 cp0 3378378.3784  $ G+=0.296uS w=-1.0936
+XTp4_1 row4 gate mp4_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_1 mp4_1 cp1 72040.6612  $ G+=13.881uS w=0.3467
+XTp4_2 row4 gate mp4_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_2 mp4_2 cp2 3378378.3784  $ G+=0.296uS w=-0.5155
+XTp4_3 row4 gate mp4_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_3 mp4_3 cp3 3378378.3784  $ G+=0.296uS w=-0.3218
+XTp4_4 row4 gate mp4_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_4 mp4_4 cp4 180336.9770  $ G+=5.545uS w=0.1340
+XTp4_5 row4 gate mp4_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_5 mp4_5 cp5 33626.5569  $ G+=29.738uS w=0.7513
+XTp4_6 row4 gate mp4_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_6 mp4_6 cp6 90712.7147  $ G+=11.024uS w=0.2738
+XTp4_7 row4 gate mp4_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_7 mp4_7 cp7 3378378.3784  $ G+=0.296uS w=-0.5622
+XTp4_8 row4 gate mp4_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_8 mp4_8 cp8 44110.5249  $ G+=22.670uS w=0.5710
+XTp4_9 row4 gate mp4_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_9 mp4_9 cp9 3378378.3784  $ G+=0.296uS w=-0.3958
+XTp4_10 row4 gate mp4_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_10 mp4_10 cp10 3378378.3784  $ G+=0.296uS w=-1.2832
+XTp4_11 row4 gate mp4_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_11 mp4_11 cp11 1181884.0333  $ G+=0.846uS w=0.0140
+XTp4_12 row4 gate mp4_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_12 mp4_12 cp12 163092.4589  $ G+=6.131uS w=0.1489
+XTp4_13 row4 gate mp4_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_13 mp4_13 cp13 3378378.3784  $ G+=0.296uS w=-0.2722
+XTp4_14 row4 gate mp4_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_14 mp4_14 cp14 3378378.3784  $ G+=0.296uS w=-0.2634
+XTp4_15 row4 gate mp4_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_15 mp4_15 cp15 3378378.3784  $ G+=0.296uS w=-0.3742
+XTp4_16 row4 gate mp4_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_16 mp4_16 cp16 3378378.3784  $ G+=0.296uS w=-0.2054
+XTp4_17 row4 gate mp4_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_17 mp4_17 cp17 3378378.3784  $ G+=0.296uS w=-0.7582
+XTp4_18 row4 gate mp4_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_18 mp4_18 cp18 3378378.3784  $ G+=0.296uS w=-0.4149
+XTp4_19 row4 gate mp4_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_19 mp4_19 cp19 3378378.3784  $ G+=0.296uS w=-0.7383
+XTp4_20 row4 gate mp4_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_20 mp4_20 cp20 3378378.3784  $ G+=0.296uS w=-0.5131
+XTp4_21 row4 gate mp4_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_21 mp4_21 cp21 133386.1566  $ G+=7.497uS w=0.1838
+XTp4_22 row4 gate mp4_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_22 mp4_22 cp22 44069.5494  $ G+=22.691uS w=0.5715
+XTp4_23 row4 gate mp4_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_23 mp4_23 cp23 153609.5437  $ G+=6.510uS w=0.1586
+XTp4_24 row4 gate mp4_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_24 mp4_24 cp24 3378378.3784  $ G+=0.296uS w=-1.0846
+XTp4_25 row4 gate mp4_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_25 mp4_25 cp25 1589740.5952  $ G+=0.629uS w=0.0085
+XTp4_26 row4 gate mp4_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_26 mp4_26 cp26 495303.9241  $ G+=2.019uS w=0.0440
+XTp4_27 row4 gate mp4_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_27 mp4_27 cp27 3378378.3784  $ G+=0.296uS w=-0.6650
+XTp4_28 row4 gate mp4_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_28 mp4_28 cp28 3378378.3784  $ G+=0.296uS w=-0.7927
+XTp4_29 row4 gate mp4_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_29 mp4_29 cp29 42034.7718  $ G+=23.790uS w=0.5995
+XTp4_30 row4 gate mp4_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_30 mp4_30 cp30 50069.3116  $ G+=19.972uS w=0.5021
+XTp4_31 row4 gate mp4_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_31 mp4_31 cp31 3378378.3784  $ G+=0.296uS w=-0.1480
+XTp4_32 row4 gate mp4_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_32 mp4_32 cp32 3378378.3784  $ G+=0.296uS w=-0.6586
+XTp4_33 row4 gate mp4_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_33 mp4_33 cp33 3378378.3784  $ G+=0.296uS w=-0.5293
+XTp4_34 row4 gate mp4_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_34 mp4_34 cp34 3378378.3784  $ G+=0.296uS w=-0.6429
+XTp4_35 row4 gate mp4_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_35 mp4_35 cp35 3378378.3784  $ G+=0.296uS w=-0.5443
+XTp4_36 row4 gate mp4_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_36 mp4_36 cp36 3378378.3784  $ G+=0.296uS w=-0.3612
+XTp4_37 row4 gate mp4_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_37 mp4_37 cp37 27672.1477  $ G+=36.137uS w=0.9146
+XTp4_38 row4 gate mp4_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_38 mp4_38 cp38 42668.5830  $ G+=23.436uS w=0.5905
+XTp4_39 row4 gate mp4_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_39 mp4_39 cp39 66688.2061  $ G+=14.995uS w=0.3751
+XTp4_40 row4 gate mp4_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_40 mp4_40 cp40 139383.3387  $ G+=7.174uS w=0.1755
+XTp4_41 row4 gate mp4_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_41 mp4_41 cp41 123411.5773  $ G+=8.103uS w=0.1992
+XTp4_42 row4 gate mp4_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_42 mp4_42 cp42 188322.0535  $ G+=5.310uS w=0.1280
+XTp4_43 row4 gate mp4_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_43 mp4_43 cp43 3378378.3784  $ G+=0.296uS w=-0.5081
+XTp4_44 row4 gate mp4_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_44 mp4_44 cp44 32933.8723  $ G+=30.364uS w=0.7673
+XTp4_45 row4 gate mp4_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_45 mp4_45 cp45 3378378.3784  $ G+=0.296uS w=-0.2397
+XTp4_46 row4 gate mp4_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_46 mp4_46 cp46 3378378.3784  $ G+=0.296uS w=-0.5128
+XTp4_47 row4 gate mp4_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_47 mp4_47 cp47 39549.5267  $ G+=25.285uS w=0.6377
+XTp4_48 row4 gate mp4_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_48 mp4_48 cp48 35345.7141  $ G+=28.292uS w=0.7144
+XTp4_49 row4 gate mp4_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_49 mp4_49 cp49 421852.6750  $ G+=2.370uS w=0.0529
+XTp4_50 row4 gate mp4_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_50 mp4_50 cp50 69759.9078  $ G+=14.335uS w=0.3583
+XTp4_51 row4 gate mp4_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_51 mp4_51 cp51 3378378.3784  $ G+=0.296uS w=-0.0752
+XTp4_52 row4 gate mp4_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_52 mp4_52 cp52 86743.2996  $ G+=11.528uS w=0.2866
+XTp4_53 row4 gate mp4_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_53 mp4_53 cp53 3378378.3784  $ G+=0.296uS w=-0.8890
+XTp4_54 row4 gate mp4_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_54 mp4_54 cp54 3378378.3784  $ G+=0.296uS w=-0.0947
+XTp4_55 row4 gate mp4_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_55 mp4_55 cp55 638531.1715  $ G+=1.566uS w=0.0324
+XTp4_56 row4 gate mp4_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_56 mp4_56 cp56 3378378.3784  $ G+=0.296uS w=-0.4681
+XTp4_57 row4 gate mp4_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_57 mp4_57 cp57 819529.8363  $ G+=1.220uS w=0.0236
+XTp4_58 row4 gate mp4_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_58 mp4_58 cp58 28227.9908  $ G+=35.426uS w=0.8965
+XTp4_59 row4 gate mp4_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_59 mp4_59 cp59 3378378.3784  $ G+=0.296uS w=-0.1777
+XTp4_60 row4 gate mp4_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_60 mp4_60 cp60 3378378.3784  $ G+=0.296uS w=-0.0278
+XTp4_61 row4 gate mp4_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_61 mp4_61 cp61 79999.2596  $ G+=12.500uS w=0.3114
+XTp4_62 row4 gate mp4_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_62 mp4_62 cp62 3378378.3784  $ G+=0.296uS w=-0.1707
+XTp4_63 row4 gate mp4_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp4_63 mp4_63 cp63 161061.3524  $ G+=6.209uS w=0.1509
+* --- Row 5 ---
+XTp5_0 row5 gate mp5_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_0 mp5_0 cp0 3378378.3784  $ G+=0.296uS w=-0.1716
+XTp5_1 row5 gate mp5_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_1 mp5_1 cp1 57275.6242  $ G+=17.459uS w=0.4380
+XTp5_2 row5 gate mp5_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_2 mp5_2 cp2 26703.2482  $ G+=37.449uS w=0.9481
+XTp5_3 row5 gate mp5_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_3 mp5_3 cp3 3378378.3784  $ G+=0.296uS w=-0.3662
+XTp5_4 row5 gate mp5_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_4 mp5_4 cp4 44138.4954  $ G+=22.656uS w=0.5706
+XTp5_5 row5 gate mp5_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_5 mp5_5 cp5 3378378.3784  $ G+=0.296uS w=-0.1156
+XTp5_6 row5 gate mp5_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_6 mp5_6 cp6 121390.3204  $ G+=8.238uS w=0.2027
+XTp5_7 row5 gate mp5_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_7 mp5_7 cp7 3378378.3784  $ G+=0.296uS w=-0.4895
+XTp5_8 row5 gate mp5_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_8 mp5_8 cp8 3378378.3784  $ G+=0.296uS w=-0.8179
+XTp5_9 row5 gate mp5_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_9 mp5_9 cp9 44345.0105  $ G+=22.550uS w=0.5679
+XTp5_10 row5 gate mp5_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_10 mp5_10 cp10 3378378.3784  $ G+=0.296uS w=-0.1925
+XTp5_11 row5 gate mp5_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_11 mp5_11 cp11 91974.2585  $ G+=10.873uS w=0.2699
+XTp5_12 row5 gate mp5_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_12 mp5_12 cp12 353537.5878  $ G+=2.829uS w=0.0646
+XTp5_13 row5 gate mp5_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_13 mp5_13 cp13 3378378.3784  $ G+=0.296uS w=-0.5085
+XTp5_14 row5 gate mp5_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_14 mp5_14 cp14 66262.6901  $ G+=15.091uS w=0.3776
+XTp5_15 row5 gate mp5_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_15 mp5_15 cp15 3378378.3784  $ G+=0.296uS w=-0.1598
+XTp5_16 row5 gate mp5_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_16 mp5_16 cp16 3378378.3784  $ G+=0.296uS w=-0.0210
+XTp5_17 row5 gate mp5_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_17 mp5_17 cp17 3378378.3784  $ G+=0.296uS w=-0.2432
+XTp5_18 row5 gate mp5_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_18 mp5_18 cp18 3378378.3784  $ G+=0.296uS w=-0.3800
+XTp5_19 row5 gate mp5_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_19 mp5_19 cp19 3378378.3784  $ G+=0.296uS w=-0.0918
+XTp5_20 row5 gate mp5_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_20 mp5_20 cp20 3378378.3784  $ G+=0.296uS w=-0.5902
+XTp5_21 row5 gate mp5_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_21 mp5_21 cp21 30713.6203  $ G+=32.559uS w=0.8233
+XTp5_22 row5 gate mp5_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_22 mp5_22 cp22 38088.3343  $ G+=26.255uS w=0.6624
+XTp5_23 row5 gate mp5_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_23 mp5_23 cp23 29790.0403  $ G+=33.568uS w=0.8491
+XTp5_24 row5 gate mp5_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_24 mp5_24 cp24 70496.6850  $ G+=14.185uS w=0.3544
+XTp5_25 row5 gate mp5_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_25 mp5_25 cp25 3378378.3784  $ G+=0.296uS w=-0.2538
+XTp5_26 row5 gate mp5_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_26 mp5_26 cp26 3378378.3784  $ G+=0.296uS w=-0.4419
+XTp5_27 row5 gate mp5_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_27 mp5_27 cp27 56096.1593  $ G+=17.827uS w=0.4474
+XTp5_28 row5 gate mp5_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_28 mp5_28 cp28 3378378.3784  $ G+=0.296uS w=-0.2664
+XTp5_29 row5 gate mp5_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_29 mp5_29 cp29 3378378.3784  $ G+=0.296uS w=-0.5901
+XTp5_30 row5 gate mp5_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_30 mp5_30 cp30 3378378.3784  $ G+=0.296uS w=-0.0322
+XTp5_31 row5 gate mp5_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_31 mp5_31 cp31 61589.9754  $ G+=16.236uS w=0.4068
+XTp5_32 row5 gate mp5_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_32 mp5_32 cp32 70882.5214  $ G+=14.108uS w=0.3525
+XTp5_33 row5 gate mp5_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_33 mp5_33 cp33 3378378.3784  $ G+=0.296uS w=-0.0020
+XTp5_34 row5 gate mp5_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_34 mp5_34 cp34 44024.7821  $ G+=22.714uS w=0.5721
+XTp5_35 row5 gate mp5_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_35 mp5_35 cp35 53095.3109  $ G+=18.834uS w=0.4731
+XTp5_36 row5 gate mp5_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_36 mp5_36 cp36 183771.1708  $ G+=5.442uS w=0.1313
+XTp5_37 row5 gate mp5_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_37 mp5_37 cp37 3378378.3784  $ G+=0.296uS w=-0.3675
+XTp5_38 row5 gate mp5_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_38 mp5_38 cp38 843177.8463  $ G+=1.186uS w=0.0227
+XTp5_39 row5 gate mp5_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_39 mp5_39 cp39 43874.5822  $ G+=22.792uS w=0.5741
+XTp5_40 row5 gate mp5_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_40 mp5_40 cp40 3378378.3784  $ G+=0.296uS w=-0.6012
+XTp5_41 row5 gate mp5_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_41 mp5_41 cp41 3378378.3784  $ G+=0.296uS w=-0.9991
+XTp5_42 row5 gate mp5_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_42 mp5_42 cp42 3378378.3784  $ G+=0.296uS w=-0.2756
+XTp5_43 row5 gate mp5_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_43 mp5_43 cp43 416879.0928  $ G+=2.399uS w=0.0537
+XTp5_44 row5 gate mp5_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_44 mp5_44 cp44 3378378.3784  $ G+=0.296uS w=-1.0386
+XTp5_45 row5 gate mp5_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_45 mp5_45 cp45 35074.3955  $ G+=28.511uS w=0.7200
+XTp5_46 row5 gate mp5_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_46 mp5_46 cp46 3378378.3784  $ G+=0.296uS w=-0.6657
+XTp5_47 row5 gate mp5_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_47 mp5_47 cp47 1216865.1998  $ G+=0.822uS w=0.0134
+XTp5_48 row5 gate mp5_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_48 mp5_48 cp48 62201.0133  $ G+=16.077uS w=0.4027
+XTp5_49 row5 gate mp5_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_49 mp5_49 cp49 3378378.3784  $ G+=0.296uS w=-0.1439
+XTp5_50 row5 gate mp5_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_50 mp5_50 cp50 3378378.3784  $ G+=0.296uS w=-0.1832
+XTp5_51 row5 gate mp5_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_51 mp5_51 cp51 164190.0297  $ G+=6.091uS w=0.1479
+XTp5_52 row5 gate mp5_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_52 mp5_52 cp52 43655.3925  $ G+=22.907uS w=0.5770
+XTp5_53 row5 gate mp5_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_53 mp5_53 cp53 3378378.3784  $ G+=0.296uS w=-0.4611
+XTp5_54 row5 gate mp5_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_54 mp5_54 cp54 173124.1572  $ G+=5.776uS w=0.1398
+XTp5_55 row5 gate mp5_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_55 mp5_55 cp55 96305.5611  $ G+=10.384uS w=0.2574
+XTp5_56 row5 gate mp5_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_56 mp5_56 cp56 3378378.3784  $ G+=0.296uS w=-0.6947
+XTp5_57 row5 gate mp5_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_57 mp5_57 cp57 156401.4337  $ G+=6.394uS w=0.1556
+XTp5_58 row5 gate mp5_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_58 mp5_58 cp58 109726.9462  $ G+=9.114uS w=0.2250
+XTp5_59 row5 gate mp5_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_59 mp5_59 cp59 3378378.3784  $ G+=0.296uS w=-0.2456
+XTp5_60 row5 gate mp5_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_60 mp5_60 cp60 185912.4532  $ G+=5.379uS w=0.1297
+XTp5_61 row5 gate mp5_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_61 mp5_61 cp61 3378378.3784  $ G+=0.296uS w=-0.2398
+XTp5_62 row5 gate mp5_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_62 mp5_62 cp62 30638.6906  $ G+=32.638uS w=0.8253
+XTp5_63 row5 gate mp5_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp5_63 mp5_63 cp63 3378378.3784  $ G+=0.296uS w=-0.1415
+* --- Row 6 ---
+XTp6_0 row6 gate mp6_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_0 mp6_0 cp0 3378378.3784  $ G+=0.296uS w=-0.1976
+XTp6_1 row6 gate mp6_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_1 mp6_1 cp1 3378378.3784  $ G+=0.296uS w=-0.4687
+XTp6_2 row6 gate mp6_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_2 mp6_2 cp2 2429894.2216  $ G+=0.412uS w=0.0029
+XTp6_3 row6 gate mp6_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_3 mp6_3 cp3 88372.1111  $ G+=11.316uS w=0.2812
+XTp6_4 row6 gate mp6_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_4 mp6_4 cp4 118601.1715  $ G+=8.432uS w=0.2076
+XTp6_5 row6 gate mp6_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_5 mp6_5 cp5 34862.0286  $ G+=28.685uS w=0.7244
+XTp6_6 row6 gate mp6_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_6 mp6_6 cp6 74696.2417  $ G+=13.388uS w=0.3341
+XTp6_7 row6 gate mp6_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_7 mp6_7 cp7 3378378.3784  $ G+=0.296uS w=-0.0740
+XTp6_8 row6 gate mp6_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_8 mp6_8 cp8 21533.3355  $ G+=46.440uS w=1.1775
+XTp6_9 row6 gate mp6_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_9 mp6_9 cp9 33876.1120  $ G+=29.519uS w=0.7457
+XTp6_10 row6 gate mp6_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_10 mp6_10 cp10 3378378.3784  $ G+=0.296uS w=-0.0244
+XTp6_11 row6 gate mp6_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_11 mp6_11 cp11 3378378.3784  $ G+=0.296uS w=-0.0926
+XTp6_12 row6 gate mp6_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_12 mp6_12 cp12 78600.3901  $ G+=12.723uS w=0.3171
+XTp6_13 row6 gate mp6_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_13 mp6_13 cp13 3378378.3784  $ G+=0.296uS w=-0.3597
+XTp6_14 row6 gate mp6_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_14 mp6_14 cp14 3378378.3784  $ G+=0.296uS w=-0.3893
+XTp6_15 row6 gate mp6_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_15 mp6_15 cp15 3378378.3784  $ G+=0.296uS w=-0.6031
+XTp6_16 row6 gate mp6_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_16 mp6_16 cp16 3378378.3784  $ G+=0.296uS w=-0.5966
+XTp6_17 row6 gate mp6_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_17 mp6_17 cp17 3378378.3784  $ G+=0.296uS w=-0.9104
+XTp6_18 row6 gate mp6_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_18 mp6_18 cp18 3378378.3784  $ G+=0.296uS w=-0.0248
+XTp6_19 row6 gate mp6_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_19 mp6_19 cp19 218585.3793  $ G+=4.575uS w=0.1092
+XTp6_20 row6 gate mp6_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_20 mp6_20 cp20 37122.3512  $ G+=26.938uS w=0.6799
+XTp6_21 row6 gate mp6_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_21 mp6_21 cp21 3378378.3784  $ G+=0.296uS w=-0.3752
+XTp6_22 row6 gate mp6_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_22 mp6_22 cp22 70135.9264  $ G+=14.258uS w=0.3563
+XTp6_23 row6 gate mp6_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_23 mp6_23 cp23 90429.9002  $ G+=11.058uS w=0.2746
+XTp6_24 row6 gate mp6_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_24 mp6_24 cp24 30089.8328  $ G+=33.234uS w=0.8405
+XTp6_25 row6 gate mp6_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_25 mp6_25 cp25 3378378.3784  $ G+=0.296uS w=-0.1806
+XTp6_26 row6 gate mp6_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_26 mp6_26 cp26 3378378.3784  $ G+=0.296uS w=-0.0858
+XTp6_27 row6 gate mp6_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_27 mp6_27 cp27 388953.5043  $ G+=2.571uS w=0.0581
+XTp6_28 row6 gate mp6_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_28 mp6_28 cp28 3378378.3784  $ G+=0.296uS w=-0.3135
+XTp6_29 row6 gate mp6_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_29 mp6_29 cp29 3378378.3784  $ G+=0.296uS w=-0.4537
+XTp6_30 row6 gate mp6_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_30 mp6_30 cp30 45147.1217  $ G+=22.150uS w=0.5577
+XTp6_31 row6 gate mp6_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_31 mp6_31 cp31 43923.6625  $ G+=22.767uS w=0.5734
+XTp6_32 row6 gate mp6_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_32 mp6_32 cp32 3378378.3784  $ G+=0.296uS w=-0.1480
+XTp6_33 row6 gate mp6_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_33 mp6_33 cp33 3378378.3784  $ G+=0.296uS w=-0.4212
+XTp6_34 row6 gate mp6_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_34 mp6_34 cp34 108452.3969  $ G+=9.221uS w=0.2277
+XTp6_35 row6 gate mp6_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_35 mp6_35 cp35 3378378.3784  $ G+=0.296uS w=-0.2553
+XTp6_36 row6 gate mp6_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_36 mp6_36 cp36 24951.1978  $ G+=40.078uS w=1.0152
+XTp6_37 row6 gate mp6_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_37 mp6_37 cp37 35578.6641  $ G+=28.107uS w=0.7097
+XTp6_38 row6 gate mp6_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_38 mp6_38 cp38 3378378.3784  $ G+=0.296uS w=-0.4987
+XTp6_39 row6 gate mp6_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_39 mp6_39 cp39 3378378.3784  $ G+=0.296uS w=-0.0677
+XTp6_40 row6 gate mp6_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_40 mp6_40 cp40 3378378.3784  $ G+=0.296uS w=-0.5758
+XTp6_41 row6 gate mp6_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_41 mp6_41 cp41 156608.2707  $ G+=6.385uS w=0.1554
+XTp6_42 row6 gate mp6_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_42 mp6_42 cp42 3378378.3784  $ G+=0.296uS w=-0.0156
+XTp6_43 row6 gate mp6_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_43 mp6_43 cp43 27204.3190  $ G+=36.759uS w=0.9305
+XTp6_44 row6 gate mp6_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_44 mp6_44 cp44 3378378.3784  $ G+=0.296uS w=-0.0146
+XTp6_45 row6 gate mp6_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_45 mp6_45 cp45 3378378.3784  $ G+=0.296uS w=-1.3580
+XTp6_46 row6 gate mp6_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_46 mp6_46 cp46 19431.2126  $ G+=51.464uS w=1.3057
+XTp6_47 row6 gate mp6_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_47 mp6_47 cp47 57896.5158  $ G+=17.272uS w=0.4332
+XTp6_48 row6 gate mp6_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_48 mp6_48 cp48 98813.7991  $ G+=10.120uS w=0.2507
+XTp6_49 row6 gate mp6_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_49 mp6_49 cp49 3378378.3784  $ G+=0.296uS w=-0.0958
+XTp6_50 row6 gate mp6_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_50 mp6_50 cp50 3378378.3784  $ G+=0.296uS w=-0.2032
+XTp6_51 row6 gate mp6_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_51 mp6_51 cp51 3378378.3784  $ G+=0.296uS w=-0.2999
+XTp6_52 row6 gate mp6_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_52 mp6_52 cp52 631159.9630  $ G+=1.584uS w=0.0329
+XTp6_53 row6 gate mp6_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_53 mp6_53 cp53 3378378.3784  $ G+=0.296uS w=-0.4021
+XTp6_54 row6 gate mp6_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_54 mp6_54 cp54 3378378.3784  $ G+=0.296uS w=-0.3150
+XTp6_55 row6 gate mp6_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_55 mp6_55 cp55 110448.3952  $ G+=9.054uS w=0.2235
+XTp6_56 row6 gate mp6_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_56 mp6_56 cp56 3378378.3784  $ G+=0.296uS w=-0.0003
+XTp6_57 row6 gate mp6_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_57 mp6_57 cp57 382001.8617  $ G+=2.618uS w=0.0592
+XTp6_58 row6 gate mp6_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_58 mp6_58 cp58 3378378.3784  $ G+=0.296uS w=-0.4522
+XTp6_59 row6 gate mp6_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_59 mp6_59 cp59 30712.3929  $ G+=32.560uS w=0.8233
+XTp6_60 row6 gate mp6_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_60 mp6_60 cp60 67397.0710  $ G+=14.837uS w=0.3711
+XTp6_61 row6 gate mp6_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_61 mp6_61 cp61 3378378.3784  $ G+=0.296uS w=-0.2402
+XTp6_62 row6 gate mp6_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_62 mp6_62 cp62 255920.4581  $ G+=3.907uS w=0.0922
+XTp6_63 row6 gate mp6_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp6_63 mp6_63 cp63 3378378.3784  $ G+=0.296uS w=-0.0180
+* --- Row 7 ---
+XTp7_0 row7 gate mp7_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_0 mp7_0 cp0 3378378.3784  $ G+=0.296uS w=-0.3765
+XTp7_1 row7 gate mp7_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_1 mp7_1 cp1 3378378.3784  $ G+=0.296uS w=-0.2886
+XTp7_2 row7 gate mp7_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_2 mp7_2 cp2 3378378.3784  $ G+=0.296uS w=-0.3883
+XTp7_3 row7 gate mp7_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_3 mp7_3 cp3 32197.0787  $ G+=31.059uS w=0.7850
+XTp7_4 row7 gate mp7_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_4 mp7_4 cp4 3378378.3784  $ G+=0.296uS w=-0.5103
+XTp7_5 row7 gate mp7_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_5 mp7_5 cp5 159732.7548  $ G+=6.260uS w=0.1522
+XTp7_6 row7 gate mp7_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_6 mp7_6 cp6 57291.4708  $ G+=17.455uS w=0.4379
+XTp7_7 row7 gate mp7_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_7 mp7_7 cp7 29176.1994  $ G+=34.275uS w=0.8671
+XTp7_8 row7 gate mp7_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_8 mp7_8 cp8 3378378.3784  $ G+=0.296uS w=-0.8995
+XTp7_9 row7 gate mp7_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_9 mp7_9 cp9 81909.4578  $ G+=12.209uS w=0.3040
+XTp7_10 row7 gate mp7_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_10 mp7_10 cp10 126269.9695  $ G+=7.920uS w=0.1945
+XTp7_11 row7 gate mp7_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_11 mp7_11 cp11 107350.8122  $ G+=9.315uS w=0.2302
+XTp7_12 row7 gate mp7_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_12 mp7_12 cp12 3378378.3784  $ G+=0.296uS w=-0.1218
+XTp7_13 row7 gate mp7_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_13 mp7_13 cp13 1038857.5988  $ G+=0.963uS w=0.0170
+XTp7_14 row7 gate mp7_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_14 mp7_14 cp14 3378378.3784  $ G+=0.296uS w=-0.5575
+XTp7_15 row7 gate mp7_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_15 mp7_15 cp15 28993.8863  $ G+=34.490uS w=0.8726
+XTp7_16 row7 gate mp7_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_16 mp7_16 cp16 73210.3729  $ G+=13.659uS w=0.3410
+XTp7_17 row7 gate mp7_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_17 mp7_17 cp17 3378378.3784  $ G+=0.296uS w=-0.5875
+XTp7_18 row7 gate mp7_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_18 mp7_18 cp18 72012.9848  $ G+=13.886uS w=0.3468
+XTp7_19 row7 gate mp7_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_19 mp7_19 cp19 48328.7056  $ G+=20.692uS w=0.5205
+XTp7_20 row7 gate mp7_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_20 mp7_20 cp20 71191.0386  $ G+=14.047uS w=0.3509
+XTp7_21 row7 gate mp7_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_21 mp7_21 cp21 64696.2208  $ G+=15.457uS w=0.3869
+XTp7_22 row7 gate mp7_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_22 mp7_22 cp22 3378378.3784  $ G+=0.296uS w=-0.2129
+XTp7_23 row7 gate mp7_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_23 mp7_23 cp23 243785.1424  $ G+=4.102uS w=0.0971
+XTp7_24 row7 gate mp7_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_24 mp7_24 cp24 3074416.6182  $ G+=0.325uS w=0.0007
+XTp7_25 row7 gate mp7_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_25 mp7_25 cp25 76634.5388  $ G+=13.049uS w=0.3254
+XTp7_26 row7 gate mp7_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_26 mp7_26 cp26 3378378.3784  $ G+=0.296uS w=-0.1573
+XTp7_27 row7 gate mp7_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_27 mp7_27 cp27 41092.5872  $ G+=24.335uS w=0.6135
+XTp7_28 row7 gate mp7_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_28 mp7_28 cp28 47253.3952  $ G+=21.163uS w=0.5325
+XTp7_29 row7 gate mp7_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_29 mp7_29 cp29 3378378.3784  $ G+=0.296uS w=-0.2315
+XTp7_30 row7 gate mp7_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_30 mp7_30 cp30 3378378.3784  $ G+=0.296uS w=-0.1507
+XTp7_31 row7 gate mp7_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_31 mp7_31 cp31 3378378.3784  $ G+=0.296uS w=-0.5623
+XTp7_32 row7 gate mp7_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_32 mp7_32 cp32 3378378.3784  $ G+=0.296uS w=-0.1524
+XTp7_33 row7 gate mp7_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_33 mp7_33 cp33 17680.2148  $ G+=56.560uS w=1.4358
+XTp7_34 row7 gate mp7_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_34 mp7_34 cp34 3378378.3784  $ G+=0.296uS w=-0.0420
+XTp7_35 row7 gate mp7_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_35 mp7_35 cp35 26991.7945  $ G+=37.048uS w=0.9379
+XTp7_36 row7 gate mp7_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_36 mp7_36 cp36 40895.0553  $ G+=24.453uS w=0.6165
+XTp7_37 row7 gate mp7_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_37 mp7_37 cp37 3378378.3784  $ G+=0.296uS w=-0.0842
+XTp7_38 row7 gate mp7_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_38 mp7_38 cp38 132848.9483  $ G+=7.527uS w=0.1845
+XTp7_39 row7 gate mp7_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_39 mp7_39 cp39 3378378.3784  $ G+=0.296uS w=-0.9826
+XTp7_40 row7 gate mp7_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_40 mp7_40 cp40 3378378.3784  $ G+=0.296uS w=-0.3666
+XTp7_41 row7 gate mp7_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_41 mp7_41 cp41 188375.0850  $ G+=5.309uS w=0.1279
+XTp7_42 row7 gate mp7_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_42 mp7_42 cp42 3378378.3784  $ G+=0.296uS w=-0.0613
+XTp7_43 row7 gate mp7_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_43 mp7_43 cp43 636736.8823  $ G+=1.571uS w=0.0325
+XTp7_44 row7 gate mp7_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_44 mp7_44 cp44 60048.9686  $ G+=16.653uS w=0.4174
+XTp7_45 row7 gate mp7_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_45 mp7_45 cp45 431409.7997  $ G+=2.318uS w=0.0516
+XTp7_46 row7 gate mp7_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_46 mp7_46 cp46 32497.2293  $ G+=30.772uS w=0.7777
+XTp7_47 row7 gate mp7_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_47 mp7_47 cp47 3378378.3784  $ G+=0.296uS w=-0.0153
+XTp7_48 row7 gate mp7_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_48 mp7_48 cp48 209776.3536  $ G+=4.767uS w=0.1141
+XTp7_49 row7 gate mp7_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_49 mp7_49 cp49 60829.8657  $ G+=16.439uS w=0.4120
+XTp7_50 row7 gate mp7_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_50 mp7_50 cp50 3378378.3784  $ G+=0.296uS w=-0.5361
+XTp7_51 row7 gate mp7_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_51 mp7_51 cp51 53626.5336  $ G+=18.647uS w=0.4683
+XTp7_52 row7 gate mp7_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_52 mp7_52 cp52 3378378.3784  $ G+=0.296uS w=-0.0383
+XTp7_53 row7 gate mp7_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_53 mp7_53 cp53 3378378.3784  $ G+=0.296uS w=-0.0959
+XTp7_54 row7 gate mp7_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_54 mp7_54 cp54 3378378.3784  $ G+=0.296uS w=-0.2502
+XTp7_55 row7 gate mp7_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_55 mp7_55 cp55 712814.6842  $ G+=1.403uS w=0.0282
+XTp7_56 row7 gate mp7_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_56 mp7_56 cp56 23787.0243  $ G+=42.040uS w=1.0653
+XTp7_57 row7 gate mp7_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_57 mp7_57 cp57 3378378.3784  $ G+=0.296uS w=-0.0726
+XTp7_58 row7 gate mp7_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_58 mp7_58 cp58 72297.1825  $ G+=13.832uS w=0.3454
+XTp7_59 row7 gate mp7_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_59 mp7_59 cp59 128603.7844  $ G+=7.776uS w=0.1909
+XTp7_60 row7 gate mp7_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_60 mp7_60 cp60 3378378.3784  $ G+=0.296uS w=-0.2755
+XTp7_61 row7 gate mp7_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_61 mp7_61 cp61 41147.2798  $ G+=24.303uS w=0.6126
+XTp7_62 row7 gate mp7_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_62 mp7_62 cp62 121311.7408  $ G+=8.243uS w=0.2028
+XTp7_63 row7 gate mp7_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrp7_63 mp7_63 cp63 110700.5570  $ G+=9.033uS w=0.2230
+
+* ===== NEGATIVE CONDUCTANCE ARRAY (8x64) =====
+* --- Row 0 ---
+XTn0_0 row0 gate mn0_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_0 mn0_0 cn0 127415.1071  $ G-=7.848uS w=-0.1927
+XTn0_1 row0 gate mn0_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_1 mn0_1 cn1 3378378.3784  $ G-=0.296uS w=1.0575
+XTn0_2 row0 gate mn0_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_2 mn0_2 cn2 84111.6276  $ G-=11.889uS w=-0.2958
+XTn0_3 row0 gate mn0_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_3 mn0_3 cn3 30478.9616  $ G-=32.810uS w=-0.8297
+XTn0_4 row0 gate mn0_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_4 mn0_4 cn4 3378378.3784  $ G-=0.296uS w=0.2802
+XTn0_5 row0 gate mn0_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_5 mn0_5 cn5 3378378.3784  $ G-=0.296uS w=0.1059
+XTn0_6 row0 gate mn0_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_6 mn0_6 cn6 3378378.3784  $ G-=0.296uS w=0.2987
+XTn0_7 row0 gate mn0_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_7 mn0_7 cn7 3378378.3784  $ G-=0.296uS w=0.0912
+XTn0_8 row0 gate mn0_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_8 mn0_8 cn8 3378378.3784  $ G-=0.296uS w=0.4291
+XTn0_9 row0 gate mn0_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_9 mn0_9 cn9 3378378.3784  $ G-=0.296uS w=0.2874
+XTn0_10 row0 gate mn0_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_10 mn0_10 cn10 845028.5370  $ G-=1.183uS w=-0.0226
+XTn0_11 row0 gate mn0_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_11 mn0_11 cn11 11542.2434  $ G-=86.638uS w=-2.2034
+XTn0_12 row0 gate mn0_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_12 mn0_12 cn12 10073.2324  $ G-=99.273uS w=-2.5258
+XTn0_13 row0 gate mn0_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_13 mn0_13 cn13 3378378.3784  $ G-=0.296uS w=1.7997
+XTn0_14 row0 gate mn0_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_14 mn0_14 cn14 3378378.3784  $ G-=0.296uS w=0.0811
+XTn0_15 row0 gate mn0_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_15 mn0_15 cn15 3378378.3784  $ G-=0.296uS w=0.0504
+XTn0_16 row0 gate mn0_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_16 mn0_16 cn16 22098.2987  $ G-=45.252uS w=-1.1472
+XTn0_17 row0 gate mn0_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_17 mn0_17 cn17 3378378.3784  $ G-=0.296uS w=0.4281
+XTn0_18 row0 gate mn0_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_18 mn0_18 cn18 80408.1580  $ G-=12.437uS w=-0.3098
+XTn0_19 row0 gate mn0_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_19 mn0_19 cn19 41071.8537  $ G-=24.348uS w=-0.6138
+XTn0_20 row0 gate mn0_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_20 mn0_20 cn20 48754.8059  $ G-=20.511uS w=-0.5159
+XTn0_21 row0 gate mn0_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_21 mn0_21 cn21 18480.5863  $ G-=54.111uS w=-1.3733
+XTn0_22 row0 gate mn0_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_22 mn0_22 cn22 3378378.3784  $ G-=0.296uS w=0.6175
+XTn0_23 row0 gate mn0_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_23 mn0_23 cn23 39258.4107  $ G-=25.472uS w=-0.6425
+XTn0_24 row0 gate mn0_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_24 mn0_24 cn24 416383.6031  $ G-=2.402uS w=-0.0537
+XTn0_25 row0 gate mn0_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_25 mn0_25 cn25 3378378.3784  $ G-=0.296uS w=0.1745
+XTn0_26 row0 gate mn0_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_26 mn0_26 cn26 86924.5797  $ G-=11.504uS w=-0.2860
+XTn0_27 row0 gate mn0_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_27 mn0_27 cn27 3378378.3784  $ G-=0.296uS w=0.0373
+XTn0_28 row0 gate mn0_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_28 mn0_28 cn28 913958.6025  $ G-=1.094uS w=-0.0204
+XTn0_29 row0 gate mn0_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_29 mn0_29 cn29 3378378.3784  $ G-=0.296uS w=0.1269
+XTn0_30 row0 gate mn0_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_30 mn0_30 cn30 3378378.3784  $ G-=0.296uS w=0.1044
+XTn0_31 row0 gate mn0_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_31 mn0_31 cn31 3378378.3784  $ G-=0.296uS w=0.1332
+XTn0_32 row0 gate mn0_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_32 mn0_32 cn32 95612.9568  $ G-=10.459uS w=-0.2593
+XTn0_33 row0 gate mn0_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_33 mn0_33 cn33 3378378.3784  $ G-=0.296uS w=0.5994
+XTn0_34 row0 gate mn0_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_34 mn0_34 cn34 23564.5936  $ G-=42.437uS w=-1.0754
+XTn0_35 row0 gate mn0_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_35 mn0_35 cn35 3378378.3784  $ G-=0.296uS w=0.4788
+XTn0_36 row0 gate mn0_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_36 mn0_36 cn36 99643.5009  $ G-=10.036uS w=-0.2485
+XTn0_37 row0 gate mn0_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_37 mn0_37 cn37 83375.1430  $ G-=11.994uS w=-0.2985
+XTn0_38 row0 gate mn0_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_38 mn0_38 cn38 3378378.3784  $ G-=0.296uS w=0.0453
+XTn0_39 row0 gate mn0_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_39 mn0_39 cn39 147963.6178  $ G-=6.758uS w=-0.1649
+XTn0_40 row0 gate mn0_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_40 mn0_40 cn40 20612.7271  $ G-=48.514uS w=-1.2305
+XTn0_41 row0 gate mn0_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_41 mn0_41 cn41 206539.8669  $ G-=4.842uS w=-0.1160
+XTn0_42 row0 gate mn0_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_42 mn0_42 cn42 24723.5996  $ G-=40.447uS w=-1.0246
+XTn0_43 row0 gate mn0_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_43 mn0_43 cn43 58684.7135  $ G-=17.040uS w=-0.4273
+XTn0_44 row0 gate mn0_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_44 mn0_44 cn44 3378378.3784  $ G-=0.296uS w=0.1430
+XTn0_45 row0 gate mn0_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_45 mn0_45 cn45 3378378.3784  $ G-=0.296uS w=0.2077
+XTn0_46 row0 gate mn0_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_46 mn0_46 cn46 42971.4011  $ G-=23.271uS w=-0.5863
+XTn0_47 row0 gate mn0_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_47 mn0_47 cn47 3378378.3784  $ G-=0.296uS w=0.4251
+XTn0_48 row0 gate mn0_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_48 mn0_48 cn48 57804.8796  $ G-=17.300uS w=-0.4339
+XTn0_49 row0 gate mn0_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_49 mn0_49 cn49 3378378.3784  $ G-=0.296uS w=1.0893
+XTn0_50 row0 gate mn0_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_50 mn0_50 cn50 3378378.3784  $ G-=0.296uS w=0.2202
+XTn0_51 row0 gate mn0_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_51 mn0_51 cn51 3378378.3784  $ G-=0.296uS w=0.0669
+XTn0_52 row0 gate mn0_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_52 mn0_52 cn52 145413.4815  $ G-=6.877uS w=-0.1679
+XTn0_53 row0 gate mn0_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_53 mn0_53 cn53 3378378.3784  $ G-=0.296uS w=0.1525
+XTn0_54 row0 gate mn0_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_54 mn0_54 cn54 98184.1350  $ G-=10.185uS w=-0.2524
+XTn0_55 row0 gate mn0_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_55 mn0_55 cn55 3378378.3784  $ G-=0.296uS w=0.2852
+XTn0_56 row0 gate mn0_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_56 mn0_56 cn56 434402.6144  $ G-=2.302uS w=-0.0512
+XTn0_57 row0 gate mn0_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_57 mn0_57 cn57 113505.6946  $ G-=8.810uS w=-0.2173
+XTn0_58 row0 gate mn0_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_58 mn0_58 cn58 3378378.3784  $ G-=0.296uS w=0.2873
+XTn0_59 row0 gate mn0_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_59 mn0_59 cn59 24053.4509  $ G-=41.574uS w=-1.0534
+XTn0_60 row0 gate mn0_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_60 mn0_60 cn60 3378378.3784  $ G-=0.296uS w=0.2813
+XTn0_61 row0 gate mn0_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_61 mn0_61 cn61 25144.9951  $ G-=39.769uS w=-1.0073
+XTn0_62 row0 gate mn0_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_62 mn0_62 cn62 3378378.3784  $ G-=0.296uS w=0.4013
+XTn0_63 row0 gate mn0_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn0_63 mn0_63 cn63 14118.8617  $ G-=70.827uS w=-1.7999
+* --- Row 1 ---
+XTn1_0 row1 gate mn1_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_0 mn1_0 cn0 3378378.3784  $ G-=0.296uS w=0.0298
+XTn1_1 row1 gate mn1_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_1 mn1_1 cn1 3378378.3784  $ G-=0.296uS w=0.3423
+XTn1_2 row1 gate mn1_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_2 mn1_2 cn2 128855.9790  $ G-=7.761uS w=-0.1905
+XTn1_3 row1 gate mn1_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_3 mn1_3 cn3 3378378.3784  $ G-=0.296uS w=0.4796
+XTn1_4 row1 gate mn1_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_4 mn1_4 cn4 3378378.3784  $ G-=0.296uS w=0.1550
+XTn1_5 row1 gate mn1_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_5 mn1_5 cn5 3378378.3784  $ G-=0.296uS w=0.0436
+XTn1_6 row1 gate mn1_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_6 mn1_6 cn6 3378378.3784  $ G-=0.296uS w=0.4129
+XTn1_7 row1 gate mn1_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_7 mn1_7 cn7 3378378.3784  $ G-=0.296uS w=0.1539
+XTn1_8 row1 gate mn1_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_8 mn1_8 cn8 381363.5767  $ G-=2.622uS w=-0.0594
+XTn1_9 row1 gate mn1_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_9 mn1_9 cn9 3378378.3784  $ G-=0.296uS w=0.4951
+XTn1_10 row1 gate mn1_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_10 mn1_10 cn10 147926.7348  $ G-=6.760uS w=-0.1650
+XTn1_11 row1 gate mn1_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_11 mn1_11 cn11 169105.1841  $ G-=5.913uS w=-0.1434
+XTn1_12 row1 gate mn1_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_12 mn1_12 cn12 216013.6599  $ G-=4.629uS w=-0.1106
+XTn1_13 row1 gate mn1_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_13 mn1_13 cn13 171835.4082  $ G-=5.820uS w=-0.1410
+XTn1_14 row1 gate mn1_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_14 mn1_14 cn14 3378378.3784  $ G-=0.296uS w=0.0325
+XTn1_15 row1 gate mn1_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_15 mn1_15 cn15 32579.4111  $ G-=30.694uS w=-0.7757
+XTn1_16 row1 gate mn1_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_16 mn1_16 cn16 3378378.3784  $ G-=0.296uS w=0.0662
+XTn1_17 row1 gate mn1_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_17 mn1_17 cn17 1249170.0277  $ G-=0.801uS w=-0.0129
+XTn1_18 row1 gate mn1_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_18 mn1_18 cn18 3378378.3784  $ G-=0.296uS w=0.7487
+XTn1_19 row1 gate mn1_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_19 mn1_19 cn19 35317.5461  $ G-=28.315uS w=-0.7150
+XTn1_20 row1 gate mn1_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_20 mn1_20 cn20 582925.3335  $ G-=1.715uS w=-0.0362
+XTn1_21 row1 gate mn1_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_21 mn1_21 cn21 3378378.3784  $ G-=0.296uS w=0.7608
+XTn1_22 row1 gate mn1_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_22 mn1_22 cn22 3378378.3784  $ G-=0.296uS w=0.5267
+XTn1_23 row1 gate mn1_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_23 mn1_23 cn23 36062.8065  $ G-=27.729uS w=-0.7001
+XTn1_24 row1 gate mn1_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_24 mn1_24 cn24 102652.2092  $ G-=9.742uS w=-0.2410
+XTn1_25 row1 gate mn1_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_25 mn1_25 cn25 27117.7801  $ G-=36.876uS w=-0.9335
+XTn1_26 row1 gate mn1_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_26 mn1_26 cn26 3378378.3784  $ G-=0.296uS w=1.0188
+XTn1_27 row1 gate mn1_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_27 mn1_27 cn27 3378378.3784  $ G-=0.296uS w=0.0392
+XTn1_28 row1 gate mn1_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_28 mn1_28 cn28 68300.3993  $ G-=14.641uS w=-0.3661
+XTn1_29 row1 gate mn1_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_29 mn1_29 cn29 66989.8773  $ G-=14.928uS w=-0.3734
+XTn1_30 row1 gate mn1_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_30 mn1_30 cn30 28322.9362  $ G-=35.307uS w=-0.8934
+XTn1_31 row1 gate mn1_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_31 mn1_31 cn31 3378378.3784  $ G-=0.296uS w=0.6709
+XTn1_32 row1 gate mn1_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_32 mn1_32 cn32 3378378.3784  $ G-=0.296uS w=0.1939
+XTn1_33 row1 gate mn1_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_33 mn1_33 cn33 3378378.3784  $ G-=0.296uS w=0.1478
+XTn1_34 row1 gate mn1_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_34 mn1_34 cn34 3378378.3784  $ G-=0.296uS w=0.8877
+XTn1_35 row1 gate mn1_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_35 mn1_35 cn35 3378378.3784  $ G-=0.296uS w=0.2473
+XTn1_36 row1 gate mn1_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_36 mn1_36 cn36 3378378.3784  $ G-=0.296uS w=0.1965
+XTn1_37 row1 gate mn1_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_37 mn1_37 cn37 716329.0435  $ G-=1.396uS w=-0.0281
+XTn1_38 row1 gate mn1_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_38 mn1_38 cn38 40350.0032  $ G-=24.783uS w=-0.6249
+XTn1_39 row1 gate mn1_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_39 mn1_39 cn39 93964.9609  $ G-=10.642uS w=-0.2640
+XTn1_40 row1 gate mn1_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_40 mn1_40 cn40 207377.2521  $ G-=4.822uS w=-0.1155
+XTn1_41 row1 gate mn1_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_41 mn1_41 cn41 3378378.3784  $ G-=0.296uS w=0.6148
+XTn1_42 row1 gate mn1_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_42 mn1_42 cn42 48112.0546  $ G-=20.785uS w=-0.5229
+XTn1_43 row1 gate mn1_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_43 mn1_43 cn43 496099.4685  $ G-=2.016uS w=-0.0439
+XTn1_44 row1 gate mn1_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_44 mn1_44 cn44 304409.4387  $ G-=3.285uS w=-0.0763
+XTn1_45 row1 gate mn1_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_45 mn1_45 cn45 123835.7092  $ G-=8.075uS w=-0.1985
+XTn1_46 row1 gate mn1_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_46 mn1_46 cn46 3378378.3784  $ G-=0.296uS w=0.2075
+XTn1_47 row1 gate mn1_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_47 mn1_47 cn47 57875.5167  $ G-=17.278uS w=-0.4334
+XTn1_48 row1 gate mn1_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_48 mn1_48 cn48 48297.6910  $ G-=20.705uS w=-0.5208
+XTn1_49 row1 gate mn1_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_49 mn1_49 cn49 3378378.3784  $ G-=0.296uS w=0.0943
+XTn1_50 row1 gate mn1_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_50 mn1_50 cn50 578077.8944  $ G-=1.730uS w=-0.0366
+XTn1_51 row1 gate mn1_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_51 mn1_51 cn51 49977.5805  $ G-=20.009uS w=-0.5031
+XTn1_52 row1 gate mn1_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_52 mn1_52 cn52 3378378.3784  $ G-=0.296uS w=1.0287
+XTn1_53 row1 gate mn1_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_53 mn1_53 cn53 87092.0359  $ G-=11.482uS w=-0.2855
+XTn1_54 row1 gate mn1_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_54 mn1_54 cn54 3378378.3784  $ G-=0.296uS w=0.3475
+XTn1_55 row1 gate mn1_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_55 mn1_55 cn55 3378378.3784  $ G-=0.296uS w=0.4691
+XTn1_56 row1 gate mn1_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_56 mn1_56 cn56 3378378.3784  $ G-=0.296uS w=0.1399
+XTn1_57 row1 gate mn1_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_57 mn1_57 cn57 3378378.3784  $ G-=0.296uS w=0.0037
+XTn1_58 row1 gate mn1_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_58 mn1_58 cn58 3378378.3784  $ G-=0.296uS w=0.3373
+XTn1_59 row1 gate mn1_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_59 mn1_59 cn59 46337.2746  $ G-=21.581uS w=-0.5432
+XTn1_60 row1 gate mn1_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_60 mn1_60 cn60 42244.7115  $ G-=23.672uS w=-0.5965
+XTn1_61 row1 gate mn1_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_61 mn1_61 cn61 1414598.5549  $ G-=0.707uS w=-0.0105
+XTn1_62 row1 gate mn1_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_62 mn1_62 cn62 3378378.3784  $ G-=0.296uS w=0.1014
+XTn1_63 row1 gate mn1_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn1_63 mn1_63 cn63 3378378.3784  $ G-=0.296uS w=0.0159
+* --- Row 2 ---
+XTn2_0 row2 gate mn2_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_0 mn2_0 cn0 137490.5616  $ G-=7.273uS w=-0.1781
+XTn2_1 row2 gate mn2_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_1 mn2_1 cn1 184811.3374  $ G-=5.411uS w=-0.1305
+XTn2_2 row2 gate mn2_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_2 mn2_2 cn2 131428.1163  $ G-=7.609uS w=-0.1866
+XTn2_3 row2 gate mn2_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_3 mn2_3 cn3 3378378.3784  $ G-=0.296uS w=0.7561
+XTn2_4 row2 gate mn2_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_4 mn2_4 cn4 57612.3184  $ G-=17.357uS w=-0.4354
+XTn2_5 row2 gate mn2_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_5 mn2_5 cn5 3378378.3784  $ G-=0.296uS w=0.1858
+XTn2_6 row2 gate mn2_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_6 mn2_6 cn6 86363.9781  $ G-=11.579uS w=-0.2879
+XTn2_7 row2 gate mn2_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_7 mn2_7 cn7 3378378.3784  $ G-=0.296uS w=0.2372
+XTn2_8 row2 gate mn2_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_8 mn2_8 cn8 3378378.3784  $ G-=0.296uS w=0.1360
+XTn2_9 row2 gate mn2_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_9 mn2_9 cn9 3378378.3784  $ G-=0.296uS w=0.1340
+XTn2_10 row2 gate mn2_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_10 mn2_10 cn10 3378378.3784  $ G-=0.296uS w=0.0481
+XTn2_11 row2 gate mn2_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_11 mn2_11 cn11 34569.7328  $ G-=28.927uS w=-0.7306
+XTn2_12 row2 gate mn2_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_12 mn2_12 cn12 41627.7985  $ G-=24.022uS w=-0.6055
+XTn2_13 row2 gate mn2_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_13 mn2_13 cn13 28873.5800  $ G-=34.634uS w=-0.8763
+XTn2_14 row2 gate mn2_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_14 mn2_14 cn14 171610.7459  $ G-=5.827uS w=-0.1411
+XTn2_15 row2 gate mn2_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_15 mn2_15 cn15 322507.3298  $ G-=3.101uS w=-0.0716
+XTn2_16 row2 gate mn2_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_16 mn2_16 cn16 3378378.3784  $ G-=0.296uS w=1.0955
+XTn2_17 row2 gate mn2_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_17 mn2_17 cn17 3378378.3784  $ G-=0.296uS w=0.0335
+XTn2_18 row2 gate mn2_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_18 mn2_18 cn18 58125.2097  $ G-=17.204uS w=-0.4315
+XTn2_19 row2 gate mn2_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_19 mn2_19 cn19 124672.7425  $ G-=8.021uS w=-0.1971
+XTn2_20 row2 gate mn2_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_20 mn2_20 cn20 30396.4120  $ G-=32.899uS w=-0.8320
+XTn2_21 row2 gate mn2_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_21 mn2_21 cn21 3378378.3784  $ G-=0.296uS w=0.1376
+XTn2_22 row2 gate mn2_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_22 mn2_22 cn22 3378378.3784  $ G-=0.296uS w=0.4969
+XTn2_23 row2 gate mn2_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_23 mn2_23 cn23 3378378.3784  $ G-=0.296uS w=0.1855
+XTn2_24 row2 gate mn2_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_24 mn2_24 cn24 3378378.3784  $ G-=0.296uS w=0.1713
+XTn2_25 row2 gate mn2_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_25 mn2_25 cn25 62153.4000  $ G-=16.089uS w=-0.4030
+XTn2_26 row2 gate mn2_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_26 mn2_26 cn26 3378378.3784  $ G-=0.296uS w=0.1326
+XTn2_27 row2 gate mn2_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_27 mn2_27 cn27 46952.9625  $ G-=21.298uS w=-0.5359
+XTn2_28 row2 gate mn2_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_28 mn2_28 cn28 3378378.3784  $ G-=0.296uS w=0.0855
+XTn2_29 row2 gate mn2_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_29 mn2_29 cn29 153608.0094  $ G-=6.510uS w=-0.1586
+XTn2_30 row2 gate mn2_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_30 mn2_30 cn30 184207.4684  $ G-=5.429uS w=-0.1310
+XTn2_31 row2 gate mn2_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_31 mn2_31 cn31 308251.3206  $ G-=3.244uS w=-0.0752
+XTn2_32 row2 gate mn2_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_32 mn2_32 cn32 21158.8669  $ G-=47.262uS w=-1.1985
+XTn2_33 row2 gate mn2_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_33 mn2_33 cn33 117936.0373  $ G-=8.479uS w=-0.2088
+XTn2_34 row2 gate mn2_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_34 mn2_34 cn34 38480.3255  $ G-=25.987uS w=-0.6556
+XTn2_35 row2 gate mn2_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_35 mn2_35 cn35 3378378.3784  $ G-=0.296uS w=0.0977
+XTn2_36 row2 gate mn2_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_36 mn2_36 cn36 3378378.3784  $ G-=0.296uS w=0.4110
+XTn2_37 row2 gate mn2_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_37 mn2_37 cn37 3378378.3784  $ G-=0.296uS w=0.0965
+XTn2_38 row2 gate mn2_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_38 mn2_38 cn38 1206267.3839  $ G-=0.829uS w=-0.0136
+XTn2_39 row2 gate mn2_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_39 mn2_39 cn39 3378378.3784  $ G-=0.296uS w=0.2697
+XTn2_40 row2 gate mn2_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_40 mn2_40 cn40 130313.1445  $ G-=7.674uS w=-0.1883
+XTn2_41 row2 gate mn2_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_41 mn2_41 cn41 3378378.3784  $ G-=0.296uS w=0.1361
+XTn2_42 row2 gate mn2_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_42 mn2_42 cn42 73830.0687  $ G-=13.545uS w=-0.3381
+XTn2_43 row2 gate mn2_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_43 mn2_43 cn43 46383.9932  $ G-=21.559uS w=-0.5426
+XTn2_44 row2 gate mn2_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_44 mn2_44 cn44 3378378.3784  $ G-=0.296uS w=0.5118
+XTn2_45 row2 gate mn2_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_45 mn2_45 cn45 132071.2938  $ G-=7.572uS w=-0.1857
+XTn2_46 row2 gate mn2_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_46 mn2_46 cn46 91179.9586  $ G-=10.967uS w=-0.2723
+XTn2_47 row2 gate mn2_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_47 mn2_47 cn47 3378378.3784  $ G-=0.296uS w=0.0081
+XTn2_48 row2 gate mn2_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_48 mn2_48 cn48 3378378.3784  $ G-=0.296uS w=0.0916
+XTn2_49 row2 gate mn2_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_49 mn2_49 cn49 102872.0923  $ G-=9.721uS w=-0.2405
+XTn2_50 row2 gate mn2_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_50 mn2_50 cn50 3378378.3784  $ G-=0.296uS w=0.3709
+XTn2_51 row2 gate mn2_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_51 mn2_51 cn51 3378378.3784  $ G-=0.296uS w=0.0411
+XTn2_52 row2 gate mn2_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_52 mn2_52 cn52 3378378.3784  $ G-=0.296uS w=0.3665
+XTn2_53 row2 gate mn2_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_53 mn2_53 cn53 3378378.3784  $ G-=0.296uS w=0.1082
+XTn2_54 row2 gate mn2_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_54 mn2_54 cn54 3378378.3784  $ G-=0.296uS w=0.3982
+XTn2_55 row2 gate mn2_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_55 mn2_55 cn55 61412.6858  $ G-=16.283uS w=-0.4080
+XTn2_56 row2 gate mn2_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_56 mn2_56 cn56 3378378.3784  $ G-=0.296uS w=0.2261
+XTn2_57 row2 gate mn2_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_57 mn2_57 cn57 3378378.3784  $ G-=0.296uS w=0.2651
+XTn2_58 row2 gate mn2_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_58 mn2_58 cn58 78431.4390  $ G-=12.750uS w=-0.3178
+XTn2_59 row2 gate mn2_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_59 mn2_59 cn59 3378378.3784  $ G-=0.296uS w=0.0563
+XTn2_60 row2 gate mn2_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_60 mn2_60 cn60 80971.1584  $ G-=12.350uS w=-0.3076
+XTn2_61 row2 gate mn2_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_61 mn2_61 cn61 24074.8135  $ G-=41.537uS w=-1.0524
+XTn2_62 row2 gate mn2_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_62 mn2_62 cn62 324905.0461  $ G-=3.078uS w=-0.0710
+XTn2_63 row2 gate mn2_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn2_63 mn2_63 cn63 35627.7272  $ G-=28.068uS w=-0.7087
+* --- Row 3 ---
+XTn3_0 row3 gate mn3_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_0 mn3_0 cn0 379821.7471  $ G-=2.633uS w=-0.0596
+XTn3_1 row3 gate mn3_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_1 mn3_1 cn1 3378378.3784  $ G-=0.296uS w=0.1062
+XTn3_2 row3 gate mn3_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_2 mn3_2 cn2 35398.6381  $ G-=28.250uS w=-0.7133
+XTn3_3 row3 gate mn3_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_3 mn3_3 cn3 453419.5324  $ G-=2.205uS w=-0.0487
+XTn3_4 row3 gate mn3_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_4 mn3_4 cn4 39944.8445  $ G-=25.035uS w=-0.6313
+XTn3_5 row3 gate mn3_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_5 mn3_5 cn5 3378378.3784  $ G-=0.296uS w=0.0880
+XTn3_6 row3 gate mn3_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_6 mn3_6 cn6 156871.3184  $ G-=6.375uS w=-0.1551
+XTn3_7 row3 gate mn3_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_7 mn3_7 cn7 3378378.3784  $ G-=0.296uS w=0.0270
+XTn3_8 row3 gate mn3_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_8 mn3_8 cn8 106968.9772  $ G-=9.349uS w=-0.2310
+XTn3_9 row3 gate mn3_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_9 mn3_9 cn9 3378378.3784  $ G-=0.296uS w=0.4854
+XTn3_10 row3 gate mn3_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_10 mn3_10 cn10 64700.3013  $ G-=15.456uS w=-0.3869
+XTn3_11 row3 gate mn3_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_11 mn3_11 cn11 3378378.3784  $ G-=0.296uS w=0.1186
+XTn3_12 row3 gate mn3_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_12 mn3_12 cn12 3378378.3784  $ G-=0.296uS w=0.0029
+XTn3_13 row3 gate mn3_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_13 mn3_13 cn13 3378378.3784  $ G-=0.296uS w=0.1829
+XTn3_14 row3 gate mn3_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_14 mn3_14 cn14 3378378.3784  $ G-=0.296uS w=0.0607
+XTn3_15 row3 gate mn3_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_15 mn3_15 cn15 3378378.3784  $ G-=0.296uS w=0.0043
+XTn3_16 row3 gate mn3_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_16 mn3_16 cn16 3378378.3784  $ G-=0.296uS w=0.0437
+XTn3_17 row3 gate mn3_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_17 mn3_17 cn17 3378378.3784  $ G-=0.296uS w=0.3442
+XTn3_18 row3 gate mn3_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_18 mn3_18 cn18 3378378.3784  $ G-=0.296uS w=0.0256
+XTn3_19 row3 gate mn3_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_19 mn3_19 cn19 223072.9404  $ G-=4.483uS w=-0.1068
+XTn3_20 row3 gate mn3_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_20 mn3_20 cn20 3378378.3784  $ G-=0.296uS w=0.3182
+XTn3_21 row3 gate mn3_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_21 mn3_21 cn21 137331.2632  $ G-=7.282uS w=-0.1783
+XTn3_22 row3 gate mn3_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_22 mn3_22 cn22 3378378.3784  $ G-=0.296uS w=0.4165
+XTn3_23 row3 gate mn3_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_23 mn3_23 cn23 541259.2765  $ G-=1.848uS w=-0.0396
+XTn3_24 row3 gate mn3_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_24 mn3_24 cn24 3378378.3784  $ G-=0.296uS w=0.0899
+XTn3_25 row3 gate mn3_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_25 mn3_25 cn25 156657.1174  $ G-=6.383uS w=-0.1553
+XTn3_26 row3 gate mn3_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_26 mn3_26 cn26 373576.9110  $ G-=2.677uS w=-0.0608
+XTn3_27 row3 gate mn3_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_27 mn3_27 cn27 3378378.3784  $ G-=0.296uS w=0.4288
+XTn3_28 row3 gate mn3_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_28 mn3_28 cn28 3378378.3784  $ G-=0.296uS w=0.2056
+XTn3_29 row3 gate mn3_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_29 mn3_29 cn29 46446.3803  $ G-=21.530uS w=-0.5419
+XTn3_30 row3 gate mn3_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_30 mn3_30 cn30 3378378.3784  $ G-=0.296uS w=0.0365
+XTn3_31 row3 gate mn3_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_31 mn3_31 cn31 3378378.3784  $ G-=0.296uS w=0.0143
+XTn3_32 row3 gate mn3_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_32 mn3_32 cn32 3378378.3784  $ G-=0.296uS w=0.4852
+XTn3_33 row3 gate mn3_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_33 mn3_33 cn33 3378378.3784  $ G-=0.296uS w=0.4302
+XTn3_34 row3 gate mn3_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_34 mn3_34 cn34 102560.9280  $ G-=9.750uS w=-0.2413
+XTn3_35 row3 gate mn3_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_35 mn3_35 cn35 3378378.3784  $ G-=0.296uS w=0.5033
+XTn3_36 row3 gate mn3_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_36 mn3_36 cn36 3378378.3784  $ G-=0.296uS w=0.0343
+XTn3_37 row3 gate mn3_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_37 mn3_37 cn37 3378378.3784  $ G-=0.296uS w=0.0866
+XTn3_38 row3 gate mn3_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_38 mn3_38 cn38 3378378.3784  $ G-=0.296uS w=0.2790
+XTn3_39 row3 gate mn3_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_39 mn3_39 cn39 3378378.3784  $ G-=0.296uS w=0.0672
+XTn3_40 row3 gate mn3_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_40 mn3_40 cn40 105587.4813  $ G-=9.471uS w=-0.2341
+XTn3_41 row3 gate mn3_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_41 mn3_41 cn41 3378378.3784  $ G-=0.296uS w=0.0180
+XTn3_42 row3 gate mn3_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_42 mn3_42 cn42 3378378.3784  $ G-=0.296uS w=0.0908
+XTn3_43 row3 gate mn3_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_43 mn3_43 cn43 84607.9894  $ G-=11.819uS w=-0.2941
+XTn3_44 row3 gate mn3_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_44 mn3_44 cn44 3378378.3784  $ G-=0.296uS w=0.0732
+XTn3_45 row3 gate mn3_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_45 mn3_45 cn45 210922.3675  $ G-=4.741uS w=-0.1134
+XTn3_46 row3 gate mn3_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_46 mn3_46 cn46 1279722.6284  $ G-=0.781uS w=-0.0124
+XTn3_47 row3 gate mn3_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_47 mn3_47 cn47 3378378.3784  $ G-=0.296uS w=0.7189
+XTn3_48 row3 gate mn3_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_48 mn3_48 cn48 3378378.3784  $ G-=0.296uS w=1.0436
+XTn3_49 row3 gate mn3_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_49 mn3_49 cn49 29387.2090  $ G-=34.028uS w=-0.8608
+XTn3_50 row3 gate mn3_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_50 mn3_50 cn50 3378378.3784  $ G-=0.296uS w=0.4065
+XTn3_51 row3 gate mn3_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_51 mn3_51 cn51 331014.4756  $ G-=3.021uS w=-0.0695
+XTn3_52 row3 gate mn3_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_52 mn3_52 cn52 3378378.3784  $ G-=0.296uS w=0.0242
+XTn3_53 row3 gate mn3_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_53 mn3_53 cn53 3378378.3784  $ G-=0.296uS w=0.0820
+XTn3_54 row3 gate mn3_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_54 mn3_54 cn54 3378378.3784  $ G-=0.296uS w=0.9014
+XTn3_55 row3 gate mn3_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_55 mn3_55 cn55 3378378.3784  $ G-=0.296uS w=0.0685
+XTn3_56 row3 gate mn3_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_56 mn3_56 cn56 2778307.7786  $ G-=0.360uS w=-0.0016
+XTn3_57 row3 gate mn3_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_57 mn3_57 cn57 48933.4530  $ G-=20.436uS w=-0.5139
+XTn3_58 row3 gate mn3_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_58 mn3_58 cn58 108087.4099  $ G-=9.252uS w=-0.2285
+XTn3_59 row3 gate mn3_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_59 mn3_59 cn59 178730.7716  $ G-=5.595uS w=-0.1352
+XTn3_60 row3 gate mn3_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_60 mn3_60 cn60 284693.5685  $ G-=3.513uS w=-0.0821
+XTn3_61 row3 gate mn3_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_61 mn3_61 cn61 44038.3872  $ G-=22.707uS w=-0.5719
+XTn3_62 row3 gate mn3_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_62 mn3_62 cn62 81549.5724  $ G-=12.262uS w=-0.3054
+XTn3_63 row3 gate mn3_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn3_63 mn3_63 cn63 3378378.3784  $ G-=0.296uS w=0.0471
+* --- Row 4 ---
+XTn4_0 row4 gate mn4_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_0 mn4_0 cn0 23173.8040  $ G-=43.152uS w=-1.0936
+XTn4_1 row4 gate mn4_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_1 mn4_1 cn1 3378378.3784  $ G-=0.296uS w=0.3467
+XTn4_2 row4 gate mn4_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_2 mn4_2 cn2 48790.4256  $ G-=20.496uS w=-0.5155
+XTn4_3 row4 gate mn4_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_3 mn4_3 cn3 77471.0445  $ G-=12.908uS w=-0.3218
+XTn4_4 row4 gate mn4_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_4 mn4_4 cn4 3378378.3784  $ G-=0.296uS w=0.1340
+XTn4_5 row4 gate mn4_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_5 mn4_5 cn5 3378378.3784  $ G-=0.296uS w=0.7513
+XTn4_6 row4 gate mn4_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_6 mn4_6 cn6 3378378.3784  $ G-=0.296uS w=0.2738
+XTn4_7 row4 gate mn4_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_7 mn4_7 cn7 44789.4028  $ G-=22.327uS w=-0.5622
+XTn4_8 row4 gate mn4_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_8 mn4_8 cn8 3378378.3784  $ G-=0.296uS w=0.5710
+XTn4_9 row4 gate mn4_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_9 mn4_9 cn9 63267.2228  $ G-=15.806uS w=-0.3958
+XTn4_10 row4 gate mn4_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_10 mn4_10 cn10 19771.1664  $ G-=50.579uS w=-1.2832
+XTn4_11 row4 gate mn4_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_11 mn4_11 cn11 3378378.3784  $ G-=0.296uS w=0.0140
+XTn4_12 row4 gate mn4_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_12 mn4_12 cn12 3378378.3784  $ G-=0.296uS w=0.1489
+XTn4_13 row4 gate mn4_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_13 mn4_13 cn13 91234.8656  $ G-=10.961uS w=-0.2722
+XTn4_14 row4 gate mn4_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_14 mn4_14 cn14 94174.8422  $ G-=10.619uS w=-0.2634
+XTn4_15 row4 gate mn4_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_15 mn4_15 cn15 66847.7801  $ G-=14.959uS w=-0.3742
+XTn4_16 row4 gate mn4_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_16 mn4_16 cn16 119809.5569  $ G-=8.347uS w=-0.2054
+XTn4_17 row4 gate mn4_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_17 mn4_17 cn17 33325.3180  $ G-=30.007uS w=-0.7582
+XTn4_18 row4 gate mn4_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_18 mn4_18 cn18 60401.0098  $ G-=16.556uS w=-0.4149
+XTn4_19 row4 gate mn4_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_19 mn4_19 cn19 34216.1510  $ G-=29.226uS w=-0.7383
+XTn4_20 row4 gate mn4_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_20 mn4_20 cn20 49014.6962  $ G-=20.402uS w=-0.5131
+XTn4_21 row4 gate mn4_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_21 mn4_21 cn21 3378378.3784  $ G-=0.296uS w=0.1838
+XTn4_22 row4 gate mn4_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_22 mn4_22 cn22 3378378.3784  $ G-=0.296uS w=0.5715
+XTn4_23 row4 gate mn4_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_23 mn4_23 cn23 3378378.3784  $ G-=0.296uS w=0.1586
+XTn4_24 row4 gate mn4_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_24 mn4_24 cn24 23366.3178  $ G-=42.797uS w=-1.0846
+XTn4_25 row4 gate mn4_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_25 mn4_25 cn25 3378378.3784  $ G-=0.296uS w=0.0085
+XTn4_26 row4 gate mn4_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_26 mn4_26 cn26 3378378.3784  $ G-=0.296uS w=0.0440
+XTn4_27 row4 gate mn4_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_27 mn4_27 cn27 37945.9865  $ G-=26.353uS w=-0.6650
+XTn4_28 row4 gate mn4_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_28 mn4_28 cn28 31889.3952  $ G-=31.358uS w=-0.7927
+XTn4_29 row4 gate mn4_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_29 mn4_29 cn29 3378378.3784  $ G-=0.296uS w=0.5995
+XTn4_30 row4 gate mn4_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_30 mn4_30 cn30 3378378.3784  $ G-=0.296uS w=0.5021
+XTn4_31 row4 gate mn4_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_31 mn4_31 cn31 164054.7177  $ G-=6.096uS w=-0.1480
+XTn4_32 row4 gate mn4_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_32 mn4_32 cn32 38308.5232  $ G-=26.104uS w=-0.6586
+XTn4_33 row4 gate mn4_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_33 mn4_33 cn33 47538.2811  $ G-=21.036uS w=-0.5293
+XTn4_34 row4 gate mn4_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_34 mn4_34 cn34 39233.0719  $ G-=25.489uS w=-0.6429
+XTn4_35 row4 gate mn4_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_35 mn4_35 cn35 46243.0119  $ G-=21.625uS w=-0.5443
+XTn4_36 row4 gate mn4_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_36 mn4_36 cn36 69210.8503  $ G-=14.449uS w=-0.3612
+XTn4_37 row4 gate mn4_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_37 mn4_37 cn37 3378378.3784  $ G-=0.296uS w=0.9146
+XTn4_38 row4 gate mn4_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_38 mn4_38 cn38 3378378.3784  $ G-=0.296uS w=0.5905
+XTn4_39 row4 gate mn4_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_39 mn4_39 cn39 3378378.3784  $ G-=0.296uS w=0.3751
+XTn4_40 row4 gate mn4_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_40 mn4_40 cn40 3378378.3784  $ G-=0.296uS w=0.1755
+XTn4_41 row4 gate mn4_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_41 mn4_41 cn41 3378378.3784  $ G-=0.296uS w=0.1992
+XTn4_42 row4 gate mn4_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_42 mn4_42 cn42 3378378.3784  $ G-=0.296uS w=0.1280
+XTn4_43 row4 gate mn4_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_43 mn4_43 cn43 49487.9471  $ G-=20.207uS w=-0.5081
+XTn4_44 row4 gate mn4_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_44 mn4_44 cn44 3378378.3784  $ G-=0.296uS w=0.7673
+XTn4_45 row4 gate mn4_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_45 mn4_45 cn45 103207.7101  $ G-=9.689uS w=-0.2397
+XTn4_46 row4 gate mn4_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_46 mn4_46 cn46 49044.7241  $ G-=20.390uS w=-0.5128
+XTn4_47 row4 gate mn4_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_47 mn4_47 cn47 3378378.3784  $ G-=0.296uS w=0.6377
+XTn4_48 row4 gate mn4_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_48 mn4_48 cn48 3378378.3784  $ G-=0.296uS w=0.7144
+XTn4_49 row4 gate mn4_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_49 mn4_49 cn49 3378378.3784  $ G-=0.296uS w=0.0529
+XTn4_50 row4 gate mn4_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_50 mn4_50 cn50 3378378.3784  $ G-=0.296uS w=0.3583
+XTn4_51 row4 gate mn4_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_51 mn4_51 cn51 308469.4930  $ G-=3.242uS w=-0.0752
+XTn4_52 row4 gate mn4_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_52 mn4_52 cn52 3378378.3784  $ G-=0.296uS w=0.2866
+XTn4_53 row4 gate mn4_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_53 mn4_53 cn53 28461.9187  $ G-=35.135uS w=-0.8890
+XTn4_54 row4 gate mn4_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_54 mn4_54 cn54 249551.9364  $ G-=4.007uS w=-0.0947
+XTn4_55 row4 gate mn4_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_55 mn4_55 cn55 3378378.3784  $ G-=0.296uS w=0.0324
+XTn4_56 row4 gate mn4_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_56 mn4_56 cn56 53653.9437  $ G-=18.638uS w=-0.4681
+XTn4_57 row4 gate mn4_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_57 mn4_57 cn57 3378378.3784  $ G-=0.296uS w=0.0236
+XTn4_58 row4 gate mn4_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_58 mn4_58 cn58 3378378.3784  $ G-=0.296uS w=0.8965
+XTn4_59 row4 gate mn4_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_59 mn4_59 cn59 137765.0323  $ G-=7.259uS w=-0.1777
+XTn4_60 row4 gate mn4_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_60 mn4_60 cn60 722015.8146  $ G-=1.385uS w=-0.0278
+XTn4_61 row4 gate mn4_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_61 mn4_61 cn61 3378378.3784  $ G-=0.296uS w=0.3114
+XTn4_62 row4 gate mn4_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_62 mn4_62 cn62 143178.6481  $ G-=6.984uS w=-0.1707
+XTn4_63 row4 gate mn4_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn4_63 mn4_63 cn63 3378378.3784  $ G-=0.296uS w=0.1509
+* --- Row 5 ---
+XTn5_0 row5 gate mn5_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_0 mn5_0 cn0 142403.4328  $ G-=7.022uS w=-0.1716
+XTn5_1 row5 gate mn5_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_1 mn5_1 cn1 3378378.3784  $ G-=0.296uS w=0.4380
+XTn5_2 row5 gate mn5_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_2 mn5_2 cn2 3378378.3784  $ G-=0.296uS w=0.9481
+XTn5_3 row5 gate mn5_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_3 mn5_3 cn3 68272.3080  $ G-=14.647uS w=-0.3662
+XTn5_4 row5 gate mn5_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_4 mn5_4 cn4 3378378.3784  $ G-=0.296uS w=0.5706
+XTn5_5 row5 gate mn5_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_5 mn5_5 cn5 207209.0603  $ G-=4.826uS w=-0.1156
+XTn5_6 row5 gate mn5_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_6 mn5_6 cn6 3378378.3784  $ G-=0.296uS w=0.2027
+XTn5_7 row5 gate mn5_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_7 mn5_7 cn7 51344.1209  $ G-=19.476uS w=-0.4895
+XTn5_8 row5 gate mn5_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_8 mn5_8 cn8 30916.4548  $ G-=32.345uS w=-0.8179
+XTn5_9 row5 gate mn5_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_9 mn5_9 cn9 3378378.3784  $ G-=0.296uS w=0.5679
+XTn5_10 row5 gate mn5_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_10 mn5_10 cn10 127569.7711  $ G-=7.839uS w=-0.1925
+XTn5_11 row5 gate mn5_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_11 mn5_11 cn11 3378378.3784  $ G-=0.296uS w=0.2699
+XTn5_12 row5 gate mn5_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_12 mn5_12 cn12 3378378.3784  $ G-=0.296uS w=0.0646
+XTn5_13 row5 gate mn5_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_13 mn5_13 cn13 49446.2421  $ G-=20.224uS w=-0.5085
+XTn5_14 row5 gate mn5_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_14 mn5_14 cn14 3378378.3784  $ G-=0.296uS w=0.3776
+XTn5_15 row5 gate mn5_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_15 mn5_15 cn15 152454.3594  $ G-=6.559uS w=-0.1598
+XTn5_16 row5 gate mn5_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_16 mn5_16 cn16 894212.9485  $ G-=1.118uS w=-0.0210
+XTn5_17 row5 gate mn5_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_17 mn5_17 cn17 101782.2245  $ G-=9.825uS w=-0.2432
+XTn5_18 row5 gate mn5_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_18 mn5_18 cn18 65852.0365  $ G-=15.186uS w=-0.3800
+XTn5_19 row5 gate mn5_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_19 mn5_19 cn19 256856.6821  $ G-=3.893uS w=-0.0918
+XTn5_20 row5 gate mn5_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_20 mn5_20 cn20 42692.8525  $ G-=23.423uS w=-0.5902
+XTn5_21 row5 gate mn5_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_21 mn5_21 cn21 3378378.3784  $ G-=0.296uS w=0.8233
+XTn5_22 row5 gate mn5_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_22 mn5_22 cn22 3378378.3784  $ G-=0.296uS w=0.6624
+XTn5_23 row5 gate mn5_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_23 mn5_23 cn23 3378378.3784  $ G-=0.296uS w=0.8491
+XTn5_24 row5 gate mn5_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_24 mn5_24 cn24 3378378.3784  $ G-=0.296uS w=0.3544
+XTn5_25 row5 gate mn5_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_25 mn5_25 cn25 97627.0956  $ G-=10.243uS w=-0.2538
+XTn5_26 row5 gate mn5_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_26 mn5_26 cn26 56779.9886  $ G-=17.612uS w=-0.4419
+XTn5_27 row5 gate mn5_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_27 mn5_27 cn27 3378378.3784  $ G-=0.296uS w=0.4474
+XTn5_28 row5 gate mn5_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_28 mn5_28 cn28 93141.2684  $ G-=10.736uS w=-0.2664
+XTn5_29 row5 gate mn5_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_29 mn5_29 cn29 42700.8582  $ G-=23.419uS w=-0.5901
+XTn5_30 row5 gate mn5_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_30 mn5_30 cn30 641299.2428  $ G-=1.559uS w=-0.0322
+XTn5_31 row5 gate mn5_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_31 mn5_31 cn31 3378378.3784  $ G-=0.296uS w=0.4068
+XTn5_32 row5 gate mn5_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_32 mn5_32 cn32 3378378.3784  $ G-=0.296uS w=0.3525
+XTn5_33 row5 gate mn5_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_33 mn5_33 cn33 2663298.3829  $ G-=0.375uS w=-0.0020
+XTn5_34 row5 gate mn5_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_34 mn5_34 cn34 3378378.3784  $ G-=0.296uS w=0.5721
+XTn5_35 row5 gate mn5_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_35 mn5_35 cn35 3378378.3784  $ G-=0.296uS w=0.4731
+XTn5_36 row5 gate mn5_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_36 mn5_36 cn36 3378378.3784  $ G-=0.296uS w=0.1313
+XTn5_37 row5 gate mn5_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_37 mn5_37 cn37 68042.1508  $ G-=14.697uS w=-0.3675
+XTn5_38 row5 gate mn5_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_38 mn5_38 cn38 3378378.3784  $ G-=0.296uS w=0.0227
+XTn5_39 row5 gate mn5_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_39 mn5_39 cn39 3378378.3784  $ G-=0.296uS w=0.5741
+XTn5_40 row5 gate mn5_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_40 mn5_40 cn40 41921.7956  $ G-=23.854uS w=-0.6012
+XTn5_41 row5 gate mn5_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_41 mn5_41 cn41 25349.2316  $ G-=39.449uS w=-0.9991
+XTn5_42 row5 gate mn5_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_42 mn5_42 cn42 90134.9733  $ G-=11.094uS w=-0.2756
+XTn5_43 row5 gate mn5_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_43 mn5_43 cn43 3378378.3784  $ G-=0.296uS w=0.0537
+XTn5_44 row5 gate mn5_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_44 mn5_44 cn44 24393.0130  $ G-=40.995uS w=-1.0386
+XTn5_45 row5 gate mn5_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_45 mn5_45 cn45 3378378.3784  $ G-=0.296uS w=0.7200
+XTn5_46 row5 gate mn5_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_46 mn5_46 cn46 37905.8684  $ G-=26.381uS w=-0.6657
+XTn5_47 row5 gate mn5_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_47 mn5_47 cn47 3378378.3784  $ G-=0.296uS w=0.0134
+XTn5_48 row5 gate mn5_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_48 mn5_48 cn48 3378378.3784  $ G-=0.296uS w=0.4027
+XTn5_49 row5 gate mn5_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_49 mn5_49 cn49 168491.4818  $ G-=5.935uS w=-0.1439
+XTn5_50 row5 gate mn5_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_50 mn5_50 cn50 133760.1485  $ G-=7.476uS w=-0.1832
+XTn5_51 row5 gate mn5_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_51 mn5_51 cn51 3378378.3784  $ G-=0.296uS w=0.1479
+XTn5_52 row5 gate mn5_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_52 mn5_52 cn52 3378378.3784  $ G-=0.296uS w=0.5770
+XTn5_53 row5 gate mn5_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_53 mn5_53 cn53 54447.2186  $ G-=18.366uS w=-0.4611
+XTn5_54 row5 gate mn5_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_54 mn5_54 cn54 3378378.3784  $ G-=0.296uS w=0.1398
+XTn5_55 row5 gate mn5_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_55 mn5_55 cn55 3378378.3784  $ G-=0.296uS w=0.2574
+XTn5_56 row5 gate mn5_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_56 mn5_56 cn56 36338.2053  $ G-=27.519uS w=-0.6947
+XTn5_57 row5 gate mn5_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_57 mn5_57 cn57 3378378.3784  $ G-=0.296uS w=0.1556
+XTn5_58 row5 gate mn5_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_58 mn5_58 cn58 3378378.3784  $ G-=0.296uS w=0.2250
+XTn5_59 row5 gate mn5_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_59 mn5_59 cn59 100784.8300  $ G-=9.922uS w=-0.2456
+XTn5_60 row5 gate mn5_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_60 mn5_60 cn60 3378378.3784  $ G-=0.296uS w=0.1297
+XTn5_61 row5 gate mn5_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_61 mn5_61 cn61 103168.7488  $ G-=9.693uS w=-0.2398
+XTn5_62 row5 gate mn5_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_62 mn5_62 cn62 3378378.3784  $ G-=0.296uS w=0.8253
+XTn5_63 row5 gate mn5_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn5_63 mn5_63 cn63 171183.8412  $ G-=5.842uS w=-0.1415
+* --- Row 6 ---
+XTn6_0 row6 gate mn6_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_0 mn6_0 cn0 124400.0860  $ G-=8.039uS w=-0.1976
+XTn6_1 row6 gate mn6_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_1 mn6_1 cn1 53584.9861  $ G-=18.662uS w=-0.4687
+XTn6_2 row6 gate mn6_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_2 mn6_2 cn2 3378378.3784  $ G-=0.296uS w=0.0029
+XTn6_3 row6 gate mn6_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_3 mn6_3 cn3 3378378.3784  $ G-=0.296uS w=0.2812
+XTn6_4 row6 gate mn6_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_4 mn6_4 cn4 3378378.3784  $ G-=0.296uS w=0.2076
+XTn6_5 row6 gate mn6_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_5 mn6_5 cn5 3378378.3784  $ G-=0.296uS w=0.7244
+XTn6_6 row6 gate mn6_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_6 mn6_6 cn6 3378378.3784  $ G-=0.296uS w=0.3341
+XTn6_7 row6 gate mn6_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_7 mn6_7 cn7 312788.6164  $ G-=3.197uS w=-0.0740
+XTn6_8 row6 gate mn6_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_8 mn6_8 cn8 3378378.3784  $ G-=0.296uS w=1.1775
+XTn6_9 row6 gate mn6_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_9 mn6_9 cn9 3378378.3784  $ G-=0.296uS w=0.7457
+XTn6_10 row6 gate mn6_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_10 mn6_10 cn10 798978.0056  $ G-=1.252uS w=-0.0244
+XTn6_11 row6 gate mn6_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_11 mn6_11 cn11 254705.4173  $ G-=3.926uS w=-0.0926
+XTn6_12 row6 gate mn6_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_12 mn6_12 cn12 3378378.3784  $ G-=0.296uS w=0.3171
+XTn6_13 row6 gate mn6_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_13 mn6_13 cn13 69494.7563  $ G-=14.390uS w=-0.3597
+XTn6_14 row6 gate mn6_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_14 mn6_14 cn14 64306.0621  $ G-=15.551uS w=-0.3893
+XTn6_15 row6 gate mn6_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_15 mn6_15 cn15 41788.5125  $ G-=23.930uS w=-0.6031
+XTn6_16 row6 gate mn6_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_16 mn6_16 cn16 42242.3300  $ G-=23.673uS w=-0.5966
+XTn6_17 row6 gate mn6_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_17 mn6_17 cn17 27798.7708  $ G-=35.973uS w=-0.9104
+XTn6_18 row6 gate mn6_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_18 mn6_18 cn18 789322.9944  $ G-=1.267uS w=-0.0248
+XTn6_19 row6 gate mn6_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_19 mn6_19 cn19 3378378.3784  $ G-=0.296uS w=0.1092
+XTn6_20 row6 gate mn6_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_20 mn6_20 cn20 3378378.3784  $ G-=0.296uS w=0.6799
+XTn6_21 row6 gate mn6_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_21 mn6_21 cn21 66680.0039  $ G-=14.997uS w=-0.3752
+XTn6_22 row6 gate mn6_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_22 mn6_22 cn22 3378378.3784  $ G-=0.296uS w=0.3563
+XTn6_23 row6 gate mn6_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_23 mn6_23 cn23 3378378.3784  $ G-=0.296uS w=0.2746
+XTn6_24 row6 gate mn6_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_24 mn6_24 cn24 3378378.3784  $ G-=0.296uS w=0.8405
+XTn6_25 row6 gate mn6_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_25 mn6_25 cn25 135645.4910  $ G-=7.372uS w=-0.1806
+XTn6_26 row6 gate mn6_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_26 mn6_26 cn26 273364.9699  $ G-=3.658uS w=-0.0858
+XTn6_27 row6 gate mn6_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_27 mn6_27 cn27 3378378.3784  $ G-=0.296uS w=0.0581
+XTn6_28 row6 gate mn6_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_28 mn6_28 cn28 79472.7748  $ G-=12.583uS w=-0.3135
+XTn6_29 row6 gate mn6_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_29 mn6_29 cn29 55328.9173  $ G-=18.074uS w=-0.4537
+XTn6_30 row6 gate mn6_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_30 mn6_30 cn30 3378378.3784  $ G-=0.296uS w=0.5577
+XTn6_31 row6 gate mn6_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_31 mn6_31 cn31 3378378.3784  $ G-=0.296uS w=0.5734
+XTn6_32 row6 gate mn6_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_32 mn6_32 cn32 164095.5285  $ G-=6.094uS w=-0.1480
+XTn6_33 row6 gate mn6_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_33 mn6_33 cn33 59519.8031  $ G-=16.801uS w=-0.4212
+XTn6_34 row6 gate mn6_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_34 mn6_34 cn34 3378378.3784  $ G-=0.296uS w=0.2277
+XTn6_35 row6 gate mn6_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_35 mn6_35 cn35 97068.1481  $ G-=10.302uS w=-0.2553
+XTn6_36 row6 gate mn6_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_36 mn6_36 cn36 3378378.3784  $ G-=0.296uS w=1.0152
+XTn6_37 row6 gate mn6_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_37 mn6_37 cn37 3378378.3784  $ G-=0.296uS w=0.7097
+XTn6_38 row6 gate mn6_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_38 mn6_38 cn38 50411.2983  $ G-=19.837uS w=-0.4987
+XTn6_39 row6 gate mn6_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_39 mn6_39 cn39 339272.2388  $ G-=2.947uS w=-0.0677
+XTn6_40 row6 gate mn6_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_40 mn6_40 cn40 43747.1261  $ G-=22.859uS w=-0.5758
+XTn6_41 row6 gate mn6_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_41 mn6_41 cn41 3378378.3784  $ G-=0.296uS w=0.1554
+XTn6_42 row6 gate mn6_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_42 mn6_42 cn42 1103797.8220  $ G-=0.906uS w=-0.0156
+XTn6_43 row6 gate mn6_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_43 mn6_43 cn43 3378378.3784  $ G-=0.296uS w=0.9305
+XTn6_44 row6 gate mn6_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_44 mn6_44 cn44 1154465.6229  $ G-=0.866uS w=-0.0146
+XTn6_45 row6 gate mn6_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_45 mn6_45 cn45 18686.9775  $ G-=53.513uS w=-1.3580
+XTn6_46 row6 gate mn6_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_46 mn6_46 cn46 3378378.3784  $ G-=0.296uS w=1.3057
+XTn6_47 row6 gate mn6_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_47 mn6_47 cn47 3378378.3784  $ G-=0.296uS w=0.4332
+XTn6_48 row6 gate mn6_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_48 mn6_48 cn48 3378378.3784  $ G-=0.296uS w=0.2507
+XTn6_49 row6 gate mn6_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_49 mn6_49 cn49 246836.6792  $ G-=4.051uS w=-0.0958
+XTn6_50 row6 gate mn6_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_50 mn6_50 cn50 121095.2856  $ G-=8.258uS w=-0.2032
+XTn6_51 row6 gate mn6_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_51 mn6_51 cn51 82988.3797  $ G-=12.050uS w=-0.2999
+XTn6_52 row6 gate mn6_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_52 mn6_52 cn52 3378378.3784  $ G-=0.296uS w=0.0329
+XTn6_53 row6 gate mn6_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_53 mn6_53 cn53 62286.5766  $ G-=16.055uS w=-0.4021
+XTn6_54 row6 gate mn6_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_54 mn6_54 cn54 79111.6899  $ G-=12.640uS w=-0.3150
+XTn6_55 row6 gate mn6_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_55 mn6_55 cn55 3378378.3784  $ G-=0.296uS w=0.2235
+XTn6_56 row6 gate mn6_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_56 mn6_56 cn56 3265882.1425  $ G-=0.306uS w=-0.0003
+XTn6_57 row6 gate mn6_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_57 mn6_57 cn57 3378378.3784  $ G-=0.296uS w=0.0592
+XTn6_58 row6 gate mn6_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_58 mn6_58 cn58 55507.0509  $ G-=18.016uS w=-0.4522
+XTn6_59 row6 gate mn6_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_59 mn6_59 cn59 3378378.3784  $ G-=0.296uS w=0.8233
+XTn6_60 row6 gate mn6_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_60 mn6_60 cn60 3378378.3784  $ G-=0.296uS w=0.3711
+XTn6_61 row6 gate mn6_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_61 mn6_61 cn61 103017.7334  $ G-=9.707uS w=-0.2402
+XTn6_62 row6 gate mn6_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_62 mn6_62 cn62 3378378.3784  $ G-=0.296uS w=0.0922
+XTn6_63 row6 gate mn6_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn6_63 mn6_63 cn63 999197.5542  $ G-=1.001uS w=-0.0180
+* --- Row 7 ---
+XTn7_0 row7 gate mn7_0 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_0 mn7_0 cn0 66443.0105  $ G-=15.050uS w=-0.3765
+XTn7_1 row7 gate mn7_1 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_1 mn7_1 cn1 86161.7655  $ G-=11.606uS w=-0.2886
+XTn7_2 row7 gate mn7_2 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_2 mn7_2 cn2 64469.2892  $ G-=15.511uS w=-0.3883
+XTn7_3 row7 gate mn7_3 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_3 mn7_3 cn3 3378378.3784  $ G-=0.296uS w=0.7850
+XTn7_4 row7 gate mn7_4 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_4 mn7_4 cn4 49276.9444  $ G-=20.293uS w=-0.5103
+XTn7_5 row7 gate mn7_5 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_5 mn7_5 cn5 3378378.3784  $ G-=0.296uS w=0.1522
+XTn7_6 row7 gate mn7_6 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_6 mn7_6 cn6 3378378.3784  $ G-=0.296uS w=0.4379
+XTn7_7 row7 gate mn7_7 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_7 mn7_7 cn7 3378378.3784  $ G-=0.296uS w=0.8671
+XTn7_8 row7 gate mn7_8 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_8 mn7_8 cn8 28133.5238  $ G-=35.545uS w=-0.8995
+XTn7_9 row7 gate mn7_9 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_9 mn7_9 cn9 3378378.3784  $ G-=0.296uS w=0.3040
+XTn7_10 row7 gate mn7_10 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_10 mn7_10 cn10 3378378.3784  $ G-=0.296uS w=0.1945
+XTn7_11 row7 gate mn7_11 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_11 mn7_11 cn11 3378378.3784  $ G-=0.296uS w=0.2302
+XTn7_12 row7 gate mn7_12 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_12 mn7_12 cn12 197347.7153  $ G-=5.067uS w=-0.1218
+XTn7_13 row7 gate mn7_13 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_13 mn7_13 cn13 3378378.3784  $ G-=0.296uS w=0.0170
+XTn7_14 row7 gate mn7_14 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_14 mn7_14 cn14 45160.9359  $ G-=22.143uS w=-0.5575
+XTn7_15 row7 gate mn7_15 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_15 mn7_15 cn15 3378378.3784  $ G-=0.296uS w=0.8726
+XTn7_16 row7 gate mn7_16 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_16 mn7_16 cn16 3378378.3784  $ G-=0.296uS w=0.3410
+XTn7_17 row7 gate mn7_17 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_17 mn7_17 cn17 42887.8680  $ G-=23.317uS w=-0.5875
+XTn7_18 row7 gate mn7_18 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_18 mn7_18 cn18 3378378.3784  $ G-=0.296uS w=0.3468
+XTn7_19 row7 gate mn7_19 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_19 mn7_19 cn19 3378378.3784  $ G-=0.296uS w=0.5205
+XTn7_20 row7 gate mn7_20 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_20 mn7_20 cn20 3378378.3784  $ G-=0.296uS w=0.3509
+XTn7_21 row7 gate mn7_21 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_21 mn7_21 cn21 3378378.3784  $ G-=0.296uS w=0.3869
+XTn7_22 row7 gate mn7_22 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_22 mn7_22 cn22 115776.2460  $ G-=8.637uS w=-0.2129
+XTn7_23 row7 gate mn7_23 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_23 mn7_23 cn23 3378378.3784  $ G-=0.296uS w=0.0971
+XTn7_24 row7 gate mn7_24 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_24 mn7_24 cn24 3378378.3784  $ G-=0.296uS w=0.0007
+XTn7_25 row7 gate mn7_25 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_25 mn7_25 cn25 3378378.3784  $ G-=0.296uS w=0.3254
+XTn7_26 row7 gate mn7_26 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_26 mn7_26 cn26 154752.5336  $ G-=6.462uS w=-0.1573
+XTn7_27 row7 gate mn7_27 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_27 mn7_27 cn27 3378378.3784  $ G-=0.296uS w=0.6135
+XTn7_28 row7 gate mn7_28 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_28 mn7_28 cn28 3378378.3784  $ G-=0.296uS w=0.5325
+XTn7_29 row7 gate mn7_29 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_29 mn7_29 cn29 106743.4828  $ G-=9.368uS w=-0.2315
+XTn7_30 row7 gate mn7_30 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_30 mn7_30 cn30 161257.1330  $ G-=6.201uS w=-0.1507
+XTn7_31 row7 gate mn7_31 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_31 mn7_31 cn31 44781.3423  $ G-=22.331uS w=-0.5623
+XTn7_32 row7 gate mn7_32 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_32 mn7_32 cn32 159515.4769  $ G-=6.269uS w=-0.1524
+XTn7_33 row7 gate mn7_33 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_33 mn7_33 cn33 3378378.3784  $ G-=0.296uS w=1.4358
+XTn7_34 row7 gate mn7_34 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_34 mn7_34 cn34 514854.2946  $ G-=1.942uS w=-0.0420
+XTn7_35 row7 gate mn7_35 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_35 mn7_35 cn35 3378378.3784  $ G-=0.296uS w=0.9379
+XTn7_36 row7 gate mn7_36 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_36 mn7_36 cn36 3378378.3784  $ G-=0.296uS w=0.6165
+XTn7_37 row7 gate mn7_37 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_37 mn7_37 cn37 278068.1624  $ G-=3.596uS w=-0.0842
+XTn7_38 row7 gate mn7_38 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_38 mn7_38 cn38 3378378.3784  $ G-=0.296uS w=0.1845
+XTn7_39 row7 gate mn7_39 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_39 mn7_39 cn39 25773.3253  $ G-=38.800uS w=-0.9826
+XTn7_40 row7 gate mn7_40 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_40 mn7_40 cn40 68202.4229  $ G-=14.662uS w=-0.3666
+XTn7_41 row7 gate mn7_41 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_41 mn7_41 cn41 3378378.3784  $ G-=0.296uS w=0.1279
+XTn7_42 row7 gate mn7_42 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_42 mn7_42 cn42 370890.2600  $ G-=2.696uS w=-0.0613
+XTn7_43 row7 gate mn7_43 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_43 mn7_43 cn43 3378378.3784  $ G-=0.296uS w=0.0325
+XTn7_44 row7 gate mn7_44 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_44 mn7_44 cn44 3378378.3784  $ G-=0.296uS w=0.4174
+XTn7_45 row7 gate mn7_45 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_45 mn7_45 cn45 3378378.3784  $ G-=0.296uS w=0.0516
+XTn7_46 row7 gate mn7_46 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_46 mn7_46 cn46 3378378.3784  $ G-=0.296uS w=0.7777
+XTn7_47 row7 gate mn7_47 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_47 mn7_47 cn47 1117156.9700  $ G-=0.895uS w=-0.0153
+XTn7_48 row7 gate mn7_48 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_48 mn7_48 cn48 3378378.3784  $ G-=0.296uS w=0.1141
+XTn7_49 row7 gate mn7_49 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_49 mn7_49 cn49 3378378.3784  $ G-=0.296uS w=0.4120
+XTn7_50 row7 gate mn7_50 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_50 mn7_50 cn50 46937.8860  $ G-=21.305uS w=-0.5361
+XTn7_51 row7 gate mn7_51 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_51 mn7_51 cn51 3378378.3784  $ G-=0.296uS w=0.4683
+XTn7_52 row7 gate mn7_52 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_52 mn7_52 cn52 556156.6030  $ G-=1.798uS w=-0.0383
+XTn7_53 row7 gate mn7_53 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_53 mn7_53 cn53 246647.5139  $ G-=4.054uS w=-0.0959
+XTn7_54 row7 gate mn7_54 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_54 mn7_54 cn54 99017.3644  $ G-=10.099uS w=-0.2502
+XTn7_55 row7 gate mn7_55 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_55 mn7_55 cn55 3378378.3784  $ G-=0.296uS w=0.0282
+XTn7_56 row7 gate mn7_56 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_56 mn7_56 cn56 3378378.3784  $ G-=0.296uS w=1.0653
+XTn7_57 row7 gate mn7_57 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_57 mn7_57 cn57 318181.5148  $ G-=3.143uS w=-0.0726
+XTn7_58 row7 gate mn7_58 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_58 mn7_58 cn58 3378378.3784  $ G-=0.296uS w=0.3454
+XTn7_59 row7 gate mn7_59 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_59 mn7_59 cn59 3378378.3784  $ G-=0.296uS w=0.1909
+XTn7_60 row7 gate mn7_60 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_60 mn7_60 cn60 90141.7274  $ G-=11.094uS w=-0.2755
+XTn7_61 row7 gate mn7_61 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_61 mn7_61 cn61 3378378.3784  $ G-=0.296uS w=0.6126
+XTn7_62 row7 gate mn7_62 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_62 mn7_62 cn62 3378378.3784  $ G-=0.296uS w=0.2028
+XTn7_63 row7 gate mn7_63 0 sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Rrn7_63 mn7_63 cn63 3378378.3784  $ G-=0.296uS w=0.2230
+
+.op
+
+.control
+run
+print i(Vsp0) i(Vsn0)
+print i(Vsp1) i(Vsn1)
+print i(Vsp2) i(Vsn2)
+print i(Vsp3) i(Vsn3)
+print i(Vsp4) i(Vsn4)
+print i(Vsp5) i(Vsn5)
+print i(Vsp6) i(Vsn6)
+print i(Vsp7) i(Vsn7)
+print i(Vsp8) i(Vsn8)
+print i(Vsp9) i(Vsn9)
+print i(Vsp10) i(Vsn10)
+print i(Vsp11) i(Vsn11)
+print i(Vsp12) i(Vsn12)
+print i(Vsp13) i(Vsn13)
+print i(Vsp14) i(Vsn14)
+print i(Vsp15) i(Vsn15)
+print i(Vsp16) i(Vsn16)
+print i(Vsp17) i(Vsn17)
+print i(Vsp18) i(Vsn18)
+print i(Vsp19) i(Vsn19)
+print i(Vsp20) i(Vsn20)
+print i(Vsp21) i(Vsn21)
+print i(Vsp22) i(Vsn22)
+print i(Vsp23) i(Vsn23)
+print i(Vsp24) i(Vsn24)
+print i(Vsp25) i(Vsn25)
+print i(Vsp26) i(Vsn26)
+print i(Vsp27) i(Vsn27)
+print i(Vsp28) i(Vsn28)
+print i(Vsp29) i(Vsn29)
+print i(Vsp30) i(Vsn30)
+print i(Vsp31) i(Vsn31)
+print i(Vsp32) i(Vsn32)
+print i(Vsp33) i(Vsn33)
+print i(Vsp34) i(Vsn34)
+print i(Vsp35) i(Vsn35)
+print i(Vsp36) i(Vsn36)
+print i(Vsp37) i(Vsn37)
+print i(Vsp38) i(Vsn38)
+print i(Vsp39) i(Vsn39)
+print i(Vsp40) i(Vsn40)
+print i(Vsp41) i(Vsn41)
+print i(Vsp42) i(Vsn42)
+print i(Vsp43) i(Vsn43)
+print i(Vsp44) i(Vsn44)
+print i(Vsp45) i(Vsn45)
+print i(Vsp46) i(Vsn46)
+print i(Vsp47) i(Vsn47)
+print i(Vsp48) i(Vsn48)
+print i(Vsp49) i(Vsn49)
+print i(Vsp50) i(Vsn50)
+print i(Vsp51) i(Vsn51)
+print i(Vsp52) i(Vsn52)
+print i(Vsp53) i(Vsn53)
+print i(Vsp54) i(Vsn54)
+print i(Vsp55) i(Vsn55)
+print i(Vsp56) i(Vsn56)
+print i(Vsp57) i(Vsn57)
+print i(Vsp58) i(Vsn58)
+print i(Vsp59) i(Vsn59)
+print i(Vsp60) i(Vsn60)
+print i(Vsp61) i(Vsn61)
+print i(Vsp62) i(Vsn62)
+print i(Vsp63) i(Vsn63)
+quit
+.endc
+
+.end

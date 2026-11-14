@@ -3,7 +3,7 @@ Full inter-patient RF accuracy test — ALL 8 features from analog circuits.
 NO Python feature computation — everything from SKY130 SPICE circuits.
 
 Feature circuits (all SKY130 PDK analog):
-  F1/F2: rr_timing.spice    — EWMA alpha=0.10, real RR intervals
+  F1/F2: rr_timing.spice    — EWMA alpha=0.015, real RR intervals
   F3/F4: beat_instability.spice — TG S&H, diode diff pair (per lead)
   F5:    pwave_diff.spice    — diode diff pair
   F6:    qrs_width.spice     — NFET S&H
@@ -42,7 +42,7 @@ EWMA_ALPHA = 0.015
 
 DS1 = ['101','106','108','109','112','114','115','116','118','119',
        '122','124','201','203','205','207','208','209','215','220','223','230']
-DS2 = ['100','103','105','111','113','117','121','200','202','210',
+DS2 = ['100','103','105','111','113','117','121','123','200','202','210',
        '212','213','214','219','221','222','228','231','232','233','234']
 
 aami_map = {}

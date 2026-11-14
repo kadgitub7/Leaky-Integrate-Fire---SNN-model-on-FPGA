@@ -1,0 +1,150 @@
+======================================================================
+COMPREHENSIVE ANALOG FRONTEND + MLP VALIDATION
+======================================================================
+
+Step 1: Extracting features...
+  A) Corrected circuit features (F2 backward-looking)...
+     Train: (50964, 8), Test: (48139, 8)
+  B) Original circuit features (F2 forward-looking)...
+     Train: (50964, 8), Test: (48139, 8)
+  Extraction time: 9.1s
+
+Step 2: Feature sanity checks...
+  Feature           Mean       Std       Min       Max   Zeros%
+  F1:rr_dev      -0.0020    0.4697   -1.2787   99.0322     0.0%
+  F4:bi_L1       -0.0000    0.3840   -8.1400    6.0750     2.2%
+  F2:asym        -0.0000    0.6581  -97.7444   98.7222     3.4%
+  F5:pwave        0.0136    0.1409   -2.2300    1.8350     1.7%
+  F6:width       -0.5737    0.3814   -5.1200    5.1150     0.1%
+  F3:bi_L0        0.0000    0.5121   -6.7450    5.7900     1.6%
+  F7:slope        0.8141    0.7437   -3.7750    4.0550     0.1%
+  F8:rpeak        0.9018    0.8376   -5.1200    5.1150     0.1%
+
+  Train class distribution:
+    Class 0 (N):  45813 (89.9%)
+    Class 1 (S):    943 (1.9%)
+    Class 2 (V):   3786 (7.4%)
+    Class 3 (F):    414 (0.8%)
+    Class 4 (Q):      8 (0.0%)
+  Test class distribution:
+    Class 0 (N):  42692 (88.7%)
+    Class 1 (S):   1836 (3.8%)
+    Class 2 (V):   3216 (6.7%)
+    Class 3 (F):    388 (0.8%)
+    Class 4 (Q):      7 (0.0%)
+
+  DS1 records: 22 | DS2 records: 21
+  Overlap: 0 records (CLEAN)
+
+  F2 corrected vs original correlation: 0.5088
+  F2 corrected: mean=-0.0000, std=0.6581
+  F2 original:  mean=-0.0000, std=0.6581
+
+Step 3: Classification accuracy...
+
+======================================================================
+sklearn MLPClassifier 8\u219264\u21925: CORRECTED circuit features (10 seeds)
+======================================================================
+  Seed 42:  94.17%  S= 55.3% V= 86.5% F= 52.3%
+  Seed 43:  94.68%  S= 75.2% V= 87.4% F= 50.0%
+  Seed 44:  93.80%  S= 65.7% V= 87.8% F= 71.1%
+  Seed 45:  94.63%  S= 69.0% V= 86.5% F= 56.4%
+  Seed 46:  94.73%  S= 72.5% V= 88.6% F= 63.4%
+  Seed 47:  94.49%  S= 82.7% V= 82.5% F= 55.2%
+  Seed 48:  94.68%  S= 66.4% V= 87.5% F= 53.6%
+  Seed 49:  94.14%  S= 69.9% V= 79.0% F= 63.4%
+  Seed 50:  94.43%  S= 66.0% V= 89.3% F= 49.5%
+  Seed 51:  94.69%  S= 69.6% V= 87.6% F= 57.5%
+
+  Mean±std: 94.44±0.29%
+  Best:     94.73%
+  S recall: 69.2±6.7%
+  V recall: 86.3±3.0%
+  F recall: 57.2±6.5%
+
+Best model classification report:
+              precision    recall  f1-score   support
+
+           N      0.979     0.964     0.972     42692
+           S      0.579     0.725     0.644      1836
+           V      0.849     0.886     0.867      3216
+           F      0.591     0.634     0.612       388
+           Q      0.100     0.143     0.118         7
+
+    accuracy                          0.947     48139
+   macro avg      0.620     0.671     0.643     48139
+weighted avg      0.952     0.947     0.949     48139
+
+Confusion matrix (rows=true, cols=pred):
+       N      S      V      F      Q
+  N   41174     953     416     140       9
+  S     431    1332      69       4       0
+  V     327      14    2849      26       0
+  F     122       0      20     246       0
+  Q       4       0       2       0       1
+
+
+--- RF(300, depth=15): CORRECTED circuit features ---
+  RF: 93.35%  S=81.6% V=87.5% F=40.5%
+
+======================================================================
+sklearn MLPClassifier 8\u219264\u21925: ORIGINAL circuit features (F2 forward) (10 seeds)
+======================================================================
+  Seed 42:  93.80%  S= 52.5% V= 88.1% F= 46.9%
+  Seed 43:  94.33%  S= 64.3% V= 90.0% F= 48.2%
+  Seed 44:  94.13%  S= 65.0% V= 85.6% F= 49.5%
+  Seed 45:  94.36%  S= 67.9% V= 84.8% F= 55.9%
+  Seed 46:  94.46%  S= 74.3% V= 89.5% F= 52.1%
+  Seed 47:  93.97%  S= 72.2% V= 88.1% F= 50.8%
+  Seed 48:  94.62%  S= 75.1% V= 86.7% F= 37.4%
+  Seed 49:  94.09%  S= 70.0% V= 85.7% F= 55.9%
+  Seed 50:  94.77%  S= 67.4% V= 86.9% F= 58.8%
+  Seed 51:  94.58%  S= 69.7% V= 89.9% F= 57.0%
+
+  Mean±std: 94.31±0.29%
+  Best:     94.77%
+  S recall: 67.8±6.2%
+  V recall: 87.5±1.8%
+  F recall: 51.2±6.0%
+
+Best model classification report:
+              precision    recall  f1-score   support
+
+           N      0.977     0.969     0.973     42692
+           S      0.592     0.674     0.631      1836
+           V      0.853     0.869     0.861      3216
+           F      0.530     0.588     0.557       388
+           Q      0.000     0.000     0.000         7
+
+    accuracy                          0.948     48139
+   macro avg      0.591     0.620     0.604     48139
+weighted avg      0.950     0.948     0.949     48139
+
+Confusion matrix (rows=true, cols=pred):
+       N      S      V      F      Q
+  N   41360     833     313     179       7
+  S     461    1238     137       0       0
+  V     370      19    2795      23       9
+  F     132       0      28     228       0
+  Q       3       0       4       0       0
+
+
+--- RF(300, depth=15): ORIGINAL circuit features (F2 forward) ---
+  RF: 94.11%  S=86.5% V=89.4% F=40.7%
+
+======================================================================
+FINAL SUMMARY
+======================================================================
+
+  Feature Set                                 MLP mean±std   MLP best       RF
+  -------------------------------------------------------------------------
+  Corrected (true circuit match)            94.44±0.29%    94.73%   93.35%
+  Original (F2 forward-looking)             94.31±0.29%    94.77%   94.11%
+
+  NOTE: 'Corrected' features match the actual analog circuit computation.
+  The MLP weights will be trained on these features and mapped to ReRAM.
+  Analog gains (3-17x) become linear scaling \u2192 absorbed by StandardScaler.
+
+Done.
+
+[exited with code 0]

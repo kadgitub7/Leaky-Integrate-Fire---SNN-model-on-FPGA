@@ -1,0 +1,69 @@
+C:\Users\kadhi\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\metrics\_classification.py:1731: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+C:\Users\kadhi\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\metrics\_classification.py:1731: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+C:\Users\kadhi\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\metrics\_classification.py:1731: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+Loaded: Train=(51008, 8), Test=(48181, 8)
+Train mean: [ 2.7192283e-07  0.0000000e+00  1.4717935e-07 -2.8717922e-08
+ -2.4888865e-07 -5.2649522e-08 -4.7863203e-08  4.3076884e-08]
+Train std:  [0.9999999  0.9999999  1.         0.9999972  1.         0.9999998
+ 0.9999999  0.99999994]
+Class dist train: {np.int64(0): np.int64(45854), np.int64(1): np.int64(944), np.int64(2): np.int64(3788), np.int64(3): np.int64(414), np.int64(4): np.int64(8)}
+Class dist test:  {np.int64(0): np.int64(42732), np.int64(1): np.int64(1837), np.int64(2): np.int64(3217), np.int64(3): np.int64(388), np.int64(4): np.int64(7)}
+
+======================================================================
+TEST 1: sklearn MLPClassifier (exact full_analog_mlp.py config)
+======================================================================
+  Seed 42: 95.73%  S=49.6% V=88.3%
+  Seed 43: 95.74%  S=50.7% V=87.2%
+  Seed 44: 96.04%  S=63.4% V=86.4%
+  Seed 45: 95.78%  S=54.1% V=87.8%
+  Seed 46: 95.51%  S=39.6% V=87.8%
+
+Best sklearn MLP: 96.04% (seed=44)
+              precision    recall  f1-score   support
+
+           N      0.969     0.991     0.980     42732
+           S      0.832     0.634     0.720      1837
+           V      0.914     0.864     0.888      3217
+           F      0.000     0.000     0.000       388
+           Q      0.000     0.000     0.000         7
+
+    accuracy                          0.960     48181
+   macro avg      0.543     0.498     0.518     48181
+weighted avg      0.952     0.960     0.956     48181
+
+======================================================================
+TEST 2: RF(300, depth=15) on cached features
+======================================================================
+RF accuracy: 95.75%
+              precision    recall  f1-score   support
+
+           N      0.973     0.985     0.979     42732
+           S      0.711     0.631     0.669      1837
+           V      0.888     0.896     0.892      3217
+           F      0.000     0.000     0.000       388
+           Q      0.000     0.000     0.000         7
+
+    accuracy                          0.958     48181
+   macro avg      0.514     0.502     0.508     48181
+weighted avg      0.949     0.958     0.953     48181
+
+======================================================================
+TEST 3: PyTorch MLP 8->64->5 with BN+Dropout+FocalLoss+SMOTE
+======================================================================
+  Seed 42: 81.60%  S=87.2% V=86.8%
+  Seed 43: 81.25%  S=85.6% V=87.0%
+  Seed 44: 79.58%  S=85.7% V=88.3%
+
+======================================================================
+TEST 4: sklearn MLPClassifier WITHOUT early_stopping
+======================================================================
+  Seed 42: 94.99%  S=49.0% V=81.7%
+  Seed 43: 95.59%  S=57.5% V=88.7%
+  Seed 44: 95.64%  S=62.2% V=85.9%
+
+Done.
+
+[exited with code 0]
