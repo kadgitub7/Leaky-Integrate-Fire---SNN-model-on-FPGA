@@ -132,7 +132,7 @@ def main():
                         try: vout[k] = float(s.split('=')[1].strip().split()[0])
                         except: pass
 
-            ngspice_pred = np.argmax(vout)
+            ngspice_pred = np.argmin(vout)
             sw_beat_pred = sw_pred[beat_idx]
             match = "OK" if ngspice_pred == sw_beat_pred else "MISMATCH"
             if ngspice_pred == true_cls:

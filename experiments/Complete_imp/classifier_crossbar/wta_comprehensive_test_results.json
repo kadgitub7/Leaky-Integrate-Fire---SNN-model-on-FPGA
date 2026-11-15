@@ -1,0 +1,18 @@
+{
+  "total_beats": 500,
+  "valid": 500,
+  "correct": 500,
+  "wrong": 0,
+  "match_rate_pct": 100.0,
+  "wta_margin_min_mv": 0.0,
+  "wta_margin_median_mv": 15.8,
+  "failures": [],
+  "voltage_range": [
+    0.55,
+    1.05
+  ],
+  "z2_range": [
+    -88.28200535004778,
+    19.45518097331262
+  ]
+}

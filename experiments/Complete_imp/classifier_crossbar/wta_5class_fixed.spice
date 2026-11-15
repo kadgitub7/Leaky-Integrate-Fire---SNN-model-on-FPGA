@@ -1,0 +1,34 @@
+* =================================================================
+* 5-Input Maximum Voltage Detector (PFET-Input, NFET Diode Load)
+* =================================================================
+* Topology: 5 PFET inputs share a common source with tail current.
+* NFET diode loads convert drain current to voltage.
+*
+* Winner (highest Vin) → smallest |Vgs| → least current →
+*   lowest NFET load current → LOWEST drain voltage.
+*
+* Classification: argmin(out0..out4) = winning class
+*
+* All SKY130 foundry elements. No ideal components.
+* =================================================================
+
+.subckt wta_5class in0 in1 in2 in3 in4 out0 out1 out2 out3 out4 vdd vss nbias pbias
+
+* --- Tail current source (~10uA shared) ---
+Xtail src pbias vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u
+
+* --- PFET input transistors (shared source) ---
+Xp0 out0 in0 src vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Xp1 out1 in1 src vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Xp2 out2 in2 src vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Xp3 out3 in3 src vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+Xp4 out4 in4 src vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u
+
+* --- NFET diode loads ---
+Xld0 out0 out0 vss vss sky130_fd_pr__nfet_01v8 W=1.0u L=1.0u
+Xld1 out1 out1 vss vss sky130_fd_pr__nfet_01v8 W=1.0u L=1.0u
+Xld2 out2 out2 vss vss sky130_fd_pr__nfet_01v8 W=1.0u L=1.0u
+Xld3 out3 out3 vss vss sky130_fd_pr__nfet_01v8 W=1.0u L=1.0u
+Xld4 out4 out4 vss vss sky130_fd_pr__nfet_01v8 W=1.0u L=1.0u
+
+.ends wta_5class
