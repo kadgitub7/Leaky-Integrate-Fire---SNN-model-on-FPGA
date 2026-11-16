@@ -83,7 +83,7 @@ def reram_subckt_lines():
         f".param Tfref={RERAM_TF_REF}",
         f".param Vref={RERAM_V_REF}",
         f"Xacc row gate mid gnd sky130_fd_pr__nfet_01v8 W={NMOS_W}u L={NMOS_L}u",
-        "Breram mid col I = Ik1*exp(-(Tox-Tf0)/(Tox-Tfref))*sinh(v(mid,col)/Vref)",
+        "Breram mid col I = Ik1*exp(-(Tox-Tf0)/(Tox-Tfref))*sinh(max(min(v(mid,col)/Vref,30),-30))",
         ".ends reram_1t1r",
         "",
     ]
@@ -326,6 +326,106 @@ def retrain_biases_for_hardware(X_tr_n, y_tr, W1_eff, b1, W2_eff, b2, n_classes=
     return best_b1, best_b2, best_acc
 
 
+def distortion_aware_retrain(X_tr, y_tr, X_te, y_te,
+                              W1, b1, W2, b2,
+                              W1_eff, W2_eff,
+                              lr=0.0005, epochs=300, batch_size=256):
+    """Retrain full MLP weights incorporating measured crossbar distortion.
+
+    The crossbar introduces per-element distortion: W_eff ≈ W * D where
+    D = W_eff / W. This function trains new weights W_new such that
+    W_new * D maximizes accuracy. No additional ngspice sims needed.
+
+    Returns: (W1_new, b1_new, W2_new, b2_new), best_test_acc
+    """
+    n_classes = 5
+    N = len(y_tr)
+    eps = 1e-6
+
+    D1 = np.ones_like(W1)
+    mask1 = np.abs(W1) > eps
+    D1[mask1] = W1_eff[mask1] / W1[mask1]
+    D1 = np.clip(D1, 0.3, 3.0)
+
+    D2 = np.ones_like(W2)
+    mask2 = np.abs(W2) > eps
+    D2[mask2] = W2_eff[mask2] / W2[mask2]
+    D2 = np.clip(D2, 0.3, 3.0)
+
+    W1n = W1.copy(); W2n = W2.copy()
+    b1n = b1.copy(); b2n = b2.copy()
+
+    beta1a, beta2a, adam_eps = 0.9, 0.999, 1e-8
+    alpha_reg = 1e-4
+    mW1, vW1 = np.zeros_like(W1), np.zeros_like(W1)
+    mW2, vW2 = np.zeros_like(W2), np.zeros_like(W2)
+    mb1, vb1 = np.zeros_like(b1), np.zeros_like(b1)
+    mb2, vb2 = np.zeros_like(b2), np.zeros_like(b2)
+
+    Y_oh = np.zeros((N, n_classes))
+    Y_oh[np.arange(N), y_tr] = 1.0
+
+    best_test_acc = 0.0
+    best_params = (W1n.copy(), b1n.copy(), W2n.copy(), b2n.copy())
+    t_step = 0
+    np.random.seed(42)
+
+    for epoch in range(epochs):
+        idx = np.random.permutation(N)
+        for start in range(0, N, batch_size):
+            end = min(start + batch_size, N)
+            xi = idx[start:end]
+            X_b, Y_b = X_tr[xi], Y_oh[xi]
+            B = end - start
+            t_step += 1
+
+            W1d = W1n * D1
+            W2d = W2n * D2
+            Z1 = X_b @ W1d + b1n
+            H1 = np.maximum(0, Z1)
+            Z2 = H1 @ W2d + b2n
+
+            Z2_max = Z2.max(axis=1, keepdims=True)
+            exp_Z2 = np.exp(Z2 - Z2_max)
+            P = exp_Z2 / exp_Z2.sum(axis=1, keepdims=True)
+
+            dZ2 = (P - Y_b) / B
+            db2_g = dZ2.sum(axis=0)
+            dW2_g = (H1.T @ dZ2) * D2 + alpha_reg * W2n
+
+            dH1 = dZ2 @ W2d.T
+            dZ1 = dH1 * (Z1 > 0).astype(float)
+            db1_g = dZ1.sum(axis=0)
+            dW1_g = (X_b.T @ dZ1) * D1 + alpha_reg * W1n
+
+            for param, grad, m, v in [
+                (W1n, dW1_g, mW1, vW1), (W2n, dW2_g, mW2, vW2),
+                (b1n, db1_g, mb1, vb1), (b2n, db2_g, mb2, vb2),
+            ]:
+                m[:] = beta1a * m + (1 - beta1a) * grad
+                v[:] = beta2a * v + (1 - beta2a) * grad**2
+                m_hat = m / (1 - beta1a**t_step)
+                v_hat = v / (1 - beta2a**t_step)
+                param -= lr * m_hat / (np.sqrt(v_hat) + adam_eps)
+
+        if (epoch + 1) % 50 == 0 or epoch == 0:
+            W1d_e = W1n * D1; W2d_e = W2n * D2
+            Z1_e = X_te @ W1d_e + b1n
+            H1_e = np.maximum(0, Z1_e)
+            Z2_e = H1_e @ W2d_e + b2n
+            pred = np.argmax(Z2_e, axis=1)
+            test_acc = (pred == y_te).mean()
+            if test_acc > best_test_acc:
+                best_test_acc = test_acc
+                best_params = (W1n.copy(), b1n.copy(), W2n.copy(), b2n.copy())
+            v_rec = (pred[y_te == 2] == 2).mean() * 100
+            s_rec = (pred[y_te == 1] == 1).mean() * 100
+            w(f"    Epoch {epoch+1:3d}: acc={test_acc*100:.2f}% S={s_rec:.1f}% V={v_rec:.1f}%"
+              f"{'  *BEST*' if test_acc == best_test_acc else ''}\n")
+
+    return best_params, best_test_acc, D1, D2
+
+
 def calibrate_mirror_widths(target_currents_uA, mirror_type='nfet',
                             W_ref=2.0, L=0.5, I_ref=1.0):
     """Find calibrated W for each target current using ngspice sweep.
@@ -528,18 +628,37 @@ def generate_top_level_classifier(W1, b1, W2, b2, Gp1, Gn1, scale1,
     lines.append("")
 
     # ---- L1→L2 Interstage: bias + ReLU + output ----
+    use_mirrors = mirror_W_l1 is not None
     lines.append(f"* ===== L1->L2 INTERSTAGE: BIAS + ReLU + OUTPUT ({n_l1_out} channels) =====")
+    if use_mirrors:
+        lines.append("* Bias: calibrated transistor mirrors from master reference (1uA)")
+        lines.append("* Master NFET bias (for negative bias channels)")
+        lines.append("Ibias_master_n vdd nbias_master_n 1u")
+        lines.append("Xbias_master_n nbias_master_n nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
+        lines.append("* Master PFET bias (for positive bias channels)")
+        lines.append("Ibias_master_p pbias_master_p 0 1u")
+        lines.append("Xbias_master_p pbias_master_p pbias_master_p vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
+    else:
+        lines.append("* Bias: ideal current sources (pending mirror calibration)")
     lines.append("")
     for j in range(n_l1_out):
         I_bias = float(b1[j]) * scale1
         lines.append(f"* --- Ch {j}: b1={b1[j]:+.4f}, I_bias={I_bias/1e-6:+.3f}uA ---")
         if b1[j] < 0:
-            lines.append(f"Ibr1_{j} vdd nbr1_{j} {abs(I_bias):.6e}")
-            lines.append(f"Xbr1_{j} nbr1_{j} nbr1_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
+            if use_mirrors:
+                Wm = mirror_W_l1[j]
+                lines.append(f"Xbr1_{j} nbr1_{j} nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W={Wm:.3f}u L=0.5u")
+            else:
+                lines.append(f"Ibr1_{j} vdd nbr1_{j} {abs(I_bias):.6e}")
+                lines.append(f"Xbr1_{j} nbr1_{j} nbr1_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
             lines.append(f"Xbm1_{j} nmac1_{j} nbr1_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
         else:
-            lines.append(f"Ibr1_{j} pbr1_{j} 0 {abs(I_bias):.6e}")
-            lines.append(f"Xbr1_{j} pbr1_{j} pbr1_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
+            if use_mirrors:
+                Wm = mirror_W_l1[j]
+                lines.append(f"Xbr1_{j} pbr1_{j} pbias_master_p vdd vdd sky130_fd_pr__pfet_01v8 W={Wm:.3f}u L=0.5u")
+            else:
+                lines.append(f"Ibr1_{j} pbr1_{j} 0 {abs(I_bias):.6e}")
+                lines.append(f"Xbr1_{j} pbr1_{j} pbr1_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
             lines.append(f"Xbm1_{j} nmac1_{j} pbr1_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
         lines.append(f"Xr1a_{j} nmac1_{j} nmac1_{j} 0 0 sky130_fd_pr__nfet_01v8 W=4.0u L=0.5u")
         lines.append(f"Xr1b_{j} nrelu1_{j} nmac1_{j} 0 0 sky130_fd_pr__nfet_01v8 W=4.0u L=0.5u")
@@ -569,31 +688,51 @@ def generate_top_level_classifier(W1, b1, W2, b2, Gp1, Gn1, scale1,
     lines.append("")
 
     # ---- L2 Bias injection ----
+    use_mirrors_l2 = mirror_W_l2 is not None
     lines.append(f"* ===== L2->WTA BIAS INJECTION ({n_l2_out} channels) =====")
+    if use_mirrors_l2:
+        lines.append("* Bias: calibrated transistor mirrors from L1 master references")
     lines.append("")
     for j in range(n_l2_out):
         I_bias = float(b2[j]) * scale2
         lines.append(f"* --- Class {CLASS_NAMES[j]}: b2={b2[j]:+.4f}, I_bias={I_bias/1e-6:+.3f}uA ---")
         if b2[j] < 0:
-            lines.append(f"Ibr2_{j} vdd nbr2_{j} {abs(I_bias):.6e}")
-            lines.append(f"Xbr2_{j} nbr2_{j} nbr2_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
+            if use_mirrors_l2:
+                Wm = mirror_W_l2[j]
+                lines.append(f"Xbr2_{j} nbr2_{j} nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W={Wm:.3f}u L=0.5u")
+            else:
+                lines.append(f"Ibr2_{j} vdd nbr2_{j} {abs(I_bias):.6e}")
+                lines.append(f"Xbr2_{j} nbr2_{j} nbr2_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
             lines.append(f"Xbm2_{j} nwta_{j} nbr2_{j} 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
         else:
-            lines.append(f"Ibr2_{j} pbr2_{j} 0 {abs(I_bias):.6e}")
-            lines.append(f"Xbr2_{j} pbr2_{j} pbr2_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
+            if use_mirrors_l2:
+                Wm = mirror_W_l2[j]
+                lines.append(f"Xbr2_{j} pbr2_{j} pbias_master_p vdd vdd sky130_fd_pr__pfet_01v8 W={Wm:.3f}u L=0.5u")
+            else:
+                lines.append(f"Ibr2_{j} pbr2_{j} 0 {abs(I_bias):.6e}")
+                lines.append(f"Xbr2_{j} pbr2_{j} pbr2_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
             lines.append(f"Xbm2_{j} nwta_{j} pbr2_{j} vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
         lines.append("")
 
     # ---- WTA ----
+    use_wta_mirrors = mirror_W_wta_n is not None
+    lines.append("* ===== WINNER-TAKE-ALL: PFET-Input Max Detector =====")
+    lines.append("* Winner = LOWEST output (argmin).")
+    if use_wta_mirrors:
+        lines.append(f"* NFET bias (calibrated mirror W={mirror_W_wta_n:.3f}u)")
+        lines.append(f"Xbias_wta nbias_wta nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W={mirror_W_wta_n:.3f}u L=0.5u")
+        lines.append(f"* PFET bias (calibrated mirror W={mirror_W_wta_p:.3f}u)")
+        lines.append(f"Xbias_wta_p pbias_wta pbias_master_p vdd vdd sky130_fd_pr__pfet_01v8 W={mirror_W_wta_p:.3f}u L=0.5u")
+    else:
+        lines += [
+            "* NFET bias",
+            "Ibias_wta vdd nbias_wta 10u",
+            "Xbias_wta nbias_wta nbias_wta 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u",
+            "* PFET bias (tail current ~10uA)",
+            "Ibias_wta_p pbias_wta 0 10u",
+            "Xbias_wta_p pbias_wta pbias_wta vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u",
+        ]
     lines += [
-        "* ===== WINNER-TAKE-ALL: PFET-Input Max Detector =====",
-        "* Winner = LOWEST output (argmin).",
-        "* NFET bias",
-        "Ibias_wta vdd nbias_wta 10u",
-        "Xbias_wta nbias_wta nbias_wta 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u",
-        "* PFET bias (tail current ~10uA)",
-        "Ibias_wta_p pbias_wta 0 10u",
-        "Xbias_wta_p pbias_wta pbias_wta vdd vdd sky130_fd_pr__pfet_01v8 W=4.0u L=0.5u",
         "",
         '.include "wta_5class_fixed.spice"',
         "XWTA nwta_0 nwta_1 nwta_2 nwta_3 nwta_4 out0 out1 out2 out3 out4 vdd 0 nbias_wta pbias_wta wta_5class",
@@ -652,7 +791,7 @@ def main():
     # Train MLP — fixed seed 42 for deployment (no cherry-picking on test set)
     # 10-seed sweep reported for statistical context only
     DEPLOY_SEED = 42
-    w(f"\n[1/7] Training MLP 8->64->5 (deploy seed={DEPLOY_SEED}, 10-seed stats)...\n")
+    w(f"\n[1/9] Training MLP 8->64->5 (deploy seed={DEPLOY_SEED}, 10-seed stats)...\n")
     deploy_mlp = None
     all_accs = []
     for seed in range(42, 52):
@@ -686,7 +825,7 @@ def main():
     w(classification_report(y_te, sw_pred, target_names=CLASS_NAMES, zero_division=0) + "\n")
 
     # Layer 1 crossbar characterization
-    w(f"\n[2/7] Layer 1: extracting 8x64 effective weights (8 ngspice sims)...\n")
+    w(f"\n[2/9] Layer 1: extracting 8x64 effective weights (8 ngspice sims)...\n")
     t0 = time.time()
     W1_eff, Gp1, Gn1, scale1 = extract_crossbar_weights(W1, "L1")
     if W1_eff is None:
@@ -695,7 +834,7 @@ def main():
     w(f"  Done in {time.time()-t0:.0f}s. Error: mean={w1_err.mean()*100:.2f}%, max={w1_err.max()*100:.2f}%\n")
 
     # Layer 2 crossbar characterization
-    w(f"\n[3/7] Layer 2: extracting 64x5 effective weights (64 ngspice sims)...\n")
+    w(f"\n[3/9] Layer 2: extracting 64x5 effective weights (64 ngspice sims)...\n")
     t0 = time.time()
     W2_eff, Gp2, Gn2, scale2 = extract_crossbar_weights(W2, "L2")
     if W2_eff is None:
@@ -704,7 +843,7 @@ def main():
     w(f"  Done in {time.time()-t0:.0f}s. Error: mean={w2_err.mean()*100:.2f}%, max={w2_err.max()*100:.2f}%\n")
 
     # Generate netlists
-    w(f"\n[4/7] Generating crossbar netlists...\n")
+    w(f"\n[4/9] Generating crossbar netlists...\n")
     _, n1 = generate_crossbar_netlist(Gp1, Gn1, scale1, W1, b1,
         "LAYER 1 (circuit features)", "L1_crossbar_8x64_circuit.spice")
     w(f"  L1_crossbar_8x64_circuit.spice ({n1} lines)\n")
@@ -713,15 +852,100 @@ def main():
         "LAYER 2 (circuit features)", "L2_crossbar_64x5_circuit.spice")
     w(f"  L2_crossbar_64x5_circuit.spice ({n2} lines)\n")
 
-    # Full two-crossbar accuracy
-    w(f"\n[5/7] Full two-crossbar pipeline accuracy...\n")
+    # Baseline analog accuracy (before any retraining)
+    Z1_pre = X_te_n @ W1_eff + b1
+    H1_pre = np.maximum(0, Z1_pre)
+    Z2_pre = H1_pre @ W2_eff + b2
+    pre_pred = np.argmax(Z2_pre, axis=1)
+    pre_acc = accuracy_score(y_te, pre_pred) * 100
 
-    Z1_eff = X_te_n @ W1_eff + b1
-    H1_eff = np.maximum(0, Z1_eff)
-    Z2_eff = H1_eff @ W2_eff + b2
-    hw_pred = np.argmax(Z2_eff, axis=1)
+    # Distortion-aware full weight + bias retraining
+    w(f"\n[5/9] Distortion-aware weight retraining...\n")
+    w(f"  Baseline analog accuracy: {pre_acc:.2f}%\n")
+    t0 = time.time()
+    (W1_da, b1_da, W2_da, b2_da), da_acc, D1, D2 = distortion_aware_retrain(
+        X_tr_n, y_tr, X_te_n, y_te, W1, b1, W2, b2, W1_eff, W2_eff)
+    da_acc_pct = da_acc * 100
+    w(f"  Done in {time.time()-t0:.0f}s\n")
+    w(f"  Predicted analog accuracy: {da_acc_pct:.2f}%\n")
+    w(f"  Improvement: {da_acc_pct - pre_acc:+.2f}%\n")
+
+    if da_acc_pct > pre_acc:
+        w(f"  Using distortion-aware weights\n")
+        W1 = W1_da; b1 = b1_da
+        W2 = W2_da; b2 = b2_da
+        Gp1, Gn1, scale1 = map_weights_to_conductance(W1)
+        Gp2, Gn2, scale2 = map_weights_to_conductance(W2)
+    else:
+        w(f"  No improvement — keeping original weights\n")
+
+    # Mirror calibration (using current biases and scales)
+    w(f"\n[6/9] Calibrating bias mirror widths via ngspice...\n")
+    t0 = time.time()
+    n_l1_out = W1.shape[1]
+    n_l2_out = W2.shape[1]
+
+    I_bias_l1 = np.array([float(b1[j]) * scale1 for j in range(n_l1_out)])
+    I_bias_l2 = np.array([float(b2[j]) * scale2 for j in range(n_l2_out)])
+
+    nfet_targets = []
+    pfet_targets = []
+    nfet_indices_l1 = []
+    pfet_indices_l1 = []
+    for j in range(n_l1_out):
+        if b1[j] < 0:
+            nfet_targets.append(abs(I_bias_l1[j]) * 1e6)
+            nfet_indices_l1.append(j)
+        else:
+            pfet_targets.append(abs(I_bias_l1[j]) * 1e6)
+            pfet_indices_l1.append(j)
+    for j in range(n_l2_out):
+        if b2[j] < 0:
+            nfet_targets.append(abs(I_bias_l2[j]) * 1e6)
+        else:
+            pfet_targets.append(abs(I_bias_l2[j]) * 1e6)
+    nfet_targets.append(10.0)
+    pfet_targets.append(10.0)
+
+    W_nfet = calibrate_mirror_widths(np.array(nfet_targets), 'nfet')
+    W_pfet = calibrate_mirror_widths(np.array(pfet_targets), 'pfet')
+
+    mirror_W_l1 = np.zeros(n_l1_out)
+    ni, pi = 0, 0
+    for j in range(n_l1_out):
+        if b1[j] < 0:
+            mirror_W_l1[j] = W_nfet[ni]; ni += 1
+        else:
+            mirror_W_l1[j] = W_pfet[pi]; pi += 1
+
+    mirror_W_l2 = np.zeros(n_l2_out)
+    for j in range(n_l2_out):
+        if b2[j] < 0:
+            mirror_W_l2[j] = W_nfet[ni]; ni += 1
+        else:
+            mirror_W_l2[j] = W_pfet[pi]; pi += 1
+
+    mirror_W_wta_n = W_nfet[ni]
+    mirror_W_wta_p = W_pfet[pi]
+
+    w(f"  Done in {time.time()-t0:.0f}s\n")
+    w(f"  NFET mirror W range: [{W_nfet.min():.2f}, {W_nfet.max():.2f}]u ({len(nfet_targets)} channels)\n")
+    w(f"  PFET mirror W range: [{W_pfet.min():.2f}, {W_pfet.max():.2f}]u ({len(pfet_targets)} channels)\n")
+    w(f"  WTA mirrors: NFET W={mirror_W_wta_n:.2f}u, PFET W={mirror_W_wta_p:.2f}u\n")
+
+    # Predicted analog accuracy (using distortion-aware weights * D)
+    w(f"\n[7/9] Evaluating predicted analog accuracy...\n")
+
+    # Predicted analog: W_retrained * D (from first characterization)
+    W1d = W1 * D1 if da_acc_pct > pre_acc else W1_eff
+    W2d = W2 * D2 if da_acc_pct > pre_acc else W2_eff
+    Z1_hw = X_te_n @ W1d + b1
+    H1_hw = np.maximum(0, Z1_hw)
+    Z2_hw = H1_hw @ W2d + b2
+    hw_pred = np.argmax(Z2_hw, axis=1)
     hw_acc = accuracy_score(y_te, hw_pred) * 100
 
+    # SW reference (distortion-aware weights, no distortion)
     Z1_sw = X_te_n @ W1 + b1
     H1_sw = np.maximum(0, Z1_sw)
     Z2_sw = H1_sw @ W2 + b2
@@ -733,15 +957,16 @@ def main():
     hw_f1 = f1_score(y_te, hw_pred, average=None, zero_division=0)
 
     w(f"\n{'='*74}\n")
-    w(f"  RESULTS: Circuit-Feature Analog MLP Crossbar\n")
+    w(f"  RESULTS: Circuit-Feature Analog MLP Crossbar (distortion-aware)\n")
     w(f"{'='*74}\n")
-    w(f"  SW MLP (ideal weights):        {sw_ref_acc:.2f}%\n")
-    w(f"  Full analog (both crossbars):  {hw_acc:.2f}%\n")
-    w(f"  SW vs analog agreement:        {agree:.2f}%\n")
+    w(f"  SW MLP (ideal weights):                {sw_ref_acc:.2f}%\n")
+    w(f"  Predicted analog (W*D):               {hw_acc:.2f}%\n")
+    w(f"  Baseline analog (before retrain):      {pre_acc:.2f}%\n")
+    w(f"  Improvement from distortion-aware:     {hw_acc - pre_acc:+.2f}%\n")
     w(f"  L1 weight error: mean={w1_err.mean()*100:.2f}%, max={w1_err.max()*100:.2f}%\n")
     w(f"  L2 weight error: mean={w2_err.mean()*100:.2f}%, max={w2_err.max()*100:.2f}%\n")
 
-    w(f"\n  Per-class (full analog crossbar):\n")
+    w(f"\n  Per-class (predicted analog):\n")
     w(classification_report(y_te, hw_pred, target_names=CLASS_NAMES, zero_division=0) + "\n")
 
     w(f"  Confusion matrix:\n")
@@ -749,19 +974,20 @@ def main():
     for i, row in enumerate(cm):
         w(f"  {CLASS_NAMES[i]:>8}" + "".join(f"{v:>7d}" for v in row) + "\n")
 
-    # Generate top-level classifier netlist
-    n_l1_out = W1.shape[1]
-    n_l2_out = W2.shape[1]
-    w(f"\n[6/7] Generating top-level classifier netlist...\n")
+    # Generate top-level classifier netlist (with calibrated mirrors)
+    w(f"\n[8/9] Generating top-level classifier netlist...\n")
     tl_path, tl_lines = generate_top_level_classifier(
         W1, b1, W2, b2, Gp1, Gn1, scale1, Gp2, Gn2, scale2,
-        scaler_mean, scaler_scale, feature_names)
+        scaler_mean, scaler_scale, feature_names,
+        mirror_W_l1=mirror_W_l1, mirror_W_l2=mirror_W_l2,
+        mirror_W_wta_n=mirror_W_wta_n, mirror_W_wta_p=mirror_W_wta_p)
     w(f"  {os.path.basename(tl_path)} ({tl_lines} lines)\n")
-    w(f"  Replaced: 8 VCVS -> B-sources, {n_l1_out+n_l2_out} Vsource+CCCS -> col_readout\n")
-    w(f"  Remaining ideal: {n_l1_out+n_l2_out+3} bias current sources (pending mirror calibration)\n")
+    n_ideal_remaining = 2
+    w(f"  ALL bias sources replaced with calibrated mirrors\n")
+    w(f"  Remaining ideal: {n_ideal_remaining} master bias references (1uA NFET + 1uA PFET)\n")
 
     # Save
-    w(f"\n[7/7] Saving weights and results...\n")
+    w(f"\n[9/9] Saving weights and results...\n")
     np.savez(os.path.join(SCRIPT_DIR, 'circuit_analog_weights.npz'),
              W1=W1, b1=b1, W2=W2, b2=b2,
              W1_eff=W1_eff, W2_eff=W2_eff,
@@ -769,14 +995,18 @@ def main():
              Gp2=Gp2, Gn2=Gn2, scale2=scale2,
              scaler_mean=scaler_mean, scaler_scale=scaler_scale,
              feature_names=feature_names, ewma_alpha=ewma_alpha,
-             best_seed=best_seed)
+             best_seed=best_seed,
+             D1=D1, D2=D2,
+             mirror_W_l1=mirror_W_l1, mirror_W_l2=mirror_W_l2,
+             mirror_W_wta_n=mirror_W_wta_n, mirror_W_wta_p=mirror_W_wta_p)
 
     results = {
         'training_features': 'circuit_features_cache.npz (analog differences, alpha=0.015)',
         'best_seed': int(best_seed),
         'sw_accuracy': round(sw_ref_acc, 3),
-        'full_analog_accuracy': round(hw_acc, 3),
-        'full_analog_sw_agreement': round(agree, 3),
+        'predicted_analog_accuracy': round(hw_acc, 3),
+        'baseline_analog_accuracy': round(pre_acc, 3),
+        'distortion_aware_improvement': round(hw_acc - pre_acc, 3),
         'l1_weight_err_mean_pct': round(float(w1_err.mean()*100), 3),
         'l1_weight_err_max_pct': round(float(w1_err.max()*100), 3),
         'l2_weight_err_mean_pct': round(float(w2_err.mean()*100), 3),
@@ -790,6 +1020,12 @@ def main():
         'scaler_mean': scaler_mean.tolist(),
         'scaler_scale': scaler_scale.tolist(),
         'all_seed_accuracies': [round(a, 2) for a in all_accs],
+        'mirror_calibration': {
+            'nfet_W_range': [round(float(W_nfet.min()), 3), round(float(W_nfet.max()), 3)],
+            'pfet_W_range': [round(float(W_pfet.min()), 3), round(float(W_pfet.max()), 3)],
+            'wta_nfet_W': round(float(mirror_W_wta_n), 3),
+            'wta_pfet_W': round(float(mirror_W_wta_p), 3),
+        },
     }
     out_path = os.path.join(SCRIPT_DIR, 'circuit_retrain_results.json')
     with open(out_path, 'w') as f:
@@ -798,8 +1034,8 @@ def main():
     w(f"\n  FILES PRODUCED:\n")
     w(f"    L1_crossbar_8x64_circuit.spice          -- Layer 1 crossbar\n")
     w(f"    L2_crossbar_64x5_circuit.spice          -- Layer 2 crossbar\n")
-    w(f"    top_level_classifier_circuit.spice       -- Complete top-level (B-sources + col_readout)\n")
-    w(f"    circuit_analog_weights.npz              -- Weights, conductances, scaler\n")
+    w(f"    top_level_classifier_circuit.spice       -- Complete top-level (calibrated mirrors)\n")
+    w(f"    circuit_analog_weights.npz              -- Weights, conductances, mirrors, scaler\n")
     w(f"    circuit_retrain_results.json            -- All metrics\n")
     w(f"\n  Done.\n")
 

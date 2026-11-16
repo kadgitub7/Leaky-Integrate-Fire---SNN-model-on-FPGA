@@ -1,57 +1,53 @@
 {
   "training_features": "circuit_features_cache.npz (analog differences, alpha=0.015)",
   "best_seed": 42,
-  "sw_accuracy": 94.178,
-  "full_analog_accuracy": 93.872,
-  "full_analog_sw_agreement": 97.887,
-  "l1_weight_err_mean_pct": 24.568,
-  "l1_weight_err_max_pct": 74.481,
-  "l2_weight_err_mean_pct": 21.974,
-  "l2_weight_err_max_pct": 74.464,
-  "l1_scale": 147060.4805225579,
-  "l2_scale": 223960.06226823642,
+  "baseline_analog_accuracy": 93.845,
+  "predicted_analog_accuracy": 94.713,
+  "distortion_aware_improvement": 0.868,
+  "l1_scale": 142435.6599372779,
+  "l2_scale": 119695.52395155295,
   "per_class_f1": {
-    "N": 0.9673,
-    "S": 0.4776,
-    "V": 0.8392,
-    "F": 0.5417,
-    "Q": 0.0667
+    "N": 0.9718,
+    "S": 0.5021,
+    "V": 0.8978,
+    "F": 0.4904,
+    "Q": 0.0
   },
   "confusion_matrix": [
     [
-      42988,
-      808,
-      267,
-      121,
-      20
+      43125,
+      792,
+      212,
+      68,
+      7
     ],
     [
-      924,
-      833,
-      78,
-      1,
+      881,
+      888,
+      67,
+      0,
       0
     ],
     [
-      592,
-      11,
-      2591,
-      23,
-      2
+      317,
+      21,
+      2863,
+      15,
+      3
     ],
     [
-      172,
+      221,
       0,
-      18,
-      198,
+      14,
+      153,
       0
     ],
     [
       4,
       0,
-      2,
+      3,
       0,
-      1
+      0
     ]
   ],
   "train_beats": 50964,
@@ -76,16 +72,16 @@
     0.7436605932245341,
     0.8376286170990681
   ],
-  "all_seed_accuracies": [
-    94.18,
-    94.64,
-    93.72,
-    94.57,
-    94.6,
-    94.85,
-    94.59,
-    94.25,
-    94.79,
-    94.63
-  ]
+  "mirror_calibration": {
+    "nfet_W_range": [
+      11.242,
+      100.0
+    ],
+    "pfet_W_range": [
+      30.913,
+      100.0
+    ],
+    "wta_nfet_W": 11.242,
+    "wta_pfet_W": 30.913
+  }
 }
