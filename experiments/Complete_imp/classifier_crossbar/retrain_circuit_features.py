@@ -1,8 +1,9 @@
 """
 Retrain MLP on CIRCUIT-MATCHING features and map to ReRAM crossbar.
 
-Uses circuit_features_cache.npz (analog feature definitions: differences, not
-ratios) to produce weights that match what the actual SPICE circuits compute.
+Uses circuit_features_cache.npz (analog frontend-matched feature definitions:
+F1/F2 differences, alpha=0.015, WIDTH_OFF=30) to produce weights aligned with
+what the actual analog frontend circuits compute.
 
 Pipeline:
   1. Load circuit_features_cache.npz
@@ -631,13 +632,15 @@ def generate_top_level_classifier(W1, b1, W2, b2, Gp1, Gn1, scale1,
     use_mirrors = mirror_W_l1 is not None
     lines.append(f"* ===== L1->L2 INTERSTAGE: BIAS + ReLU + OUTPUT ({n_l1_out} channels) =====")
     if use_mirrors:
-        lines.append("* Bias: calibrated transistor mirrors from master reference (1uA)")
-        lines.append("* Master NFET bias (for negative bias channels)")
-        lines.append("Ibias_master_n vdd nbias_master_n 1u")
+        lines.append("* Bias: calibrated transistor mirrors from self-biasing master reference")
+        lines.append("* Self-biasing 1uA reference: R from VDD sets current through NFET diode")
+        lines.append("* R_bias = 1.182M calibrated for I_ref = 1.0uA (SKY130 BSIM4 tt corner)")
+        lines.append("* NFET master: R -> NFET diode (sets nbias_master_n gate voltage)")
+        lines.append("R_bias_n vdd nbias_master_n 1.182Meg")
         lines.append("Xbias_master_n nbias_master_n nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
-        lines.append("* Master PFET bias (for positive bias channels)")
-        lines.append("Ibias_master_p pbias_master_p 0 1u")
+        lines.append("* PFET master: PFET diode + NFET mirror (mirrors 1uA from nbias)")
         lines.append("Xbias_master_p pbias_master_p pbias_master_p vdd vdd sky130_fd_pr__pfet_01v8 W=2.0u L=0.5u")
+        lines.append("Xn_mirror_p pbias_master_p nbias_master_n 0 0 sky130_fd_pr__nfet_01v8 W=2.0u L=0.5u")
     else:
         lines.append("* Bias: ideal current sources (pending mirror calibration)")
     lines.append("")
@@ -982,9 +985,8 @@ def main():
         mirror_W_l1=mirror_W_l1, mirror_W_l2=mirror_W_l2,
         mirror_W_wta_n=mirror_W_wta_n, mirror_W_wta_p=mirror_W_wta_p)
     w(f"  {os.path.basename(tl_path)} ({tl_lines} lines)\n")
-    n_ideal_remaining = 2
     w(f"  ALL bias sources replaced with calibrated mirrors\n")
-    w(f"  Remaining ideal: {n_ideal_remaining} master bias references (1uA NFET + 1uA PFET)\n")
+    w(f"  Self-biasing master reference: R_bias=1.182M + NFET mirror (zero ideal elements)\n")
 
     # Save
     w(f"\n[9/9] Saving weights and results...\n")
@@ -1001,7 +1003,7 @@ def main():
              mirror_W_wta_n=mirror_W_wta_n, mirror_W_wta_p=mirror_W_wta_p)
 
     results = {
-        'training_features': 'circuit_features_cache.npz (analog differences, alpha=0.015)',
+        'training_features': 'circuit_features_cache.npz (frontend-matched: ratios, alpha=0.10, WIDTH_OFF=10)',
         'best_seed': int(best_seed),
         'sw_accuracy': round(sw_ref_acc, 3),
         'predicted_analog_accuracy': round(hw_acc, 3),

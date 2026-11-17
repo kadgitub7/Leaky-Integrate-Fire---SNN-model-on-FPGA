@@ -1,51 +1,51 @@
 {
   "training_features": "circuit_features_cache.npz (analog differences, alpha=0.015)",
   "best_seed": 42,
-  "baseline_analog_accuracy": 93.845,
-  "predicted_analog_accuracy": 94.713,
-  "distortion_aware_improvement": 0.868,
-  "l1_scale": 142435.6599372779,
-  "l2_scale": 119695.52395155295,
+  "baseline_analog_accuracy": 93.451,
+  "predicted_analog_accuracy": 94.699,
+  "distortion_aware_improvement": 1.249,
+  "l1_scale": 139081.517898891,
+  "l2_scale": 124884.6478142234,
   "per_class_f1": {
     "N": 0.9718,
-    "S": 0.5021,
-    "V": 0.8978,
-    "F": 0.4904,
+    "S": 0.5586,
+    "V": 0.8944,
+    "F": 0.4664,
     "Q": 0.0
   },
   "confusion_matrix": [
     [
-      43125,
-      792,
-      212,
-      68,
+      42928,
+      851,
+      223,
+      195,
       7
     ],
     [
-      881,
-      888,
-      67,
-      0,
+      712,
+      1051,
+      72,
+      1,
       0
     ],
     [
-      317,
+      314,
+      25,
+      2859,
       21,
-      2863,
-      15,
-      3
-    ],
-    [
-      221,
-      0,
-      14,
-      153,
       0
     ],
     [
-      4,
+      188,
       0,
+      16,
+      184,
+      0
+    ],
+    [
       3,
+      0,
+      4,
       0,
       0
     ]

@@ -1,0 +1,99 @@
+{
+  "id": "PLAN-2026-11-16-001",
+  "timestamp": "2026-11-16T00:35:00Z",
+  "skill": "architect_planner",
+  "objective": "OBJ-2026-11-16-001",
+  "status": "active",
+  "approach": "R-based bias reference with NFET current mirror for PFET master",
+  "approach_rationale": "Simplest topology that meets all criteria. VDD is fixed at 1.8V so supply independence (beta-multiplier) is unnecessary. Natural startup via resistive path eliminates the zero-current equilibrium that plagues self-biased loops. Only adds 1 resistor + 1 transistor. Minimal risk to existing mirror calibration since it generates the same ~1uA through the same W=2u L=0.5u master diodes.",
+  "alternatives_considered": [
+    {
+      "name": "Beta-multiplier (subthreshold)",
+      "reason_rejected": "Requires startup circuit to avoid zero-current state. Adds ~8 transistors + 1 resistor. Supply independence not needed (VDD=1.8V fixed). Higher convergence risk in ngspice .op."
+    },
+    {
+      "name": "Bandgap + resistor",
+      "reason_rejected": "Overkill — 15+ transistors for temperature stability not needed in simulation. Would require significant design effort and validation. Future work if tapeout proceeds."
+    }
+  ],
+  "analog_specialist_assessment": {
+    "feasibility": "HIGH",
+    "analysis": "At VDD=1.8V, NFET W=2u L=0.5u in subthreshold draws ~1uA at Vgs~0.5V. Resistor R_bias = (VDD - Vgs)/I = (1.8-0.5)/1e-6 = 1.3MOhm. This is a large but physically realizable poly resistor (650 squares of high-res poly at 2kOhm/sq). The NFET mirror for the PFET master has ~15% CLM error at L=0.5u (Vds mismatch: 0.5V vs 1.3V), which shifts the PFET master current to ~1.15uA. This is within the SC-4 tolerance (0.8-1.2uA). All downstream mirrors scale proportionally, preserving relative accuracy.",
+    "first_principles_prediction": {
+      "V_nbias_master_n": "~0.48-0.52V (NFET diode at ~1uA, W=2u L=0.5u)",
+      "I_ref": "(1.8V - V_nbias) / 1.3MOhm ≈ 0.98-1.02 uA",
+      "V_pbias_master_p": "~1.25-1.35V (VDD - |Vsg_PFET| at ~1uA, W=2u L=0.5u)",
+      "I_pfet_master": "~1.0-1.2 uA (NFET mirror CLM adds ~10-15%)"
+    }
+  },
+  "steps": [
+    {
+      "step_number": 1,
+      "action": "Create isolated test netlist for R-based bias reference. Simulate with ngspice .op to measure: V(nbias), V(pbias), I through each master diode. Compare against analog specialist predictions.",
+      "files_read": ["top_level_classifier_circuit.spice (lines 1224-1231)"],
+      "files_modified": [],
+      "files_created": ["scratchpad/test_bias_ref.spice", "scratchpad/test_bias_ref.py"],
+      "completion_criterion": "ngspice .op converges, V(nbias) in [0.4, 0.6]V, I_ref in [0.8, 1.2]uA",
+      "verification": "Compare simulated values against first-principles predictions",
+      "rollback": "Delete test files (no production files modified)",
+      "estimated_minutes": 15,
+      "depends_on": [],
+      "analog_specialist_notes": "NFET diode W=2u L=0.5u should give Vgs~0.5V at 1uA. R=1.3MOhm. If V(nbias) is too far from 0.5V, adjust R iteratively."
+    },
+    {
+      "step_number": 2,
+      "action": "Calibrate R value: if the simulated current deviates from 1uA, adjust R to bring it within 5%. This accounts for BSIM4 model specifics that hand calculations cannot predict exactly.",
+      "files_read": ["scratchpad/test_bias_ref results"],
+      "files_modified": ["scratchpad/test_bias_ref.spice"],
+      "files_created": [],
+      "completion_criterion": "I_ref within 5% of 1.0uA (0.95-1.05 uA)",
+      "verification": "ngspice .op with calibrated R",
+      "rollback": "Revert R to 1.3M",
+      "estimated_minutes": 10,
+      "depends_on": [1],
+      "analog_specialist_notes": "R = (VDD - V_nbias_measured) / I_target. Use measured V_nbias from step 1."
+    },
+    {
+      "step_number": 3,
+      "action": "Modify generate_top_level_classifier() in retrain_circuit_features.py: replace the 2 ideal I-source lines with the R-based reference topology. The generator must emit: (a) R_bias from VDD to nbias_master_n, (b) the existing NFET master diode (unchanged), (c) the existing PFET master diode (unchanged), (d) a new NFET mirror transistor to sink current through the PFET diode.",
+      "files_read": ["retrain_circuit_features.py (lines 630-641)"],
+      "files_modified": ["retrain_circuit_features.py"],
+      "files_created": [],
+      "completion_criterion": "Generator emits bias reference instead of ideal sources. No 'I' elements in generated output.",
+      "verification": "Run generator, grep for 'Ibias' (should be absent), grep for 'R_bias' (should be present)",
+      "rollback": "git checkout retrain_circuit_features.py",
+      "estimated_minutes": 15,
+      "depends_on": [2],
+      "analog_specialist_notes": "NFET mirror for PFET master: same W/L as master NFET (W=2u L=0.5u), gate=nbias_master_n. This gives ~1uA with CLM error."
+    },
+    {
+      "step_number": 4,
+      "action": "Regenerate top_level_classifier_circuit.spice and run ngspice .op. Verify: (a) convergence, (b) WTA winner unchanged, (c) WTA margin preserved, (d) no ideal I-sources in netlist.",
+      "files_read": [],
+      "files_modified": ["top_level_classifier_circuit.spice (regenerated)"],
+      "files_created": [],
+      "completion_criterion": "All SC-1 through SC-4 from OBJ pass",
+      "verification": "Full ngspice .op validation of top-level",
+      "rollback": "Regenerate with old generator (git checkout)",
+      "estimated_minutes": 20,
+      "depends_on": [3],
+      "analog_specialist_notes": "If WTA discrimination changes, check if bias current shift affected mirror calibration. Small systematic shift (<20%) should not change WTA winner."
+    },
+    {
+      "step_number": 5,
+      "action": "Update design logs: MASTER_ISSUE_LOG.md (mark MAJOR-008 classifier portion COMPLETE), analog_kb (add bias reference to circuit catalog and update DR-006), create VER record.",
+      "files_read": [],
+      "files_modified": ["MASTER_ISSUE_LOG.md", "design_logs/analog_kb/circuit_catalog.json", "design_logs/analog_kb/design_rules.json"],
+      "files_created": ["design_logs/verification/VER-2026-11-16-001.json"],
+      "completion_criterion": "All logs updated with results",
+      "verification": "Review log entries for completeness",
+      "rollback": "N/A (documentation only)",
+      "estimated_minutes": 10,
+      "depends_on": [4],
+      "analog_specialist_notes": null
+    }
+  ],
+  "total_estimated_hours": 1.2,
+  "critical_path": [1, 2, 3, 4, 5],
+  "parallelizable": []
+}

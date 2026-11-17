@@ -57,10 +57,14 @@
       "id": "DR-006",
       "rule": "Bias generator requires startup circuit in silicon",
       "reason": "Self-biased current mirror has stable zero-current state. .ic V(xbias.iref)=0.3 works in simulation only.",
-      "workaround": "Add startup circuit for tapeout. OK for simulation with .ic.",
-      "incident": null,
-      "affected": "bias_gen.spice",
-      "verified": true
+      "workaround": "Classifier: replaced with R-based reference (R=1.182M + NFET diode), which has natural startup via resistive path. Frontend bias_gen still needs startup circuit.",
+      "incident": "MAJOR-008: replaced 2 ideal I-sources with R-based self-biasing reference",
+      "affected": "bias_gen.spice (frontend), top_level_classifier_circuit.spice (classifier — FIXED)",
+      "verified": true,
+      "fix_applied": {
+        "classifier": "R_bias_n=1.182Meg from VDD to NFET diode + NFET mirror for PFET master. VER-2026-11-16-001.",
+        "frontend": "Still uses .ic — to be addressed in MAJOR-007 integration"
+      }
     },
     {
       "id": "DR-007",

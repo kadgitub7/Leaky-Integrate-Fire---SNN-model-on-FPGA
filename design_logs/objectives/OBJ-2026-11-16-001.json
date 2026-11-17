@@ -1,0 +1,76 @@
+{
+  "id": "OBJ-2026-11-16-001",
+  "timestamp": "2026-11-16T00:30:00Z",
+  "skill": "objectives_engineer",
+  "parent_issue": "MAJOR-008",
+  "status": "completed",
+  "title": "Replace ideal bias current sources with self-biasing reference circuit",
+  "context": "The classifier top-level has 2 remaining ideal elements: Ibias_master_n (1uA) and Ibias_master_p (1uA) at lines 1227-1231 of top_level_classifier_circuit.spice. These ideal current sources must be replaced with a real transistor-based bias reference that starts autonomously from VDD=1.8V. This is the classifier-specific portion of MAJOR-008 (No Startup / Independence Circuits). The frontend LDO and frontend .ic elimination are deferred to MAJOR-007 integration.",
+  "success_criteria": [
+    {
+      "id": "SC-1",
+      "metric": "ideal_element_count",
+      "target": "0 ideal current sources (I elements) in top_level_classifier_circuit.spice",
+      "measurement_method": "grep -c '^I' top_level_classifier_circuit.spice (should return 0)",
+      "current_value": "2 (Ibias_master_n, Ibias_master_p)",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-2",
+      "metric": "startup_convergence",
+      "target": "ngspice .op converges without any .ic statements (zero initial conditions)",
+      "measurement_method": "Run ngspice .op on top_level_classifier_circuit.spice, verify exit code 0 and 'done' in output",
+      "current_value": "PASS (already converges with ideal sources, need to verify with real reference)",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-3",
+      "metric": "wta_discrimination",
+      "target": "Same WTA winner as baseline (out2 = class 2 winner), margin >= 10mV over runner-up",
+      "measurement_method": "Extract v(out0)-v(out4) from .op, verify argmax unchanged and margin preserved",
+      "current_value": "out2=0.1958V (winner), next=out4=0.1449V, margin=50.9mV",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-4",
+      "metric": "reference_current_accuracy",
+      "target": "Master bias current within 20% of 1uA target (0.8-1.2 uA)",
+      "measurement_method": "Measure I(Xbias_master_n) or V(nbias_master_n) in .op, compare to baseline",
+      "current_value": "Exactly 1.0uA (ideal source)",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-5",
+      "metric": "accuracy_regression",
+      "target": "Predicted analog accuracy regression < 0.5% from baseline (94.71%)",
+      "measurement_method": "If bias current shifts, evaluate impact on mirror calibration accuracy. Full re-characterization only if current error > 10%.",
+      "current_value": "94.71% predicted analog accuracy (distortion-aware retrained)",
+      "priority": "target"
+    },
+    {
+      "id": "SC-6",
+      "metric": "input_independence",
+      "target": "Only external inputs: VDD (1.8V) and ECG feature voltages. No external bias currents or reference voltages.",
+      "measurement_method": "Audit netlist for I-sources, V-sources (except VDD), or .ic statements",
+      "current_value": "2 ideal I-sources still present",
+      "priority": "must_pass"
+    }
+  ],
+  "constraints": [
+    "Must use SKY130 130nm CMOS devices only (sky130_fd_pr__nfet_01v8, sky130_fd_pr__pfet_01v8)",
+    "No digital elements — fully analog bias reference",
+    "Must not change mirror gate voltages (nbias_master_n, pbias_master_p) by more than 10% from current values",
+    "Passive resistor R element is acceptable (represents physical poly resistor)",
+    "Must integrate into generate_top_level_classifier() in retrain_circuit_features.py"
+  ],
+  "dependencies": [
+    "MAJOR-003 (COMPLETE — all other ideal elements already replaced)",
+    "Distortion-aware retraining (COMPLETE — baseline accuracy established)"
+  ],
+  "estimated_effort": "2-3 hours",
+  "risk_factors": [
+    "Bias current mismatch: if reference produces != 1uA, all 72 mirror currents shift proportionally. Impact is systematic (all channels shift same direction), so relative accuracy may be preserved.",
+    "Convergence: self-biasing loops can have multiple equilibria. The R-based approach avoids this (no loop, natural startup).",
+    "Resistor value: 1.3MOhm poly resistor is large but physically realizable in SKY130 high-res poly (650 squares at 2kOhm/sq)."
+  ]
+}

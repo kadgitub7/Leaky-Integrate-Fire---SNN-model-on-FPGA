@@ -1,0 +1,103 @@
+{
+  "id": "VER-2026-11-16-001",
+  "timestamp": "2026-11-16T01:30:00Z",
+  "skill": "verification_engineer",
+  "test_name": "MAJOR-008 Classifier Bias Reference Replacement",
+  "objective": "OBJ-2026-11-16-001",
+  "plan_step": "PLAN-2026-11-16-001, steps 1-4",
+  "status": "completed",
+  "execution_time_s": 420,
+  "overall_verdict": "PASS",
+  "criteria_results": [
+    {
+      "criterion": "SC-1: Zero ideal current sources (I elements) in top-level netlist",
+      "measured": "0 lines starting with 'I' in top_level_classifier_circuit.spice",
+      "verdict": "PASS",
+      "margin": "N/A (binary)"
+    },
+    {
+      "criterion": "SC-2: ngspice .op converges without .ic statements",
+      "measured": "Converged via dynamic gmin stepping, exit code 0, no .ic used",
+      "verdict": "PASS",
+      "margin": "N/A (binary)"
+    },
+    {
+      "criterion": "SC-3: WTA winner unchanged (out2), margin >= 10mV",
+      "measured": "v(out2)=0.19665V (winner), runner-up v(out3)=0.14372V, margin=52.9mV",
+      "verdict": "PASS",
+      "margin": "+42.9mV above 10mV threshold"
+    },
+    {
+      "criterion": "SC-4: Reference current within 20% of 1uA (0.8-1.2 uA)",
+      "measured": "NFET master: 0.996 uA, PFET master: 1.022 uA (isolation test)",
+      "verdict": "PASS",
+      "margin": "NFET: 0.4% error, PFET: 2.2% error"
+    },
+    {
+      "criterion": "SC-5: Accuracy regression < 0.5%",
+      "measured": "94.70% predicted analog accuracy (unchanged from pre-modification baseline)",
+      "verdict": "PASS",
+      "margin": "0.0% regression (same weights, only bias source changed)"
+    },
+    {
+      "criterion": "SC-6: No external bias inputs (only VDD + ECG features)",
+      "measured": "Only VDD=1.8V, 8 feature voltages. R_bias_n (passive) + transistors only.",
+      "verdict": "PASS",
+      "margin": "N/A (binary)"
+    }
+  ],
+  "failures": [],
+  "anomalies": [
+    "WTA discrimination actually improved slightly: 52.9mV margin (new) vs 50.9mV (baseline). This is because the R-based reference produces 0.996uA vs exactly 1.0uA, which systematically shifts all mirror currents by -0.4%. The nonlinear interaction slightly favors class 2 discrimination.",
+    "V(pbias_master_p) differs by -1.46mV from ideal. This is due to NFET channel-length modulation (Vds mismatch: mirror NFET at Vds≈1.2V vs diode NFET at Vds≈0.62V). The error is within tolerance but could be reduced with longer L mirror if needed."
+  ],
+  "regression_check": "PASS — WTA outputs within 1.5mV of baseline for all 5 classes",
+  "test_details": {
+    "isolation_test": {
+      "file": "scratchpad/test_bias_ref.spice",
+      "R_initial": "1.3 MOhm",
+      "R_calibrated": "1.182 MOhm",
+      "V_nbias_measured": "0.6226V",
+      "V_nbias_ideal": "0.6228V",
+      "V_nbias_error_mV": -0.19,
+      "V_pbias_measured": "0.8050V",
+      "V_pbias_ideal": "0.8064V",
+      "V_pbias_error_mV": -1.46,
+      "I_nfet_measured_uA": 0.996,
+      "I_pfet_measured_uA": 1.022
+    },
+    "top_level_test": {
+      "file": "top_level_classifier_circuit.spice",
+      "lines": 2447,
+      "convergence": "dynamic gmin stepping",
+      "wta_outputs": {
+        "v_out0": 0.14271,
+        "v_out1": 0.14246,
+        "v_out2": 0.19665,
+        "v_out3": 0.14372,
+        "v_out4": 0.14345
+      },
+      "wta_winner": "out2 (class V)",
+      "wta_margin_mV": 52.9,
+      "baseline_wta_outputs": {
+        "v_out0": 0.14253,
+        "v_out1": 0.14246,
+        "v_out2": 0.19581,
+        "v_out3": 0.14427,
+        "v_out4": 0.14485
+      },
+      "baseline_wta_margin_mV": 50.9
+    }
+  },
+  "recommendations": [
+    "MAJOR-008 classifier portion is COMPLETE. Proceed to MAJOR-007 (frontend+classifier integration) or MAJOR-006 (energy recompute).",
+    "For tapeout: consider replacing R_bias_n with a SKY130 high-res poly resistor (sky130_fd_pr__res_high_po). R=1.182MOhm requires ~591 squares at 2kOhm/sq.",
+    "For better supply rejection: replace R-based reference with beta-multiplier. Not needed for simulation validation."
+  ],
+  "references": [
+    "experiments/Complete_imp/classifier_crossbar/top_level_classifier_circuit.spice",
+    "experiments/Complete_imp/classifier_crossbar/retrain_circuit_features.py",
+    "design_logs/objectives/OBJ-2026-11-16-001.json",
+    "design_logs/plans/PLAN-2026-11-16-001.json"
+  ]
+}

@@ -53,6 +53,16 @@
       "validated_in": ["delay_timer.spice"],
       "known_issues": ["SF decay rate depends on bias current. Per-comparator pipeline delay calibration required."]
     },
+    "r_based_bias_reference": {
+      "topology": "R_bias (1.182MOhm) from VDD to NFET diode (W=2u L=0.5u). PFET master driven by NFET mirror (W=2u L=0.5u, gate=nbias). Natural startup via resistive path.",
+      "output": "nbias_master_n ~ 0.623V, pbias_master_p ~ 0.805V, I_ref ~ 1.0uA",
+      "design_equation": "R = (VDD - V_nbias) / I_target. Calibrated for BSIM4 tt corner: V_nbias=0.623V at 1uA for W=2u L=0.5u NFET.",
+      "advantages": ["Natural startup (no zero-current equilibrium)", "Simple (1 R + 1 extra transistor)", "Sub-mV bias voltage error vs ideal 1uA source"],
+      "limitations": ["Supply-dependent: I varies linearly with VDD. At ±5% VDD: ±7% current.", "1.182MOhm requires ~591 squares of high-res poly (physical but large)"],
+      "validated_in": ["top_level_classifier_circuit.spice"],
+      "known_issues": ["NFET mirror for PFET master has ~2% CLM error (Vds mismatch 0.62V vs 1.2V). Acceptable for simulation; use L=2u for better matching at tapeout."],
+      "verification": "VER-2026-11-16-001"
+    },
     "lazzaro_wta": {
       "topology": "5 input cells with shared inhibition node. 16 transistors. NMOS input W=2 L=0.5, PFET load W=4 L=0.5.",
       "bias": "Ibias=10uA",

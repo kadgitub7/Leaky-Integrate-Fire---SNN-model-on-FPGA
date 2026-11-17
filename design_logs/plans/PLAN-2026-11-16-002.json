@@ -1,0 +1,93 @@
+{
+  "id": "PLAN-2026-11-16-002",
+  "timestamp": "2026-11-16T03:15:00Z",
+  "skill": "architect_planner",
+  "objective": "OBJ-2026-11-16-002",
+  "status": "active",
+  "approach": "Incremental integration with R-divider regulator and capacitive startup",
+  "approach_rationale": "Frontend draws ultra-low subthreshold current (~100pA-1nA). R-divider gives exactly 0.9V with <1% error under this load, needs no startup circuit, and is physically realizable (poly resistors + MIM cap). Capacitive kick startup for bias_gen avoids disturbing steady-state operation. Combined simulation validates all interface effects.",
+  "alternatives_considered": [
+    {
+      "name": "Active PMOS LDO regulator",
+      "reason_rejected": "Unnecessarily complex for ~1nA load. Adds error amplifier, reference, compensation cap. The frontend load is nearly constant, so regulation is not needed — just accurate voltage setting."
+    },
+    {
+      "name": "Cascaded diode-connected FET voltage drop",
+      "reason_rejected": "Voltage depends on current and temperature. At subthreshold currents, Vgs varies significantly with process. R-divider gives exact ratio regardless of current level."
+    },
+    {
+      "name": "Resistive startup for bias_gen (R from VDD to iref)",
+      "reason_rejected": "Even very large R (1GOhm) injects current comparable to or exceeding the 150pA mirror operating current, disturbing the bias point. Capacitive kick injects charge only during transient VDD ramp, zero DC disturbance."
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "action": "Design and test voltage regulator: R-divider (R1=R2=10MOhm) from VDD(1.8V) to VDD_frontend(0.9V) with 100pF bypass cap. Isolation test: apply 1.8V, verify 0.9V output, then connect bias_gen as load and verify stability.",
+      "files_read": ["bias_gen.spice"],
+      "files_modified": [],
+      "files_created": ["scratchpad/test_vdd_regulator.spice"],
+      "completion_criterion": "VDD_frontend = 0.900V +/-5% under bias_gen load, no oscillation",
+      "verification": "ngspice .op + short .tran, measure v(vdd_frontend)",
+      "rollback": "Delete test file. No production files modified.",
+      "estimated_minutes": 30,
+      "depends_on": [],
+      "analog_specialist_notes": "R=10MOhm = 5000 squares at 2kOhm/sq poly. Large but feasible. 100pF MIM cap is standard. Quiescent current = 90nA from divider."
+    },
+    {
+      "step_number": 2,
+      "action": "Design and test bias_gen startup: Add C_startup (5pF MIM cap) from VDD_frontend to bias_gen iref node. Test that bias_gen starts from zero IC with VDD ramp.",
+      "files_read": ["bias_gen.spice"],
+      "files_modified": [],
+      "files_created": ["scratchpad/test_bias_startup.spice"],
+      "completion_criterion": "v(vbias) reaches 0.30V +/-10% within 1ms of VDD application, without any .ic statements",
+      "verification": "ngspice .tran with VDD_frontend ramp (0 to 0.9V in 10us), measure v(vbias) settling",
+      "rollback": "Delete test file.",
+      "estimated_minutes": 30,
+      "depends_on": [1],
+      "analog_specialist_notes": "5pF MIM is small. During 10us ramp: I_inject = 5pF * 90kV/s = 0.45nA, well above 150pA mirror current. After ramp, C passes no DC — zero steady-state disturbance."
+    },
+    {
+      "step_number": 3,
+      "action": "Build combined frontend-only test: VDD(1.8V) → R-divider → VDD_frontend → full frontend (asic_frontend subcircuit) with C_startup. Drive with real ECG PWL data for 3 beats. Verify frontend features match standalone results (no .ic except timer precharge which is natural).",
+      "files_read": ["frontend_top.spice", "all frontend subcircuit .spice files", "_integ_v7.spice"],
+      "files_modified": [],
+      "files_created": ["scratchpad/test_frontend_integrated.spice"],
+      "completion_criterion": "Frontend features f1-f8 produce voltages in valid range (0.05V-0.85V) for beats 2+. Bias_gen starts without .ic.",
+      "verification": "Compare feature voltages at beat-valid times against standalone _integ_v7 results",
+      "rollback": "Delete test file.",
+      "estimated_minutes": 60,
+      "depends_on": [1, 2],
+      "analog_specialist_notes": "Timer/EWMA caps start at 0V — first beat is startup. Expect valid features from beat 2 onward. Frontend .ic for timers (v=0.9V precharge) can be dropped: timer naturally precharges via rpeak_pulse."
+    },
+    {
+      "step_number": 4,
+      "action": "Build full combined system netlist: frontend (from step 3) + B-source interface (affine mapping with feature reorder) + classifier crossbar. Feature mapping: F1→feat0, F2→feat3, F3→feat1, F4→feat4, F5→feat5, F6→feat2, F7→feat6, F8→feat7.",
+      "files_read": ["top_level_classifier_circuit.spice", "retrain_circuit_features.py"],
+      "files_modified": [],
+      "files_created": ["scratchpad/combined_system.spice"],
+      "completion_criterion": "ngspice parses netlist without errors, .op converges",
+      "verification": ".op convergence check, verify all node voltages are physical (0-1.8V)",
+      "rollback": "Delete test file.",
+      "estimated_minutes": 60,
+      "depends_on": [3],
+      "analog_specialist_notes": "B-sources read frontend feature voltages directly — no level shifting needed since B-sources are behavioral. Classifier sees affine-mapped row voltages in its 1.8V domain."
+    },
+    {
+      "step_number": 5,
+      "action": "Run transient simulation of full combined system with real ECG data for 3+ beats. Extract WTA outputs at feature-valid times. Verify classification matches standalone results.",
+      "files_read": [],
+      "files_modified": [],
+      "files_created": ["scratchpad/analyze_combined.py"],
+      "completion_criterion": "WTA winner matches standalone prediction for >= 2/3 beats. Winner margin >= 5mV.",
+      "verification": "Compare WTA argmax against standalone test results from circuit_retrain_results.json",
+      "rollback": "N/A — read-only analysis.",
+      "estimated_minutes": 90,
+      "depends_on": [4],
+      "analog_specialist_notes": "May need to identify feature-valid time windows from delay timer outputs. WTA needs ~1ms settling after all features are valid."
+    }
+  ],
+  "total_estimated_hours": 5,
+  "critical_path": [1, 2, 3, 4, 5],
+  "parallelizable": []
+}

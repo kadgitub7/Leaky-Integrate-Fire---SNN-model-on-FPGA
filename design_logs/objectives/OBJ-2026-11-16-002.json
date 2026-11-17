@@ -1,0 +1,90 @@
+{
+  "id": "OBJ-2026-11-16-002",
+  "timestamp": "2026-11-16T03:00:00Z",
+  "skill": "objectives_engineer",
+  "parent_issue": "MAJOR-007",
+  "status": "active",
+  "title": "Frontend + Classifier full-system integration simulation",
+  "context": "Frontend (0.9V subthreshold, 8 analog feature outputs) and classifier (1.8V, 8-64-5 MLP on 1T1R ReRAM crossbar) have never been simulated as one SPICE netlist. Interface effects (loading, settling, noise coupling) are uncharacterized. Also absorbs deferred MAJOR-008 frontend items: bias_gen startup circuit and LDO/voltage regulator.",
+  "success_criteria": [
+    {
+      "id": "SC-1",
+      "metric": "combined_netlist_convergence",
+      "target": "ngspice transient simulation completes without convergence failure for >= 3 ECG beats",
+      "measurement_method": "Run ngspice on combined_system.spice with .tran, verify 'done' in output and no 'singular matrix' or 'timestep too small'",
+      "current_value": "No combined netlist exists",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-2",
+      "metric": "voltage_regulator_accuracy",
+      "target": "0.9V frontend supply within +/-5% (0.855V to 0.945V) under frontend load",
+      "measurement_method": "Measure v(vdd_frontend) during transient, check min/max over simulation",
+      "current_value": "No regulator exists",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-3",
+      "metric": "bias_gen_startup",
+      "target": "bias_gen produces vbias within 10% of 0.30V target without any .ic statements (zero initial conditions)",
+      "measurement_method": "Measure v(vbias) in .op or early transient, compare to 0.30V reference. No .ic v(xbias.iref)=... allowed.",
+      "current_value": "Requires .ic v(xbias.iref)=0.3 for convergence",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-4",
+      "metric": "frontend_feature_range",
+      "target": "All 8 frontend feature outputs produce voltages in range 0.05V-0.85V (within 0.9V rail) during transient",
+      "measurement_method": "Extract min/max of f1-f8 over transient simulation",
+      "current_value": "Standalone frontend produces features in ~0.13V-0.48V range",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-5",
+      "metric": "wta_classification_match",
+      "target": "WTA winner (argmax of v(out0)-v(out4)) matches standalone classifier prediction for >= 2 out of 3 test beats",
+      "measurement_method": "Sample WTA outputs at feature-valid times (after delay timer settles), compare argmax to standalone test",
+      "current_value": "Standalone WTA: out2 is winner (class V) for test record 100",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-6",
+      "metric": "input_independence",
+      "target": "Only external inputs: VDD=1.8V and ECG electrodes (elec_l0_p, elec_l0_n, elec_l1_p, elec_l1_n). Zero .ic statements.",
+      "measurement_method": "Audit combined netlist for .ic, ideal I-sources, or V-sources other than VDD, electrode signals, and threshold references",
+      "current_value": "Frontend needs .ic for bias_gen startup, timer caps, EWMA caps",
+      "priority": "must_pass"
+    },
+    {
+      "id": "SC-7",
+      "metric": "wta_margin",
+      "target": "WTA winner-to-runner-up voltage margin >= 5mV at measurement time",
+      "measurement_method": "Extract v(out0)-v(out4) at feature-valid time, compute winner margin",
+      "current_value": "Standalone margin: 52.9mV",
+      "priority": "target"
+    }
+  ],
+  "constraints": [
+    "Must use SKY130 130nm CMOS devices only",
+    "No digital elements in signal path — fully analog system",
+    "Frontend operates at 0.9V (subthreshold), classifier at 1.8V",
+    "Feature reorder: Frontend [F1,F2,F3,F4,F5,F6,F7,F8] maps to Classifier rows [0,3,1,4,5,2,6,7]",
+    "B-source interface (affine VCVS) is acceptable as analog behavioral element representing resistor network",
+    "Threshold voltages (rpeak_threshold, vth_14, vth_69, etc.) may use ideal V-sources (represent on-chip trimming)",
+    "Must not modify classifier weights, mirror calibration, or ReRAM conductances"
+  ],
+  "dependencies": [
+    "FATAL-001 (COMPLETE — ReRAM cells)",
+    "FATAL-002 (COMPLETE — WTA circuit)",
+    "MAJOR-003 (COMPLETE — no ideal elements in signal path)",
+    "MAJOR-008 classifier portion (COMPLETE — self-biasing reference)"
+  ],
+  "estimated_effort": "4-6 hours",
+  "risk_factors": [
+    "Convergence: Combined system has ~200+ MOSFETs, 1664 ReRAM cells, ~25 MIM caps. May need careful timestep control.",
+    "Frontend .ic elimination: Timer and EWMA caps need proper initial conditions or startup sequence. May need startup transient before feature extraction begins.",
+    "Loading effects: Frontend source followers may be loaded differently when driving B-source inputs vs standalone ideal measurement.",
+    "LDO design: Simple resistive divider won't regulate under varying load. May need active regulator or accept that frontend load is essentially constant.",
+    "Simulation time: Full transient with both blocks may take 30+ minutes per beat."
+  ]
+}

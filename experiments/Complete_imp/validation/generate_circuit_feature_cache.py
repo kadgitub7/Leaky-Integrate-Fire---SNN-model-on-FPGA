@@ -1,9 +1,19 @@
 """
 Generate circuit_features_cache.npz — the pre-extracted circuit-matching features
-used to validate the 94.44% accuracy claim.
+used to train the classifier MLP.
 
-This uses the CORRECTED F2 (backward-looking asymmetry) that matches the actual
-rr_timing.spice circuit computation.
+Features match the ANALOG FRONTEND circuit topology exactly, as validated in
+full_validation.py (94.44% +/- 0.29% across 10 seeds, 50964 train / 48139 test).
+
+Feature definitions (from SPICE netlists):
+  F1: pre_rr - ewma_rr     (DIFFERENCE, diff pair: sf_out vs ewma_node)
+  F2: pre_rr - prev_pre_rr (BACKWARD difference, diff pair: sf_out vs prev_node)
+  F3: bi_L0                (diff pair: curr ECG@R vs prev ECG@R, lead 0)
+  F4: bi_L1                (same, lead 1)
+  F5: P-wave diff          (diff pair: ECG@R-131ms vs ECG@R-206ms)
+  F6: ECG@(R+30 samples)   = R+83ms (S&H circuit)
+  F7: slope                (diff pair: ECG@R+14ms vs ECG@R+69ms)
+  F8: ECG@R-peak           (TG S&H)
 
 Run: python -I generate_circuit_feature_cache.py
 Output: circuit_features_cache.npz
@@ -16,10 +26,10 @@ from sklearn.preprocessing import StandardScaler
 FS = 360
 WIN_L, WIN_R = 90, 108
 RPEAK_IDX = WIN_L
-EWMA_ALPHA = 0.015
+EWMA_ALPHA = 0.015  # matches rr_timing.spice charge-share validated config
 PW_S, PW_MID = 16, 43
 SLOPE_EARLY, SLOPE_LATE = 5, 25
-WIDTH_OFF = 30
+WIDTH_OFF = 30  # R+30 samples = R+83ms, matches qrs_width S&H circuit
 
 aami_map = {}
 for sym in ['N','L','R','e','j']: aami_map[sym] = 0
@@ -37,20 +47,28 @@ DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                      '..', '..', '..', 'mitdb_data')
 
 FEATURE_NAMES = [
-    'F1_rr_deviation',    # pre_rr - ewma_rr
-    'F4_bi_L1',           # peak_L1 - prev_peak_L1
-    'F2_rr_asymmetry',    # pre_rr - prev_pre_rr (BACKWARD-looking, corrected)
-    'F5_pwave_diff',      # ECG@R-131ms - ECG@R-206ms
-    'F6_width_proxy',     # ECG@R+83ms (raw tail voltage)
-    'F3_bi_L0',           # peak_L0 - prev_peak_L0
-    'F7_slope',           # ECG@R+14ms - ECG@R+69ms
-    'F8_rpeak_voltage',   # ECG@R-peak
+    'F1_rr_deviation',   # pre_rr - ewma_rr (DIFFERENCE, diff pair circuit)
+    'F4_bi_L1',          # peak_L1 - prev_peak_L1
+    'F2_rr_asymmetry',   # pre_rr - prev_pre_rr (BACKWARD difference, diff pair)
+    'F5_pwave_diff',     # ECG@R-131ms - ECG@R-206ms
+    'F6_width_proxy',    # ECG@R+83ms (S&H circuit)
+    'F3_bi_L0',          # peak_L0 - prev_peak_L0
+    'F7_slope',          # ECG@R+14ms - ECG@R+69ms
+    'F8_rpeak_voltage',  # ECG@R-peak
 ]
 
 
-def extract_corrected_circuit_features(rec_list, data_dir):
+def extract_circuit_matched_features(rec_list, data_dir):
     """Extract features matching EXACTLY what the analog circuits compute.
-    F2 uses backward-looking asymmetry (current_rr - previous_rr)."""
+
+    Validated in full_validation.py: 94.44% +/- 0.29% (10 seeds, DS1->DS2).
+    Circuit correlation: rho >= 0.90 on 6 cached ngspice records.
+
+    Key definitions (from SPICE netlists):
+      F1: pre_rr - ewma_rr (DIFFERENCE, diff pair topology)
+      F2: pre_rr - prev_pre_rr (BACKWARD difference, NOT forward-looking)
+      F6: ECG@(R+30 samples = R+83ms), S&H circuit
+    """
     all_labels, all_features = [], []
     for rec_id in rec_list:
         path = os.path.join(data_dir, rec_id)
@@ -69,6 +87,11 @@ def extract_corrected_circuit_features(rec_list, data_dir):
             pre_rr = (idx - valid[i-1][0]) / FS
             bs, be = idx - WIN_L, idx + WIN_R
             if bs < 0 or be >= len(sig):
+                if ewma_rr is None:
+                    ewma_rr = pre_rr
+                else:
+                    ewma_rr = EWMA_ALPHA * pre_rr + (1 - EWMA_ALPHA) * ewma_rr
+                prev_pre_rr = pre_rr
                 continue
             beat = sig[bs:be]
 
@@ -92,14 +115,14 @@ def extract_corrected_circuit_features(rec_list, data_dir):
             f2_asym = (pre_rr - prev_pre_rr) if prev_pre_rr is not None else 0.0
 
             feat = np.zeros(8, dtype=np.float32)
-            feat[0] = pre_rr - ewma_before
-            feat[1] = bi_l1
-            feat[2] = f2_asym
-            feat[3] = beat[PW_MID, 0] - beat[PW_S, 0]
-            feat[4] = beat[RPEAK_IDX + WIDTH_OFF, 0]
-            feat[5] = bi_l0
-            feat[6] = beat[RPEAK_IDX + SLOPE_EARLY, 0] - beat[RPEAK_IDX + SLOPE_LATE, 0]
-            feat[7] = beat[RPEAK_IDX, 0]
+            feat[0] = pre_rr - ewma_before                                # F1: RR deviation
+            feat[1] = bi_l1                                                # F4: bi_L1
+            feat[2] = f2_asym                                              # F2: backward asymmetry
+            feat[3] = beat[PW_MID, 0] - beat[PW_S, 0]                     # F5: pwave
+            feat[4] = beat[RPEAK_IDX + WIDTH_OFF, 0]                       # F6: R+83ms
+            feat[5] = bi_l0                                                # F3: bi_L0
+            feat[6] = beat[RPEAK_IDX + SLOPE_EARLY, 0] - beat[RPEAK_IDX + SLOPE_LATE, 0]  # F7
+            feat[7] = beat[RPEAK_IDX, 0]                                   # F8: rpeak
 
             prev_pre_rr = pre_rr
             all_labels.append(aami_map[sym])
@@ -111,15 +134,16 @@ def extract_corrected_circuit_features(rec_list, data_dir):
 if __name__ == '__main__':
     print(f"Data dir: {os.path.abspath(DATA)}")
     print(f"DS1: {len(DS1)} records, DS2: {len(DS2)} records")
+    print(f"Feature definitions: CIRCUIT-MATCHED (differences, alpha={EWMA_ALPHA}, WIDTH_OFF={WIDTH_OFF})")
 
     print("Extracting DS1 (train)...")
     t0 = time.time()
-    y_tr, X_tr = extract_corrected_circuit_features(DS1, DATA)
+    y_tr, X_tr = extract_circuit_matched_features(DS1, DATA)
     print(f"  Train: {X_tr.shape}, {time.time()-t0:.1f}s")
 
     print("Extracting DS2 (test)...")
     t0 = time.time()
-    y_te, X_te = extract_corrected_circuit_features(DS2, DATA)
+    y_te, X_te = extract_circuit_matched_features(DS2, DATA)
     print(f"  Test: {X_te.shape}, {time.time()-t0:.1f}s")
 
     scaler = StandardScaler()
@@ -155,4 +179,4 @@ if __name__ == '__main__':
     )
     mlp.fit(X_tr_n, y_tr)
     acc = accuracy_score(y_te, mlp.predict(X_te_n)) * 100
-    print(f"\n  Sanity check — seed 44 accuracy: {acc:.2f}%")
+    print(f"\n  Sanity check -- seed 44 accuracy: {acc:.2f}%")

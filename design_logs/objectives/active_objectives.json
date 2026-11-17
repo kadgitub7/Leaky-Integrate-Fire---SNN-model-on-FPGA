@@ -1,5 +1,5 @@
 {
-  "active_objectives": [],
-  "last_updated": "2026-11-10T16:00:00Z",
-  "notes": "Initialized. Use /objectives-engineer to create the first objective."
+  "active_objectives": ["OBJ-2026-11-16-002"],
+  "last_updated": "2026-11-16T03:00:00Z",
+  "notes": "MAJOR-007 frontend+classifier integration. Absorbs deferred MAJOR-008 frontend items."
 }
