@@ -1,0 +1,22 @@
+.title s14_propdelay_cross4ms
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+Vrpk rpk 0 PWL(0.0000000 0.000000 0.0996000 0.000000 0.1000000 0.900000 0.1050000 0.900000 0.1054000 0.000000 0.8996000 0.000000 0.9000000 0.900000 0.9050000 0.900000 0.9054000 0.000000 1.6996000 0.000000 1.7000000 0.900000 1.7050000 0.900000 1.7054000 0.000000 2.3000000 0.000000)
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/edge_buffer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pulse_gen.spice"
+Vth14 nth14 0 0.423109
+Xdt rpk dt_s14 dt_s69 dt_wid dt_bi dt_rr dt_rpk sf_out
++ vdd vss vbias nth14 0.200 0.200 0.200 0.200 0.200 delay_timer
+Xeb dt_s14 s14_sharp vdd vss edge_buffer
+Xpg s14_sharp pulse_s14 vdd vss vbias pulse_gen
+.tran 0.1m 2.3
+.meas tran t_s14_1 WHEN V(pulse_s14)=0.45 RISE=1 TD=0.9010000
+.meas tran t_s14_2 WHEN V(pulse_s14)=0.45 RISE=1 TD=1.7010000
+
+.end

@@ -1,0 +1,38 @@
+.title rrcap_offset_sweep_20mv
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+Vrpk rpk 0 PWL(0.0000000 0.000000 0.4996000 0.000000 0.5000000 0.900000 0.5050000 0.900000 0.5054000 0.000000 1.2996000 0.000000 1.3000000 0.900000 1.3050000 0.900000 1.3054000 0.000000 2.0996000 0.000000 2.1000000 0.900000 2.1050000 0.900000 2.1054000 0.000000 2.8996000 0.000000 2.9000000 0.900000 2.9050000 0.900000 2.9054000 0.000000 3.6996000 0.000000 3.7000000 0.900000 3.7050000 0.900000 3.7054000 0.000000 4.4996000 0.000000 4.5000000 0.900000 4.5050000 0.900000 4.5054000 0.000000 5.2996000 0.000000 5.3000000 0.900000 5.3050000 0.900000 5.3054000 0.000000 6.0996000 0.000000 6.1000000 0.900000 6.1050000 0.900000 6.1054000 0.000000 6.6000000 0.000000)
+Vcap capture_trig 0 PWL(0.0000000 0.000000 0.4946000 0.000000 0.4950000 0.900000 0.4970000 0.900000 0.4974000 0.000000 1.2946000 0.000000 1.2950000 0.900000 1.2970000 0.900000 1.2974000 0.000000 2.0946000 0.000000 2.0950000 0.900000 2.0970000 0.900000 2.0974000 0.000000 2.8946000 0.000000 2.8950000 0.900000 2.8970000 0.900000 2.8974000 0.000000 3.6946000 0.000000 3.6950000 0.900000 3.6970000 0.900000 3.6974000 0.000000 4.4946000 0.000000 4.4950000 0.900000 4.4970000 0.900000 4.4974000 0.000000 5.2946000 0.000000 5.2950000 0.900000 5.2970000 0.900000 5.2974000 0.000000 6.0946000 0.000000 6.0950000 0.900000 6.0970000 0.900000 6.0974000 0.000000 6.6000000 0.000000)
+Vcopy copy_trig 0 PWL(0.0000000 0.000000 0.5096000 0.000000 0.5100000 0.900000 0.5120000 0.900000 0.5124000 0.000000 1.3096000 0.000000 1.3100000 0.900000 1.3120000 0.900000 1.3124000 0.000000 2.1096000 0.000000 2.1100000 0.900000 2.1120000 0.900000 2.1124000 0.000000 2.9096000 0.000000 2.9100000 0.900000 2.9120000 0.900000 2.9124000 0.000000 3.7096000 0.000000 3.7100000 0.900000 3.7120000 0.900000 3.7124000 0.000000 4.5096000 0.000000 4.5100000 0.900000 4.5120000 0.900000 4.5124000 0.000000 5.3096000 0.000000 5.3100000 0.900000 5.3120000 0.900000 5.3124000 0.000000 6.1096000 0.000000 6.1100000 0.900000 6.1120000 0.900000 6.1124000 0.000000 6.6000000 0.000000)
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rr_timing.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pwave_predictor.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/edge_buffer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pulse_gen.spice"
+
+Xrr 0 capture_trig rpk copy_trig f1 f2 timer_out ewma_out vdd vss vbias rr_timing
+.ic V(xrr.ewma_node)=0.35
+
+Bvth_base vth_base 0 V = V(ewma_out) + 0.070209
+Bvth_peak vth_peak 0 V = V(ewma_out) + 0.061837
+Bvth_cap vth_rr_cap 0 V = V(ewma_out) + 0.020000
+
+Xpw timer_out ewma_out pw_base_level pw_peak_level rr_cap_level vth_base vth_peak vth_rr_cap vdd vss vbias pwave_predictor
+
+Xeb_cap rr_cap_level rr_cap_sharp vdd vss edge_buffer
+Xpg_cap rr_cap_sharp rr_cap_pulse vdd vss vbias pulse_gen
+
+.tran 0.1m 6.6000
+
+.meas tran tcap_3 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=2.5000000
+.meas tran tcap_4 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=3.3000000
+.meas tran tcap_5 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=4.1000000
+.meas tran tcap_6 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=4.9000000
+.meas tran tcap_7 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=5.7000000
+
+.end

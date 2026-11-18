@@ -1,0 +1,84 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: sf_curve_with_tg
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.05704e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261181
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0220585
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.593434
+xrr.tail_a                         0.000671357
+xrr.net_a1                            0.420799
+f2                                    0.418492
+timer_out                          7.05704e-05
+ewma_out                                  0.35
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.23687e-11
+vdd#branch                        -4.23153e-11
+
+
+No. of Data Rows : 66298
+
+  Measurements for Transient Analysis
+
+sf_0ms              =  4.831761e-01
+sf_50ms             =  4.775259e-01
+sf_100ms            =  4.718632e-01
+sf_200ms            =  4.605799e-01
+sf_300ms            =  4.493226e-01
+sf_400ms            =  4.380962e-01
+sf_500ms            =  4.268766e-01
+sf_600ms            =  4.156963e-01
+sf_650ms            =  4.101160e-01
+sf_700ms            =  4.045387e-01
+sf_750ms            =  3.989830e-01
+sf_795ms            =  4.832424e-01
+ewma_val            =  3.468286e-01
+esamp_val           =  3.730185e-01
+
+
+Total analysis time (seconds) = 8.208
+
+Total elapsed time (seconds) = 17.990 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1170.094 MB.
+Maximum ngspice program size =   60.449 MB.
+Current ngspice program size =   60.449 MB.
+

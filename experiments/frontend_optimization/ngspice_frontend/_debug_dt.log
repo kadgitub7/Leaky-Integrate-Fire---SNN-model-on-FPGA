@@ -1,0 +1,186 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: debug_dt_comparators
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+nth14                                   0.4756
+nth69                                   0.4469
+nth83                                   0.4397
+nth300                                  0.3287
+nth10                                   0.4777
+nthrpk                                     0.3
+xdt.sf_timer                       1.17518e-05
+sf_dt                              1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483673
+xdt.ct2                            0.000104052
+xdt.stg1_s69                       0.000104305
+dt_s69                                     0.9
+xdt.cn3                               0.483673
+xdt.ct3                            0.000104052
+xdt.stg1_wid                       0.000104351
+dt_wid                                     0.9
+xdt.cn4                               0.483673
+xdt.ct4                            0.000104051
+xdt.stg1_bi                        0.000108769
+dt_bi                                      0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483669
+xdt.ct5                            0.000104052
+xdt.stg1_rr                        0.000104179
+dt_rr                                      0.9
+xdt.cn6                               0.483669
+xdt.ct6                            0.000104052
+xdt.stg1_s14                       0.000104185
+dt_s14                                     0.9
+xdt.cn7                               0.483673
+xdt.ct7                             0.00010405
+xdt.stg1_rpk                        0.00011402
+dt_rpk                                     0.9
+xeb69.mid                           9.0827e-11
+s69_sharp                                  0.9
+xebwid.mid                          9.0827e-11
+wid_sharp                                  0.9
+vthrpk#branch                                0
+vth10n#branch                                0
+vth300n#branch                               0
+vth83n#branch                                0
+vth69n#branch                                0
+vth14n#branch                                0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         3.35633e-12
+vdd#branch                        -3.35577e-12
+
+
+No. of Data Rows : 50020
+
+  Measurements for Transient Analysis
+
+sf_0ms              =  1.175179e-05
+s69_0ms             =  9.000000e-01
+wid_0ms             =  9.000000e-01
+stg69_0ms           =  1.043047e-04
+stgwid_0ms          =  1.043507e-04
+s14_0ms             =  9.000000e-01
+sf_50ms             =  1.175210e-05
+s69_50ms            =  9.000000e-01
+wid_50ms            =  9.000000e-01
+stg69_50ms          =  1.043047e-04
+stgwid_50ms         =  1.043507e-04
+s14_50ms            =  9.000000e-01
+sf_99ms             =  1.175210e-05
+s69_99ms            =  9.000000e-01
+wid_99ms            =  9.000000e-01
+stg69_99ms          =  1.043047e-04
+stgwid_99ms         =  1.043507e-04
+s14_99ms            =  9.000000e-01
+sf_106ms            =  4.828812e-01
+s69_106ms           =  1.720390e-11
+wid_106ms           =  1.792900e-11
+stg69_106ms         =  8.869377e-01
+stgwid_106ms        =  8.897143e-01
+s14_106ms           =  -2.592812e-09
+sf_110ms            =  4.807898e-01
+s69_110ms           =  1.727921e-11
+wid_110ms           =  1.805192e-11
+stg69_110ms         =  8.859863e-01
+stgwid_110ms        =  8.890082e-01
+s14_110ms           =  8.999526e-01
+sf_120ms            =  4.755540e-01
+s69_120ms           =  1.551723e-11
+wid_120ms           =  1.684573e-11
+stg69_120ms         =  8.831679e-01
+stgwid_120ms        =  8.869613e-01
+s14_120ms           =  8.999995e-01
+sf_140ms            =  4.651238e-01
+s69_140ms           =  1.198361e-11
+wid_140ms           =  1.560622e-11
+stg69_140ms         =  8.743969e-01
+stgwid_140ms        =  8.811024e-01
+s14_140ms           =  9.000000e-01
+sf_160ms            =  4.547161e-01
+s69_160ms           =  -2.310365e-11
+wid_160ms           =  9.017481e-12
+stg69_160ms         =  8.507974e-01
+stgwid_160ms        =  8.702116e-01
+s14_160ms           =  9.000000e-01
+sf_170ms            =  4.495165e-01
+s69_170ms           =  -6.381207e-10
+wid_170ms           =  -5.700378e-12
+stg69_170ms         =  7.653827e-01
+stgwid_170ms        =  8.589415e-01
+s14_170ms           =  9.000000e-01
+sf_175ms            =  4.469292e-01
+s69_175ms           =  -2.870347e-09
+wid_175ms           =  -3.008094e-11
+stg69_175ms         =  5.744918e-01
+stgwid_175ms        =  8.480729e-01
+s14_175ms           =  9.000000e-01
+sf_180ms            =  4.443242e-01
+s69_180ms           =  7.721332e-01
+wid_180ms           =  -1.451861e-10
+stg69_180ms         =  2.974749e-01
+stgwid_180ms        =  8.233900e-01
+s14_180ms           =  9.000000e-01
+sf_185ms            =  4.417376e-01
+s69_185ms           =  8.994028e-01
+wid_185ms           =  -9.534628e-10
+stg69_185ms         =  2.246206e-01
+stgwid_185ms        =  7.400888e-01
+s14_185ms           =  9.000000e-01
+sf_190ms            =  4.391395e-01
+s69_190ms           =  8.996371e-01
+wid_190ms           =  1.808090e-07
+stg69_190ms         =  2.148861e-01
+stgwid_190ms        =  5.167587e-01
+s14_190ms           =  9.000000e-01
+sf_200ms            =  4.339615e-01
+s69_200ms           =  8.998114e-01
+wid_200ms           =  8.995989e-01
+stg69_200ms         =  2.018936e-01
+stgwid_200ms        =  2.168531e-01
+s14_200ms           =  9.000000e-01
+sf_250ms            =  4.081632e-01
+s69_250ms           =  8.999684e-01
+wid_250ms           =  8.999640e-01
+stg69_250ms         =  1.653160e-01
+stgwid_250ms        =  1.680775e-01
+s14_250ms           =  9.000000e-01
+sf_300ms            =  3.825278e-01
+s69_300ms           =  8.999904e-01
+wid_300ms           =  8.999899e-01
+stg69_300ms         =  1.399804e-01
+stgwid_300ms        =  1.410941e-01
+s14_300ms           =  9.000000e-01
+
+
+Total analysis time (seconds) = 9.907
+
+Total elapsed time (seconds) = 20.178 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2441.340 MB.
+Maximum ngspice program size =   85.234 MB.
+Current ngspice program size =   85.234 MB.
+

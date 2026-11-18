@@ -1,0 +1,219 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: analog_diagnostic
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Operating point simulation skipped by 'uic',
+  now using transient initial conditions.
+
+No. of Data Rows : 47587
+
+  Measurements for Transient Analysis
+
+
+Error: measure  trrc_17  when(WHEN) : out of interval
+ .meas tran trrc_17 when v(trig_rr_cap)=0.45 rise=1 td=13.9222222 failed!
+
+
+Error: measure  trrc_18  when(WHEN) : out of interval
+ .meas tran trrc_18 when v(trig_rr_cap)=0.45 rise=1 td=14.7194444 failed!
+
+
+Error: measure  trrc_19  when(WHEN) : out of interval
+ .meas tran trrc_19 when v(trig_rr_cap)=0.45 rise=1 td=15.5111111 failed!
+
+trpk_0              =   4.92667e-01
+trpk_1              =   1.30756e+00
+trpk_2              =   2.09682e+00
+trpk_3              =   2.88749e+00
+trpk_4              =   3.67510e+00
+trpk_5              =   4.49192e+00
+trpk_6              =   5.14532e+00
+trpk_7              =   6.14009e+00
+trpk_8              =   6.98326e+00
+trpk_9              =   7.79350e+00
+trpk_10             =   8.58556e+00
+trpk_11             =   9.35528e+00
+trpk_12             =   1.01953e+01
+trpk_13             =   1.10507e+01
+trpk_14             =   1.18720e+01
+trpk_15             =   1.27019e+01
+trpk_16             =   1.35228e+01
+trpk_17             =   1.43184e+01
+trpk_18             =   1.51126e+01
+trpk_19             =   1.59068e+01
+tpwb_5              =   4.26999e+00
+tpwp_5              =   4.34499e+00
+trrc_5              =   4.47898e+00
+ewma_5              =  3.707511e-01
+tmr_5               =  3.922990e-01
+ecg_at_rpk_5        =  4.558760e-01
+tmr_pwb_5           =  4.318113e-01
+thr_pwb_5           =  4.161159e-01
+f5_5                =  8.659145e-01
+f3_5                =  2.962977e-01
+f8_5                =  4.075401e-01
+tpwb_6              =   5.08761e+00
+tpwp_6              =   5.81622e+00
+trrc_6              =   5.94990e+00
+ewma_6              =  3.707097e-01
+tmr_6               =  4.108276e-01
+ecg_at_rpk_6        =  4.393810e-01
+tmr_pwb_6           =  3.933636e-01
+thr_pwb_6           =  4.160687e-01
+f5_6                =  8.706049e-01
+f3_6                =  2.945541e-01
+f8_6                =  4.045287e-01
+tpwb_7              =   6.73579e+00
+tpwp_7              =   5.81622e+00
+trrc_7              =   5.94990e+00
+ewma_7              =  3.706624e-01
+tmr_7               =  3.726356e-01
+ecg_at_rpk_7        =  4.393810e-01
+tmr_pwb_7           =  4.103322e-01
+thr_pwb_7           =  4.160832e-01
+f5_7                =  4.197749e-01
+f3_7                =  2.962717e-01
+f8_7                =  4.050574e-01
+tpwb_8              =   6.73579e+00
+tpwp_8              =   6.81136e+00
+trrc_8              =   6.94486e+00
+ewma_8              =  3.706769e-01
+tmr_8               =  3.894484e-01
+ecg_at_rpk_8        =  4.468040e-01
+tmr_pwb_8           =  4.139263e-01
+thr_pwb_8           =  4.161382e-01
+f5_8                =  3.093958e-01
+f3_8                =  2.966092e-01
+f8_8                =  4.058301e-01
+tpwb_9              =   7.57878e+00
+tpwp_9              =   7.65378e+00
+trrc_9              =   7.78772e+00
+ewma_9              =  3.707325e-01
+tmr_9               =  3.929268e-01
+ecg_at_rpk_9        =  4.525770e-01
+tmr_pwb_9           =  4.161989e-01
+thr_pwb_9           =  4.161572e-01
+f5_9                =  8.848893e-01
+f3_9                =  2.973439e-01
+f8_9                =  4.082226e-01
+tpwb_10             =   8.38861e+00
+tpwp_10             =   8.46361e+00
+trrc_10             =   1.01602e+01
+ewma_10             =  3.707510e-01
+tmr_10              =  3.953418e-01
+ecg_at_rpk_10       =  4.352580e-01
+tmr_pwb_10          =  4.184376e-01
+thr_pwb_10          =  4.161307e-01
+f5_10               =  8.995368e-01
+f3_10               =  2.970204e-01
+f8_10               =  4.090192e-01
+tpwb_11             =   9.18111e+00
+tpwp_11             =   9.25656e+00
+trrc_11             =   1.01602e+01
+ewma_11             =  3.707246e-01
+tmr_11              =  3.976521e-01
+ecg_at_rpk_11       =  4.377320e-01
+tmr_pwb_11          =  4.107626e-01
+thr_pwb_11          =  4.160924e-01
+f5_11               =  2.722336e-01
+f3_11               =  2.944621e-01
+f8_11               =  4.052408e-01
+tpwb_12             =   9.95144e+00
+tpwp_12             =   1.00265e+01
+trrc_12             =   1.01602e+01
+ewma_12             =  3.706864e-01
+tmr_12              =  3.898078e-01
+ecg_at_rpk_12       =  4.459790e-01
+tmr_pwb_12          =  4.090415e-01
+thr_pwb_12          =  4.161198e-01
+f5_12               =  8.874015e-01
+f3_12               =  2.947279e-01
+f8_12               =  4.045421e-01
+tpwb_13             =   1.07906e+01
+tpwp_13             =   1.08660e+01
+trrc_13             =   1.09998e+01
+ewma_13             =  3.707138e-01
+tmr_13              =  3.880653e-01
+ecg_at_rpk_13       =  4.418560e-01
+tmr_pwb_13          =  4.127896e-01
+thr_pwb_13          =  4.161603e-01
+f5_13               =  3.033591e-01
+f3_13               =  2.955266e-01
+f8_13               =  4.036700e-01
+tpwb_14             =   1.16459e+01
+tpwp_14             =   1.17209e+01
+trrc_14             =   1.18550e+01
+ewma_14             =  3.707545e-01
+tmr_14              =  3.921799e-01
+ecg_at_rpk_14       =  4.311340e-01
+tmr_pwb_14          =  4.119964e-01
+thr_pwb_14          =  4.162031e-01
+f5_14               =  8.876139e-01
+f3_14               =  2.954210e-01
+f8_14               =  4.024990e-01
+tpwb_15             =   1.24669e+01
+tpwp_15             =   1.25419e+01
+trrc_15             =   1.26758e+01
+ewma_15             =  3.707974e-01
+tmr_15              =  3.910784e-01
+ecg_at_rpk_15       =  4.344330e-01
+tmr_pwb_15          =  4.129075e-01
+thr_pwb_15          =  4.162622e-01
+f5_15               =  8.728870e-01
+f3_15               =  2.969895e-01
+f8_15               =  4.050577e-01
+tpwb_16             =   1.32964e+01
+tpwp_16             =   1.33714e+01
+trrc_16             =   1.35052e+01
+ewma_16             =  3.708564e-01
+tmr_16              =  3.923170e-01
+ecg_at_rpk_16       =  4.468040e-01
+tmr_pwb_16          =  4.157983e-01
+thr_pwb_16          =  4.163162e-01
+f5_16               =  8.725079e-01
+f3_16               =  2.959539e-01
+f8_16               =  4.043631e-01
+tpwb_17             =   1.41168e+01
+tpwp_17             =   1.41919e+01
+ewma_17             =  3.709099e-01
+tmr_17              =  3.949533e-01
+ecg_at_rpk_17       =  4.352580e-01
+tmr_pwb_17          =  4.151437e-01
+thr_pwb_17          =  4.162875e-01
+f5_17               =  8.507140e-01
+f3_17               =  2.967656e-01
+f8_17               =  4.057619e-01
+tpwb_18             =   1.49126e+01
+tpwp_18             =   1.49876e+01
+ewma_18             =  3.708813e-01
+tmr_18              =  3.947445e-01
+ecg_at_rpk_18       =  4.525770e-01
+tmr_pwb_18          =  4.159270e-01
+thr_pwb_18          =  4.162586e-01
+f5_18               =  8.683323e-01
+f3_18               =  2.958081e-01
+f8_18               =  4.047325e-01
+tpwb_19             =   1.57076e+01
+tpwp_19             =   1.57826e+01
+ewma_19             =  3.708524e-01
+tmr_19              =  3.950757e-01
+ecg_at_rpk_19       =  4.476290e-01
+f5_19               =  8.995605e-01
+f3_19               =  2.971366e-01
+f8_19               =  4.068360e-01
+
+
+Total analysis time (seconds) = 63.492
+
+Total elapsed time (seconds) = 78.739 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1188.711 MB.
+Maximum ngspice program size =  226.566 MB.
+Current ngspice program size =  226.566 MB.
+

@@ -48,6 +48,7 @@
 .include "delay_timer.spice"
 .include "pwave_predictor.spice"
 .include "pulse_gen.spice"
+.include "edge_buffer.spice"
 .include "inverter.spice"
 .include "rr_timing.spice"
 .include "beat_instability.spice"
@@ -64,7 +65,8 @@
 *   elec_l0_p, elec_l0_n  — Differential electrode pair, Lead 0
 *   elec_l1_p, elec_l1_n  — Differential electrode pair, Lead 1
 *   rpeak_threshold        — Comparator threshold for R-peak detection
-*   vth_14, vth_69, vth_83, vth_300, vth_10 — Delay timer thresholds
+*   vth_14, vth_69, vth_83, vth_300, vth_10, vth_rpk_del — Delay timer thresholds
+*   vth_pw_base, vth_pw_peak, vth_pw_rr_cap — Pwave predictor thresholds
 *
 * Outputs:
 *   f1..f8                 — 8 analog feature voltages
@@ -81,8 +83,8 @@
 
 .subckt asic_frontend elec_l0_p elec_l0_n elec_l1_p elec_l1_n
 + rpeak_threshold
-+ vth_14 vth_69 vth_83 vth_300 vth_10
-+ vth_pw_base vth_pw_peak
++ vth_14 vth_69 vth_83 vth_300 vth_10 vth_rpk_del
++ vth_pw_base vth_pw_peak vth_pw_rr_cap
 + f1_rr_ratio f2_rr_asym
 + f3_bi_l0 f4_bi_l1
 + f5_pwave f6_width f7_slope f8_symmetry
@@ -102,17 +104,26 @@ Xpg_rpk rpeak_level rpeak_pulse vdd vss vbias pulse_gen
 
 * === 4. POST-R DELAY TIMER ===
 * Generates: trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
-Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy sf_delay_out
-+ vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 delay_timer
+* Pin order: rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
+*            trig_rpk_delayed sf_out vdd vss vbias_delay
+*            vth_14_fast vth_69 vth_83 vth_300 vth_10 vth_rpk_del
+Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
++ trig_rpk_delayed sf_delay_out
++ vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 vth_rpk_del delay_timer
 
-* === 5. PULSE GENERATORS ===
-* Convert delay_timer level outputs to brief S&H trigger pulses
-* Delay timer outputs go HIGH and stay HIGH; feature S&H gates need brief pulses
-Xpg_s14 trig_s14 pulse_s14 vdd vss vbias pulse_gen
-Xpg_s69 trig_s69 pulse_s69 vdd vss vbias pulse_gen
-Xpg_wid trig_wid pulse_wid vdd vss vbias pulse_gen
-Xpg_bi  trig_bi_copy pulse_bi vdd vss vbias pulse_gen
-Xpg_rr  trig_rr_copy pulse_rr_copy vdd vss vbias pulse_gen
+* === 5. EDGE BUFFERS + PULSE GENERATORS ===
+* Main timer comparators transition over 5-10ms; edge buffers sharpen
+* these slow transitions so the AC-coupled pulse_gen can detect them
+Xeb_s14 trig_s14 s14_sharp vdd vss edge_buffer
+Xeb_s69 trig_s69 s69_sharp vdd vss edge_buffer
+Xeb_wid trig_wid wid_sharp vdd vss edge_buffer
+Xeb_bi  trig_bi_copy bi_sharp vdd vss edge_buffer
+Xeb_rr  trig_rr_copy rr_sharp vdd vss edge_buffer
+Xpg_s14 s14_sharp pulse_s14 vdd vss vbias pulse_gen
+Xpg_s69 s69_sharp pulse_s69 vdd vss vbias pulse_gen
+Xpg_wid wid_sharp pulse_wid vdd vss vbias pulse_gen
+Xpg_bi  bi_sharp pulse_bi vdd vss vbias pulse_gen
+Xpg_rr  rr_sharp pulse_rr_copy vdd vss vbias pulse_gen
 
 * === 6. FEATURE EXTRACTION — F1 & F2: RR Timing ===
 * trig_rr_cap comes from P-wave predictor (pulsed via pulse_gen)
@@ -123,7 +134,10 @@ Xrr ecg_amp_l0 pulse_rr_cap rpeak_pulse pulse_rr_copy
 
 * === 7. P-WAVE PREDICTOR ===
 * Uses SF-shifted timer/EWMA nodes exposed by rr_timing
-Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap vth_pw_base vth_pw_peak vdd vss vbias pwave_predictor
+* Pin order: timer_node ewma_node pw_base_trig pw_peak_trig rr_cap_trig
+*            vth_base vth_peak vth_rr_cap vdd vss vbias
+Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap
++ vth_pw_base vth_pw_peak vth_pw_rr_cap vdd vss vbias pwave_predictor
 
 * Pulse generators for pwave predictor outputs
 Xpg_pwb trig_pw_base pulse_pw_base vdd vss vbias pulse_gen

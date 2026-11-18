@@ -1,0 +1,145 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: full_trigger_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.05704e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261181
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0220585
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.593436
+xrr.tail_a                         0.000671357
+xrr.net_a1                            0.420799
+f2                                    0.418492
+timer_out                          7.05704e-05
+ewma_out                                  0.35
+vth_base                              0.420209
+vth_peak                              0.411837
+vth_rr_cap                               0.385
+xpw.cnb                               0.483621
+xpw.ctb                            0.000104205
+xpw.stg1_base                      0.000104679
+pw_base_level                              0.9
+xpw.cnp                               0.483621
+xpw.ctp                            0.000104205
+xpw.stg1_peak                      0.000104786
+pw_peak_level                              0.9
+xpw.cnc                               0.483621
+xpw.ctc                            0.000104205
+xpw.stg1_cap                        0.00010533
+rr_cap_level                               0.9
+xeb_base.mid                        9.0827e-11
+pw_base_sharp                              0.9
+xpg_base.xcac.a                  -1.90245e-297
+xpg_base.xcac.b1                 -1.90245e-297
+xpg_base.pulse_raw               -1.90245e-297
+xpg_base.inv1_out                          0.9
+pw_base_pulse                      1.73955e-07
+xeb_peak.mid                        9.0827e-11
+pw_peak_sharp                              0.9
+xpg_peak.xcac.a                  -1.90241e-297
+xpg_peak.xcac.b1                 -1.90241e-297
+xpg_peak.pulse_raw               -1.90241e-297
+xpg_peak.inv1_out                          0.9
+pw_peak_pulse                      1.73955e-07
+xeb_cap.mid                         9.0827e-11
+rr_cap_sharp                               0.9
+xpg_cap.xcac.a                   -1.90241e-297
+xpg_cap.xcac.b1                  -1.90241e-297
+xpg_cap.pulse_raw                -1.90241e-297
+xpg_cap.inv1_out                           0.9
+rr_cap_pulse                       1.73955e-07
+bvth_cap#branch                              0
+bvth_peak#branch                             0
+bvth_base#branch                             0
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         1.71925e-10
+vdd#branch                        -1.71872e-10
+
+
+No. of Data Rows : 98494
+
+  Measurements for Transient Analysis
+
+tpwb_3              =   2.71360e+00
+tpwp_3              =   2.78870e+00
+tcap_3              =   2.89620e+00
+ewma2_3             =  3.452087e-01
+tpwb_4              =   3.50990e+00
+tpwp_4              =   3.58520e+00
+tcap_4              =   3.69630e+00
+ewma2_4             =  3.456032e-01
+tpwb_5              =   4.30630e+00
+tpwp_5              =   4.38170e+00
+tcap_5              =   4.49640e+00
+ewma2_5             =  3.460061e-01
+tpwb_6              =   5.10270e+00
+tpwp_6              =   5.17799e+00
+tcap_6              =   5.29630e+00
+ewma2_6             =  3.464076e-01
+tpwb_7              =   5.89920e+00
+tpwp_7              =   5.97460e+00
+tcap_7              =   6.09630e+00
+ewma2_7             =  3.468061e-01
+tpwb_8              =   6.69570e+00
+tpwp_8              =   6.77100e+00
+tcap_8              =   6.89630e+00
+ewma2_8             =  3.472004e-01
+tpwb_9              =   7.49220e+00
+tpwp_9              =   7.56740e+00
+tcap_9              =   7.69630e+00
+ewma2_9             =  3.475904e-01
+tpwb_10             =   8.28860e+00
+tpwp_10             =   8.36389e+00
+tcap_10             =   8.49630e+00
+ewma2_10            =  3.479770e-01
+tpwb_11             =   9.08529e+00
+tpwp_11             =   9.16049e+00
+tcap_11             =   9.29620e+00
+ewma2_11            =  3.483598e-01
+
+
+Total analysis time (seconds) = 25.664
+
+Total elapsed time (seconds) = 35.843 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1535.668 MB.
+Maximum ngspice program size =  100.445 MB.
+Current ngspice program size =  100.445 MB.
+

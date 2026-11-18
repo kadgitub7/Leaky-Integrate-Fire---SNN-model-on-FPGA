@@ -1,0 +1,65 @@
+.title delay_timer_calibration
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+
+* Single rpeak pulse at t=0.5s (5ms wide)
+Vrpk rpk 0 PWL(0 0 0.4996 0 0.5 0.9 0.505 0.9 0.5054 0 2.0 0)
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+
+* Dummy thresholds — we're just measuring SF curve
+Vth14  vth14  0 0.1
+Vth69  vth69  0 0.1
+Vth83  vth83  0 0.1
+Vth300 vth300 0 0.1
+Vth10  vth10  0 0.1
+Vth_rpk vth_rpk 0 0.1
+
+Xdt rpk dt_s14 dt_s69 dt_wid dt_bi dt_rr dt_rpk sf_main vdd vss vbias vth14 vth69 vth83 vth300 vth10 vth_rpk delay_timer
+
+.tran 0.1m 2.0
+
+* Main timer SF measurements (after pulse ends at 0.505s)
+* Add 1ms offset for SF to settle after precharge
+.meas tran sf_m_0ms   FIND V(sf_main) AT=0.506
+.meas tran sf_m_5ms   FIND V(sf_main) AT=0.511
+.meas tran sf_m_10ms  FIND V(sf_main) AT=0.516
+.meas tran sf_m_14ms  FIND V(sf_main) AT=0.520
+.meas tran sf_m_20ms  FIND V(sf_main) AT=0.526
+.meas tran sf_m_28ms  FIND V(sf_main) AT=0.534
+.meas tran sf_m_40ms  FIND V(sf_main) AT=0.546
+.meas tran sf_m_50ms  FIND V(sf_main) AT=0.556
+.meas tran sf_m_60ms  FIND V(sf_main) AT=0.566
+.meas tran sf_m_69ms  FIND V(sf_main) AT=0.575
+.meas tran sf_m_75ms  FIND V(sf_main) AT=0.581
+.meas tran sf_m_80ms  FIND V(sf_main) AT=0.586
+.meas tran sf_m_83ms  FIND V(sf_main) AT=0.589
+.meas tran sf_m_90ms  FIND V(sf_main) AT=0.596
+.meas tran sf_m_100ms FIND V(sf_main) AT=0.606
+.meas tran sf_m_120ms FIND V(sf_main) AT=0.626
+.meas tran sf_m_150ms FIND V(sf_main) AT=0.656
+.meas tran sf_m_200ms FIND V(sf_main) AT=0.706
+.meas tran sf_m_250ms FIND V(sf_main) AT=0.756
+.meas tran sf_m_300ms FIND V(sf_main) AT=0.806
+.meas tran sf_m_400ms FIND V(sf_main) AT=0.906
+.meas tran sf_m_500ms FIND V(sf_main) AT=1.006
+
+* Fast timer SF (internal node: xdt.sf_timer2)
+.meas tran sf_f_0ms   FIND V(xdt.sf_timer2) AT=0.506
+.meas tran sf_f_2ms   FIND V(xdt.sf_timer2) AT=0.508
+.meas tran sf_f_5ms   FIND V(xdt.sf_timer2) AT=0.511
+.meas tran sf_f_7ms   FIND V(xdt.sf_timer2) AT=0.513
+.meas tran sf_f_10ms  FIND V(xdt.sf_timer2) AT=0.516
+.meas tran sf_f_12ms  FIND V(xdt.sf_timer2) AT=0.518
+.meas tran sf_f_14ms  FIND V(xdt.sf_timer2) AT=0.520
+.meas tran sf_f_16ms  FIND V(xdt.sf_timer2) AT=0.522
+.meas tran sf_f_20ms  FIND V(xdt.sf_timer2) AT=0.526
+.meas tran sf_f_30ms  FIND V(xdt.sf_timer2) AT=0.536
+
+.end

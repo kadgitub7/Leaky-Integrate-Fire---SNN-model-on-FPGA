@@ -1,0 +1,72 @@
+.title delay_timer_trigger_test
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+
+Vrpk rpk 0 PWL(0.0000000 0.000000 0.4996000 0.000000 0.5000000 0.900000 0.5005000 0.900000 0.5009000 0.000000 1.2996000 0.000000 1.3000000 0.900000 1.3005000 0.900000 1.3009000 0.000000 2.0996000 0.000000 2.1000000 0.900000 2.1005000 0.900000 2.1009000 0.000000 2.8996000 0.000000 2.9000000 0.900000 2.9005000 0.900000 2.9009000 0.000000 3.6996000 0.000000 3.7000000 0.900000 3.7005000 0.900000 3.7009000 0.000000 4.5000000 0.000000)
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/edge_buffer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pulse_gen.spice"
+
+* Correctly calibrated thresholds
+Vth14  vth14  0 0.298424
+Vth69  vth69  0 0.446932
+Vth83  vth83  0 0.439665
+Vth300 vth300 0 0.328703
+Vth10  vth10  0 0.347980
+Vth_rpk vth_rpk 0 0.298424
+
+Xdt rpk dt_s14 dt_s69 dt_wid dt_bi dt_rr dt_rpk sf_out vdd vss vbias vth14 vth69 vth83 vth300 vth10 vth_rpk delay_timer
+
+* Edge buffers + pulse generators
+Xeb_s14 dt_s14 s14_sharp vdd vss edge_buffer
+Xpg_s14 s14_sharp trig_s14 vdd vss vbias pulse_gen
+Xeb_s69 dt_s69 s69_sharp vdd vss edge_buffer
+Xpg_s69 s69_sharp trig_s69 vdd vss vbias pulse_gen
+Xeb_wid dt_wid wid_sharp vdd vss edge_buffer
+Xpg_wid wid_sharp trig_wid vdd vss vbias pulse_gen
+Xeb_bi  dt_bi  bi_sharp  vdd vss edge_buffer
+Xpg_bi  bi_sharp  trig_bi  vdd vss vbias pulse_gen
+Xeb_rr  dt_rr  rr_sharp  vdd vss edge_buffer
+Xpg_rr  rr_sharp  trig_rr  vdd vss vbias pulse_gen
+
+.tran 0.1m 4.50
+
+* Beat 0: R-peak at 0.500s
+.meas tran t_s14_0 WHEN V(trig_s14)=0.45 RISE=1 TD=0.500000
+.meas tran t_s69_0 WHEN V(trig_s69)=0.45 RISE=1 TD=0.500000
+.meas tran t_wid_0 WHEN V(trig_wid)=0.45 RISE=1 TD=0.500000
+.meas tran t_bi_0  WHEN V(trig_bi)=0.45  RISE=1 TD=0.500000
+.meas tran t_rr_0  WHEN V(trig_rr)=0.45  RISE=1 TD=0.500000
+* Beat 1: R-peak at 1.300s
+.meas tran t_s14_1 WHEN V(trig_s14)=0.45 RISE=1 TD=1.300000
+.meas tran t_s69_1 WHEN V(trig_s69)=0.45 RISE=1 TD=1.300000
+.meas tran t_wid_1 WHEN V(trig_wid)=0.45 RISE=1 TD=1.300000
+.meas tran t_bi_1  WHEN V(trig_bi)=0.45  RISE=1 TD=1.300000
+.meas tran t_rr_1  WHEN V(trig_rr)=0.45  RISE=1 TD=1.300000
+* Beat 2: R-peak at 2.100s
+.meas tran t_s14_2 WHEN V(trig_s14)=0.45 RISE=1 TD=2.100000
+.meas tran t_s69_2 WHEN V(trig_s69)=0.45 RISE=1 TD=2.100000
+.meas tran t_wid_2 WHEN V(trig_wid)=0.45 RISE=1 TD=2.100000
+.meas tran t_bi_2  WHEN V(trig_bi)=0.45  RISE=1 TD=2.100000
+.meas tran t_rr_2  WHEN V(trig_rr)=0.45  RISE=1 TD=2.100000
+* Beat 3: R-peak at 2.900s
+.meas tran t_s14_3 WHEN V(trig_s14)=0.45 RISE=1 TD=2.900000
+.meas tran t_s69_3 WHEN V(trig_s69)=0.45 RISE=1 TD=2.900000
+.meas tran t_wid_3 WHEN V(trig_wid)=0.45 RISE=1 TD=2.900000
+.meas tran t_bi_3  WHEN V(trig_bi)=0.45  RISE=1 TD=2.900000
+.meas tran t_rr_3  WHEN V(trig_rr)=0.45  RISE=1 TD=2.900000
+* Beat 4: R-peak at 3.700s
+.meas tran t_s14_4 WHEN V(trig_s14)=0.45 RISE=1 TD=3.700000
+.meas tran t_s69_4 WHEN V(trig_s69)=0.45 RISE=1 TD=3.700000
+.meas tran t_wid_4 WHEN V(trig_wid)=0.45 RISE=1 TD=3.700000
+.meas tran t_bi_4  WHEN V(trig_bi)=0.45  RISE=1 TD=3.700000
+.meas tran t_rr_4  WHEN V(trig_rr)=0.45  RISE=1 TD=3.700000
+
+.end

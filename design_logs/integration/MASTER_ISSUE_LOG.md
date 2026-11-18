@@ -159,7 +159,72 @@
   2. Create combined netlist: frontend_top.spice → level shifter → top_level_classifier.spice
   3. Run transient simulation with ECG input for 3+ beats
   4. Verify classification matches standalone results
-- **Status:** NOT STARTED (depends on FATAL-001, FATAL-002)
+- **Status:** IN PROGRESS
+  - **2026-11-17 Analysis:** Thorough investigation of SPICE-Python correlation completed
+  - **Feature extraction circuits VERIFIED:** With ideal triggers, rho > 0.90 for all 8 features (6-record cache: F1=0.998-1.000, F2=0.995-1.000)
+  - **Trigger timing issues identified:** See VER-TRIGGER-TIMING-ANALYSIS.md
+    - F6 delay timer miscalibrated: R+28ms instead of design-specified R+83ms
+    - F5 pwave predictor has analog trigger timing errors (rho drops 0.994→0.467)
+    - F2 rr_capture prev_node has charge retention issues (rho drops 0.988→0.732)
+  - **Classifier retrain:** Running on corrected Python features (differences, alpha=0.015, WIDTH_OFF=30). MLP 94.48% ± 0.32% (10 seeds). Crossbar weight extraction in progress.
+  - **Decision:** Train classifier on Python features matching DESIGN INTENT (not broken trigger data). Trigger circuit fixes are separate follow-up work.
+  - **2026-11-17 Trigger Calibration:** All 8 trigger thresholds calibrated with propagation-delay compensation. See VER-TRIGGER-FIX-RESULTS.md.
+    - Delay timer (5 triggers): ALL PASS <0.5% error at RR=800ms
+    - Pwave predictor (3 triggers): PASS at steady state but ±9ms EWMA drift
+    - Calibrated values: vth_14=0.3953V, vth_69=0.4524V, vth_83=0.4451V, vth_300=0.3340V, vth_10=0.4449V
+    - Pwave offsets (EWMA-relative): PW_base=+45.4mV, PW_peak=+37.0mV, RR_cap=+22.0mV
+  - **2026-11-17 Three-Way Validation (record 100):** Comprehensive test comparing Python features vs SPICE ideal triggers vs SPICE analog triggers. Spearman rho results (ideal-vs-analog):
+
+    | Feature | Py-Ideal | Id-Analog | Status | Root Cause |
+    |---------|----------|-----------|--------|------------|
+    | F1:rr_ratio | 0.993 | **1.000** | PASS | -- |
+    | F2:rr_asym | 0.729 | 0.873 | FAIL | EWMA convergence + prev_node retention |
+    | F3:bi_L0 | 0.311 | 0.104 | FAIL | rpeak fires on QRS slope, not peak |
+    | F4:bi_L1 | 0.889 | 0.414 | FAIL | Same as F3 |
+    | F5:pwave | 0.982 | 0.236 | FAIL | EWMA too slow for RR adaptation |
+    | F6:width | 0.891 | 0.589 | FAIL | rpeak offset variation ±2ms/beat |
+    | F7:slope | 0.925 | 0.736 | FAIL | Same as F6 |
+    | F8:symmetry | 0.265 | 0.139 | FAIL | rpeak fires on QRS slope, not peak |
+
+    **Bug found in test:** EWMA IC was using SF lookup (0.391V) instead of converged EWMA value (~0.371V). The 20mV gap is from SF output impedance + charge-sharing losses. Fix: `ic_ewma = interp_sf(rr_t, rr_v, avg_rr) - 0.020`. After fix, F1 improved from 0.986 to 1.000.
+
+    **Three distinct failure categories identified:**
+
+    **Category A: EWMA convergence too slow (F2, F5)**
+    - Alpha=0.015 (Cesamp=5pF, Cewma=330pF), tau=67 beats
+    - Pwave thresholds are EWMA-relative but EWMA barely moves over 20 beats
+    - Timer value at target time varies with RR interval, but threshold stays fixed
+    - Result: pwave triggers fire ±50ms from target (confirmed in diagnostics)
+    - Fix: Reduce Cewma to 100pF → alpha=0.048, tau=21 beats
+    - Risk: Noisier EWMA; must verify F1 rho remains >= 0.97
+
+    **Category B: rpeak captures QRS slope, not peak (F3, F4, F8)**
+    - Analog rpeak_detector fires at ECG threshold crossing (QRS upslope)
+    - At threshold crossing, ECG ≈ rpeak_threshold (constant by definition)
+    - S&H in F3/F4 captures ~same voltage every beat → feature has zero dynamic range
+    - Diagnostic confirmed: analog F3 sd=0.0009V (vs ideal sd=0.015V), analog F8 sd=0.002V (vs ideal sd=0.018V)
+    - ECG at rpeak pulse time varies only 0.025V (threshold crossing region) vs 0.072V at true peak
+    - Fix options:
+      1. Use delayed rpeak (trig_rpk_del from delay timer) for capture — BUT pipeline delay (7.8ms) > avg rpeak offset (5ms), can't reach true peak time
+      2. Use S14 trigger (R+14ms) for capture — changes feature definition, captures post-QRS morphology instead of peak amplitude
+      3. Add peak-hold circuit: diode-cap peak tracker → S&H captures held peak voltage
+      4. Remove F3/F4/F8 from feature set and retrain classifier on remaining 5 features
+
+    **Category C: rpeak offset variation (F6, F7)**
+    - Delay timer thresholds calibrated for fixed rpeak offset (5ms avg)
+    - Actual offset varies 3-7ms beat-to-beat (from diagnostic: sd ≈ 1.1ms)
+    - Timer discharge rate: fast=12.5mV/ms, main=0.52mV/ms
+    - At main timer rate, ±2ms offset variation → ±1mV timer error → ~2ms trigger error
+    - F6/F7 rho=0.59/0.74 — moderate but not passing
+    - Fix: These improve naturally when rpeak detector is more consistent, or when features are measured with wider capture windows
+
+  - **Remaining work (priority order):**
+    1. Fix EWMA alpha: test Cewma=100pF (alpha=0.048) — verify F1 stable, F5 improved
+    2. Fix rpeak capture: evaluate delayed-rpeak vs peak-hold for F3/F4/F8
+    3. Re-run three-way validation on 5+ records after fixes
+    4. If F3/F4/F8 cannot be fixed in analog, retrain classifier on working features (F1, F5, F6, F7) + whatever subset of F2-F8 passes
+    5. Complete classifier retrain + crossbar characterization
+    6. Full frontend + classifier integration
 
 ### MAJOR-008: No Startup / Independence Circuits
 - **Severity:** MAJOR
@@ -219,3 +284,10 @@
 | 2026-11-14 | MAJOR-004+005 | Full re-characterization with corrected dataset + honest seed | Analog: 94.25% (seed 42, full DS2), V=88.9%, agreement=99.73% |
 | 2026-11-15 | MAJOR-003 | Distortion-aware weight retraining + sinh overflow fix | 93.85% → 94.71% predicted analog, all 216 ideal elements replaced, ngspice .op converges |
 | 2026-11-16 | MAJOR-008 | Classifier bias: R-based self-biasing reference replaces 2 ideal I-sources | R=1.182M, I_ref=0.996uA, V error<0.2mV, WTA margin=52.9mV, zero ideal elements |
+| 2026-11-17 | MAJOR-007 | Corrected feature cache: differences (not ratios), alpha=0.015, WIDTH_OFF=30 | 50,964 train / 49,654 test, sanity 93.75% |
+| 2026-11-17 | MAJOR-007 | Root cause analysis: trigger timing vs feature extraction | Feature circuits verified (ideal triggers rho>0.90). Trigger circuits have 3 bugs: F6 timing, F5 pwave, F2 capture |
+| 2026-11-17 | MAJOR-007 | F6 delay timer mismatch proven: R+28ms vs design R+83ms | Diagnostic: R2=0.975 at R+28ms vs R2=0.729 at R+83ms. All test scripts use wrong timing except energy_test.py |
+| 2026-11-17 | MAJOR-007 | Classifier retrain started on corrected Python features | 94.48% ± 0.32% (10 seeds), crossbar extraction in progress |
+| 2026-11-17 | MAJOR-007 | Trigger calibration complete: 5 delay timer + 3 pwave triggers | All delay timer <0.5% error. Pwave PASS at steady state, ±9ms EWMA drift |
+| 2026-11-17 | MAJOR-007 | Three-way validation (Py vs Ideal vs Analog) on record 100 | F1=1.000 PASS. F2-F8 FAIL. 3 root causes: EWMA alpha (F5), rpeak-on-slope (F3/F4/F8), offset variation (F6/F7) |
+| 2026-11-17 | MAJOR-007 | Bug fix: EWMA IC was 20mV too high (SF lookup vs actual EWMA) | ic_ewma corrected to SF_value - 0.020V. F1 improved 0.986 → 1.000 |

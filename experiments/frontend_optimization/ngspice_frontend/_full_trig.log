@@ -1,0 +1,244 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: full_trigger_chain
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+nth14                                    0.225
+nth69                                   0.4524
+nth83                                   0.4451
+nth300                                   0.334
+nth10                                   0.2735
+nthrpk                                     0.3
+xdt.sf_timer                       1.17518e-05
+sf_delay                           1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483673
+xdt.ct2                            0.000104052
+xdt.stg1_s69                       0.000104275
+dt_s69                                     0.9
+xdt.cn3                               0.483673
+xdt.ct3                            0.000104052
+xdt.stg1_wid                       0.000104315
+dt_wid                                     0.9
+xdt.cn4                               0.483673
+xdt.ct4                            0.000104052
+xdt.stg1_bi                        0.000108164
+dt_bi                                      0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483673
+xdt.ct5                            0.000104049
+xdt.stg1_rr                        0.000124072
+dt_rr                                      0.9
+xdt.cn6                               0.483673
+xdt.ct6                            0.000104039
+xdt.stg1_s14                       0.000176567
+dt_s14                                     0.9
+xdt.cn7                               0.483673
+xdt.ct7                             0.00010405
+xdt.stg1_rpk                        0.00011402
+dt_rpk_del                                 0.9
+xeb_s14.mid                         9.0827e-11
+s14_sharp                                  0.9
+xeb_s69.mid                         9.0827e-11
+s69_sharp                                  0.9
+xeb_wid.mid                         9.0827e-11
+wid_sharp                                  0.9
+xeb_bi.mid                          9.0827e-11
+bi_sharp                                   0.9
+xeb_rr.mid                          9.0827e-11
+rr_sharp                                   0.9
+xpg_s14.xcac.a                               0
+xpg_s14.xcac.b1                              0
+xpg_s14.pulse_raw                            0
+xpg_s14.inv1_out                           0.9
+pulse_s14                          1.73955e-07
+xpg_s69.xcac.a                               0
+xpg_s69.xcac.b1                              0
+xpg_s69.pulse_raw                            0
+xpg_s69.inv1_out                           0.9
+pulse_s69                          1.73955e-07
+xpg_wid.xcac.a                               0
+xpg_wid.xcac.b1                              0
+xpg_wid.pulse_raw                            0
+xpg_wid.inv1_out                           0.9
+pulse_wid                          1.73955e-07
+xpg_bi.xcac.a                                0
+xpg_bi.xcac.b1                               0
+xpg_bi.pulse_raw                             0
+xpg_bi.inv1_out                            0.9
+pulse_bi                           1.73955e-07
+xpg_rr.xcac.a                                0
+xpg_rr.xcac.b1                               0
+xpg_rr.pulse_raw                             0
+xpg_rr.inv1_out                            0.9
+pulse_rr                           1.73955e-07
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.05697e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261181
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0220585
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.593436
+xrr.tail_a                         0.000671357
+xrr.net_a1                            0.420799
+f2                                    0.418492
+timer_out                          7.05697e-05
+ewma_out                                  0.35
+vth_base                                0.4202
+vth_peak                                0.4118
+vth_rr_cap                               0.385
+xpw.cnb                               0.483621
+xpw.ctb                            0.000104205
+xpw.stg1_base                       0.00010468
+pw_base_level                              0.9
+xpw.cnp                               0.483621
+xpw.ctp                            0.000104205
+xpw.stg1_peak                      0.000104786
+pw_peak_level                              0.9
+xpw.cnc                               0.483621
+xpw.ctc                            0.000104205
+xpw.stg1_cap                        0.00010533
+rr_cap_level                               0.9
+xeb_base.mid                        9.0827e-11
+pw_base_sharp                              0.9
+xpg_base.xcac.a                              0
+xpg_base.xcac.b1                             0
+xpg_base.pulse_raw                           0
+xpg_base.inv1_out                          0.9
+pw_base_pulse                      1.73955e-07
+xeb_peak.mid                        9.0827e-11
+pw_peak_sharp                              0.9
+xpg_peak.xcac.a                              0
+xpg_peak.xcac.b1                             0
+xpg_peak.pulse_raw                           0
+xpg_peak.inv1_out                          0.9
+pw_peak_pulse                      1.73955e-07
+xeb_cap.mid                         9.0827e-11
+rr_cap_sharp                               0.9
+xpg_cap.xcac.a                               0
+xpg_cap.xcac.b1                              0
+xpg_cap.pulse_raw                            0
+xpg_cap.inv1_out                           0.9
+rr_cap_pulse                       1.73955e-07
+bvth_cap#branch                              0
+bvth_peak#branch                             0
+bvth_base#branch                             0
+vthrpk#branch                                0
+vth10#branch                                 0
+vth300#branch                                0
+vth83#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         3.88532e-10
+vdd#branch                        -3.88475e-10
+
+
+No. of Data Rows : 98550
+
+  Measurements for Transient Analysis
+
+t_s14_3             =   2.92840e+00
+t_s69_3             =   2.96880e+00
+t_wid_3             =   2.98300e+00
+t_pwb_3             =   2.71350e+00
+t_pwp_3             =   2.78900e+00
+t_cap_3             =   2.89620e+00
+t_s14_4             =   3.72840e+00
+t_s69_4             =   3.76880e+00
+t_wid_4             =   3.78300e+00
+t_pwb_4             =   3.50990e+00
+t_pwp_4             =   3.58540e+00
+t_cap_4             =   3.69630e+00
+t_s14_5             =   4.52840e+00
+t_s69_5             =   4.56880e+00
+t_wid_5             =   4.58300e+00
+t_pwb_5             =   4.30630e+00
+t_pwp_5             =   4.38180e+00
+t_cap_5             =   4.49640e+00
+t_s14_6             =   5.32840e+00
+t_s69_6             =   5.36880e+00
+t_wid_6             =   5.38300e+00
+t_pwb_6             =   5.10270e+00
+t_pwp_6             =   5.17820e+00
+t_cap_6             =   5.29630e+00
+t_s14_7             =   6.12840e+00
+t_s69_7             =   6.16880e+00
+t_wid_7             =   6.18300e+00
+t_pwb_7             =   5.89910e+00
+t_pwp_7             =   5.97470e+00
+t_cap_7             =   6.09630e+00
+t_s14_8             =   6.92840e+00
+t_s69_8             =   6.96880e+00
+t_wid_8             =   6.98300e+00
+t_pwb_8             =   6.69560e+00
+t_pwp_8             =   6.77110e+00
+t_cap_8             =   6.89630e+00
+t_s14_9             =   7.72840e+00
+t_s69_9             =   7.76880e+00
+t_wid_9             =   7.78300e+00
+t_pwb_9             =   7.49210e+00
+t_pwp_9             =   7.56760e+00
+t_cap_9             =   7.69630e+00
+t_s14_10            =   8.52840e+00
+t_s69_10            =   8.56880e+00
+t_wid_10            =   8.58300e+00
+t_pwb_10            =   8.28870e+00
+t_pwp_10            =   8.36410e+00
+t_cap_10            =   8.49630e+00
+t_s14_11            =   9.32840e+00
+t_s69_11            =   9.36880e+00
+t_wid_11            =   9.38300e+00
+t_pwb_11            =   9.08530e+00
+t_pwp_11            =   9.16080e+00
+t_cap_11            =   9.29620e+00
+
+
+Total analysis time (seconds) = 66.891
+
+Total elapsed time (seconds) = 86.810 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1620.562 MB.
+Maximum ngspice program size =  175.855 MB.
+Current ngspice program size =  175.855 MB.
+

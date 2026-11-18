@@ -1,0 +1,76 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: ewma_convergence_ic0.38
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+cap_trig                                     0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.06775e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261192
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0221504
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.38
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                            0.169375
+xrr.net_r1                            0.269028
+f1                                    0.613682
+xrr.tail_a                         0.000671358
+xrr.net_a1                            0.420799
+f2                                    0.418492
+tout                               7.06775e-05
+eout                                      0.38
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.25475e-11
+vdd#branch                        -4.24939e-11
+
+
+No. of Data Rows : 122550
+
+  Measurements for Transient Analysis
+
+ewma_3              =  3.740128e-01
+esamp_3             =  3.782301e-01
+ewma_7              =  3.745357e-01
+esamp_7             =  3.819910e-01
+ewma_14             =  3.755132e-01
+esamp_14            =  3.825937e-01
+
+
+Total analysis time (seconds) = 15.666
+
+Total elapsed time (seconds) = 23.780 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 2132.672 MB.
+Maximum ngspice program size =   62.211 MB.
+Current ngspice program size =   62.211 MB.
+

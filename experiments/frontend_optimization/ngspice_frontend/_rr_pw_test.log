@@ -1,0 +1,352 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: rr_pwave_trigger_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+ecg_l0                                     0.3
+rpk                                          0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         1.17408e-05
+rr_cap_pulse                       1.73955e-07
+xrr.prev_node                      1.09485e-05
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                     9.52274e-06
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+rr_copy_pulse                      1.73955e-07
+xrr.ewma_node                      8.68289e-06
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                          0.00064752
+xrr.net_r1                            0.420826
+f1_out                                0.420824
+xrr.tail_a                          0.00064754
+xrr.net_a1                            0.420824
+f2_out                                0.420824
+rr_timer                           1.17408e-05
+rr_ewma                            8.68289e-06
+vth_base                             0.0950087
+vth_peak                             0.0610087
+xpw.cnb                               0.483672
+xpw.ctb                             0.00010363
+xpw.stg1_base                         0.002517
+pw_base_level                              0.9
+xpw.cnp                               0.483671
+xpw.ctp                             0.00010301
+xpw.stg1_peak                       0.00640186
+pw_peak_level                              0.9
+xpw.cnc                               0.483664
+xpw.ctc                            9.70839e-05
+xpw.stg1_cap                          0.484103
+rr_cap_level                       1.31931e-06
+xeb_base.mid                        9.0827e-11
+pw_base_sharp                              0.9
+xpg_base.xcac.a                              0
+xpg_base.xcac.b1                             0
+xpg_base.pulse_raw                           0
+xpg_base.inv1_out                          0.9
+pw_base_pulse                      1.73955e-07
+xeb_peak.mid                        9.0827e-11
+pw_peak_sharp                              0.9
+xpg_peak.xcac.a                              0
+xpg_peak.xcac.b1                             0
+xpg_peak.pulse_raw                           0
+xpg_peak.inv1_out                          0.9
+pw_peak_pulse                      1.73955e-07
+xeb_cap.mid                                0.9
+rr_cap_sharp                        9.0827e-11
+xpg_cap.xcac.a                               0
+xpg_cap.xcac.b1                              0
+xpg_cap.pulse_raw                            0
+xpg_cap.inv1_out                           0.9
+vth14                                      0.1
+vth69                                      0.1
+vth83                                      0.1
+vth300                                     0.1
+vth10                                  0.34798
+vth_rpk                                    0.1
+xdt.sf_timer                       1.17518e-05
+sf_dt                              1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483672
+xdt.ct2                            0.000103682
+xdt.stg1_s69                        0.00220699
+dt_s69                                     0.9
+xdt.cn3                               0.483672
+xdt.ct3                            0.000103682
+xdt.stg1_wid                        0.00220699
+dt_wid                                     0.9
+xdt.cn4                               0.483672
+xdt.ct4                            0.000103682
+xdt.stg1_bi                         0.00220699
+dt_bi                                      0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483673
+xdt.ct5                            0.000104052
+xdt.stg1_rr                        0.000106921
+dt_rr                                      0.9
+xdt.cn6                               0.483672
+xdt.ct6                            0.000103682
+xdt.stg1_s14                        0.00220699
+dt_s14                                     0.9
+xdt.cn7                               0.483672
+xdt.ct7                            0.000103682
+xdt.stg1_rpk                        0.00220699
+dt_rpk                                     0.9
+xeb_rr.mid                          9.0827e-11
+rr_sharp                                   0.9
+xpg_rr.xcac.a                                0
+xpg_rr.xcac.b1                               0
+xpg_rr.pulse_raw                             0
+xpg_rr.inv1_out                            0.9
+bvth_peak#branch                             0
+bvth_base#branch                             0
+vth_rpk#branch                               0
+vth10#branch                                 0
+vth300#branch                                0
+vth83#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vrpk#branch                                  0
+vecg#branch                                  0
+vbias#branch                                 0
+vss#branch                         1.81687e-10
+vdd#branch                        -1.81685e-10
+
+
+No. of Data Rows : 40698
+
+  Measurements for Transient Analysis
+
+
+Error: measure  tpwb_3  when(WHEN) : out of interval
+ .meas tran tpwb_3 when v(pw_base_pulse)=0.45 rise=1 td=2.8055556 failed!
+
+
+Error: measure  tpwp_3  when(WHEN) : out of interval
+ .meas tran tpwp_3 when v(pw_peak_pulse)=0.45 rise=1 td=2.8055556 failed!
+
+
+Error: measure  tcap_3  when(WHEN) : out of interval
+ .meas tran tcap_3 when v(rr_cap_pulse)=0.45 rise=1 td=2.8055556 failed!
+
+
+Error: measure  tpwb_4  when(WHEN) : out of interval
+ .meas tran tpwb_4 when v(pw_base_pulse)=0.45 rise=1 td=3.5944444 failed!
+
+
+Error: measure  tpwp_4  when(WHEN) : out of interval
+ .meas tran tpwp_4 when v(pw_peak_pulse)=0.45 rise=1 td=3.5944444 failed!
+
+
+Error: measure  tcap_4  when(WHEN) : out of interval
+ .meas tran tcap_4 when v(rr_cap_pulse)=0.45 rise=1 td=3.5944444 failed!
+
+
+Error: measure  tpwb_5  when(WHEN) : out of interval
+ .meas tran tpwb_5 when v(pw_base_pulse)=0.45 rise=1 td=4.4111111 failed!
+
+
+Error: measure  tpwp_5  when(WHEN) : out of interval
+ .meas tran tpwp_5 when v(pw_peak_pulse)=0.45 rise=1 td=4.4111111 failed!
+
+
+Error: measure  tcap_5  when(WHEN) : out of interval
+ .meas tran tcap_5 when v(rr_cap_pulse)=0.45 rise=1 td=4.4111111 failed!
+
+
+Error: measure  tpwb_6  when(WHEN) : out of interval
+ .meas tran tpwb_6 when v(pw_base_pulse)=0.45 rise=1 td=5.0638889 failed!
+
+
+Error: measure  tpwp_6  when(WHEN) : out of interval
+ .meas tran tpwp_6 when v(pw_peak_pulse)=0.45 rise=1 td=5.0638889 failed!
+
+
+Error: measure  tcap_6  when(WHEN) : out of interval
+ .meas tran tcap_6 when v(rr_cap_pulse)=0.45 rise=1 td=5.0638889 failed!
+
+
+Error: measure  tpwb_7  when(WHEN) : out of interval
+ .meas tran tpwb_7 when v(pw_base_pulse)=0.45 rise=1 td=6.0583333 failed!
+
+
+Error: measure  tpwp_7  when(WHEN) : out of interval
+ .meas tran tpwp_7 when v(pw_peak_pulse)=0.45 rise=1 td=6.0583333 failed!
+
+
+Error: measure  tcap_7  when(WHEN) : out of interval
+ .meas tran tcap_7 when v(rr_cap_pulse)=0.45 rise=1 td=6.0583333 failed!
+
+
+Error: measure  tpwb_8  when(WHEN) : out of interval
+ .meas tran tpwb_8 when v(pw_base_pulse)=0.45 rise=1 td=6.9027778 failed!
+
+
+Error: measure  tpwp_8  when(WHEN) : out of interval
+ .meas tran tpwp_8 when v(pw_peak_pulse)=0.45 rise=1 td=6.9027778 failed!
+
+
+Error: measure  tcap_8  when(WHEN) : out of interval
+ .meas tran tcap_8 when v(rr_cap_pulse)=0.45 rise=1 td=6.9027778 failed!
+
+
+Error: measure  tpwb_9  when(WHEN) : out of interval
+ .meas tran tpwb_9 when v(pw_base_pulse)=0.45 rise=1 td=7.7138889 failed!
+
+
+Error: measure  tpwp_9  when(WHEN) : out of interval
+ .meas tran tpwp_9 when v(pw_peak_pulse)=0.45 rise=1 td=7.7138889 failed!
+
+
+Error: measure  tcap_9  when(WHEN) : out of interval
+ .meas tran tcap_9 when v(rr_cap_pulse)=0.45 rise=1 td=7.7138889 failed!
+
+
+Error: measure  tpwb_10  when(WHEN) : out of interval
+ .meas tran tpwb_10 when v(pw_base_pulse)=0.45 rise=1 td=8.5027778 failed!
+
+
+Error: measure  tpwp_10  when(WHEN) : out of interval
+ .meas tran tpwp_10 when v(pw_peak_pulse)=0.45 rise=1 td=8.5027778 failed!
+
+
+Error: measure  tcap_10  when(WHEN) : out of interval
+ .meas tran tcap_10 when v(rr_cap_pulse)=0.45 rise=1 td=8.5027778 failed!
+
+
+Error: measure  tpwb_11  when(WHEN) : out of interval
+ .meas tran tpwb_11 when v(pw_base_pulse)=0.45 rise=1 td=9.2750000 failed!
+
+
+Error: measure  tpwp_11  when(WHEN) : out of interval
+ .meas tran tpwp_11 when v(pw_peak_pulse)=0.45 rise=1 td=9.2750000 failed!
+
+
+Error: measure  tcap_11  when(WHEN) : out of interval
+ .meas tran tcap_11 when v(rr_cap_pulse)=0.45 rise=1 td=9.2750000 failed!
+
+
+Error: measure  tpwb_12  when(WHEN) : out of interval
+ .meas tran tpwb_12 when v(pw_base_pulse)=0.45 rise=1 td=10.1138889 failed!
+
+
+Error: measure  tpwp_12  when(WHEN) : out of interval
+ .meas tran tpwp_12 when v(pw_peak_pulse)=0.45 rise=1 td=10.1138889 failed!
+
+
+Error: measure  tcap_12  when(WHEN) : out of interval
+ .meas tran tcap_12 when v(rr_cap_pulse)=0.45 rise=1 td=10.1138889 failed!
+
+
+Error: measure  tpwb_13  when(WHEN) : out of interval
+ .meas tran tpwb_13 when v(pw_base_pulse)=0.45 rise=1 td=10.9694444 failed!
+
+
+Error: measure  tpwp_13  when(WHEN) : out of interval
+ .meas tran tpwp_13 when v(pw_peak_pulse)=0.45 rise=1 td=10.9694444 failed!
+
+
+Error: measure  tcap_13  when(WHEN) : out of interval
+ .meas tran tcap_13 when v(rr_cap_pulse)=0.45 rise=1 td=10.9694444 failed!
+
+
+Error: measure  tpwb_14  when(WHEN) : out of interval
+ .meas tran tpwb_14 when v(pw_base_pulse)=0.45 rise=1 td=11.7916667 failed!
+
+
+Error: measure  tpwp_14  when(WHEN) : out of interval
+ .meas tran tpwp_14 when v(pw_peak_pulse)=0.45 rise=1 td=11.7916667 failed!
+
+
+Error: measure  tcap_14  when(WHEN) : out of interval
+ .meas tran tcap_14 when v(rr_cap_pulse)=0.45 rise=1 td=11.7916667 failed!
+
+
+Error: measure  tpwb_15  when(WHEN) : out of interval
+ .meas tran tpwb_15 when v(pw_base_pulse)=0.45 rise=1 td=12.6194444 failed!
+
+
+Error: measure  tpwp_15  when(WHEN) : out of interval
+ .meas tran tpwp_15 when v(pw_peak_pulse)=0.45 rise=1 td=12.6194444 failed!
+
+
+Error: measure  tcap_15  when(WHEN) : out of interval
+ .meas tran tcap_15 when v(rr_cap_pulse)=0.45 rise=1 td=12.6194444 failed!
+
+
+Error: measure  tpwb_16  when(WHEN) : out of interval
+ .meas tran tpwb_16 when v(pw_base_pulse)=0.45 rise=1 td=13.4416667 failed!
+
+
+Error: measure  tpwp_16  when(WHEN) : out of interval
+ .meas tran tpwp_16 when v(pw_peak_pulse)=0.45 rise=1 td=13.4416667 failed!
+
+
+Error: measure  tcap_16  when(WHEN) : out of interval
+ .meas tran tcap_16 when v(rr_cap_pulse)=0.45 rise=1 td=13.4416667 failed!
+
+ewma_3              =  5.667485e-04
+timer_3             =  4.583645e-01
+ewma_4              =  8.028201e-04
+timer_4             =  4.585471e-01
+ewma_5              =  1.038943e-03
+timer_5             =  4.569643e-01
+ewma_6              =  1.262397e-03
+timer_6             =  4.650601e-01
+ewma_7              =  1.487873e-03
+timer_7             =  4.451277e-01
+ewma_8              =  1.751223e-03
+timer_8             =  4.553265e-01
+ewma_9              =  1.983703e-03
+timer_9             =  4.572968e-01
+ewma_10             =  2.209305e-03
+timer_10            =  4.585263e-01
+ewma_11             =  2.428252e-03
+timer_11            =  4.594385e-01
+ewma_12             =  2.648823e-03
+timer_12            =  4.556502e-01
+ewma_13             =  2.879570e-03
+timer_13            =  4.546656e-01
+ewma_14             =  3.106806e-03
+timer_14            =  4.566440e-01
+ewma_15             =  3.327147e-03
+timer_15            =  4.563619e-01
+ewma_16             =  3.546660e-03
+timer_16            =  4.566403e-01
+
+
+Total analysis time (seconds) = 41.711
+
+Total elapsed time (seconds) = 63.874 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  671.562 MB.
+Maximum ngspice program size =  137.836 MB.
+Current ngspice program size =  137.836 MB.
+

@@ -1,0 +1,49 @@
+.title fast_timer_sf_curve
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+Vrpk rpk 0 PWL(0 0 0.0496 0 0.0500 0.9 0.0550 0.9 0.0554 0 0.5 0)
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+Xdt rpk ts14 ts69 twid tbi trr trpk sf_out
++ vdd vss vbias 0.200 0.200 0.200 0.200 0.200 0.200 delay_timer
+.tran 0.01m 0.5
+.meas tran sff_0ms FIND V(xdt.sf_timer2) AT=0.0560000
+.meas tran sfm_0ms FIND V(sf_out) AT=0.0560000
+.meas tran sff_1ms FIND V(xdt.sf_timer2) AT=0.0570000
+.meas tran sfm_1ms FIND V(sf_out) AT=0.0570000
+.meas tran sff_2ms FIND V(xdt.sf_timer2) AT=0.0580000
+.meas tran sfm_2ms FIND V(sf_out) AT=0.0580000
+.meas tran sff_3ms FIND V(xdt.sf_timer2) AT=0.0590000
+.meas tran sfm_3ms FIND V(sf_out) AT=0.0590000
+.meas tran sff_4ms FIND V(xdt.sf_timer2) AT=0.0600000
+.meas tran sfm_4ms FIND V(sf_out) AT=0.0600000
+.meas tran sff_5ms FIND V(xdt.sf_timer2) AT=0.0610000
+.meas tran sfm_5ms FIND V(sf_out) AT=0.0610000
+.meas tran sff_6ms FIND V(xdt.sf_timer2) AT=0.0620000
+.meas tran sfm_6ms FIND V(sf_out) AT=0.0620000
+.meas tran sff_7ms FIND V(xdt.sf_timer2) AT=0.0630000
+.meas tran sfm_7ms FIND V(sf_out) AT=0.0630000
+.meas tran sff_8ms FIND V(xdt.sf_timer2) AT=0.0640000
+.meas tran sfm_8ms FIND V(sf_out) AT=0.0640000
+.meas tran sff_10ms FIND V(xdt.sf_timer2) AT=0.0660000
+.meas tran sfm_10ms FIND V(sf_out) AT=0.0660000
+.meas tran sff_12ms FIND V(xdt.sf_timer2) AT=0.0680000
+.meas tran sfm_12ms FIND V(sf_out) AT=0.0680000
+.meas tran sff_14ms FIND V(xdt.sf_timer2) AT=0.0700000
+.meas tran sfm_14ms FIND V(sf_out) AT=0.0700000
+.meas tran sff_16ms FIND V(xdt.sf_timer2) AT=0.0720000
+.meas tran sfm_16ms FIND V(sf_out) AT=0.0720000
+.meas tran sff_18ms FIND V(xdt.sf_timer2) AT=0.0740000
+.meas tran sfm_18ms FIND V(sf_out) AT=0.0740000
+.meas tran sff_20ms FIND V(xdt.sf_timer2) AT=0.0760000
+.meas tran sfm_20ms FIND V(sf_out) AT=0.0760000
+.meas tran sff_25ms FIND V(xdt.sf_timer2) AT=0.0810000
+.meas tran sfm_25ms FIND V(sf_out) AT=0.0810000
+.meas tran sff_30ms FIND V(xdt.sf_timer2) AT=0.0860000
+.meas tran sfm_30ms FIND V(sf_out) AT=0.0860000
+
+.end

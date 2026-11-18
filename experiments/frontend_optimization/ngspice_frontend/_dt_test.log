@@ -1,0 +1,146 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: delay_timer_trigger_test
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+vth14                                 0.298424
+vth69                                 0.446932
+vth83                                 0.439665
+vth300                                0.328703
+vth10                                  0.34798
+vth_rpk                               0.298424
+xdt.sf_timer                       1.17518e-05
+sf_out                             1.17518e-05
+xdt.rpeak_bar                              0.9
+xdt.timer_node                     4.58743e-06
+xdt.xctimer.a                                0
+xdt.xctimer.b1                               0
+xdt.cn2                               0.483673
+xdt.ct2                            0.000104052
+xdt.stg1_s69                       0.000104305
+dt_s69                                     0.9
+xdt.cn3                               0.483673
+xdt.ct3                            0.000104052
+xdt.stg1_wid                       0.000104351
+dt_wid                                     0.9
+xdt.cn4                               0.483673
+xdt.ct4                            0.000104051
+xdt.stg1_bi                        0.000108768
+dt_bi                                      0.9
+xdt.timer2                         4.58743e-06
+xdt.xct2.a                                   0
+xdt.xct2.b1                                  0
+xdt.sf_timer2                      1.17519e-05
+xdt.cn5                               0.483673
+xdt.ct5                            0.000104052
+xdt.stg1_rr                        0.000106921
+dt_rr                                      0.9
+xdt.cn6                               0.483673
+xdt.ct6                             0.00010405
+xdt.stg1_s14                        0.00011444
+dt_s14                                     0.9
+xdt.cn7                               0.483673
+xdt.ct7                             0.00010405
+xdt.stg1_rpk                        0.00011444
+dt_rpk                                     0.9
+xeb_s14.mid                         9.0827e-11
+s14_sharp                                  0.9
+xpg_s14.xcac.a                     7.53287e-25
+xpg_s14.xcac.b1                    7.53287e-25
+xpg_s14.pulse_raw                  7.53287e-25
+xpg_s14.inv1_out                           0.9
+trig_s14                           1.73955e-07
+xeb_s69.mid                         9.0827e-11
+s69_sharp                                  0.9
+xpg_s69.xcac.a                    -3.34692e-25
+xpg_s69.xcac.b1                   -3.34692e-25
+xpg_s69.pulse_raw                 -3.34692e-25
+xpg_s69.inv1_out                           0.9
+trig_s69                           1.73955e-07
+xeb_wid.mid                         9.0827e-11
+wid_sharp                                  0.9
+xpg_wid.xcac.a                    -3.31609e-25
+xpg_wid.xcac.b1                   -3.31609e-25
+xpg_wid.pulse_raw                 -3.31609e-25
+xpg_wid.inv1_out                           0.9
+trig_wid                           1.73955e-07
+xeb_bi.mid                          9.0827e-11
+bi_sharp                                   0.9
+xpg_bi.xcac.a                     -3.34709e-25
+xpg_bi.xcac.b1                    -3.34709e-25
+xpg_bi.pulse_raw                  -3.34709e-25
+xpg_bi.inv1_out                            0.9
+trig_bi                            1.73955e-07
+xeb_rr.mid                          9.0827e-11
+rr_sharp                                   0.9
+xpg_rr.xcac.a                     -3.34709e-25
+xpg_rr.xcac.b1                    -3.34709e-25
+xpg_rr.pulse_raw                  -3.34709e-25
+xpg_rr.inv1_out                            0.9
+trig_rr                            1.73955e-07
+vth_rpk#branch                               0
+vth10#branch                                 0
+vth300#branch                                0
+vth83#branch                                 0
+vth69#branch                                 0
+vth14#branch                                 0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         2.16607e-10
+vdd#branch                        -2.16605e-10
+
+
+No. of Data Rows : 45090
+
+  Measurements for Transient Analysis
+
+t_s14_0             =   5.17400e-01
+t_s69_0             =   5.74900e-01
+t_wid_0             =   5.89000e-01
+t_bi_0              =   8.06800e-01
+t_rr_0              =   5.13300e-01
+t_s14_1             =   1.31740e+00
+t_s69_1             =   1.37490e+00
+t_wid_1             =   1.38900e+00
+t_bi_1              =   1.60680e+00
+t_rr_1              =   1.31330e+00
+t_s14_2             =   2.11740e+00
+t_s69_2             =   2.17490e+00
+t_wid_2             =   2.18900e+00
+t_bi_2              =   2.40680e+00
+t_rr_2              =   2.11330e+00
+t_s14_3             =   2.91740e+00
+t_s69_3             =   2.97490e+00
+t_wid_3             =   2.98900e+00
+t_bi_3              =   3.20680e+00
+t_rr_3              =   2.91330e+00
+t_s14_4             =   3.71740e+00
+t_s69_4             =   3.77490e+00
+t_wid_4             =   3.78900e+00
+t_bi_4              =   4.00680e+00
+t_rr_4              =   3.71330e+00
+
+
+Total analysis time (seconds) = 37.611
+
+Total elapsed time (seconds) = 53.145 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  627.855 MB.
+Maximum ngspice program size =  115.535 MB.
+Current ngspice program size =  114.797 MB.
+

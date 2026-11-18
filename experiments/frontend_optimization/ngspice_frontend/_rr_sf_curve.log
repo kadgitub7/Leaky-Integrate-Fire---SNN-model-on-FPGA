@@ -1,0 +1,84 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: rr_timing_sf_curve
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                          4.5179e-05
+xrr.prev_node                      4.21284e-05
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0172957
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.594211
+xrr.tail_a                         0.000648099
+xrr.net_a1                            0.420794
+f2                                    0.420797
+timer_out                           4.5179e-05
+ewma_out                                  0.35
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.20601e-11
+vdd#branch                        -4.19861e-11
+
+
+No. of Data Rows : 42188
+
+  Measurements for Transient Analysis
+
+sf_0ms              =  4.831589e-01
+sf_10ms             =  4.820126e-01
+sf_20ms             =  4.808903e-01
+sf_50ms             =  4.775057e-01
+sf_100ms            =  4.718547e-01
+sf_150ms            =  4.661876e-01
+sf_200ms            =  4.605561e-01
+sf_250ms            =  4.549278e-01
+sf_300ms            =  4.492911e-01
+sf_400ms            =  4.380702e-01
+sf_500ms            =  4.268754e-01
+sf_600ms            =  4.156789e-01
+sf_650ms            =  4.101085e-01
+sf_700ms            =  4.045282e-01
+sf_750ms            =  3.989601e-01
+sf_795ms            =  4.832319e-01
+ewma_at_rpk         =  3.450630e-01
+esamp_at_rpk        =  3.699608e-01
+
+
+Total analysis time (seconds) = 4.778
+
+Total elapsed time (seconds) = 13.782 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1732.277 MB.
+Maximum ngspice program size =   55.680 MB.
+Current ngspice program size =   55.680 MB.
+

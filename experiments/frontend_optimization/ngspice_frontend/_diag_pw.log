@@ -1,0 +1,184 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: diagnose_pwave_drift
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.05704e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261181
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0220585
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.593434
+xrr.tail_a                         0.000671357
+xrr.net_a1                            0.420799
+f2                                    0.418492
+timer_out                          7.05704e-05
+ewma_out                                  0.35
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.23687e-11
+vdd#branch                        -4.23153e-11
+
+
+No. of Data Rows : 122550
+
+  Measurements for Transient Analysis
+
+ewma_pre_2          =  3.448734e-01
+sf_pre_2            =  3.957542e-01
+timer_pre_2         =  7.931407e-01
+sf_cap_2            =  3.604914e-01
+esamp_cap_2         =  3.604334e-01
+ewma_post_2         =  3.452212e-01
+tmr_pwb_2           =  4.170500e-01
+tmr_pwp_2           =  4.086704e-01
+tmr_rrc_2           =  3.577388e-01
+ewma_pre_3          =  3.452208e-01
+sf_pre_3            =  3.957620e-01
+timer_pre_3         =  7.931407e-01
+sf_cap_3            =  3.656781e-01
+esamp_cap_3         =  3.656255e-01
+ewma_post_3         =  3.456181e-01
+tmr_pwb_3           =  4.170419e-01
+tmr_pwp_3           =  4.086809e-01
+tmr_rrc_3           =  3.594566e-01
+ewma_pre_4          =  3.456178e-01
+sf_pre_4            =  3.957504e-01
+timer_pre_4         =  7.931407e-01
+sf_cap_4            =  3.670122e-01
+esamp_cap_4         =  3.669611e-01
+ewma_post_4         =  3.460235e-01
+tmr_pwb_4           =  4.170397e-01
+tmr_pwp_4           =  4.086620e-01
+tmr_rrc_4           =  3.601570e-01
+ewma_pre_5          =  3.460231e-01
+sf_pre_5            =  3.957657e-01
+timer_pre_5         =  7.931407e-01
+sf_cap_5            =  3.674690e-01
+esamp_cap_5         =  3.674184e-01
+ewma_post_5         =  3.464276e-01
+tmr_pwb_5           =  4.170378e-01
+tmr_pwp_5           =  4.086683e-01
+tmr_rrc_5           =  3.605315e-01
+ewma_pre_6          =  3.464272e-01
+sf_pre_6            =  3.957591e-01
+timer_pre_6         =  7.931407e-01
+sf_cap_6            =  3.677144e-01
+esamp_cap_6         =  3.676642e-01
+ewma_post_6         =  3.468283e-01
+tmr_pwb_6           =  4.170407e-01
+tmr_pwp_6           =  4.086597e-01
+tmr_rrc_6           =  3.608240e-01
+ewma_pre_7          =  3.468279e-01
+sf_pre_7            =  3.957616e-01
+timer_pre_7         =  7.931407e-01
+sf_cap_7            =  3.679087e-01
+esamp_cap_7         =  3.678587e-01
+ewma_post_7         =  3.472251e-01
+tmr_pwb_7           =  4.170435e-01
+tmr_pwp_7           =  4.086789e-01
+tmr_rrc_7           =  3.610991e-01
+ewma_pre_8          =  3.472248e-01
+sf_pre_8            =  3.957557e-01
+timer_pre_8         =  7.931407e-01
+sf_cap_8            =  3.680893e-01
+esamp_cap_8         =  3.680395e-01
+ewma_post_8         =  3.476180e-01
+tmr_pwb_8           =  4.170500e-01
+tmr_pwp_8           =  4.086712e-01
+tmr_rrc_8           =  3.613623e-01
+ewma_pre_9          =  3.476177e-01
+sf_pre_9            =  3.957542e-01
+timer_pre_9         =  7.931407e-01
+sf_cap_9            =  3.682659e-01
+esamp_cap_9         =  3.682163e-01
+ewma_post_9         =  3.480069e-01
+tmr_pwb_9           =  4.170498e-01
+tmr_pwp_9           =  4.086762e-01
+tmr_rrc_9           =  3.616253e-01
+ewma_pre_10         =  3.480065e-01
+sf_pre_10           =  3.957498e-01
+timer_pre_10        =  7.931407e-01
+sf_cap_10           =  3.684401e-01
+esamp_cap_10        =  3.683907e-01
+ewma_post_10        =  3.483917e-01
+tmr_pwb_10          =  4.170483e-01
+tmr_pwp_10          =  4.086584e-01
+tmr_rrc_10          =  3.618820e-01
+ewma_pre_11         =  3.483914e-01
+sf_pre_11           =  3.957549e-01
+timer_pre_11        =  7.931407e-01
+sf_cap_11           =  3.686143e-01
+esamp_cap_11        =  3.685652e-01
+ewma_post_11        =  3.487726e-01
+tmr_pwb_11          =  4.170385e-01
+tmr_pwp_11          =  4.086778e-01
+tmr_rrc_11          =  3.621372e-01
+ewma_pre_12         =  3.487722e-01
+sf_pre_12           =  3.957554e-01
+timer_pre_12        =  7.931407e-01
+sf_cap_12           =  3.687867e-01
+esamp_cap_12        =  3.687378e-01
+ewma_post_12        =  3.491497e-01
+tmr_pwb_12          =  4.170493e-01
+tmr_pwp_12          =  4.086761e-01
+tmr_rrc_12          =  3.623906e-01
+ewma_pre_13         =  3.491493e-01
+sf_pre_13           =  3.957647e-01
+timer_pre_13        =  7.931407e-01
+sf_cap_13           =  3.689577e-01
+esamp_cap_13        =  3.689089e-01
+ewma_post_13        =  3.495231e-01
+tmr_pwb_13          =  4.170398e-01
+tmr_pwp_13          =  4.086755e-01
+tmr_rrc_13          =  3.626395e-01
+ewma_pre_14         =  3.495228e-01
+sf_pre_14           =  3.957684e-01
+timer_pre_14        =  7.931407e-01
+sf_cap_14           =  3.691273e-01
+esamp_cap_14        =  3.690788e-01
+ewma_post_14        =  3.498928e-01
+
+
+Total analysis time (seconds) = 35.256
+
+Total elapsed time (seconds) = 48.384 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  882.547 MB.
+Maximum ngspice program size =   64.473 MB.
+Current ngspice program size =   64.473 MB.
+

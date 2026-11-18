@@ -1,0 +1,161 @@
+.title full_trigger_tight_tolerance
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+Vrpk rpk 0 PWL(0.0000000 0.000000 0.4996000 0.000000 0.5000000 0.900000 0.5050000 0.900000 0.5054000 0.000000 1.2996000 0.000000 1.3000000 0.900000 1.3050000 0.900000 1.3054000 0.000000 2.0996000 0.000000 2.1000000 0.900000 2.1050000 0.900000 2.1054000 0.000000 2.8996000 0.000000 2.9000000 0.900000 2.9050000 0.900000 2.9054000 0.000000 3.6996000 0.000000 3.7000000 0.900000 3.7050000 0.900000 3.7054000 0.000000 4.4996000 0.000000 4.5000000 0.900000 4.5050000 0.900000 4.5054000 0.000000 5.2996000 0.000000 5.3000000 0.900000 5.3050000 0.900000 5.3054000 0.000000 6.0996000 0.000000 6.1000000 0.900000 6.1050000 0.900000 6.1054000 0.000000 6.8996000 0.000000 6.9000000 0.900000 6.9050000 0.900000 6.9054000 0.000000 7.6996000 0.000000 7.7000000 0.900000 7.7050000 0.900000 7.7054000 0.000000 8.4996000 0.000000 8.5000000 0.900000 8.5050000 0.900000 8.5054000 0.000000 9.2996000 0.000000 9.3000000 0.900000 9.3050000 0.900000 9.3054000 0.000000 10.0996000 0.000000 10.1000000 0.900000 10.1050000 0.900000 10.1054000 0.000000 10.8996000 0.000000 10.9000000 0.900000 10.9050000 0.900000 10.9054000 0.000000 11.6996000 0.000000 11.7000000 0.900000 11.7050000 0.900000 11.7054000 0.000000 12.4996000 0.000000 12.5000000 0.900000 12.5050000 0.900000 12.5054000 0.000000 13.2996000 0.000000 13.3000000 0.900000 13.3050000 0.900000 13.3054000 0.000000 14.0996000 0.000000 14.1000000 0.900000 14.1050000 0.900000 14.1054000 0.000000 14.8996000 0.000000 14.9000000 0.900000 14.9050000 0.900000 14.9054000 0.000000 15.6996000 0.000000 15.7000000 0.900000 15.7050000 0.900000 15.7054000 0.000000 16.2000000 0.000000)
+Vcap capture_trig 0 PWL(0.0000000 0.000000 0.4946000 0.000000 0.4950000 0.900000 0.4970000 0.900000 0.4974000 0.000000 1.2946000 0.000000 1.2950000 0.900000 1.2970000 0.900000 1.2974000 0.000000 2.0946000 0.000000 2.0950000 0.900000 2.0970000 0.900000 2.0974000 0.000000 2.8946000 0.000000 2.8950000 0.900000 2.8970000 0.900000 2.8974000 0.000000 3.6946000 0.000000 3.6950000 0.900000 3.6970000 0.900000 3.6974000 0.000000 4.4946000 0.000000 4.4950000 0.900000 4.4970000 0.900000 4.4974000 0.000000 5.2946000 0.000000 5.2950000 0.900000 5.2970000 0.900000 5.2974000 0.000000 6.0946000 0.000000 6.0950000 0.900000 6.0970000 0.900000 6.0974000 0.000000 6.8946000 0.000000 6.8950000 0.900000 6.8970000 0.900000 6.8974000 0.000000 7.6946000 0.000000 7.6950000 0.900000 7.6970000 0.900000 7.6974000 0.000000 8.4946000 0.000000 8.4950000 0.900000 8.4970000 0.900000 8.4974000 0.000000 9.2946000 0.000000 9.2950000 0.900000 9.2970000 0.900000 9.2974000 0.000000 10.0946000 0.000000 10.0950000 0.900000 10.0970000 0.900000 10.0974000 0.000000 10.8946000 0.000000 10.8950000 0.900000 10.8970000 0.900000 10.8974000 0.000000 11.6946000 0.000000 11.6950000 0.900000 11.6970000 0.900000 11.6974000 0.000000 12.4946000 0.000000 12.4950000 0.900000 12.4970000 0.900000 12.4974000 0.000000 13.2946000 0.000000 13.2950000 0.900000 13.2970000 0.900000 13.2974000 0.000000 14.0946000 0.000000 14.0950000 0.900000 14.0970000 0.900000 14.0974000 0.000000 14.8946000 0.000000 14.8950000 0.900000 14.8970000 0.900000 14.8974000 0.000000 15.6946000 0.000000 15.6950000 0.900000 15.6970000 0.900000 15.6974000 0.000000 16.2000000 0.000000)
+Vcopy copy_trig 0 PWL(0.0000000 0.000000 0.5096000 0.000000 0.5100000 0.900000 0.5120000 0.900000 0.5124000 0.000000 1.3096000 0.000000 1.3100000 0.900000 1.3120000 0.900000 1.3124000 0.000000 2.1096000 0.000000 2.1100000 0.900000 2.1120000 0.900000 2.1124000 0.000000 2.9096000 0.000000 2.9100000 0.900000 2.9120000 0.900000 2.9124000 0.000000 3.7096000 0.000000 3.7100000 0.900000 3.7120000 0.900000 3.7124000 0.000000 4.5096000 0.000000 4.5100000 0.900000 4.5120000 0.900000 4.5124000 0.000000 5.3096000 0.000000 5.3100000 0.900000 5.3120000 0.900000 5.3124000 0.000000 6.1096000 0.000000 6.1100000 0.900000 6.1120000 0.900000 6.1124000 0.000000 6.9096000 0.000000 6.9100000 0.900000 6.9120000 0.900000 6.9124000 0.000000 7.7096000 0.000000 7.7100000 0.900000 7.7120000 0.900000 7.7124000 0.000000 8.5096000 0.000000 8.5100000 0.900000 8.5120000 0.900000 8.5124000 0.000000 9.3096000 0.000000 9.3100000 0.900000 9.3120000 0.900000 9.3124000 0.000000 10.1096000 0.000000 10.1100000 0.900000 10.1120000 0.900000 10.1124000 0.000000 10.9096000 0.000000 10.9100000 0.900000 10.9120000 0.900000 10.9124000 0.000000 11.7096000 0.000000 11.7100000 0.900000 11.7120000 0.900000 11.7124000 0.000000 12.5096000 0.000000 12.5100000 0.900000 12.5120000 0.900000 12.5124000 0.000000 13.3096000 0.000000 13.3100000 0.900000 13.3120000 0.900000 13.3124000 0.000000 14.1096000 0.000000 14.1100000 0.900000 14.1120000 0.900000 14.1124000 0.000000 14.9096000 0.000000 14.9100000 0.900000 14.9120000 0.900000 14.9124000 0.000000 15.7096000 0.000000 15.7100000 0.900000 15.7120000 0.900000 15.7124000 0.000000 16.2000000 0.000000)
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rr_timing.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pwave_predictor.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/edge_buffer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/pulse_gen.spice"
+
+Vth14  nth14  0 0.395277
+Vth69  nth69  0 0.452400
+Vth83  nth83  0 0.445100
+Vth300 nth300 0 0.334000
+Vth10  nth10  0 0.444940
+Vthrpk nthrpk 0 0.300000
+
+Xdt rpk dt_s14 dt_s69 dt_wid dt_bi dt_rr dt_rpk_del sf_delay
++ vdd vss vbias nth14 nth69 nth83 nth300 nth10 nthrpk delay_timer
+
+Xeb_s14 dt_s14 s14_sharp vdd vss edge_buffer
+Xeb_s69 dt_s69 s69_sharp vdd vss edge_buffer
+Xeb_wid dt_wid wid_sharp vdd vss edge_buffer
+Xeb_bi  dt_bi  bi_sharp  vdd vss edge_buffer
+Xeb_rr  dt_rr  rr_sharp  vdd vss edge_buffer
+Xpg_s14 s14_sharp pulse_s14 vdd vss vbias pulse_gen
+Xpg_s69 s69_sharp pulse_s69 vdd vss vbias pulse_gen
+Xpg_wid wid_sharp pulse_wid vdd vss vbias pulse_gen
+Xpg_bi  bi_sharp  pulse_bi  vdd vss vbias pulse_gen
+Xpg_rr  rr_sharp  pulse_rr  vdd vss vbias pulse_gen
+
+Xrr 0 capture_trig rpk copy_trig f1 f2 timer_out ewma_out vdd vss vbias rr_timing
+.ic V(xrr.ewma_node)=0.35
+
+Bvth_base vth_base 0 V = V(ewma_out) + 0.070200
+Bvth_peak vth_peak 0 V = V(ewma_out) + 0.061800
+Bvth_cap vth_rr_cap 0 V = V(ewma_out) + 0.035000
+
+Xpw timer_out ewma_out pw_base_level pw_peak_level rr_cap_level vth_base vth_peak vth_rr_cap vdd vss vbias pwave_predictor
+
+Xeb_base pw_base_level pw_base_sharp vdd vss edge_buffer
+Xpg_base pw_base_sharp pw_base_pulse vdd vss vbias pulse_gen
+Xeb_peak pw_peak_level pw_peak_sharp vdd vss edge_buffer
+Xpg_peak pw_peak_sharp pw_peak_pulse vdd vss vbias pulse_gen
+Xeb_cap  rr_cap_level  rr_cap_sharp  vdd vss edge_buffer
+Xpg_cap  rr_cap_sharp  rr_cap_pulse  vdd vss vbias pulse_gen
+
+.tran 0.1m 16.2000
+
+.meas tran t_s14_3 WHEN V(pulse_s14)=0.45 RISE=1 TD=2.9010000
+.meas tran t_s69_3 WHEN V(pulse_s69)=0.45 RISE=1 TD=2.9010000
+.meas tran t_wid_3 WHEN V(pulse_wid)=0.45 RISE=1 TD=2.9010000
+.meas tran t_pwb_3 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=2.5000000
+.meas tran t_pwp_3 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=2.5000000
+.meas tran t_cap_3 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=2.5000000
+.meas tran t_s14_4 WHEN V(pulse_s14)=0.45 RISE=1 TD=3.7010000
+.meas tran t_s69_4 WHEN V(pulse_s69)=0.45 RISE=1 TD=3.7010000
+.meas tran t_wid_4 WHEN V(pulse_wid)=0.45 RISE=1 TD=3.7010000
+.meas tran t_pwb_4 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=3.3000000
+.meas tran t_pwp_4 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=3.3000000
+.meas tran t_cap_4 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=3.3000000
+.meas tran t_s14_5 WHEN V(pulse_s14)=0.45 RISE=1 TD=4.5010000
+.meas tran t_s69_5 WHEN V(pulse_s69)=0.45 RISE=1 TD=4.5010000
+.meas tran t_wid_5 WHEN V(pulse_wid)=0.45 RISE=1 TD=4.5010000
+.meas tran t_pwb_5 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=4.1000000
+.meas tran t_pwp_5 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=4.1000000
+.meas tran t_cap_5 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=4.1000000
+.meas tran t_s14_6 WHEN V(pulse_s14)=0.45 RISE=1 TD=5.3010000
+.meas tran t_s69_6 WHEN V(pulse_s69)=0.45 RISE=1 TD=5.3010000
+.meas tran t_wid_6 WHEN V(pulse_wid)=0.45 RISE=1 TD=5.3010000
+.meas tran t_pwb_6 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=4.9000000
+.meas tran t_pwp_6 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=4.9000000
+.meas tran t_cap_6 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=4.9000000
+.meas tran t_s14_7 WHEN V(pulse_s14)=0.45 RISE=1 TD=6.1010000
+.meas tran t_s69_7 WHEN V(pulse_s69)=0.45 RISE=1 TD=6.1010000
+.meas tran t_wid_7 WHEN V(pulse_wid)=0.45 RISE=1 TD=6.1010000
+.meas tran t_pwb_7 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=5.7000000
+.meas tran t_pwp_7 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=5.7000000
+.meas tran t_cap_7 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=5.7000000
+.meas tran t_s14_8 WHEN V(pulse_s14)=0.45 RISE=1 TD=6.9010000
+.meas tran t_s69_8 WHEN V(pulse_s69)=0.45 RISE=1 TD=6.9010000
+.meas tran t_wid_8 WHEN V(pulse_wid)=0.45 RISE=1 TD=6.9010000
+.meas tran t_pwb_8 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=6.5000000
+.meas tran t_pwp_8 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=6.5000000
+.meas tran t_cap_8 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=6.5000000
+.meas tran t_s14_9 WHEN V(pulse_s14)=0.45 RISE=1 TD=7.7010000
+.meas tran t_s69_9 WHEN V(pulse_s69)=0.45 RISE=1 TD=7.7010000
+.meas tran t_wid_9 WHEN V(pulse_wid)=0.45 RISE=1 TD=7.7010000
+.meas tran t_pwb_9 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=7.3000000
+.meas tran t_pwp_9 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=7.3000000
+.meas tran t_cap_9 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=7.3000000
+.meas tran t_s14_10 WHEN V(pulse_s14)=0.45 RISE=1 TD=8.5010000
+.meas tran t_s69_10 WHEN V(pulse_s69)=0.45 RISE=1 TD=8.5010000
+.meas tran t_wid_10 WHEN V(pulse_wid)=0.45 RISE=1 TD=8.5010000
+.meas tran t_pwb_10 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=8.1000000
+.meas tran t_pwp_10 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=8.1000000
+.meas tran t_cap_10 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=8.1000000
+.meas tran t_s14_11 WHEN V(pulse_s14)=0.45 RISE=1 TD=9.3010000
+.meas tran t_s69_11 WHEN V(pulse_s69)=0.45 RISE=1 TD=9.3010000
+.meas tran t_wid_11 WHEN V(pulse_wid)=0.45 RISE=1 TD=9.3010000
+.meas tran t_pwb_11 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=8.9000000
+.meas tran t_pwp_11 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=8.9000000
+.meas tran t_cap_11 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=8.9000000
+.meas tran t_s14_12 WHEN V(pulse_s14)=0.45 RISE=1 TD=10.1010000
+.meas tran t_s69_12 WHEN V(pulse_s69)=0.45 RISE=1 TD=10.1010000
+.meas tran t_wid_12 WHEN V(pulse_wid)=0.45 RISE=1 TD=10.1010000
+.meas tran t_pwb_12 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=9.7000000
+.meas tran t_pwp_12 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=9.7000000
+.meas tran t_cap_12 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=9.7000000
+.meas tran t_s14_13 WHEN V(pulse_s14)=0.45 RISE=1 TD=10.9010000
+.meas tran t_s69_13 WHEN V(pulse_s69)=0.45 RISE=1 TD=10.9010000
+.meas tran t_wid_13 WHEN V(pulse_wid)=0.45 RISE=1 TD=10.9010000
+.meas tran t_pwb_13 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=10.5000000
+.meas tran t_pwp_13 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=10.5000000
+.meas tran t_cap_13 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=10.5000000
+.meas tran t_s14_14 WHEN V(pulse_s14)=0.45 RISE=1 TD=11.7010000
+.meas tran t_s69_14 WHEN V(pulse_s69)=0.45 RISE=1 TD=11.7010000
+.meas tran t_wid_14 WHEN V(pulse_wid)=0.45 RISE=1 TD=11.7010000
+.meas tran t_pwb_14 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=11.3000000
+.meas tran t_pwp_14 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=11.3000000
+.meas tran t_cap_14 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=11.3000000
+.meas tran t_s14_15 WHEN V(pulse_s14)=0.45 RISE=1 TD=12.5010000
+.meas tran t_s69_15 WHEN V(pulse_s69)=0.45 RISE=1 TD=12.5010000
+.meas tran t_wid_15 WHEN V(pulse_wid)=0.45 RISE=1 TD=12.5010000
+.meas tran t_pwb_15 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=12.1000000
+.meas tran t_pwp_15 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=12.1000000
+.meas tran t_cap_15 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=12.1000000
+.meas tran t_s14_16 WHEN V(pulse_s14)=0.45 RISE=1 TD=13.3010000
+.meas tran t_s69_16 WHEN V(pulse_s69)=0.45 RISE=1 TD=13.3010000
+.meas tran t_wid_16 WHEN V(pulse_wid)=0.45 RISE=1 TD=13.3010000
+.meas tran t_pwb_16 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=12.9000000
+.meas tran t_pwp_16 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=12.9000000
+.meas tran t_cap_16 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=12.9000000
+.meas tran t_s14_17 WHEN V(pulse_s14)=0.45 RISE=1 TD=14.1010000
+.meas tran t_s69_17 WHEN V(pulse_s69)=0.45 RISE=1 TD=14.1010000
+.meas tran t_wid_17 WHEN V(pulse_wid)=0.45 RISE=1 TD=14.1010000
+.meas tran t_pwb_17 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=13.7000000
+.meas tran t_pwp_17 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=13.7000000
+.meas tran t_cap_17 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=13.7000000
+.meas tran t_s14_18 WHEN V(pulse_s14)=0.45 RISE=1 TD=14.9010000
+.meas tran t_s69_18 WHEN V(pulse_s69)=0.45 RISE=1 TD=14.9010000
+.meas tran t_wid_18 WHEN V(pulse_wid)=0.45 RISE=1 TD=14.9010000
+.meas tran t_pwb_18 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=14.5000000
+.meas tran t_pwp_18 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=14.5000000
+.meas tran t_cap_18 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=14.5000000
+.meas tran t_s14_19 WHEN V(pulse_s14)=0.45 RISE=1 TD=15.7010000
+.meas tran t_s69_19 WHEN V(pulse_s69)=0.45 RISE=1 TD=15.7010000
+.meas tran t_wid_19 WHEN V(pulse_wid)=0.45 RISE=1 TD=15.7010000
+.meas tran t_pwb_19 WHEN V(pw_base_pulse)=0.45 RISE=1 TD=15.3000000
+.meas tran t_pwp_19 WHEN V(pw_peak_pulse)=0.45 RISE=1 TD=15.3000000
+.meas tran t_cap_19 WHEN V(rr_cap_pulse)=0.45 RISE=1 TD=15.3000000
+
+.end

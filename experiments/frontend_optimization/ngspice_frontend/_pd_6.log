@@ -1,0 +1,106 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning: singular matrix:  check node 0.200
+
+Note: Starting dynamic gmin stepping
+Warning: singular matrix:  check node 0.200
+
+Warning: Dynamic gmin stepping failed
+Note: Starting true gmin stepping
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: True gmin stepping failed
+Note: Starting source stepping
+Warning: source stepping failed
+Note: Transient op started
+Note: Transient op finished successfully
+
+Note: No compatibility mode selected!
+
+
+Circuit: s14_propdelay_cross6ms
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+nth14                                 0.397793
+xdt.sf_timer                         0.0297107
+sf_out                               0.0297107
+xdt.rpeak_bar                              0.9
+xdt.timer_node                      1.5485e-05
+xdt.xctimer.a                     -1.76541e-14
+xdt.xctimer.b1                    -8.00353e-18
+xdt.cn2                               0.882272
+xdt.ct2                              0.0207671
+xdt.stg1_s69                           0.49221
+0.200                                0.0185028
+dt_s69                             9.62792e-07
+xdt.cn3                               0.882272
+xdt.ct3                              0.0207671
+xdt.stg1_wid                           0.49221
+dt_wid                             9.62792e-07
+xdt.cn4                               0.882272
+xdt.ct4                              0.0207671
+xdt.stg1_bi                            0.49221
+dt_bi                              9.62792e-07
+xdt.timer2                         0.000377605
+xdt.xct2.a                        -5.83334e-14
+xdt.xct2.b1                       -6.48858e-16
+xdt.sf_timer2                        0.0321073
+xdt.cn5                               0.882318
+xdt.ct5                               0.021004
+xdt.stg1_rr                           0.492203
+dt_rr                              9.64182e-07
+xdt.cn6                               0.881271
+xdt.ct6                               0.160658
+xdt.stg1_s14                          0.508907
+dt_s14                              3.0325e-07
+xdt.cn7                               0.882318
+xdt.ct7                               0.021004
+xdt.stg1_rpk                          0.492203
+dt_rpk                             9.64182e-07
+xeb.mid                                    0.9
+s14_sharp                         -3.24307e-07
+xpg.xcac.a                           0.0123713
+xpg.xcac.b1                          0.0123713
+xpg.pulse_raw                        0.0123713
+xpg.inv1_out                               0.9
+pulse_s14                          1.73955e-07
+vth14#branch                        -2.296e-11
+vrpk#branch                        3.17637e-22
+vbias#branch                      -7.90144e-11
+vss#branch                         1.53792e-10
+vdd#branch                        -5.18975e-11
+
+
+No. of Data Rows : 23062
+
+  Measurements for Transient Analysis
+
+t_s14_1             =   9.13800e-01
+t_s14_2             =   1.71380e+00
+
+
+Total analysis time (seconds) = 5.192
+
+Total elapsed time (seconds) = 13.917 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1670.344 MB.
+Maximum ngspice program size =   84.887 MB.
+Current ngspice program size =   84.887 MB.
+

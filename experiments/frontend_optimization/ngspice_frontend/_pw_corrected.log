@@ -1,0 +1,159 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: pwave_corrected_offsets
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         4.51792e-05
+xrr.prev_node                      4.21285e-05
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0172957
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.35
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                             0.14635
+xrr.net_r1                            0.269195
+f1                                    0.593455
+xrr.tail_a                         0.000648099
+xrr.net_a1                            0.420794
+f2                                    0.420797
+timer_out                          4.51792e-05
+ewma_out                                  0.35
+vth_base                              0.421959
+vth_peak                              0.413595
+xpw.cnb                               0.483643
+xpw.ctb                            0.000104139
+xpw.stg1_base                      0.000104594
+pw_base_level                              0.9
+xpw.cnp                               0.483643
+xpw.ctp                            0.000104139
+xpw.stg1_peak                      0.000104695
+pw_peak_level                              0.9
+xpw.cnc                               0.483643
+xpw.ctc                            0.000104139
+xpw.stg1_cap                       0.000106865
+rr_cap_level                               0.9
+xeb_base.mid                        9.0827e-11
+pw_base_sharp                              0.9
+xpg_base.xcac.a                  -8.35723e-304
+xpg_base.xcac.b1                 -8.35723e-304
+xpg_base.pulse_raw               -8.35723e-304
+xpg_base.inv1_out                          0.9
+pw_base_pulse                      1.73955e-07
+xeb_peak.mid                        9.0827e-11
+pw_peak_sharp                              0.9
+xpg_peak.xcac.a                  -8.35709e-304
+xpg_peak.xcac.b1                 -8.35709e-304
+xpg_peak.pulse_raw               -8.35709e-304
+xpg_peak.inv1_out                          0.9
+pw_peak_pulse                      1.73955e-07
+xeb_cap.mid                         9.0827e-11
+rr_cap_sharp                               0.9
+xpg_cap.xcac.a                   -8.35709e-304
+xpg_cap.xcac.b1                  -8.35709e-304
+xpg_cap.pulse_raw                -8.35709e-304
+xpg_cap.inv1_out                           0.9
+rr_cap_pulse                       1.73955e-07
+bvth_peak#branch                             0
+bvth_base#branch                             0
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         1.71616e-10
+vdd#branch                        -1.71541e-10
+
+
+No. of Data Rows : 98489
+
+  Measurements for Transient Analysis
+
+
+Error: measure  tcap_3  when(WHEN) : out of interval
+ .meas tran tcap_3 when v(rr_cap_pulse)=0.45 rise=1 td=2.5000000 failed!
+
+
+Error: measure  tcap_4  when(WHEN) : out of interval
+ .meas tran tcap_4 when v(rr_cap_pulse)=0.45 rise=1 td=3.3000000 failed!
+
+
+Error: measure  tcap_5  when(WHEN) : out of interval
+ .meas tran tcap_5 when v(rr_cap_pulse)=0.45 rise=1 td=4.1000000 failed!
+
+
+Error: measure  tcap_6  when(WHEN) : out of interval
+ .meas tran tcap_6 when v(rr_cap_pulse)=0.45 rise=1 td=4.9000000 failed!
+
+
+Error: measure  tcap_7  when(WHEN) : out of interval
+ .meas tran tcap_7 when v(rr_cap_pulse)=0.45 rise=1 td=5.7000000 failed!
+
+
+Error: measure  tcap_8  when(WHEN) : out of interval
+ .meas tran tcap_8 when v(rr_cap_pulse)=0.45 rise=1 td=6.5000000 failed!
+
+
+Error: measure  tcap_9  when(WHEN) : out of interval
+ .meas tran tcap_9 when v(rr_cap_pulse)=0.45 rise=1 td=7.3000000 failed!
+
+
+Error: measure  tcap_10  when(WHEN) : out of interval
+ .meas tran tcap_10 when v(rr_cap_pulse)=0.45 rise=1 td=8.1000000 failed!
+
+
+Error: measure  tcap_11  when(WHEN) : out of interval
+ .meas tran tcap_11 when v(rr_cap_pulse)=0.45 rise=1 td=8.9000000 failed!
+
+tpwb_3              =   2.69900e+00
+tpwp_3              =   2.77390e+00
+tpwb_4              =   3.49590e+00
+tpwp_4              =   3.57090e+00
+tpwb_5              =   4.29280e+00
+tpwp_5              =   4.36780e+00
+tpwb_6              =   5.08970e+00
+tpwp_6              =   5.16470e+00
+tpwb_7              =   5.88640e+00
+tpwp_7              =   5.96149e+00
+tpwb_8              =   6.68320e+00
+tpwp_8              =   6.75830e+00
+tpwb_9              =   7.48010e+00
+tpwp_9              =   7.55530e+00
+tpwb_10             =   8.27690e+00
+tpwp_10             =   8.35220e+00
+tpwb_11             =   9.07390e+00
+tpwp_11             =   9.14930e+00
+
+
+Total analysis time (seconds) = 3432.77
+
+Total elapsed time (seconds) = 3447.923 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1044.371 MB.
+Maximum ngspice program size =   95.016 MB.
+Current ngspice program size =   95.016 MB.
+

@@ -1,0 +1,154 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Note: No compatibility mode selected!
+
+
+Circuit: ewma_cal_rr700
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+cap_t                                        0
+copy_t                                       0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         7.06424e-05
+xrr.capture_trig_bar                       0.9
+xrr.copy_trig_bar                          0.9
+xrr.prev_node                       0.00261189
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                       0.0221202
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                             0.37
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                            0.161709
+xrr.net_r1                             0.26908
+f1                                     0.60767
+xrr.tail_a                         0.000671358
+xrr.net_a1                            0.420799
+f2                                    0.418492
+tout                               7.06424e-05
+eout                                      0.37
+vcp#branch                                   0
+vc#branch                                    0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         4.24924e-11
+vdd#branch                        -4.24387e-11
+
+
+No. of Data Rows : 214088
+
+  Measurements for Transient Analysis
+
+e_2                 =  3.529551e-01
+s_2                 =  3.705852e-01
+sf_2                =  3.706687e-01
+e_3                 =  3.541656e-01
+s_3                 =  3.758111e-01
+sf_3                =  3.758873e-01
+e_4                 =  3.554906e-01
+s_4                 =  3.774235e-01
+sf_4                =  3.774972e-01
+e_5                 =  3.568075e-01
+s_5                 =  3.782425e-01
+sf_5                =  3.783149e-01
+e_6                 =  3.580898e-01
+s_6                 =  3.788724e-01
+sf_6                =  3.789438e-01
+e_7                 =  3.593325e-01
+s_7                 =  3.794442e-01
+sf_7                =  3.795146e-01
+e_8                 =  3.605377e-01
+s_8                 =  3.799944e-01
+sf_8                =  3.800638e-01
+e_9                 =  3.617034e-01
+s_9                 =  3.805312e-01
+sf_9                =  3.805998e-01
+e_10                =  3.628329e-01
+s_10                =  3.810574e-01
+sf_10               =  3.811250e-01
+e_11                =  3.639244e-01
+s_11                =  3.815628e-01
+sf_11               =  3.816295e-01
+e_12                =  3.649827e-01
+s_12                =  3.820656e-01
+sf_12               =  3.821314e-01
+e_13                =  3.660090e-01
+s_13                =  3.825603e-01
+sf_13               =  3.826251e-01
+e_14                =  3.670042e-01
+s_14                =  3.830445e-01
+sf_14               =  3.831085e-01
+e_15                =  3.679686e-01
+s_15                =  3.835191e-01
+sf_15               =  3.835822e-01
+e_16                =  3.689059e-01
+s_16                =  3.839848e-01
+sf_16               =  3.840469e-01
+e_17                =  3.698148e-01
+s_17                =  3.844398e-01
+sf_17               =  3.845010e-01
+e_18                =  3.706967e-01
+s_18                =  3.848851e-01
+sf_18               =  3.849454e-01
+e_19                =  3.715519e-01
+s_19                =  3.853210e-01
+sf_19               =  3.853805e-01
+e_20                =  3.723818e-01
+s_20                =  3.857480e-01
+sf_20               =  3.858066e-01
+e_21                =  3.731884e-01
+s_21                =  3.861651e-01
+sf_21               =  3.862228e-01
+e_22                =  3.739714e-01
+s_22                =  3.865735e-01
+sf_22               =  3.866303e-01
+e_23                =  3.747333e-01
+s_23                =  3.869739e-01
+sf_23               =  3.870298e-01
+e_24                =  3.754746e-01
+s_24                =  3.873656e-01
+sf_24               =  3.874207e-01
+e_25                =  3.761916e-01
+s_25                =  3.877484e-01
+sf_25               =  3.878027e-01
+e_26                =  3.768896e-01
+s_26                =  3.881235e-01
+sf_26               =  3.881770e-01
+e_27                =  3.775693e-01
+s_27                =  3.884886e-01
+sf_27               =  3.885412e-01
+e_28                =  3.782290e-01
+s_28                =  3.888516e-01
+sf_28               =  3.889033e-01
+e_29                =  3.788722e-01
+s_29                =  3.892035e-01
+sf_29               =  3.892545e-01
+
+
+Total analysis time (seconds) = 27.582
+
+Total elapsed time (seconds) = 37.891 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1936.891 MB.
+Maximum ngspice program size =   64.910 MB.
+Current ngspice program size =   63.422 MB.
+

@@ -1,0 +1,129 @@
+Using SPARSE 1.3 as Direct Linear Solver
+Warning: singular matrix:  check node 0.200
+
+Note: Starting dynamic gmin stepping
+Warning: singular matrix:  check node 0.200
+
+Warning: Dynamic gmin stepping failed
+Note: Starting true gmin stepping
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: singular matrix:  check node 0.200
+
+Warning: True gmin stepping failed
+Note: Starting source stepping
+Warning: source stepping failed
+Note: Transient op started
+Note: Transient op finished successfully
+
+Note: No compatibility mode selected!
+
+
+Circuit: fast_timer_sf_curve
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+xdt.sf_timer                         0.0297108
+sf_out                               0.0297108
+xdt.rpeak_bar                              0.9
+xdt.timer_node                      1.5485e-05
+xdt.xctimer.a                      -1.7654e-14
+xdt.xctimer.b1                    -8.00352e-18
+xdt.cn2                               0.882272
+xdt.ct2                              0.0207647
+xdt.stg1_s69                          0.492232
+0.200                                0.0184962
+ts69                               9.61791e-07
+xdt.cn3                               0.882272
+xdt.ct3                              0.0207647
+xdt.stg1_wid                          0.492232
+twid                               9.61791e-07
+xdt.cn4                               0.882272
+xdt.ct4                              0.0207647
+xdt.stg1_bi                           0.492232
+tbi                                9.61791e-07
+xdt.timer2                         0.000377341
+xdt.xct2.a                        -5.82624e-14
+xdt.xct2.b1                       -6.48068e-16
+xdt.sf_timer2                        0.0297132
+xdt.cn5                               0.882272
+xdt.ct5                              0.0207649
+xdt.stg1_rr                           0.492232
+trr                                9.61785e-07
+xdt.cn6                               0.882272
+xdt.ct6                              0.0207649
+xdt.stg1_s14                          0.492232
+ts14                               9.61785e-07
+xdt.cn7                               0.882272
+xdt.ct7                              0.0207649
+xdt.stg1_rpk                          0.492232
+trpk                               9.61785e-07
+vrpk#branch                        3.77194e-22
+vbias#branch                       -8.8926e-11
+vss#branch                         9.67575e-11
+vdd#branch                        -7.89919e-12
+
+
+No. of Data Rows : 50020
+
+  Measurements for Transient Analysis
+
+sff_0ms             =  4.741999e-01
+sfm_0ms             =  4.828739e-01
+sff_1ms             =  4.613694e-01
+sfm_1ms             =  4.823545e-01
+sff_2ms             =  4.485777e-01
+sfm_2ms             =  4.818277e-01
+sff_3ms             =  4.358245e-01
+sfm_3ms             =  4.813079e-01
+sff_4ms             =  4.231094e-01
+sfm_4ms             =  4.807880e-01
+sff_5ms             =  4.104322e-01
+sfm_5ms             =  4.802697e-01
+sff_6ms             =  3.977930e-01
+sfm_6ms             =  4.797384e-01
+sff_7ms             =  3.851918e-01
+sfm_7ms             =  4.792171e-01
+sff_8ms             =  3.726287e-01
+sfm_8ms             =  4.786922e-01
+sff_10ms            =  3.476173e-01
+sfm_10ms            =  4.776506e-01
+sff_12ms            =  3.227611e-01
+sfm_12ms            =  4.766062e-01
+sff_14ms            =  2.980648e-01
+sfm_14ms            =  4.755624e-01
+sff_16ms            =  2.735345e-01
+sfm_16ms            =  4.745168e-01
+sff_18ms            =  2.491667e-01
+sfm_18ms            =  4.734692e-01
+sff_20ms            =  2.249522e-01
+sfm_20ms            =  4.724273e-01
+sff_25ms            =  1.651018e-01
+sfm_25ms            =  4.698177e-01
+sff_30ms            =  1.064412e-01
+sfm_30ms            =  4.672028e-01
+
+
+Total analysis time (seconds) = 9.268
+
+Total elapsed time (seconds) = 18.528 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available =  938.898 MB.
+Maximum ngspice program size =   77.836 MB.
+Current ngspice program size =   77.836 MB.
+

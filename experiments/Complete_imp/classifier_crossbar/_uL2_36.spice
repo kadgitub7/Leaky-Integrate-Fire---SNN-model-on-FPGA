@@ -1,0 +1,819 @@
+* Unit-input row 36: 64x5 diff 1T1R ReRAM crossbar (L2)
+* Column readout: NFET diode W=50.0u L=1.0u, V_row offset=0.52V
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice"
+.include "C:/src/skywater-pdk-libs-sky130_fd_pr/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+
+* === 1T1R ReRAM cell (SKY130 PDK behavioral I-V) ===
+.subckt reram_1t1r row gate col gnd Tf0=3.3e-9
+.param Ik1=6.14e-05
+.param Tox=5e-09
+.param Tfref=4.7249e-09
+.param Vref=0.43
+Xacc row gate mid gnd sky130_fd_pr__nfet_01v8 W=1.0u L=0.15u
+Breram mid col I = Ik1*exp(-(Tox-Tf0)/(Tox-Tfref))*sinh(max(min(v(mid,col)/Vref,30),-30))
+.ends reram_1t1r
+
+
+Vrow0 row0 0 0
+Vgate0 gate0 0 0
+Vrow1 row1 0 0
+Vgate1 gate1 0 0
+Vrow2 row2 0 0
+Vgate2 gate2 0 0
+Vrow3 row3 0 0
+Vgate3 gate3 0 0
+Vrow4 row4 0 0
+Vgate4 gate4 0 0
+Vrow5 row5 0 0
+Vgate5 gate5 0 0
+Vrow6 row6 0 0
+Vgate6 gate6 0 0
+Vrow7 row7 0 0
+Vgate7 gate7 0 0
+Vrow8 row8 0 0
+Vgate8 gate8 0 0
+Vrow9 row9 0 0
+Vgate9 gate9 0 0
+Vrow10 row10 0 0
+Vgate10 gate10 0 0
+Vrow11 row11 0 0
+Vgate11 gate11 0 0
+Vrow12 row12 0 0
+Vgate12 gate12 0 0
+Vrow13 row13 0 0
+Vgate13 gate13 0 0
+Vrow14 row14 0 0
+Vgate14 gate14 0 0
+Vrow15 row15 0 0
+Vgate15 gate15 0 0
+Vrow16 row16 0 0
+Vgate16 gate16 0 0
+Vrow17 row17 0 0
+Vgate17 gate17 0 0
+Vrow18 row18 0 0
+Vgate18 gate18 0 0
+Vrow19 row19 0 0
+Vgate19 gate19 0 0
+Vrow20 row20 0 0
+Vgate20 gate20 0 0
+Vrow21 row21 0 0
+Vgate21 gate21 0 0
+Vrow22 row22 0 0
+Vgate22 gate22 0 0
+Vrow23 row23 0 0
+Vgate23 gate23 0 0
+Vrow24 row24 0 0
+Vgate24 gate24 0 0
+Vrow25 row25 0 0
+Vgate25 gate25 0 0
+Vrow26 row26 0 0
+Vgate26 gate26 0 0
+Vrow27 row27 0 0
+Vgate27 gate27 0 0
+Vrow28 row28 0 0
+Vgate28 gate28 0 0
+Vrow29 row29 0 0
+Vgate29 gate29 0 0
+Vrow30 row30 0 0
+Vgate30 gate30 0 0
+Vrow31 row31 0 0
+Vgate31 gate31 0 0
+Vrow32 row32 0 0
+Vgate32 gate32 0 0
+Vrow33 row33 0 0
+Vgate33 gate33 0 0
+Vrow34 row34 0 0
+Vgate34 gate34 0 0
+Vrow35 row35 0 0
+Vgate35 gate35 0 0
+Vrow36 row36 0 0.67
+Vgate36 gate36 0 1.8
+Vrow37 row37 0 0
+Vgate37 gate37 0 0
+Vrow38 row38 0 0
+Vgate38 gate38 0 0
+Vrow39 row39 0 0
+Vgate39 gate39 0 0
+Vrow40 row40 0 0
+Vgate40 gate40 0 0
+Vrow41 row41 0 0
+Vgate41 gate41 0 0
+Vrow42 row42 0 0
+Vgate42 gate42 0 0
+Vrow43 row43 0 0
+Vgate43 gate43 0 0
+Vrow44 row44 0 0
+Vgate44 gate44 0 0
+Vrow45 row45 0 0
+Vgate45 gate45 0 0
+Vrow46 row46 0 0
+Vgate46 gate46 0 0
+Vrow47 row47 0 0
+Vgate47 gate47 0 0
+Vrow48 row48 0 0
+Vgate48 gate48 0 0
+Vrow49 row49 0 0
+Vgate49 gate49 0 0
+Vrow50 row50 0 0
+Vgate50 gate50 0 0
+Vrow51 row51 0 0
+Vgate51 gate51 0 0
+Vrow52 row52 0 0
+Vgate52 gate52 0 0
+Vrow53 row53 0 0
+Vgate53 gate53 0 0
+Vrow54 row54 0 0
+Vgate54 gate54 0 0
+Vrow55 row55 0 0
+Vgate55 gate55 0 0
+Vrow56 row56 0 0
+Vgate56 gate56 0 0
+Vrow57 row57 0 0
+Vgate57 gate57 0 0
+Vrow58 row58 0 0
+Vgate58 gate58 0 0
+Vrow59 row59 0 0
+Vgate59 gate59 0 0
+Vrow60 row60 0 0
+Vgate60 gate60 0 0
+Vrow61 row61 0 0
+Vgate61 gate61 0 0
+Vrow62 row62 0 0
+Vgate62 gate62 0 0
+Vrow63 row63 0 0
+Vgate63 gate63 0 0
+
+Xcolpd0 cp0 cp0 smp0 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsp0 smp0 0 0
+Xcolnd0 cn0 cn0 smn0 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsn0 smn0 0 0
+Xcolpd1 cp1 cp1 smp1 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsp1 smp1 0 0
+Xcolnd1 cn1 cn1 smn1 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsn1 smn1 0 0
+Xcolpd2 cp2 cp2 smp2 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsp2 smp2 0 0
+Xcolnd2 cn2 cn2 smn2 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsn2 smn2 0 0
+Xcolpd3 cp3 cp3 smp3 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsp3 smp3 0 0
+Xcolnd3 cn3 cn3 smn3 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsn3 smn3 0 0
+Xcolpd4 cp4 cp4 smp4 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsp4 smp4 0 0
+Xcolnd4 cn4 cn4 smn4 0 sky130_fd_pr__nfet_01v8 W=50.0u L=1.0u
+Vsn4 smn4 0 0
+
+Xrp0_0 row0 gate0 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp0_1 row0 gate0 cp1 0 reram_1t1r Tf0=4.314027e-09
+Xrp0_2 row0 gate0 cp2 0 reram_1t1r Tf0=4.155991e-09
+Xrp0_3 row0 gate0 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp0_4 row0 gate0 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp1_0 row1 gate1 cp0 0 reram_1t1r Tf0=4.485717e-09
+Xrp1_1 row1 gate1 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp1_2 row1 gate1 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp1_3 row1 gate1 cp3 0 reram_1t1r Tf0=4.316569e-09
+Xrp1_4 row1 gate1 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp2_0 row2 gate2 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp2_1 row2 gate2 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp2_2 row2 gate2 cp2 0 reram_1t1r Tf0=4.206825e-09
+Xrp2_3 row2 gate2 cp3 0 reram_1t1r Tf0=4.124997e-09
+Xrp2_4 row2 gate2 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp3_0 row3 gate3 cp0 0 reram_1t1r Tf0=4.077392e-09
+Xrp3_1 row3 gate3 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp3_2 row3 gate3 cp2 0 reram_1t1r Tf0=4.172548e-09
+Xrp3_3 row3 gate3 cp3 0 reram_1t1r Tf0=4.428510e-09
+Xrp3_4 row3 gate3 cp4 0 reram_1t1r Tf0=3.638481e-09
+Xrp4_0 row4 gate4 cp0 0 reram_1t1r Tf0=4.099321e-09
+Xrp4_1 row4 gate4 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp4_2 row4 gate4 cp2 0 reram_1t1r Tf0=3.720731e-09
+Xrp4_3 row4 gate4 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp4_4 row4 gate4 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp5_0 row5 gate5 cp0 0 reram_1t1r Tf0=4.212597e-09
+Xrp5_1 row5 gate5 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp5_2 row5 gate5 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp5_3 row5 gate5 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp5_4 row5 gate5 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp6_0 row6 gate6 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp6_1 row6 gate6 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp6_2 row6 gate6 cp2 0 reram_1t1r Tf0=4.369677e-09
+Xrp6_3 row6 gate6 cp3 0 reram_1t1r Tf0=4.039008e-09
+Xrp6_4 row6 gate6 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp7_0 row7 gate7 cp0 0 reram_1t1r Tf0=4.293086e-09
+Xrp7_1 row7 gate7 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp7_2 row7 gate7 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp7_3 row7 gate7 cp3 0 reram_1t1r Tf0=4.519673e-09
+Xrp7_4 row7 gate7 cp4 0 reram_1t1r Tf0=4.196232e-09
+Xrp8_0 row8 gate8 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp8_1 row8 gate8 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp8_2 row8 gate8 cp2 0 reram_1t1r Tf0=4.253559e-09
+Xrp8_3 row8 gate8 cp3 0 reram_1t1r Tf0=4.326233e-09
+Xrp8_4 row8 gate8 cp4 0 reram_1t1r Tf0=3.638603e-09
+Xrp9_0 row9 gate9 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp9_1 row9 gate9 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp9_2 row9 gate9 cp2 0 reram_1t1r Tf0=4.343667e-09
+Xrp9_3 row9 gate9 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp9_4 row9 gate9 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp10_0 row10 gate10 cp0 0 reram_1t1r Tf0=4.270610e-09
+Xrp10_1 row10 gate10 cp1 0 reram_1t1r Tf0=3.945390e-09
+Xrp10_2 row10 gate10 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp10_3 row10 gate10 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp10_4 row10 gate10 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp11_0 row11 gate11 cp0 0 reram_1t1r Tf0=4.118593e-09
+Xrp11_1 row11 gate11 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp11_2 row11 gate11 cp2 0 reram_1t1r Tf0=4.387350e-09
+Xrp11_3 row11 gate11 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp11_4 row11 gate11 cp4 0 reram_1t1r Tf0=3.898566e-09
+Xrp12_0 row12 gate12 cp0 0 reram_1t1r Tf0=4.364033e-09
+Xrp12_1 row12 gate12 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp12_2 row12 gate12 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp12_3 row12 gate12 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp12_4 row12 gate12 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp13_0 row13 gate13 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp13_1 row13 gate13 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp13_2 row13 gate13 cp2 0 reram_1t1r Tf0=4.290686e-09
+Xrp13_3 row13 gate13 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp13_4 row13 gate13 cp4 0 reram_1t1r Tf0=4.363726e-09
+Xrp14_0 row14 gate14 cp0 0 reram_1t1r Tf0=3.320863e-09
+Xrp14_1 row14 gate14 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp14_2 row14 gate14 cp2 0 reram_1t1r Tf0=4.512780e-09
+Xrp14_3 row14 gate14 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp14_4 row14 gate14 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp15_0 row15 gate15 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp15_1 row15 gate15 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp15_2 row15 gate15 cp2 0 reram_1t1r Tf0=4.389063e-09
+Xrp15_3 row15 gate15 cp3 0 reram_1t1r Tf0=3.889719e-09
+Xrp15_4 row15 gate15 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp16_0 row16 gate16 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp16_1 row16 gate16 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp16_2 row16 gate16 cp2 0 reram_1t1r Tf0=4.463095e-09
+Xrp16_3 row16 gate16 cp3 0 reram_1t1r Tf0=4.328848e-09
+Xrp16_4 row16 gate16 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp17_0 row17 gate17 cp0 0 reram_1t1r Tf0=4.432238e-09
+Xrp17_1 row17 gate17 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp17_2 row17 gate17 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp17_3 row17 gate17 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp17_4 row17 gate17 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp18_0 row18 gate18 cp0 0 reram_1t1r Tf0=3.950970e-09
+Xrp18_1 row18 gate18 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp18_2 row18 gate18 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp18_3 row18 gate18 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp18_4 row18 gate18 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp19_0 row19 gate19 cp0 0 reram_1t1r Tf0=4.402913e-09
+Xrp19_1 row19 gate19 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp19_2 row19 gate19 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp19_3 row19 gate19 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp19_4 row19 gate19 cp4 0 reram_1t1r Tf0=3.941115e-09
+Xrp20_0 row20 gate20 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp20_1 row20 gate20 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp20_2 row20 gate20 cp2 0 reram_1t1r Tf0=4.305882e-09
+Xrp20_3 row20 gate20 cp3 0 reram_1t1r Tf0=4.242006e-09
+Xrp20_4 row20 gate20 cp4 0 reram_1t1r Tf0=4.037379e-09
+Xrp21_0 row21 gate21 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp21_1 row21 gate21 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp21_2 row21 gate21 cp2 0 reram_1t1r Tf0=4.411586e-09
+Xrp21_3 row21 gate21 cp3 0 reram_1t1r Tf0=4.449404e-09
+Xrp21_4 row21 gate21 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp22_0 row22 gate22 cp0 0 reram_1t1r Tf0=4.261584e-09
+Xrp22_1 row22 gate22 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp22_2 row22 gate22 cp2 0 reram_1t1r Tf0=4.207414e-09
+Xrp22_3 row22 gate22 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp22_4 row22 gate22 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp23_0 row23 gate23 cp0 0 reram_1t1r Tf0=3.449893e-09
+Xrp23_1 row23 gate23 cp1 0 reram_1t1r Tf0=4.352194e-09
+Xrp23_2 row23 gate23 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp23_3 row23 gate23 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp23_4 row23 gate23 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp24_0 row24 gate24 cp0 0 reram_1t1r Tf0=4.320710e-09
+Xrp24_1 row24 gate24 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp24_2 row24 gate24 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp24_3 row24 gate24 cp3 0 reram_1t1r Tf0=4.606958e-09
+Xrp24_4 row24 gate24 cp4 0 reram_1t1r Tf0=3.868407e-09
+Xrp25_0 row25 gate25 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp25_1 row25 gate25 cp1 0 reram_1t1r Tf0=4.536229e-09
+Xrp25_2 row25 gate25 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp25_3 row25 gate25 cp3 0 reram_1t1r Tf0=4.427589e-09
+Xrp25_4 row25 gate25 cp4 0 reram_1t1r Tf0=4.457785e-09
+Xrp26_0 row26 gate26 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp26_1 row26 gate26 cp1 0 reram_1t1r Tf0=4.592101e-09
+Xrp26_2 row26 gate26 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp26_3 row26 gate26 cp3 0 reram_1t1r Tf0=4.294349e-09
+Xrp26_4 row26 gate26 cp4 0 reram_1t1r Tf0=4.350366e-09
+Xrp27_0 row27 gate27 cp0 0 reram_1t1r Tf0=4.538798e-09
+Xrp27_1 row27 gate27 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp27_2 row27 gate27 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp27_3 row27 gate27 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp27_4 row27 gate27 cp4 0 reram_1t1r Tf0=4.373265e-09
+Xrp28_0 row28 gate28 cp0 0 reram_1t1r Tf0=4.390639e-09
+Xrp28_1 row28 gate28 cp1 0 reram_1t1r Tf0=4.128054e-09
+Xrp28_2 row28 gate28 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp28_3 row28 gate28 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp28_4 row28 gate28 cp4 0 reram_1t1r Tf0=3.588556e-09
+Xrp29_0 row29 gate29 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp29_1 row29 gate29 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp29_2 row29 gate29 cp2 0 reram_1t1r Tf0=4.547957e-09
+Xrp29_3 row29 gate29 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp29_4 row29 gate29 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp30_0 row30 gate30 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp30_1 row30 gate30 cp1 0 reram_1t1r Tf0=4.511926e-09
+Xrp30_2 row30 gate30 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp30_3 row30 gate30 cp3 0 reram_1t1r Tf0=4.063332e-09
+Xrp30_4 row30 gate30 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp31_0 row31 gate31 cp0 0 reram_1t1r Tf0=4.159174e-09
+Xrp31_1 row31 gate31 cp1 0 reram_1t1r Tf0=4.391194e-09
+Xrp31_2 row31 gate31 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp31_3 row31 gate31 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp31_4 row31 gate31 cp4 0 reram_1t1r Tf0=3.836677e-09
+Xrp32_0 row32 gate32 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp32_1 row32 gate32 cp1 0 reram_1t1r Tf0=4.497218e-09
+Xrp32_2 row32 gate32 cp2 0 reram_1t1r Tf0=4.176826e-09
+Xrp32_3 row32 gate32 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp32_4 row32 gate32 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp33_0 row33 gate33 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp33_1 row33 gate33 cp1 0 reram_1t1r Tf0=4.494865e-09
+Xrp33_2 row33 gate33 cp2 0 reram_1t1r Tf0=4.451103e-09
+Xrp33_3 row33 gate33 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp33_4 row33 gate33 cp4 0 reram_1t1r Tf0=4.407749e-09
+Xrp34_0 row34 gate34 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp34_1 row34 gate34 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp34_2 row34 gate34 cp2 0 reram_1t1r Tf0=4.316161e-09
+Xrp34_3 row34 gate34 cp3 0 reram_1t1r Tf0=4.350229e-09
+Xrp34_4 row34 gate34 cp4 0 reram_1t1r Tf0=3.892760e-09
+Xrp35_0 row35 gate35 cp0 0 reram_1t1r Tf0=4.430637e-09
+Xrp35_1 row35 gate35 cp1 0 reram_1t1r Tf0=4.019996e-09
+Xrp35_2 row35 gate35 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp35_3 row35 gate35 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp35_4 row35 gate35 cp4 0 reram_1t1r Tf0=4.331263e-09
+Xrp36_0 row36 gate36 cp0 0 reram_1t1r Tf0=3.929389e-09
+Xrp36_1 row36 gate36 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp36_2 row36 gate36 cp2 0 reram_1t1r Tf0=4.298100e-09
+Xrp36_3 row36 gate36 cp3 0 reram_1t1r Tf0=4.366591e-09
+Xrp36_4 row36 gate36 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp37_0 row37 gate37 cp0 0 reram_1t1r Tf0=3.743770e-09
+Xrp37_1 row37 gate37 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp37_2 row37 gate37 cp2 0 reram_1t1r Tf0=4.313341e-09
+Xrp37_3 row37 gate37 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp37_4 row37 gate37 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp38_0 row38 gate38 cp0 0 reram_1t1r Tf0=4.295095e-09
+Xrp38_1 row38 gate38 cp1 0 reram_1t1r Tf0=4.236250e-09
+Xrp38_2 row38 gate38 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp38_3 row38 gate38 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp38_4 row38 gate38 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp39_0 row39 gate39 cp0 0 reram_1t1r Tf0=4.427846e-09
+Xrp39_1 row39 gate39 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp39_2 row39 gate39 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp39_3 row39 gate39 cp3 0 reram_1t1r Tf0=3.904088e-09
+Xrp39_4 row39 gate39 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp40_0 row40 gate40 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp40_1 row40 gate40 cp1 0 reram_1t1r Tf0=4.238425e-09
+Xrp40_2 row40 gate40 cp2 0 reram_1t1r Tf0=4.212143e-09
+Xrp40_3 row40 gate40 cp3 0 reram_1t1r Tf0=4.499434e-09
+Xrp40_4 row40 gate40 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp41_0 row41 gate41 cp0 0 reram_1t1r Tf0=4.395567e-09
+Xrp41_1 row41 gate41 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp41_2 row41 gate41 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp41_3 row41 gate41 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp41_4 row41 gate41 cp4 0 reram_1t1r Tf0=4.266665e-09
+Xrp42_0 row42 gate42 cp0 0 reram_1t1r Tf0=4.415272e-09
+Xrp42_1 row42 gate42 cp1 0 reram_1t1r Tf0=4.162868e-09
+Xrp42_2 row42 gate42 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp42_3 row42 gate42 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp42_4 row42 gate42 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp43_0 row43 gate43 cp0 0 reram_1t1r Tf0=4.334920e-09
+Xrp43_1 row43 gate43 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp43_2 row43 gate43 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp43_3 row43 gate43 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp43_4 row43 gate43 cp4 0 reram_1t1r Tf0=4.263301e-09
+Xrp44_0 row44 gate44 cp0 0 reram_1t1r Tf0=4.407670e-09
+Xrp44_1 row44 gate44 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp44_2 row44 gate44 cp2 0 reram_1t1r Tf0=4.000146e-09
+Xrp44_3 row44 gate44 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp44_4 row44 gate44 cp4 0 reram_1t1r Tf0=4.090711e-09
+Xrp45_0 row45 gate45 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp45_1 row45 gate45 cp1 0 reram_1t1r Tf0=4.303134e-09
+Xrp45_2 row45 gate45 cp2 0 reram_1t1r Tf0=4.314332e-09
+Xrp45_3 row45 gate45 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp45_4 row45 gate45 cp4 0 reram_1t1r Tf0=3.817473e-09
+Xrp46_0 row46 gate46 cp0 0 reram_1t1r Tf0=4.277839e-09
+Xrp46_1 row46 gate46 cp1 0 reram_1t1r Tf0=4.396108e-09
+Xrp46_2 row46 gate46 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp46_3 row46 gate46 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp46_4 row46 gate46 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp47_0 row47 gate47 cp0 0 reram_1t1r Tf0=4.440515e-09
+Xrp47_1 row47 gate47 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp47_2 row47 gate47 cp2 0 reram_1t1r Tf0=4.122899e-09
+Xrp47_3 row47 gate47 cp3 0 reram_1t1r Tf0=4.174738e-09
+Xrp47_4 row47 gate47 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp48_0 row48 gate48 cp0 0 reram_1t1r Tf0=4.031445e-09
+Xrp48_1 row48 gate48 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp48_2 row48 gate48 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp48_3 row48 gate48 cp3 0 reram_1t1r Tf0=3.514131e-09
+Xrp48_4 row48 gate48 cp4 0 reram_1t1r Tf0=4.082126e-09
+Xrp49_0 row49 gate49 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp49_1 row49 gate49 cp1 0 reram_1t1r Tf0=4.046607e-09
+Xrp49_2 row49 gate49 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp49_3 row49 gate49 cp3 0 reram_1t1r Tf0=4.345709e-09
+Xrp49_4 row49 gate49 cp4 0 reram_1t1r Tf0=4.357355e-09
+Xrp50_0 row50 gate50 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp50_1 row50 gate50 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp50_2 row50 gate50 cp2 0 reram_1t1r Tf0=4.328986e-09
+Xrp50_3 row50 gate50 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp50_4 row50 gate50 cp4 0 reram_1t1r Tf0=3.482224e-09
+Xrp51_0 row51 gate51 cp0 0 reram_1t1r Tf0=4.557286e-09
+Xrp51_1 row51 gate51 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp51_2 row51 gate51 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp51_3 row51 gate51 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp51_4 row51 gate51 cp4 0 reram_1t1r Tf0=3.795381e-09
+Xrp52_0 row52 gate52 cp0 0 reram_1t1r Tf0=4.334836e-09
+Xrp52_1 row52 gate52 cp1 0 reram_1t1r Tf0=4.319176e-09
+Xrp52_2 row52 gate52 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp52_3 row52 gate52 cp3 0 reram_1t1r Tf0=3.437430e-09
+Xrp52_4 row52 gate52 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp53_0 row53 gate53 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp53_1 row53 gate53 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp53_2 row53 gate53 cp2 0 reram_1t1r Tf0=4.485028e-09
+Xrp53_3 row53 gate53 cp3 0 reram_1t1r Tf0=4.166707e-09
+Xrp53_4 row53 gate53 cp4 0 reram_1t1r Tf0=3.813881e-09
+Xrp54_0 row54 gate54 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp54_1 row54 gate54 cp1 0 reram_1t1r Tf0=3.976341e-09
+Xrp54_2 row54 gate54 cp2 0 reram_1t1r Tf0=4.180043e-09
+Xrp54_3 row54 gate54 cp3 0 reram_1t1r Tf0=4.533993e-09
+Xrp54_4 row54 gate54 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp55_0 row55 gate55 cp0 0 reram_1t1r Tf0=4.481378e-09
+Xrp55_1 row55 gate55 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp55_2 row55 gate55 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp55_3 row55 gate55 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp55_4 row55 gate55 cp4 0 reram_1t1r Tf0=3.982119e-09
+Xrp56_0 row56 gate56 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp56_1 row56 gate56 cp1 0 reram_1t1r Tf0=4.363038e-09
+Xrp56_2 row56 gate56 cp2 0 reram_1t1r Tf0=4.103878e-09
+Xrp56_3 row56 gate56 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp56_4 row56 gate56 cp4 0 reram_1t1r Tf0=4.197747e-09
+Xrp57_0 row57 gate57 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp57_1 row57 gate57 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp57_2 row57 gate57 cp2 0 reram_1t1r Tf0=4.273359e-09
+Xrp57_3 row57 gate57 cp3 0 reram_1t1r Tf0=3.911877e-09
+Xrp57_4 row57 gate57 cp4 0 reram_1t1r Tf0=3.754789e-09
+Xrp58_0 row58 gate58 cp0 0 reram_1t1r Tf0=3.300000e-09
+Xrp58_1 row58 gate58 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp58_2 row58 gate58 cp2 0 reram_1t1r Tf0=4.356568e-09
+Xrp58_3 row58 gate58 cp3 0 reram_1t1r Tf0=4.274836e-09
+Xrp58_4 row58 gate58 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp59_0 row59 gate59 cp0 0 reram_1t1r Tf0=4.065885e-09
+Xrp59_1 row59 gate59 cp1 0 reram_1t1r Tf0=4.242507e-09
+Xrp59_2 row59 gate59 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp59_3 row59 gate59 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp59_4 row59 gate59 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp60_0 row60 gate60 cp0 0 reram_1t1r Tf0=4.387388e-09
+Xrp60_1 row60 gate60 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp60_2 row60 gate60 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp60_3 row60 gate60 cp3 0 reram_1t1r Tf0=3.808009e-09
+Xrp60_4 row60 gate60 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp61_0 row61 gate61 cp0 0 reram_1t1r Tf0=3.960568e-09
+Xrp61_1 row61 gate61 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp61_2 row61 gate61 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp61_3 row61 gate61 cp3 0 reram_1t1r Tf0=4.556744e-09
+Xrp61_4 row61 gate61 cp4 0 reram_1t1r Tf0=3.300000e-09
+Xrp62_0 row62 gate62 cp0 0 reram_1t1r Tf0=4.337664e-09
+Xrp62_1 row62 gate62 cp1 0 reram_1t1r Tf0=3.300000e-09
+Xrp62_2 row62 gate62 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp62_3 row62 gate62 cp3 0 reram_1t1r Tf0=3.300000e-09
+Xrp62_4 row62 gate62 cp4 0 reram_1t1r Tf0=4.045084e-09
+Xrp63_0 row63 gate63 cp0 0 reram_1t1r Tf0=4.427823e-09
+Xrp63_1 row63 gate63 cp1 0 reram_1t1r Tf0=4.262965e-09
+Xrp63_2 row63 gate63 cp2 0 reram_1t1r Tf0=3.300000e-09
+Xrp63_3 row63 gate63 cp3 0 reram_1t1r Tf0=4.251334e-09
+Xrp63_4 row63 gate63 cp4 0 reram_1t1r Tf0=3.300000e-09
+
+Xrn0_0 row0 gate0 cn0 0 reram_1t1r Tf0=4.320911e-09
+Xrn0_1 row0 gate0 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn0_2 row0 gate0 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn0_3 row0 gate0 cn3 0 reram_1t1r Tf0=4.132225e-09
+Xrn0_4 row0 gate0 cn4 0 reram_1t1r Tf0=4.393409e-09
+Xrn1_0 row1 gate1 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn1_1 row1 gate1 cn1 0 reram_1t1r Tf0=4.516456e-09
+Xrn1_2 row1 gate1 cn2 0 reram_1t1r Tf0=4.490212e-09
+Xrn1_3 row1 gate1 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn1_4 row1 gate1 cn4 0 reram_1t1r Tf0=3.675093e-09
+Xrn2_0 row2 gate2 cn0 0 reram_1t1r Tf0=4.533189e-09
+Xrn2_1 row2 gate2 cn1 0 reram_1t1r Tf0=4.211641e-09
+Xrn2_2 row2 gate2 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn2_3 row2 gate2 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn2_4 row2 gate2 cn4 0 reram_1t1r Tf0=4.170108e-09
+Xrn3_0 row3 gate3 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn3_1 row3 gate3 cn1 0 reram_1t1r Tf0=4.721550e-09
+Xrn3_2 row3 gate3 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn3_3 row3 gate3 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn3_4 row3 gate3 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn4_0 row4 gate4 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn4_1 row4 gate4 cn1 0 reram_1t1r Tf0=4.604559e-09
+Xrn4_2 row4 gate4 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn4_3 row4 gate4 cn3 0 reram_1t1r Tf0=4.027652e-09
+Xrn4_4 row4 gate4 cn4 0 reram_1t1r Tf0=4.132474e-09
+Xrn5_0 row5 gate5 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn5_1 row5 gate5 cn1 0 reram_1t1r Tf0=4.053084e-09
+Xrn5_2 row5 gate5 cn2 0 reram_1t1r Tf0=4.479747e-09
+Xrn5_3 row5 gate5 cn3 0 reram_1t1r Tf0=4.342178e-09
+Xrn5_4 row5 gate5 cn4 0 reram_1t1r Tf0=4.207637e-09
+Xrn6_0 row6 gate6 cn0 0 reram_1t1r Tf0=4.402110e-09
+Xrn6_1 row6 gate6 cn1 0 reram_1t1r Tf0=3.373642e-09
+Xrn6_2 row6 gate6 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn6_3 row6 gate6 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn6_4 row6 gate6 cn4 0 reram_1t1r Tf0=4.442088e-09
+Xrn7_0 row7 gate7 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn7_1 row7 gate7 cn1 0 reram_1t1r Tf0=4.757021e-09
+Xrn7_2 row7 gate7 cn2 0 reram_1t1r Tf0=4.469707e-09
+Xrn7_3 row7 gate7 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn7_4 row7 gate7 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn8_0 row8 gate8 cn0 0 reram_1t1r Tf0=4.317522e-09
+Xrn8_1 row8 gate8 cn1 0 reram_1t1r Tf0=4.385735e-09
+Xrn8_2 row8 gate8 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn8_3 row8 gate8 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn8_4 row8 gate8 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn9_0 row9 gate9 cn0 0 reram_1t1r Tf0=4.172544e-09
+Xrn9_1 row9 gate9 cn1 0 reram_1t1r Tf0=4.317392e-09
+Xrn9_2 row9 gate9 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn9_3 row9 gate9 cn3 0 reram_1t1r Tf0=4.052821e-09
+Xrn9_4 row9 gate9 cn4 0 reram_1t1r Tf0=3.642486e-09
+Xrn10_0 row10 gate10 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn10_1 row10 gate10 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn10_2 row10 gate10 cn2 0 reram_1t1r Tf0=4.286659e-09
+Xrn10_3 row10 gate10 cn3 0 reram_1t1r Tf0=4.467767e-09
+Xrn10_4 row10 gate10 cn4 0 reram_1t1r Tf0=4.469476e-09
+Xrn11_0 row11 gate11 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn11_1 row11 gate11 cn1 0 reram_1t1r Tf0=4.427906e-09
+Xrn11_2 row11 gate11 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn11_3 row11 gate11 cn3 0 reram_1t1r Tf0=4.471037e-09
+Xrn11_4 row11 gate11 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn12_0 row12 gate12 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn12_1 row12 gate12 cn1 0 reram_1t1r Tf0=4.544658e-09
+Xrn12_2 row12 gate12 cn2 0 reram_1t1r Tf0=4.440045e-09
+Xrn12_3 row12 gate12 cn3 0 reram_1t1r Tf0=3.972060e-09
+Xrn12_4 row12 gate12 cn4 0 reram_1t1r Tf0=4.044543e-09
+Xrn13_0 row13 gate13 cn0 0 reram_1t1r Tf0=4.312785e-09
+Xrn13_1 row13 gate13 cn1 0 reram_1t1r Tf0=4.529551e-09
+Xrn13_2 row13 gate13 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn13_3 row13 gate13 cn3 0 reram_1t1r Tf0=4.241063e-09
+Xrn13_4 row13 gate13 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn14_0 row14 gate14 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn14_1 row14 gate14 cn1 0 reram_1t1r Tf0=4.207205e-09
+Xrn14_2 row14 gate14 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn14_3 row14 gate14 cn3 0 reram_1t1r Tf0=4.404979e-09
+Xrn14_4 row14 gate14 cn4 0 reram_1t1r Tf0=4.359635e-09
+Xrn15_0 row15 gate15 cn0 0 reram_1t1r Tf0=4.163068e-09
+Xrn15_1 row15 gate15 cn1 0 reram_1t1r Tf0=4.173381e-09
+Xrn15_2 row15 gate15 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn15_3 row15 gate15 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn15_4 row15 gate15 cn4 0 reram_1t1r Tf0=4.577363e-09
+Xrn16_0 row16 gate16 cn0 0 reram_1t1r Tf0=4.485092e-09
+Xrn16_1 row16 gate16 cn1 0 reram_1t1r Tf0=3.439082e-09
+Xrn16_2 row16 gate16 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn16_3 row16 gate16 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn16_4 row16 gate16 cn4 0 reram_1t1r Tf0=4.339921e-09
+Xrn17_0 row17 gate17 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn17_1 row17 gate17 cn1 0 reram_1t1r Tf0=3.341961e-09
+Xrn17_2 row17 gate17 cn2 0 reram_1t1r Tf0=4.274152e-09
+Xrn17_3 row17 gate17 cn3 0 reram_1t1r Tf0=4.451347e-09
+Xrn17_4 row17 gate17 cn4 0 reram_1t1r Tf0=4.462365e-09
+Xrn18_0 row18 gate18 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn18_1 row18 gate18 cn1 0 reram_1t1r Tf0=4.519020e-09
+Xrn18_2 row18 gate18 cn2 0 reram_1t1r Tf0=4.428660e-09
+Xrn18_3 row18 gate18 cn3 0 reram_1t1r Tf0=4.168788e-09
+Xrn18_4 row18 gate18 cn4 0 reram_1t1r Tf0=4.036693e-09
+Xrn19_0 row19 gate19 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn19_1 row19 gate19 cn1 0 reram_1t1r Tf0=4.159521e-09
+Xrn19_2 row19 gate19 cn2 0 reram_1t1r Tf0=4.344355e-09
+Xrn19_3 row19 gate19 cn3 0 reram_1t1r Tf0=3.872062e-09
+Xrn19_4 row19 gate19 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn20_0 row20 gate20 cn0 0 reram_1t1r Tf0=4.219794e-09
+Xrn20_1 row20 gate20 cn1 0 reram_1t1r Tf0=4.205895e-09
+Xrn20_2 row20 gate20 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn20_3 row20 gate20 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn20_4 row20 gate20 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn21_0 row21 gate21 cn0 0 reram_1t1r Tf0=4.313357e-09
+Xrn21_1 row21 gate21 cn1 0 reram_1t1r Tf0=4.537672e-09
+Xrn21_2 row21 gate21 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn21_3 row21 gate21 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn21_4 row21 gate21 cn4 0 reram_1t1r Tf0=4.253067e-09
+Xrn22_0 row22 gate22 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn22_1 row22 gate22 cn1 0 reram_1t1r Tf0=4.369326e-09
+Xrn22_2 row22 gate22 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn22_3 row22 gate22 cn3 0 reram_1t1r Tf0=4.425991e-09
+Xrn22_4 row22 gate22 cn4 0 reram_1t1r Tf0=4.221135e-09
+Xrn23_0 row23 gate23 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn23_1 row23 gate23 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn23_2 row23 gate23 cn2 0 reram_1t1r Tf0=4.511548e-09
+Xrn23_3 row23 gate23 cn3 0 reram_1t1r Tf0=4.166366e-09
+Xrn23_4 row23 gate23 cn4 0 reram_1t1r Tf0=4.146804e-09
+Xrn24_0 row24 gate24 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn24_1 row24 gate24 cn1 0 reram_1t1r Tf0=4.232323e-09
+Xrn24_2 row24 gate24 cn2 0 reram_1t1r Tf0=4.541490e-09
+Xrn24_3 row24 gate24 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn24_4 row24 gate24 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn25_0 row25 gate25 cn0 0 reram_1t1r Tf0=4.032968e-09
+Xrn25_1 row25 gate25 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn25_2 row25 gate25 cn2 0 reram_1t1r Tf0=4.667713e-09
+Xrn25_3 row25 gate25 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn25_4 row25 gate25 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn26_0 row26 gate26 cn0 0 reram_1t1r Tf0=4.347533e-09
+Xrn26_1 row26 gate26 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn26_2 row26 gate26 cn2 0 reram_1t1r Tf0=4.261139e-09
+Xrn26_3 row26 gate26 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn26_4 row26 gate26 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn27_0 row27 gate27 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn27_1 row27 gate27 cn1 0 reram_1t1r Tf0=4.635344e-09
+Xrn27_2 row27 gate27 cn2 0 reram_1t1r Tf0=4.662589e-09
+Xrn27_3 row27 gate27 cn3 0 reram_1t1r Tf0=3.924008e-09
+Xrn27_4 row27 gate27 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn28_0 row28 gate28 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn28_1 row28 gate28 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn28_2 row28 gate28 cn2 0 reram_1t1r Tf0=4.416172e-09
+Xrn28_3 row28 gate28 cn3 0 reram_1t1r Tf0=3.621610e-09
+Xrn28_4 row28 gate28 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn29_0 row29 gate29 cn0 0 reram_1t1r Tf0=4.397011e-09
+Xrn29_1 row29 gate29 cn1 0 reram_1t1r Tf0=4.386430e-09
+Xrn29_2 row29 gate29 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn29_3 row29 gate29 cn3 0 reram_1t1r Tf0=4.369475e-09
+Xrn29_4 row29 gate29 cn4 0 reram_1t1r Tf0=4.479012e-09
+Xrn30_0 row30 gate30 cn0 0 reram_1t1r Tf0=4.390312e-09
+Xrn30_1 row30 gate30 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn30_2 row30 gate30 cn2 0 reram_1t1r Tf0=4.188316e-09
+Xrn30_3 row30 gate30 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn30_4 row30 gate30 cn4 0 reram_1t1r Tf0=4.894443e-09
+Xrn31_0 row31 gate31 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn31_1 row31 gate31 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn31_2 row31 gate31 cn2 0 reram_1t1r Tf0=4.099336e-09
+Xrn31_3 row31 gate31 cn3 0 reram_1t1r Tf0=4.480693e-09
+Xrn31_4 row31 gate31 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn32_0 row32 gate32 cn0 0 reram_1t1r Tf0=4.268459e-09
+Xrn32_1 row32 gate32 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn32_2 row32 gate32 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn32_3 row32 gate32 cn3 0 reram_1t1r Tf0=4.518165e-09
+Xrn32_4 row32 gate32 cn4 0 reram_1t1r Tf0=4.718135e-09
+Xrn33_0 row33 gate33 cn0 0 reram_1t1r Tf0=4.533750e-09
+Xrn33_1 row33 gate33 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn33_2 row33 gate33 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn33_3 row33 gate33 cn3 0 reram_1t1r Tf0=4.462461e-09
+Xrn33_4 row33 gate33 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn34_0 row34 gate34 cn0 0 reram_1t1r Tf0=4.328522e-09
+Xrn34_1 row34 gate34 cn1 0 reram_1t1r Tf0=3.960691e-09
+Xrn34_2 row34 gate34 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn34_3 row34 gate34 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn34_4 row34 gate34 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn35_0 row35 gate35 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn35_1 row35 gate35 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn35_2 row35 gate35 cn2 0 reram_1t1r Tf0=4.510437e-09
+Xrn35_3 row35 gate35 cn3 0 reram_1t1r Tf0=4.464673e-09
+Xrn35_4 row35 gate35 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn36_0 row36 gate36 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn36_1 row36 gate36 cn1 0 reram_1t1r Tf0=4.453717e-09
+Xrn36_2 row36 gate36 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn36_3 row36 gate36 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn36_4 row36 gate36 cn4 0 reram_1t1r Tf0=3.945782e-09
+Xrn37_0 row37 gate37 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn37_1 row37 gate37 cn1 0 reram_1t1r Tf0=4.150465e-09
+Xrn37_2 row37 gate37 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn37_3 row37 gate37 cn3 0 reram_1t1r Tf0=4.569090e-09
+Xrn37_4 row37 gate37 cn4 0 reram_1t1r Tf0=3.819448e-09
+Xrn38_0 row38 gate38 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn38_1 row38 gate38 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn38_2 row38 gate38 cn2 0 reram_1t1r Tf0=4.139285e-09
+Xrn38_3 row38 gate38 cn3 0 reram_1t1r Tf0=3.819503e-09
+Xrn38_4 row38 gate38 cn4 0 reram_1t1r Tf0=4.575339e-09
+Xrn39_0 row39 gate39 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn39_1 row39 gate39 cn1 0 reram_1t1r Tf0=4.492100e-09
+Xrn39_2 row39 gate39 cn2 0 reram_1t1r Tf0=4.366600e-09
+Xrn39_3 row39 gate39 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn39_4 row39 gate39 cn4 0 reram_1t1r Tf0=4.064995e-09
+Xrn40_0 row40 gate40 cn0 0 reram_1t1r Tf0=4.331208e-09
+Xrn40_1 row40 gate40 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn40_2 row40 gate40 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn40_3 row40 gate40 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn40_4 row40 gate40 cn4 0 reram_1t1r Tf0=3.780858e-09
+Xrn41_0 row41 gate41 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn41_1 row41 gate41 cn1 0 reram_1t1r Tf0=4.653455e-09
+Xrn41_2 row41 gate41 cn2 0 reram_1t1r Tf0=4.424865e-09
+Xrn41_3 row41 gate41 cn3 0 reram_1t1r Tf0=4.443378e-09
+Xrn41_4 row41 gate41 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn42_0 row42 gate42 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn42_1 row42 gate42 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn42_2 row42 gate42 cn2 0 reram_1t1r Tf0=4.494287e-09
+Xrn42_3 row42 gate42 cn3 0 reram_1t1r Tf0=3.643612e-09
+Xrn42_4 row42 gate42 cn4 0 reram_1t1r Tf0=4.490182e-09
+Xrn43_0 row43 gate43 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn43_1 row43 gate43 cn1 0 reram_1t1r Tf0=4.137907e-09
+Xrn43_2 row43 gate43 cn2 0 reram_1t1r Tf0=4.243699e-09
+Xrn43_3 row43 gate43 cn3 0 reram_1t1r Tf0=4.512350e-09
+Xrn43_4 row43 gate43 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn44_0 row44 gate44 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn44_1 row44 gate44 cn1 0 reram_1t1r Tf0=3.309781e-09
+Xrn44_2 row44 gate44 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn44_3 row44 gate44 cn3 0 reram_1t1r Tf0=4.353882e-09
+Xrn44_4 row44 gate44 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn45_0 row45 gate45 cn0 0 reram_1t1r Tf0=4.296992e-09
+Xrn45_1 row45 gate45 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn45_2 row45 gate45 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn45_3 row45 gate45 cn3 0 reram_1t1r Tf0=4.391479e-09
+Xrn45_4 row45 gate45 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn46_0 row46 gate46 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn46_1 row46 gate46 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn46_2 row46 gate46 cn2 0 reram_1t1r Tf0=3.979385e-09
+Xrn46_3 row46 gate46 cn3 0 reram_1t1r Tf0=4.458391e-09
+Xrn46_4 row46 gate46 cn4 0 reram_1t1r Tf0=4.400261e-09
+Xrn47_0 row47 gate47 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn47_1 row47 gate47 cn1 0 reram_1t1r Tf0=4.519234e-09
+Xrn47_2 row47 gate47 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn47_3 row47 gate47 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn47_4 row47 gate47 cn4 0 reram_1t1r Tf0=4.061611e-09
+Xrn48_0 row48 gate48 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn48_1 row48 gate48 cn1 0 reram_1t1r Tf0=3.973745e-09
+Xrn48_2 row48 gate48 cn2 0 reram_1t1r Tf0=4.364014e-09
+Xrn48_3 row48 gate48 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn48_4 row48 gate48 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn49_0 row49 gate49 cn0 0 reram_1t1r Tf0=4.313651e-09
+Xrn49_1 row49 gate49 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn49_2 row49 gate49 cn2 0 reram_1t1r Tf0=4.059337e-09
+Xrn49_3 row49 gate49 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn49_4 row49 gate49 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn50_0 row50 gate50 cn0 0 reram_1t1r Tf0=4.020314e-09
+Xrn50_1 row50 gate50 cn1 0 reram_1t1r Tf0=4.469327e-09
+Xrn50_2 row50 gate50 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn50_3 row50 gate50 cn3 0 reram_1t1r Tf0=4.293757e-09
+Xrn50_4 row50 gate50 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn51_0 row51 gate51 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn51_1 row51 gate51 cn1 0 reram_1t1r Tf0=4.666754e-09
+Xrn51_2 row51 gate51 cn2 0 reram_1t1r Tf0=4.548991e-09
+Xrn51_3 row51 gate51 cn3 0 reram_1t1r Tf0=3.850375e-09
+Xrn51_4 row51 gate51 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn52_0 row52 gate52 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn52_1 row52 gate52 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn52_2 row52 gate52 cn2 0 reram_1t1r Tf0=4.479021e-09
+Xrn52_3 row52 gate52 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn52_4 row52 gate52 cn4 0 reram_1t1r Tf0=4.138717e-09
+Xrn53_0 row53 gate53 cn0 0 reram_1t1r Tf0=4.198831e-09
+Xrn53_1 row53 gate53 cn1 0 reram_1t1r Tf0=4.564390e-09
+Xrn53_2 row53 gate53 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn53_3 row53 gate53 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn53_4 row53 gate53 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn54_0 row54 gate54 cn0 0 reram_1t1r Tf0=4.385072e-09
+Xrn54_1 row54 gate54 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn54_2 row54 gate54 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn54_3 row54 gate54 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn54_4 row54 gate54 cn4 0 reram_1t1r Tf0=4.204785e-09
+Xrn55_0 row55 gate55 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn55_1 row55 gate55 cn1 0 reram_1t1r Tf0=4.595740e-09
+Xrn55_2 row55 gate55 cn2 0 reram_1t1r Tf0=4.422894e-09
+Xrn55_3 row55 gate55 cn3 0 reram_1t1r Tf0=3.595095e-09
+Xrn55_4 row55 gate55 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn56_0 row56 gate56 cn0 0 reram_1t1r Tf0=4.369777e-09
+Xrn56_1 row56 gate56 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn56_2 row56 gate56 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn56_3 row56 gate56 cn3 0 reram_1t1r Tf0=4.486971e-09
+Xrn56_4 row56 gate56 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn57_0 row57 gate57 cn0 0 reram_1t1r Tf0=4.218274e-09
+Xrn57_1 row57 gate57 cn1 0 reram_1t1r Tf0=4.152311e-09
+Xrn57_2 row57 gate57 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn57_3 row57 gate57 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn57_4 row57 gate57 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn58_0 row58 gate58 cn0 0 reram_1t1r Tf0=4.187068e-09
+Xrn58_1 row58 gate58 cn1 0 reram_1t1r Tf0=4.396881e-09
+Xrn58_2 row58 gate58 cn2 0 reram_1t1r Tf0=3.300000e-09
+Xrn58_3 row58 gate58 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn58_4 row58 gate58 cn4 0 reram_1t1r Tf0=3.917714e-09
+Xrn59_0 row59 gate59 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn59_1 row59 gate59 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn59_2 row59 gate59 cn2 0 reram_1t1r Tf0=3.925533e-09
+Xrn59_3 row59 gate59 cn3 0 reram_1t1r Tf0=4.612574e-09
+Xrn59_4 row59 gate59 cn4 0 reram_1t1r Tf0=4.616100e-09
+Xrn60_0 row60 gate60 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn60_1 row60 gate60 cn1 0 reram_1t1r Tf0=3.797835e-09
+Xrn60_2 row60 gate60 cn2 0 reram_1t1r Tf0=4.545508e-09
+Xrn60_3 row60 gate60 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn60_4 row60 gate60 cn4 0 reram_1t1r Tf0=3.597128e-09
+Xrn61_0 row61 gate61 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn61_1 row61 gate61 cn1 0 reram_1t1r Tf0=4.392891e-09
+Xrn61_2 row61 gate61 cn2 0 reram_1t1r Tf0=4.304819e-09
+Xrn61_3 row61 gate61 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn61_4 row61 gate61 cn4 0 reram_1t1r Tf0=4.011101e-09
+Xrn62_0 row62 gate62 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn62_1 row62 gate62 cn1 0 reram_1t1r Tf0=4.476628e-09
+Xrn62_2 row62 gate62 cn2 0 reram_1t1r Tf0=4.209985e-09
+Xrn62_3 row62 gate62 cn3 0 reram_1t1r Tf0=4.379740e-09
+Xrn62_4 row62 gate62 cn4 0 reram_1t1r Tf0=3.300000e-09
+Xrn63_0 row63 gate63 cn0 0 reram_1t1r Tf0=3.300000e-09
+Xrn63_1 row63 gate63 cn1 0 reram_1t1r Tf0=3.300000e-09
+Xrn63_2 row63 gate63 cn2 0 reram_1t1r Tf0=4.477118e-09
+Xrn63_3 row63 gate63 cn3 0 reram_1t1r Tf0=3.300000e-09
+Xrn63_4 row63 gate63 cn4 0 reram_1t1r Tf0=4.458825e-09
+
+.op
+.control
+run
+print i(Vsp0) i(Vsn0)
+print i(Vsp1) i(Vsn1)
+print i(Vsp2) i(Vsn2)
+print i(Vsp3) i(Vsn3)
+print i(Vsp4) i(Vsn4)
+quit
+.endc
+.end

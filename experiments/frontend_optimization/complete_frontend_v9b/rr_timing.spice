@@ -5,7 +5,7 @@
 *   V_timer ≈ 0.59-0.62V at typical HR (0.6-0.67s)
 *
 * Source follower: NFET, level-shifts timer down by ~0.40V
-*   V_sf ≈ 0.20-0.22V (NFET switches work at Vgs=0.7V)
+*   V_sf ≈ 0.48V; CMOS TG switches (near-zero loss vs ~24mV NFET-only)
 *
 * Control signals (3 pins):
 *   capture_trig: 2ms pulse, 5ms before rpeak
@@ -37,17 +37,26 @@ XCtimer net_timer vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
 XMsf vdd net_timer sf_out vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XMsf_bias sf_out vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 
-* === PREV CAPTURE at capture_trig ===
+* === COMPLEMENTARY CLOCKS FOR CMOS TGs ===
+* NFET-only switches had ~24mV loss at Vsf≈0.4V (Vgs barely above Vth)
+* CMOS TGs eliminate this: PFET conducts when NFET pinches off
+Xinv_cap capture_trig capture_trig_bar vdd vss inverter_sub
+Xinv_copy copy_trig copy_trig_bar vdd vss inverter_sub
+
+* === PREV CAPTURE at capture_trig (CMOS TG) ===
 XMprev sf_out capture_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMprev_p sf_out capture_trig_bar prev_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
-* === EWMA SAMPLE at capture_trig (separate from prev) ===
+* === EWMA SAMPLE at capture_trig (CMOS TG) ===
 XMesamp sf_out capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMesamp_p sf_out capture_trig_bar esamp_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
-* === EWMA CHARGE-SHARE at copy_trig ===
+* === EWMA CHARGE-SHARE at copy_trig (CMOS TG) ===
 * alpha = Cesamp/(Cesamp+Cewma) = 5/(5+330) ≈ 0.015
 XMewma esamp_node copy_trig ewma_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMewma_p esamp_node copy_trig_bar ewma_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XCewma ewma_node vss sky130_fd_pr__cap_mim_m3_1 W=405 L=405
 
 * === DIFF PAIR: rr_ratio (diode loads, gain ~1) ===

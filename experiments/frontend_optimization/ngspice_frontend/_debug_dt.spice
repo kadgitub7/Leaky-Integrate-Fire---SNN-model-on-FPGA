@@ -1,0 +1,128 @@
+.title debug_dt_comparators
+.lib "sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+.temp 27
+Vdd vdd 0 0.9
+Vss vss 0 0
+Vbias vbias 0 0.300
+Vrpk rpk 0 PWL(0 0 0.0996 0 0.1000 0.9 0.1050 0.9 0.1054 0 0.5 0)
+
+* Threshold voltage sources
+Vth14n nth14 0 0.4756
+Vth69n nth69 0 0.4469
+Vth83n nth83 0 0.4397
+Vth300n nth300 0 0.3287
+Vth10n nth10 0 0.4777
+Vthrpk nthrpk 0 0.3
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/inverter.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/delay_timer.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/edge_buffer.spice"
+
+Xdt rpk dt_s14 dt_s69 dt_wid dt_bi dt_rr dt_rpk sf_dt
++ vdd vss vbias nth14 nth69 nth83 nth300 nth10 nthrpk delay_timer
+
+* Edge buffers on S69 and WID to sharpen transitions
+Xeb69 dt_s69 s69_sharp vdd vss edge_buffer
+Xebwid dt_wid wid_sharp vdd vss edge_buffer
+
+.tran 0.01m 0.5
+
+.meas tran sf_0ms FIND V(sf_dt) AT=0.0000000
+.meas tran s69_0ms FIND V(dt_s69) AT=0.0000000
+.meas tran wid_0ms FIND V(dt_wid) AT=0.0000000
+.meas tran stg69_0ms FIND V(xdt.stg1_s69) AT=0.0000000
+.meas tran stgwid_0ms FIND V(xdt.stg1_wid) AT=0.0000000
+.meas tran s14_0ms FIND V(dt_s14) AT=0.0000000
+.meas tran sf_50ms FIND V(sf_dt) AT=0.0500000
+.meas tran s69_50ms FIND V(dt_s69) AT=0.0500000
+.meas tran wid_50ms FIND V(dt_wid) AT=0.0500000
+.meas tran stg69_50ms FIND V(xdt.stg1_s69) AT=0.0500000
+.meas tran stgwid_50ms FIND V(xdt.stg1_wid) AT=0.0500000
+.meas tran s14_50ms FIND V(dt_s14) AT=0.0500000
+.meas tran sf_99ms FIND V(sf_dt) AT=0.0990000
+.meas tran s69_99ms FIND V(dt_s69) AT=0.0990000
+.meas tran wid_99ms FIND V(dt_wid) AT=0.0990000
+.meas tran stg69_99ms FIND V(xdt.stg1_s69) AT=0.0990000
+.meas tran stgwid_99ms FIND V(xdt.stg1_wid) AT=0.0990000
+.meas tran s14_99ms FIND V(dt_s14) AT=0.0990000
+.meas tran sf_106ms FIND V(sf_dt) AT=0.1060000
+.meas tran s69_106ms FIND V(dt_s69) AT=0.1060000
+.meas tran wid_106ms FIND V(dt_wid) AT=0.1060000
+.meas tran stg69_106ms FIND V(xdt.stg1_s69) AT=0.1060000
+.meas tran stgwid_106ms FIND V(xdt.stg1_wid) AT=0.1060000
+.meas tran s14_106ms FIND V(dt_s14) AT=0.1060000
+.meas tran sf_110ms FIND V(sf_dt) AT=0.1100000
+.meas tran s69_110ms FIND V(dt_s69) AT=0.1100000
+.meas tran wid_110ms FIND V(dt_wid) AT=0.1100000
+.meas tran stg69_110ms FIND V(xdt.stg1_s69) AT=0.1100000
+.meas tran stgwid_110ms FIND V(xdt.stg1_wid) AT=0.1100000
+.meas tran s14_110ms FIND V(dt_s14) AT=0.1100000
+.meas tran sf_120ms FIND V(sf_dt) AT=0.1200000
+.meas tran s69_120ms FIND V(dt_s69) AT=0.1200000
+.meas tran wid_120ms FIND V(dt_wid) AT=0.1200000
+.meas tran stg69_120ms FIND V(xdt.stg1_s69) AT=0.1200000
+.meas tran stgwid_120ms FIND V(xdt.stg1_wid) AT=0.1200000
+.meas tran s14_120ms FIND V(dt_s14) AT=0.1200000
+.meas tran sf_140ms FIND V(sf_dt) AT=0.1400000
+.meas tran s69_140ms FIND V(dt_s69) AT=0.1400000
+.meas tran wid_140ms FIND V(dt_wid) AT=0.1400000
+.meas tran stg69_140ms FIND V(xdt.stg1_s69) AT=0.1400000
+.meas tran stgwid_140ms FIND V(xdt.stg1_wid) AT=0.1400000
+.meas tran s14_140ms FIND V(dt_s14) AT=0.1400000
+.meas tran sf_160ms FIND V(sf_dt) AT=0.1600000
+.meas tran s69_160ms FIND V(dt_s69) AT=0.1600000
+.meas tran wid_160ms FIND V(dt_wid) AT=0.1600000
+.meas tran stg69_160ms FIND V(xdt.stg1_s69) AT=0.1600000
+.meas tran stgwid_160ms FIND V(xdt.stg1_wid) AT=0.1600000
+.meas tran s14_160ms FIND V(dt_s14) AT=0.1600000
+.meas tran sf_170ms FIND V(sf_dt) AT=0.1700000
+.meas tran s69_170ms FIND V(dt_s69) AT=0.1700000
+.meas tran wid_170ms FIND V(dt_wid) AT=0.1700000
+.meas tran stg69_170ms FIND V(xdt.stg1_s69) AT=0.1700000
+.meas tran stgwid_170ms FIND V(xdt.stg1_wid) AT=0.1700000
+.meas tran s14_170ms FIND V(dt_s14) AT=0.1700000
+.meas tran sf_175ms FIND V(sf_dt) AT=0.1750000
+.meas tran s69_175ms FIND V(dt_s69) AT=0.1750000
+.meas tran wid_175ms FIND V(dt_wid) AT=0.1750000
+.meas tran stg69_175ms FIND V(xdt.stg1_s69) AT=0.1750000
+.meas tran stgwid_175ms FIND V(xdt.stg1_wid) AT=0.1750000
+.meas tran s14_175ms FIND V(dt_s14) AT=0.1750000
+.meas tran sf_180ms FIND V(sf_dt) AT=0.1800000
+.meas tran s69_180ms FIND V(dt_s69) AT=0.1800000
+.meas tran wid_180ms FIND V(dt_wid) AT=0.1800000
+.meas tran stg69_180ms FIND V(xdt.stg1_s69) AT=0.1800000
+.meas tran stgwid_180ms FIND V(xdt.stg1_wid) AT=0.1800000
+.meas tran s14_180ms FIND V(dt_s14) AT=0.1800000
+.meas tran sf_185ms FIND V(sf_dt) AT=0.1850000
+.meas tran s69_185ms FIND V(dt_s69) AT=0.1850000
+.meas tran wid_185ms FIND V(dt_wid) AT=0.1850000
+.meas tran stg69_185ms FIND V(xdt.stg1_s69) AT=0.1850000
+.meas tran stgwid_185ms FIND V(xdt.stg1_wid) AT=0.1850000
+.meas tran s14_185ms FIND V(dt_s14) AT=0.1850000
+.meas tran sf_190ms FIND V(sf_dt) AT=0.1900000
+.meas tran s69_190ms FIND V(dt_s69) AT=0.1900000
+.meas tran wid_190ms FIND V(dt_wid) AT=0.1900000
+.meas tran stg69_190ms FIND V(xdt.stg1_s69) AT=0.1900000
+.meas tran stgwid_190ms FIND V(xdt.stg1_wid) AT=0.1900000
+.meas tran s14_190ms FIND V(dt_s14) AT=0.1900000
+.meas tran sf_200ms FIND V(sf_dt) AT=0.2000000
+.meas tran s69_200ms FIND V(dt_s69) AT=0.2000000
+.meas tran wid_200ms FIND V(dt_wid) AT=0.2000000
+.meas tran stg69_200ms FIND V(xdt.stg1_s69) AT=0.2000000
+.meas tran stgwid_200ms FIND V(xdt.stg1_wid) AT=0.2000000
+.meas tran s14_200ms FIND V(dt_s14) AT=0.2000000
+.meas tran sf_250ms FIND V(sf_dt) AT=0.2500000
+.meas tran s69_250ms FIND V(dt_s69) AT=0.2500000
+.meas tran wid_250ms FIND V(dt_wid) AT=0.2500000
+.meas tran stg69_250ms FIND V(xdt.stg1_s69) AT=0.2500000
+.meas tran stgwid_250ms FIND V(xdt.stg1_wid) AT=0.2500000
+.meas tran s14_250ms FIND V(dt_s14) AT=0.2500000
+.meas tran sf_300ms FIND V(sf_dt) AT=0.3000000
+.meas tran s69_300ms FIND V(dt_s69) AT=0.3000000
+.meas tran wid_300ms FIND V(dt_wid) AT=0.3000000
+.meas tran stg69_300ms FIND V(xdt.stg1_s69) AT=0.3000000
+.meas tran stgwid_300ms FIND V(xdt.stg1_wid) AT=0.3000000
+.meas tran s14_300ms FIND V(dt_s14) AT=0.3000000
+
+.end

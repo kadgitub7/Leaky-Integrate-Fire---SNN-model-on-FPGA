@@ -1,0 +1,96 @@
+Using SPARSE 1.3 as Direct Linear Solver
+
+Note: No compatibility mode selected!
+
+
+Circuit: debug_ewma_tracking
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        0.9
+vss                                          0
+vbias                                      0.3
+rpk                                          0
+capture_trig                                 0
+copy_trig                                    0
+xrr.rpeak_bar                              0.9
+xrr.net_timer                      6.58112e-06
+xrr.xctimer.a                                0
+xrr.xctimer.b1                               0
+xrr.sf_out                         1.17413e-05
+xrr.prev_node                       1.0949e-05
+xrr.xcprev.a                                 0
+xrr.xcprev.b1                                0
+xrr.esamp_node                     9.70705e-06
+xrr.xcesamp.a                                0
+xrr.xcesamp.b1                               0
+xrr.ewma_node                       9.0777e-06
+xrr.xcewma.a                                 0
+xrr.xcewma.b1                                0
+xrr.tail_r                         0.000647523
+xrr.net_r1                            0.420826
+f1_out                                0.420824
+xrr.tail_a                          0.00064754
+xrr.net_a1                            0.420824
+f2_out                                0.420824
+timer_out                          1.17413e-05
+ewma_out                            9.0777e-06
+vcopy#branch                                 0
+vcap#branch                                  0
+vrpk#branch                                  0
+vbias#branch                                 0
+vss#branch                         2.32562e-12
+vdd#branch                        -2.32557e-12
+
+
+No. of Data Rows : 45190
+
+  Measurements for Transient Analysis
+
+ewma_at_rpk_0       =  9.086626e-06
+timer_at_rpk_0      =  1.006782e-03
+sf_at_rpk_0         =  1.006782e-03
+esamp_0             =  -9.081163e-05
+ewma_int_0          =  1.104242e-05
+ewma_after_copy_0   =  1.313072e-05
+ewma_at_rpk_1       =  7.201159e-05
+timer_at_rpk_1      =  4.691700e-01
+sf_at_rpk_1         =  4.691700e-01
+esamp_1             =  3.505824e-01
+ewma_int_1          =  7.386514e-05
+ewma_after_copy_1   =  5.368650e-03
+ewma_at_rpk_2       =  5.406638e-03
+timer_at_rpk_2      =  4.691772e-01
+sf_at_rpk_2         =  4.691772e-01
+esamp_2             =  3.514158e-01
+ewma_int_2          =  5.408149e-03
+ewma_after_copy_2   =  1.063477e-02
+ewma_at_rpk_3       =  1.065752e-02
+timer_at_rpk_3      =  4.691683e-01
+sf_at_rpk_3         =  4.691683e-01
+esamp_3             =  3.514589e-01
+ewma_int_3          =  1.065877e-02
+ewma_after_copy_3   =  1.580658e-02
+ewma_at_rpk_4       =  1.581794e-02
+timer_at_rpk_4      =  4.691777e-01
+sf_at_rpk_4         =  4.691777e-01
+esamp_4             =  3.514836e-01
+ewma_int_4          =  1.581896e-02
+ewma_after_copy_4   =  2.088908e-02
+
+
+Total analysis time (seconds) = 4.864
+
+Total elapsed time (seconds) = 14.245 
+
+Total DRAM available = 15982.191 MB.
+DRAM currently available = 1292.234 MB.
+Maximum ngspice program size =   55.898 MB.
+Current ngspice program size =   55.898 MB.
+
