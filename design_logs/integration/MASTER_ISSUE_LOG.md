@@ -218,13 +218,78 @@
     - F6/F7 rho=0.59/0.74 — moderate but not passing
     - Fix: These improve naturally when rpeak detector is more consistent, or when features are measured with wider capture windows
 
-  - **Remaining work (priority order):**
-    1. Fix EWMA alpha: test Cewma=100pF (alpha=0.048) — verify F1 stable, F5 improved
-    2. Fix rpeak capture: evaluate delayed-rpeak vs peak-hold for F3/F4/F8
-    3. Re-run three-way validation on 5+ records after fixes
-    4. If F3/F4/F8 cannot be fixed in analog, retrain classifier on working features (F1, F5, F6, F7) + whatever subset of F2-F8 passes
-    5. Complete classifier retrain + crossbar characterization
-    6. Full frontend + classifier integration
+  - **2026-11-18 Corrected Three-Way Validation (record 100):** Rebuilt testbench matching integration_test.py exactly: T_WID=28ms (R+28ms, not R+83ms), rpeak_pulse for F3/F4/F8 capture (sample 88, not sample 90), correct 11-pin pwave_predictor mapping, RPEAK_SAMPLE_OFFSET=2 for Python reference alignment.
+
+    | Feature | Py-Ideal | Py-Analog | Id-Analog | n | Status |
+    |---------|----------|-----------|-----------|---|--------|
+    | F1:rr_ratio | 0.959 | 0.952 | 0.962 | 20 | WARN |
+    | F2:rr_asym | 0.787 | **0.981** | 0.737 | 19 | FAIL (ideal testbench) |
+    | F3:bi_L0 | **0.973** | 0.051 | 0.111 | 30 | **FAIL** (rpeak jitter) |
+    | F4:bi_L1 | 0.924 | **0.966** | 0.923 | 30 | WARN (near-pass) |
+    | F5:pwave | **0.968** | 0.267 | 0.214 | 30 | **FAIL** (slow EWMA) |
+    | F6:width | 0.958 | **0.970** | **0.982** | 30 | **PASS** |
+    | F7:slope | 0.964 | 0.710 | 0.698 | 30 | **FAIL** (s14 jitter) |
+    | F8:symmetry | **0.981** | 0.022 | 0.143 | 30 | **FAIL** (rpeak jitter) |
+
+    **Updated root cause analysis (4 categories):**
+
+    **Category 1: Rpeak detector jitter on steep QRS portions (F3, F7, F8)**
+    - The analog rpeak detector fires on the QRS upslope threshold crossing.
+    - Beat-to-beat jitter: 3.5ms range (-3.3 to -6.8ms before annotation), ±1.3 samples at 360Hz.
+    - **F3/F8 (beat instability):** On the steep QRS upslope (~108mV/ms in SPICE domain), 1.3-sample jitter → ±45mV capture error. The curr-prev signal range collapses from [-47mV, +37mV] (Python) to [-0.4mV, +6.8mV] (analog). The diff pair output has only 3.7mV variation vs Python's ~85mV range. Result: rho ≈ 0.05-0.14.
+    - **F7 (slope = ECG at R+14ms minus R+69ms):** At R+14ms the QRS downslope has ~16.5mV/ms slope in SPICE. 3.5ms jitter → 58mV jitter in s14 capture, overwhelming the ~200mV signal range. Result: rho ≈ 0.70.
+    - **F4 (bi_L1, lead 1):** Near-pass at 0.966 because lead 1 has gentler QRS slope, reducing jitter impact.
+    - **F6 (width at R+28ms):** PASSES at 0.982 because the ECG at R+28ms changes slowly (~5mV/ms), making 3.5ms jitter only ~17mV — small vs the signal range.
+    - **Fundamental limitation:** Cannot be fixed without circuit redesign (peak-hold circuit, or higher-gain rpeak comparator with hysteresis for sharper triggering). Alternative: retrain classifier to tolerate jitter or drop affected features.
+
+    **Category 2: Fundamental RR-prediction limitation (F5)**
+    - Diagnostic confirmed: pwave base comparator fires at ~618ms after CURRENT rpeak regardless of NEXT RR interval. Timing before next R-peak = RR_next - 618ms. Varies from 55ms to 408ms (target: 206ms).
+    - Root cause is NOT EWMA convergence: fast EWMA (tau=11, run6) vs slow EWMA (tau=67, run5) produced nearly identical threshold values (0.391-0.393V). Both EWMAs converge correctly to the average RR timer value.
+    - Root cause IS RR variability: Record 100 has RR intervals ~673ms to ~1026ms (353ms range). This creates ±180ms trigger timing error — the timer-based predictor simply cannot predict when the next R-peak will be.
+    - Bimodal F5 output (~0.87V or ~0.33V) results from S&H capturing ECG at wildly different cardiac cycle phases depending on whether RR_next > or < RR_avg.
+    - **Run6 result (fast EWMA):** F5 Py-Analog WORSENED (0.267→0.066) because tiny timing shifts from EWMA change randomly flipped the bimodal state. However, F1 IMPROVED dramatically (Id-Analog 0.962→0.992 PASS) because the fast EWMA's rr_cap trigger fires more accurately, improving the main timer's capture timing.
+    - **Fast EWMA RETAINED** for F1 benefit (also F2 Py-An: 0.981→0.991).
+    - **F5 is a fundamental design limitation.** Fix requires either: (a) redesigning the pwave predictor for variable-RR, (b) retraining the classifier without F5, or (c) accepting that F5 carries noisy/bimodal information and testing whether the classifier still works.
+
+    **Category 3: Ideal testbench discrepancy (F2)**
+    - Py-Analog=0.981 (excellent) — the analog F2 circuit works correctly.
+    - Id-Analog=0.737 and Py-Ideal=0.787 — the IDEAL testbench doesn't match either Python or analog.
+    - Root cause: likely the ideal rr_cap timing or EWMA behavior in the ideal testbench doesn't match the analog circuit's behavior. The ideal testbench fires rr_cap from PWL at annotation-5ms, while the analog uses the pwave predictor's rr_cap comparator. This timing difference affects the prev_node capture and thus F2.
+    - **Not blocking:** The analog circuit is correct. The ideal testbench needs debugging but is not a circuit issue.
+
+    **Category 4: Near-pass features (F1, F4)**
+    - F1 (rr_ratio): Py-Analog=0.952, Id-Analog=0.962. Close to 0.97. May improve with more beats, better rr_cap timing (from fast EWMA fix), or slight parameter tuning.
+    - F4 (bi_L1): Py-Analog=0.966. Close to 0.97. Benefits from lead 1's gentler QRS slope.
+
+  - **2026-11-18 Run6 Results (fast EWMA validated):**
+
+    | Feature | Py-Analog | Id-Analog | Status | vs Run5 |
+    |---------|-----------|-----------|--------|---------|
+    | F1:rr_ratio | **0.964** | **0.992** | **PASS** | +0.030 (Id-An) |
+    | F2:rr_asym | **0.991** | 0.735 | PASS (Py-An) | +0.010 |
+    | F3:bi_L0 | 0.040 | 0.189 | FAIL | ~ same |
+    | F4:bi_L1 | **0.965** | 0.921 | Near-pass | ~ same |
+    | F5:pwave | 0.066 | 0.038 | FAIL | -0.201 (worse) |
+    | F6:width | **0.970** | **0.982** | **PASS** | ~ same |
+    | F7:slope | 0.686 | 0.704 | FAIL | ~ same |
+    | F8:symmetry | 0.120 | 0.246 | FAIL | ~ same |
+
+    **Working features (Py-Analog ≥ 0.96):** F1 (0.964), F2 (0.991), F4 (0.965), F6 (0.970) — 4 of 8
+    **Failing features:** F3 (rpeak jitter), F5 (RR prediction), F7 (s14 jitter), F8 (rpeak jitter)
+
+  - **Remaining work (priority order) — DESIGN DECISION NEEDED:**
+    1. ~~Fast EWMA for pwave~~ — VALIDATED: F1 passes (0.992), F5 fundamentally limited
+    2. **USER DECISION:** Choose path forward for failing features F3/F5/F7/F8:
+       - **Option A: Retrain classifier on 4 working features** (F1, F2, F4, F6). Drop F3/F5/F7/F8. Simplest approach, reduces frontend complexity. 4→64→5 MLP.
+       - **Option B: Retrain on all 8 analog features** (including jittery/bimodal ones). The classifier may learn to use the noisy information. Test accuracy before deciding.
+       - **Option C: Redesign affected circuits.** Peak-hold for F3/F8, faster timer for F7, different pwave architecture for F5. Significant design effort.
+       - **Option D: Hybrid** — keep features that might work with retraining (F7 has rho=0.69, may carry partial information), drop truly broken ones (F3/F8/F5).
+    3. Fix pwave threshold formula sign error (5.8ms systematic, low priority)
+    4. Debug F2 ideal testbench discrepancy (optional — analog F2 works, Py-An=0.991)
+    5. Run multi-record validation after design decision
+    6. Update frontend_top.spice with fast EWMA circuit
+    7. Complete classifier retrain + crossbar characterization
+    8. Full frontend + classifier integration
 
 ### MAJOR-008: No Startup / Independence Circuits
 - **Severity:** MAJOR
@@ -291,3 +356,9 @@
 | 2026-11-17 | MAJOR-007 | Trigger calibration complete: 5 delay timer + 3 pwave triggers | All delay timer <0.5% error. Pwave PASS at steady state, ±9ms EWMA drift |
 | 2026-11-17 | MAJOR-007 | Three-way validation (Py vs Ideal vs Analog) on record 100 | F1=1.000 PASS. F2-F8 FAIL. 3 root causes: EWMA alpha (F5), rpeak-on-slope (F3/F4/F8), offset variation (F6/F7) |
 | 2026-11-17 | MAJOR-007 | Bug fix: EWMA IC was 20mV too high (SF lookup vs actual EWMA) | ic_ewma corrected to SF_value - 0.020V. F1 improved 0.986 → 1.000 |
+| 2026-11-18 | MAJOR-007 | Corrected three-way validation: T_WID=28ms, rpeak_pulse capture, 11-pin pwave | F6=0.982 PASS, F3/F7/F8 FAIL (rpeak jitter), F5 FAIL (slow EWMA) |
+| 2026-11-18 | MAJOR-007 | Root cause: rpeak jitter (3.5ms range) destroys F3/F7/F8 on steep QRS | curr-prev range collapses 85mV→3.7mV. Fundamental analog limitation |
+| 2026-11-18 | MAJOR-007 | Root cause: EWMA tau=67 too slow for pwave RR adaptation | pwb fires 49-392ms before R (target 206). Bimodal F5 output |
+| 2026-11-18 | MAJOR-007 | Fix: Separate fast EWMA (5pF/50pF, alpha=0.091, tau=11) for pwave | F1 improved 0.962→0.992 (PASS). F5 worsened (fundamental RR limitation, not EWMA) |
+| 2026-11-18 | MAJOR-007 | Root cause confirmed: F5 failure is RR-prediction, not EWMA convergence | Timer fires at fixed ~618ms post-rpeak. RR range 673-1026ms → ±180ms trigger error |
+| 2026-11-18 | MAJOR-007 | Feature scorecard: 4/8 working (F1,F2,F4,F6), 4/8 failing (F3,F5,F7,F8) | Design decision needed: retrain on 4 features vs redesign circuits |
