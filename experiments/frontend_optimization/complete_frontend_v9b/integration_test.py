@@ -55,6 +55,17 @@ RPEAK_OFFSET_MS = 6.6
 PG_WIDTH_MS = 0.7  # pulse_gen pulse width
 RPEAK_SAMPLE_OFFSET = round((RPEAK_OFFSET_MS - PG_WIDTH_MS) * FS / 1000)  # =2
 
+# True peak detector: fires ~4.1ms AFTER R-peak (measured on record 100 v3d)
+# Pipeline: peak_detected → edge_buffer → pulse_gen → edge_buffer ≈ 2ms
+# So true_rpeak_pulse arrives at R + 4.1 + 2.0 = R + 6.1ms
+TRUE_PEAK_DET_OFFSET_MS = 4.1  # peak_detected signal relative to R
+TRUE_RPEAK_PIPELINE_MS = 2.0   # edge_buffer + pulse_gen + edge_buffer
+TRUE_RPEAK_TOTAL_MS = TRUE_PEAK_DET_OFFSET_MS + TRUE_RPEAK_PIPELINE_MS  # 6.1ms after R
+# For delay timer: offset_ms convention is positive=fires BEFORE R, negative=fires AFTER R
+TRUE_RPEAK_OFFSET_MS = -TRUE_RPEAK_TOTAL_MS  # -6.1 (fires 6.1ms after R)
+# Python sample offset for features captured by true_rpeak_pulse FALL
+TRUE_RPEAK_SAMPLE_OFFSET = -round((TRUE_RPEAK_TOTAL_MS + PG_WIDTH_MS) * FS / 1000)  # -2 (after R)
+
 
 def interp_sf(t_arr, v_arr, t_ms):
     if t_ms <= t_arr[0]: return v_arr[0]
@@ -85,7 +96,7 @@ def load_beats(record_id, max_beats=40):
         prev_be = valid[i-1][0] + WIN_R
         if prev_bs >= 0 and prev_be < len(sig):
             prev_beat = sig[prev_bs:prev_be]
-            rpk_idx = WIN_L - RPEAK_SAMPLE_OFFSET
+            rpk_idx = WIN_L - TRUE_RPEAK_SAMPLE_OFFSET  # 90-(-2)=92 (2 samples after R)
             py_bi_l0 = beat[rpk_idx, 0] - prev_beat[rpk_idx, 0]
             py_bi_l1 = beat[rpk_idx, min(1, n_leads-1)] - prev_beat[rpk_idx, min(1, n_leads-1)]
         else:
@@ -106,7 +117,7 @@ def load_beats(record_id, max_beats=40):
             'py_pw': beat[PW_MID, 0] - beat[PW_S, 0],
             'py_wid': beat[WIN_L + 10, 0],
             'py_slp': beat[WIN_L + 5, 0] - beat[WIN_L + 25, 0],
-            'py_sym': beat[WIN_L - RPEAK_SAMPLE_OFFSET, 0],
+            'py_sym': beat[WIN_L - TRUE_RPEAK_SAMPLE_OFFSET, 0],  # sample at R+6.8ms (true peak fall)
         })
         if len(raw_beats) >= max_beats: break
     max_peak = max(np.max(np.abs(b['ecg_l0'][WIN_L-20:WIN_L+40])) for b in raw_beats)
@@ -164,7 +175,8 @@ fp = FRONTEND_DIR.replace("\\", "/")
 
 #RECORDS = ['107', '115', '232', '118']  # weak records only
 #RECORDS = ['101', '102', '105', '106', '107', '108', '114', '115', '116', '118', '205', '214', '219', '220', '222', '232']
-RECORDS = ['100', '101', '102', '104', '105', '106', '107', '108', '109', '111', '114', '115', '116', '117', '118', '119', '200', '205', '207', '208', '212', '214', '215', '219', '220', '222', '228', '231', '232', '234']
+RECORDS = ['100']  # Single record for true peak detector validation
+#RECORDS_ALL = ['100', '101', '102', '104', '105', '106', '107', '108', '109', '111', '114', '115', '116', '117', '118', '119', '200', '205', '207', '208', '212', '214', '215', '219', '220', '222', '228', '231', '232', '234']
 all_results = {}
 
 for rec_id in RECORDS:
@@ -294,21 +306,21 @@ for rec_id in RECORDS:
         print("  rpeak POS frac={:.0f}% thresh={:.4f}V detectable={}/{} offset={:.1f}ms min_rpk={:.4f}V".format(
             cfg['frac']*100, rpeak_thresh, n_det, n, raw_offset_ms, min_rpk))
 
-    # --- Delay timer thresholds (per-record adaptive offset) ---
-    offset_ms = rpeak_offset_ms - PG_WIDTH_MS
-    # Fast timer handles offsets up to ~35ms (ft_v drops to ~0.06V at 35ms)
-    # For offsets > 35ms, the fast timer values are too low to resolve
-    use_slow_for_fast = offset_ms > 35.0
-    if use_slow_for_fast:
-        print("  NOTE: offset {:.1f}ms exceeds fast timer range, using main timer for s14/s10/rpk_del".format(offset_ms))
-        vth_14 = interp_sf(dt_t, dt_v, max(0.5, 14 + offset_ms - pipe_s14))
-        vth_10 = interp_sf(dt_t, dt_v, max(0.5, 10 + offset_ms - pipe_s10))
-        vth_rpk_del = interp_sf(dt_t, dt_v, max(0.5, 0 + offset_ms - pipe_rpk_del))
-    else:
-        vth_14 = interp_sf(ft_t, ft_v, max(0.3, 14 + offset_ms - pipe_s14))
-        vth_10 = interp_sf(ft_t, ft_v, max(0.3, 10 + offset_ms - pipe_s10))
-        vth_rpk_del = interp_sf(ft_t, ft_v, max(0.3, 0 + offset_ms - pipe_rpk_del))
-    # Main timer needs ~15ms minimum decay for comparator to resolve
+    # --- Delay timer thresholds ---
+    # True peak detector: use fixed offset (true_rpeak_pulse at R+6.1ms)
+    # offset_ms convention: positive = trigger before R, negative = after R
+    offset_ms = TRUE_RPEAK_OFFSET_MS - PG_WIDTH_MS  # -6.8ms
+    # Also keep ARM offset for diagnostics
+    arm_offset_ms = rpeak_offset_ms - PG_WIDTH_MS
+
+    # With true peak detector, all effective delays are SHORTER because trigger fires AFTER R
+    # Fast timer handles up to ~35ms; with offset_ms=-6.8: 14+(-6.8)-2.9=4.3ms (fast), etc.
+    use_slow_for_fast = False  # never needed with true peak (delays are short)
+    vth_14 = interp_sf(ft_t, ft_v, max(0.3, 14 + offset_ms - pipe_s14))
+    vth_10 = interp_sf(ft_t, ft_v, max(0.3, 10 + offset_ms - pipe_s10))
+    # rpk_del no longer needed: true_rpeak_pulse IS the near-peak capture trigger
+    vth_rpk_del = 0.48  # placeholder (unused with true peak detector)
+    # Main timer thresholds
     wid_main_delay = 28 + offset_ms - pipe_wid
     use_fast_for_wid = wid_main_delay < 15.0
     if use_fast_for_wid:
@@ -318,10 +330,13 @@ for rec_id in RECORDS:
         vth_28 = interp_sf(dt_t, dt_v, max(0.5, 28 + offset_ms - pipe_wid))
     vth_69 = interp_sf(dt_t, dt_v, max(0.5, 69 + offset_ms - pipe_s69))
     vth_300 = interp_sf(dt_t, dt_v, max(0.5, 300 + offset_ms - pipe_bi))
+    print("  TRUE PEAK: offset_ms={:.1f} (ARM offset={:.1f})".format(offset_ms, arm_offset_ms))
+    print("  Delay thresholds: s14={:.4f}(ft@{:.1f}ms) wid={:.4f} s69={:.4f} bi={:.4f} rr={:.4f}(ft@{:.1f}ms)".format(
+        vth_14, 14+offset_ms-pipe_s14, vth_28, vth_69, vth_300, vth_10, 10+offset_ms-pipe_s10))
 
-    # Adjust Python reference sample offset to match per-record rpeak offset
-    rpeak_sample_offset = round((rpeak_offset_ms - PG_WIDTH_MS) * FS / 1000)
-    rpeak_sample_offset = max(0, min(15, rpeak_sample_offset))
+    # Python reference sample offset: true peak detector captures at R + 6.8ms (fall edge)
+    # Negative offset = samples AFTER R-peak annotation
+    rpeak_sample_offset = TRUE_RPEAK_SAMPLE_OFFSET  # -2 (2 samples after R)
 
     # --- IC for rr_timing ---
     PW = 0.0005
@@ -334,15 +349,16 @@ for rec_id in RECORDS:
     SF_DECAY_RATE = 0.112e-3
     pwb_target_ms = 205.6
     pwp_target_ms = 130.6
-    PWB_OFFSET_MV = (pwb_target_ms + rpeak_offset_ms - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
-    PWP_OFFSET_MV = (pwp_target_ms + rpeak_offset_ms - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
+    # Pwave offsets use TRUE_RPEAK_OFFSET_MS since timer2 is now precharged by true_rpeak_pulse
+    PWB_OFFSET_MV = (pwb_target_ms + TRUE_RPEAK_OFFSET_MS - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
+    PWP_OFFSET_MV = (pwp_target_ms + TRUE_RPEAK_OFFSET_MS - PG_WIDTH_MS - pipe_pw) * SF_DECAY_RATE * 1000
     RRC_OFFSET_MV = 20.0
-    print("  rpeak_offset={:.1f}ms sample_offset={} SF_DECAY={:.4f}mV/ms ic_ewma={:.4f}V avg_rr={:.0f}ms".format(
-        rpeak_offset_ms, rpeak_sample_offset, SF_DECAY_RATE*1000, ic_ewma, avg_rr_ms))
+    print("  rpeak_offset(ARM)={:.1f}ms true_rpeak_offset={:.1f}ms sample_offset={} SF_DECAY={:.4f}mV/ms ic_ewma={:.4f}V avg_rr={:.0f}ms".format(
+        rpeak_offset_ms, TRUE_RPEAK_OFFSET_MS, rpeak_sample_offset, SF_DECAY_RATE*1000, ic_ewma, avg_rr_ms))
     print("  pwave offsets: pwb={:.1f}mV (R-{:.0f}ms) pwp={:.1f}mV (R-{:.0f}ms) rrc={:.1f}mV".format(
         PWB_OFFSET_MV, pwb_target_ms, PWP_OFFSET_MV, pwp_target_ms, RRC_OFFSET_MV))
     if use_slow_for_fast:
-        print("  SLOW timer thresholds: vth_14={:.4f} vth_10={:.4f} vth_rpk_del={:.4f}".format(vth_14, vth_10, vth_rpk_del))
+        print("  SLOW timer thresholds: vth_14={:.4f} vth_10={:.4f}".format(vth_14, vth_10))
 
     # --- Analog pipeline ---
     # Comparator wiring depends on QRS polarity
@@ -433,6 +449,7 @@ Vecg1 ecg_l1 0 PWL({ecg1})
 .include "{fp}/delay_timer.spice"
 .include "{fp}/edge_buffer.spice"
 .include "{fp}/rpeak_hold.spice"
+.include "{fp}/true_peak_detector.spice"
 .include "{fp}/pwave_predictor.spice"
 
 * --- Bias generator (replaces ideal Vbias) ---
@@ -451,7 +468,16 @@ Xpg_rpk rpeak_level_sharp rpeak_pulse_raw vdd vss vbias pulse_gen
 * Direct connection: no refractory gate (hold circuit provides debounce)
 Xeb_rpk rpeak_pulse_raw rpeak_pulse vdd vss edge_buffer
 
-* --- Delay timer (triggered by analog rpeak pulse) ---
+* --- True peak detector (fires at actual R-peak, ~4.1ms after threshold crossing) ---
+* ARM signal = rpeak_level_held (HIGH during QRS, prevents false triggers)
+Xtpd ecg_l0 rpeak_level_held true_peak_det vdd vss vbias true_peak_detector
+.ic V(xtpd.peak_hold)=0.3
+* Level-to-pulse conversion for true peak detector
+Xeb_tpd_in true_peak_det tpd_sharp vdd vss edge_buffer
+Xpg_tpd tpd_sharp tpd_pulse_raw vdd vss vbias pulse_gen
+Xeb_tpd tpd_pulse_raw true_rpeak_pulse vdd vss edge_buffer
+
+* --- Delay timer (triggered by TRUE RPEAK pulse) ---
 Vth14 vth_14_node 0 {vth14:.6f}
 Vth69 vth_69_node 0 {vth69:.6f}
 Vth28 vth_28_node 0 {vth28:.6f}
@@ -459,7 +485,7 @@ Vth300 vth_300_node 0 {vth300:.6f}
 Vth10 vth_10_node 0 {vth10:.6f}
 Vth_rpk_del vth_rpk_del_node 0 {vth_rpk_del:.6f}
 
-Xdt rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level trig_rpk_del_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node vth_rpk_del_node delay_timer
+Xdt true_rpeak_pulse trig_s14_level trig_s69_level trig_wid_level trig_bi_level trig_rr_level trig_rpk_del_level dt_sf_out vdd vss vbias vth_14_node vth_69_node vth_28_node vth_300_node vth_10_node vth_rpk_del_node delay_timer
 
 * --- Pulse generators for delay_timer outputs ---
 {slow_ext_cmps}
@@ -469,7 +495,8 @@ Xpg_s69 trig_s69_level pg_s69_raw vdd vss vbias long_pulse_gen
 Xpg_wid {wid_src} pg_wid_raw vdd vss vbias long_pulse_gen
 Xpg_bi  trig_bi_level  pg_bi_raw  vdd vss vbias long_pulse_gen
 Xpg_rr  {rr_src}  pg_rr_raw  vdd vss vbias pulse_gen
-Xpg_rpk_del {rpkdel_src} pg_rpk_del_raw vdd vss vbias pulse_gen
+* rpk_del no longer needed (true_rpeak_pulse captures near peak directly)
+* Xpg_rpk_del {rpkdel_src} pg_rpk_del_raw vdd vss vbias pulse_gen
 
 * --- Edge buffers for cleaner trigger edges ---
 Xeb_s14 pg_s14_raw trig_s14 vdd vss edge_buffer
@@ -487,14 +514,15 @@ XMnand_rrc_p2 nand_rrc2 esamp_ok_level vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=
 XMnand_rrc_n1 nand_rrc2 trig_rr_copy_raw nand_mid_rrc2 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMnand_rrc_n2 nand_mid_rrc2 esamp_ok_level vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 Xinv_nand_rrc2 nand_rrc2 trig_rr_copy vdd vss inverter_sub
-Xeb_rpk_del pg_rpk_del_raw rpeak_pulse_delayed vdd vss edge_buffer
+* Xeb_rpk_del pg_rpk_del_raw rpeak_pulse_delayed vdd vss edge_buffer
 
 * ============================================================
 * ANALOG RR_CAP (pwave_predictor + AND gate with rpeak_level)
 * ============================================================
 * Duplicate timer+SF for pwave_predictor (isolated from esamp loading on rr_timer)
-Xinv_rpk_pre rpeak_pulse rpk_bar_pre vdd vss inverter_sub
-XMpre2n vdd rpeak_pulse net_timer2 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* Now precharged by true_rpeak_pulse (fires R+6.1ms instead of R-6.6ms)
+Xinv_rpk_pre true_rpeak_pulse rpk_bar_pre vdd vss inverter_sub
+XMpre2n vdd true_rpeak_pulse net_timer2 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 XMpre2p vdd rpk_bar_pre net_timer2 vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 XMdis2 net_timer2 vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
 XCtimer2 net_timer2 vss sky130_fd_pr__cap_mim_m3_1 W=400 L=400
@@ -533,12 +561,12 @@ Xpg_pwp pwp_level trig_pw_peak vdd vss vbias pulse_gen
 .include "{fp}/qrs_slope.spice"
 .include "{fp}/qrs_symmetry.spice"
 
-* F1/F2: rr_timing (ANALOG rpeak, ANALOG rr_cap via pwave_pred, analog rr_copy)
-Xrr ecg_l0 trig_rr_cap rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
+* F1/F2: rr_timing (TRUE RPEAK, ANALOG rr_cap via pwave_pred, analog rr_copy)
+Xrr ecg_l0 trig_rr_cap true_rpeak_pulse trig_rr_copy f1_rr_ratio f2_rr_asym rr_timer rr_ewma vdd vss vbias rr_timing
 
-* F3/F4: beat_instability (DELAYED rpeak, ANALOG bi_copy)
-Xbi0 ecg_l0 rpeak_pulse_delayed trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
-Xbi1 ecg_l1 rpeak_pulse_delayed trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
+* F3/F4: beat_instability (TRUE RPEAK pulse — captures near R+6.8ms, on flatter QRS)
+Xbi0 ecg_l0 true_rpeak_pulse trig_bi_copy f3_bi_l0 vdd vss vbias beat_instability
+Xbi1 ecg_l1 true_rpeak_pulse trig_bi_copy f4_bi_l1 vdd vss vbias beat_instability
 
 * F5: pwave_diff (ANALOG pw triggers via pwave_predictor)
 Xpw ecg_l0 trig_pw_base trig_pw_peak f5_pwave vdd vss vbias pwave_diff
@@ -549,8 +577,8 @@ Xwid ecg_l0 trig_wid f6_width vdd vss qrs_width
 * F7: qrs_slope (ANALOG s14, s69 triggers)
 Xslp ecg_l0 trig_s14 trig_s69 f7_slope vdd vss vbias qrs_slope
 
-* F8: qrs_symmetry (DELAYED rpeak pulse — captures near true R-peak)
-Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
+* F8: qrs_symmetry (TRUE RPEAK pulse — captures at R+6.8ms, near peak on flat QRS)
+Xsym ecg_l0 true_rpeak_pulse f8_symmetry vdd vss qrs_symmetry
 
 * ============================================================
 * INITIAL CONDITIONS
@@ -570,6 +598,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 .ic V(xdt.timer2)=0
 .ic V(rpeak_pulse_raw)=0
 .ic V(rpeak_level_held)=0
+.ic V(true_peak_det)=0
+.ic V(true_rpeak_pulse)=0
 
 .tran 0.5m {ttot:.4f} UIC
 
@@ -645,20 +675,20 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     for j in range(n):
         td = max(0.01, rpeak_times[j] - 0.050)
         sp += ".meas tran trpk_{j} WHEN V(rpeak_pulse)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
-        # Delay timer SF diagnostics at specific offsets from rpeak
+        # Delay timer SF diagnostics at specific offsets from true_rpeak_pulse
         for dt_off_ms in [5, 15, 30, 50, 80]:
-            t_probe = rpeak_times[j] - rpeak_offset_ms/1000 + dt_off_ms/1000
+            t_probe = rpeak_times[j] + TRUE_RPEAK_TOTAL_MS/1000 + dt_off_ms/1000
             if t_probe > 0.01 and t_probe < total_time:
                 sp += ".meas tran dtsf_{j}_{dtms} FIND V(dt_sf_out) AT={t:.7f}\n".format(j=j, dtms=dt_off_ms, t=t_probe)
         sp += ".meas tran ts14_{j} WHEN V(trig_s14)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran ts69_{j} WHEN V(trig_s69)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran twid_{j} WHEN V(trig_wid)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
-        sp += ".meas tran trpk_del_{j} WHEN V(rpeak_pulse_delayed)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran ttrpk_{j} WHEN V(true_rpeak_pulse)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         # Measure pulse FALL times to compute actual hold offsets
         sp += ".meas tran ts14_fall_{j} WHEN V(trig_s14)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran ts69_fall_{j} WHEN V(trig_s69)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran twid_fall_{j} WHEN V(trig_wid)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
-        sp += ".meas tran trpk_del_fall_{j} WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
+        sp += ".meas tran ttrpk_fall_{j} WHEN V(true_rpeak_pulse)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
         # rr_cap analog timing
         sp += ".meas tran trrc_{j} WHEN V(trig_rr_cap)=0.45 RISE=1 TD={td:.7f}\n".format(j=j, td=td)
         sp += ".meas tran trrc_fall_{j} WHEN V(trig_rr_cap)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td)
@@ -671,27 +701,28 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         sp += ".meas tran bi0_prev_{j} FIND V(xbi0.prev_node) AT={t:.7f}\n".format(j=j, t=t_meas)
         sp += ".meas tran bi1_curr_{j} FIND V(xbi1.curr_node) AT={t:.7f}\n".format(j=j, t=t_meas)
         sp += ".meas tran bi1_prev_{j} FIND V(xbi1.prev_node) AT={t:.7f}\n".format(j=j, t=t_meas)
-        # F8: measure simulated ecg_l0 at rpeak_del trigger fall (ngspice FIND...WHEN)
+        # F8: measure simulated ecg_l0 at true_rpeak_pulse fall (ngspice FIND...WHEN)
         td_f8 = max(0.01, rpeak_times[j] - 0.050)
-        sp += ".meas tran ecg_at_f8cap_{j} FIND V(ecg_l0) WHEN V(rpeak_pulse_delayed)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td_f8)
+        sp += ".meas tran ecg_at_f8cap_{j} FIND V(ecg_l0) WHEN V(true_rpeak_pulse)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td_f8)
         # F5: measure pwave S&H cap values and trigger fall times for all beats
         sp += ".meas tran pw_shb_{j} FIND V(xpw.shb) AT={t:.7f}\n".format(j=j, t=t_meas)
         sp += ".meas tran pw_shp_{j} FIND V(xpw.shp) AT={t:.7f}\n".format(j=j, t=t_meas)
         td_pw = max(0.01, rpeak_times[j] - 0.300)
         sp += ".meas tran tpwb_fall_{j} WHEN V(trig_pw_base)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td_pw)
         sp += ".meas tran tpwp_fall_{j} WHEN V(trig_pw_peak)=0.45 FALL=1 TD={td:.7f}\n".format(j=j, td=td_pw)
-    # Diagnostic: rpeak_pulse amplitude and S&H output for first 5 beats
+    # Diagnostic: true_rpeak_pulse amplitude and S&H output for first 5 beats
     for j in range(SKIP, min(SKIP+10, n)):
-        t_expected = rpeak_times[j] - 0.0068  # expected rpk at R-6.8ms
-        sp += ".meas tran rpk_amp_{j} MAX V(rpeak_pulse) FROM={f:.7f} TO={t:.7f}\n".format(
-            j=j, f=t_expected-0.002, t=t_expected+0.005)
+        t_expected_tpd = rpeak_times[j] + 0.0061  # expected true_rpk at R+6.1ms
+        t_expected_arm = rpeak_times[j] - 0.0068  # ARM rpk at R-6.8ms (still active)
+        sp += ".meas tran rpk_amp_{j} MAX V(true_rpeak_pulse) FROM={f:.7f} TO={t:.7f}\n".format(
+            j=j, f=t_expected_tpd-0.005, t=t_expected_tpd+0.005)
         sp += ".meas tran rpk_raw_{j} MAX V(rpeak_pulse_raw) FROM={f:.7f} TO={t:.7f}\n".format(
-            j=j, f=t_expected-0.002, t=t_expected+0.005)
+            j=j, f=t_expected_arm-0.002, t=t_expected_arm+0.005)
         sp += ".meas tran ecg_at_rpk_{j} FIND V(ecg_l0) AT={t:.7f}\n".format(
-            j=j, t=t_expected+0.0003)  # 0.3ms into pulse
+            j=j, t=t_expected_tpd+0.0003)  # 0.3ms into true_rpk pulse
         # F8: sym_out IS the S&H cap; measure circuit output directly
         sp += ".meas tran sh_sym_{j} FIND V(f8_symmetry) AT={t:.7f}\n".format(
-            j=j, t=t_expected+0.005)  # 5ms after capture
+            j=j, t=t_expected_tpd+0.005)  # 5ms after true peak capture
         # F3 diagnostic: output at measurement time (curr/prev now measured for ALL beats above)
         sp += ".meas tran bi_out_{j} FIND V(f3_bi_l0) AT={t:.7f}\n".format(
             j=j, t=rpeak_times[j]+0.100)
@@ -757,7 +788,7 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
     # --- Classify beats: valid vs missed trigger ---
     valid_rpk = set()
-    valid_rpk_del = set()  # delayed rpeak valid (for F3/F4/F8)
+    valid_rpk_del = set()  # true_rpeak valid (for F3/F4/F8 — replaces rpk_delayed)
     valid_dt = set()  # delay timer triggers valid
     n_rpk_ok = 0; n_rpk_miss = 0
     n_rpk_del_ok = 0; n_rpk_del_miss = 0
@@ -765,12 +796,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
     for j in range(n):
         r = rpeak_times[j]
         trpk = res.get('trpk_{}'.format(j))
-        trpk_del = res.get('trpk_del_{}'.format(j))
+        ttrpk = res.get('ttrpk_{}'.format(j))  # true_rpeak_pulse timing
         ts14 = res.get('ts14_{}'.format(j))
         twid = res.get('twid_{}'.format(j))
         ts69 = res.get('ts69_{}'.format(j))
-        # rpeak valid if within expected offset window of true R
-        # raw_offset_ms: negative=before R, positive=after R
+        # ARM rpeak valid if within expected offset window of true R
         rpk_window_lo = min(raw_offset_ms - 10, -10) / 1000.0
         rpk_window_hi = max(raw_offset_ms + 10, 5) / 1000.0
         if trpk and (trpk - r) > rpk_window_lo and (trpk - r) < rpk_window_hi:
@@ -778,15 +808,15 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
             n_rpk_ok += 1
         else:
             n_rpk_miss += 1
-        # delayed rpeak valid if within expected window of true R
-        rpkdel_window = max(25, abs(rpeak_offset_ms) + 15) / 1000.0
-        if trpk_del and (trpk_del - r) > -rpkdel_window and (trpk_del - r) < rpkdel_window:
+        # true_rpeak_pulse valid if fires within R+1ms to R+15ms
+        if ttrpk and (ttrpk - r) > 0.001 and (ttrpk - r) < 0.015:
             valid_rpk_del.add(j)
             n_rpk_del_ok += 1
         else:
             n_rpk_del_miss += 1
-        # delay triggers valid if within reasonable range of expected
-        dt_tol = max(15, abs(rpeak_offset_ms) * 0.5 + 10)
+        # delay triggers valid: now triggered by true_rpeak_pulse at R+6.1ms
+        # tolerance wider because jitter is ~3.4ms p2p
+        dt_tol = 15
         if (ts14 and abs((ts14 - r)*1000 - 14) < dt_tol and
             twid and abs((twid - r)*1000 - 28) < dt_tol and
             ts69 and abs((ts69 - r)*1000 - 69) < dt_tol):
@@ -794,7 +824,7 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
             n_dt_ok += 1
         else:
             n_dt_miss += 1
-    print("  rpeak valid: {}/{}, rpk_delayed valid: {}/{}, delay_timer valid: {}/{}".format(
+    print("  ARM rpeak valid: {}/{}, true_rpeak valid: {}/{}, delay_timer valid: {}/{}".format(
         n_rpk_ok, n, n_rpk_del_ok, n, n_dt_ok, n))
     # Print sample trigger times for valid beats
     shown = 0
@@ -802,14 +832,14 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
         if j in valid_rpk and shown < 3:
             r = rpeak_times[j] * 1000
             trpk = res.get('trpk_{}'.format(j))
-            trpk_del = res.get('trpk_del_{}'.format(j))
+            ttrpk = res.get('ttrpk_{}'.format(j))
             ts14 = res.get('ts14_{}'.format(j))
             twid = res.get('twid_{}'.format(j))
             ts69 = res.get('ts69_{}'.format(j))
-            rpk_del_ms = (trpk_del*1000-r) if trpk_del else None
-            print("    beat {}: rpk={:.1f}, rpk_del={}, s14={:.1f}, wid={:.1f}, s69={:.1f} ms from R".format(
+            ttrpk_ms = (ttrpk*1000-r) if ttrpk else None
+            print("    beat {}: ARM_rpk={:.1f}, true_rpk={}, s14={:.1f}, wid={:.1f}, s69={:.1f} ms from R".format(
                 j, (trpk*1000-r),
-                "{:.1f}".format(rpk_del_ms) if rpk_del_ms is not None else "MISS",
+                "{:.1f}".format(ttrpk_ms) if ttrpk_ms is not None else "MISS",
                 (ts14*1000-r) if ts14 else 0,
                 (twid*1000-r) if twid else 0, (ts69*1000-r) if ts69 else 0))
             shown += 1
@@ -961,16 +991,16 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
                 cv_list.append(cv)
         rhos[fk] = abs(spearmanr(cv_list, pv_list)[0]) if len(cv_list) >= 5 else 0.0
 
-    # F8: use ngspice-measured ecg_l0 at trigger fall as reference (avoids interpolation mismatch)
+    # F8: use ngspice-measured ecg_l0 at true_rpeak_pulse fall as reference
     cv_list, pv_list = [], []
-    cv_ecgref_list, pv_ecgref_list = [], []  # ecg_at_time approach for comparison
+    cv_ecgref_list, pv_ecgref_list = [], []
     f8_diag = []
     for j in range(SKIP, n):
         if j not in valid_rpk_del:
             continue
         cv = res.get('f8_{}'.format(j))
         ecg_cap = res.get('ecg_at_f8cap_{}'.format(j))
-        t_fall = res.get('trpk_del_fall_{}'.format(j))
+        t_fall = res.get('ttrpk_fall_{}'.format(j))
         if cv is not None and ecg_cap is not None:
             pv_list.append(ecg_cap)
             cv_list.append(cv)
@@ -1043,11 +1073,11 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
             if j not in valid_rpk_del:
                 continue
             cv = res.get('f{}_{}'.format(fk, j))
-            t_fall = res.get('trpk_del_fall_{}'.format(j))
+            t_fall = res.get('ttrpk_fall_{}'.format(j))
             curr_v = res.get('{}_curr_{}'.format(prefix, j))
             # Fall-time ref
             if cv is not None and t_fall is not None and (j-1) in valid_rpk_del:
-                t_fall_prev = res.get('trpk_del_fall_{}'.format(j-1))
+                t_fall_prev = res.get('ttrpk_fall_{}'.format(j-1))
                 if t_fall_prev is not None:
                     ecg_arr = beats[j]['ecg_l0'] if lead == 0 else beats[j]['ecg_l1']
                     prev_arr = beats[j-1]['ecg_l0'] if lead == 0 else beats[j-1]['ecg_l1']
@@ -1068,13 +1098,13 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
     # --- Diagnostic: print F8 values for first few valid beats ---
     if rec_id == '100':
-        print("  F8 S&H diagnostic (delayed rpeak):")
+        print("  F8 S&H diagnostic (true_rpeak_pulse):")
         shown_f8 = 0
         for j in range(SKIP, n):
             if j not in valid_rpk_del or shown_f8 >= 5:
                 continue
             cv = res.get('f8_{}'.format(j))
-            t_fall = res.get('trpk_del_fall_{}'.format(j))
+            t_fall = res.get('ttrpk_fall_{}'.format(j))
             if cv is not None and t_fall is not None:
                 py_actual = ecg_at_time(beats[j]['ecg_l0'], rpeak_times[j], t_fall)
                 py_fixed = beats[j]['py_sym']
@@ -1092,26 +1122,26 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
             ts14_r = res.get('ts14_{}'.format(j)); ts14_f = res.get('ts14_fall_{}'.format(j))
             ts69_r = res.get('ts69_{}'.format(j)); ts69_f = res.get('ts69_fall_{}'.format(j))
             twid_r = res.get('twid_{}'.format(j)); twid_f = res.get('twid_fall_{}'.format(j))
-            trd_r = res.get('trpk_del_{}'.format(j)); trd_f = res.get('trpk_del_fall_{}'.format(j))
+            trd_r = res.get('ttrpk_{}'.format(j)); trd_f = res.get('ttrpk_fall_{}'.format(j))
             pw_s14 = (ts14_f - ts14_r)*1000 if ts14_r and ts14_f and ts14_f > ts14_r else None
             pw_s69 = (ts69_f - ts69_r)*1000 if ts69_r and ts69_f and ts69_f > ts69_r else None
             pw_wid = (twid_f - twid_r)*1000 if twid_r and twid_f and twid_f > twid_r else None
             pw_rpkd = (trd_f - trd_r)*1000 if trd_r and trd_f and trd_f > trd_r else None
-            print("    beat {}: s14={}, s69={}, wid={}, rpk_del={} ms".format(
+            print("    beat {}: s14={}, s69={}, wid={}, true_rpk={} ms".format(
                 j,
                 "{:.2f}".format(pw_s14) if pw_s14 else "N/A",
                 "{:.2f}".format(pw_s69) if pw_s69 else "N/A",
                 "{:.2f}".format(pw_wid) if pw_wid else "N/A",
                 "{:.2f}".format(pw_rpkd) if pw_rpkd else "N/A"))
         # F3 diagnostic: curr_node, prev_node, output
-        print("  F3 beat_instab diagnostic:")
+        print("  F3 beat_instab diagnostic (true_rpeak_pulse):")
         for j in range(SKIP, min(SKIP+10, n)):
             bi_c = res.get('bi0_curr_{}'.format(j))
             bi_p = res.get('bi0_prev_{}'.format(j))
             bi_o = res.get('bi_out_{}'.format(j))
             f3_cv = res.get('f3_{}'.format(j))
-            t_rpk_del = res.get('trpk_del_{}'.format(j))
-            rpk_del_off = (t_rpk_del - rpeak_times[j])*1000 if t_rpk_del else None
+            t_trpk = res.get('ttrpk_{}'.format(j))
+            trpk_off = (t_trpk - rpeak_times[j])*1000 if t_trpk else None
             valid_str = "V" if j in valid_rpk_del else "X"
             if bi_c is not None:
                 print("    beat {} [{}]: curr={:.5f} prev={:.5f} diff={:.5f} out={:.5f} f3={} off={}ms".format(
@@ -1119,7 +1149,7 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
                     bi_c, bi_p if bi_p else 0, (bi_c - bi_p) if bi_p else 0,
                     bi_o if bi_o else 0,
                     "{:.5f}".format(f3_cv) if f3_cv else "N/A",
-                    "{:.1f}".format(rpk_del_off) if rpk_del_off else "MISS"))
+                    "{:.1f}".format(trpk_off) if trpk_off else "MISS"))
 
         # F7 diagnostic: print Python ref vs circuit for each beat
         print("  F7 slope diagnostic (s14/s69 actual fall times):")
@@ -1165,8 +1195,8 @@ Xsym ecg_l0 rpeak_pulse_delayed f8_symmetry vdd vss qrs_symmetry
 
     fnames = {1:'F1:rr_ratio', 2:'F2:rr_asym', 3:'F3:bi_L0', 4:'F4:bi_L1',
               5:'F5:pwave', 6:'F6:width', 7:'F7:slope', 8:'F8:symmetry'}
-    triggers = {1:'ANALOG rpk+ANALOG rrc', 2:'ANALOG rpk+ANALOG rrc', 3:'DELAYED rpk', 4:'DELAYED rpk',
-                5:'ANALOG pw(S&H ref)', 6:'ANALOG wid', 7:'ANALOG s14/s69', 8:'DELAYED rpk'}
+    triggers = {1:'TRUE_RPK+ANALOG rrc', 2:'TRUE_RPK+ANALOG rrc', 3:'TRUE_RPK direct', 4:'TRUE_RPK direct',
+                5:'ANALOG pw(S&H ref)', 6:'ANALOG wid', 7:'ANALOG s14/s69', 8:'TRUE_RPK direct'}
     for fk in range(1, 9):
         status = "PASS" if rhos[fk] >= 0.95 else "WARN" if rhos[fk] >= 0.80 else "FAIL"
         extra = ""
