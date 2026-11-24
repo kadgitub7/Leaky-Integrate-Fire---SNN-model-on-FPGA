@@ -1,0 +1,80 @@
+* ============================================================
+* STANDALONE TESTBENCH: true_peak_detector.spice
+* ============================================================
+* Purpose: Verify basic operation with synthetic triangle peak.
+* Stimulus: Triangle ramp 0.35V -> 0.50V -> 0.35V (10ms up, 10ms down)
+*   with arm_signal HIGH during the peak region.
+* Expected: peak_detected goes HIGH after the true peak (10ms mark),
+*   with delay determined by detect threshold (~4mV).
+* Pass/fail: peak_detected rises between 10ms and 12ms.
+* ============================================================
+
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.003 gmin=1e-15 itl4=200
+
+* === SUPPLIES ===
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+* === BIAS GENERATOR ===
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
+
+* === STIMULUS: Synthetic Triangle Peak ===
+* Baseline 0.35V, ramp to 0.50V in 10ms, back to 0.35V in 10ms
+* Upslope = 15mV/ms, downslope = -15mV/ms (mild, like a broad QRS)
+Vecg ecg_in 0 PWL(
++ 0m     0.350
++ 2m     0.350
++ 12m    0.500
++ 22m    0.350
++ 30m    0.350
++ )
+
+* === ARM SIGNAL: HIGH during peak region ===
+* Arm goes HIGH at 5ms (before peak), LOW at 25ms (after peak passes)
+Varm arm_signal 0 PWL(
++ 0m     0
++ 4.9m   0
++ 5.0m   0.9
++ 24.9m  0.9
++ 25.0m  0
++ 30m    0
++ )
+
+* === DEVICE UNDER TEST ===
+Xtpd ecg_in arm_signal peak_detected vdd vss vbias true_peak_detector
+.ic V(xtpd.peak_hold)=0.3
+
+* === MEASUREMENTS ===
+* When does peak_detected rise?
+.meas tran t_detect WHEN V(peak_detected)=0.45 RISE=1
+
+* What is the peak_hold voltage at the true peak time (12ms)?
+.meas tran v_hold_at_peak FIND V(xtpd.peak_hold) AT=12m
+
+* What is the ECG at detect time?
+.meas tran v_ecg_at_detect FIND V(ecg_in) WHEN V(peak_detected)=0.45 RISE=1
+
+* Peak hold max value
+.meas tran v_hold_max MAX V(xtpd.peak_hold)
+
+* Detection latency relative to true peak (12ms)
+.meas tran detect_latency PARAM='t_detect - 12m'
+
+* === SIMULATION ===
+.tran 10u 30m UIC
+
+* === SUBCIRCUITS ===
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/true_peak_detector.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+
+.control
+run
+print t_detect v_hold_at_peak v_ecg_at_detect v_hold_max detect_latency
+wrdata _tb_tpd_results.txt V(ecg_in) V(xtpd.peak_hold) V(peak_detected) V(arm_signal)
+quit
+.endc
+
+.end

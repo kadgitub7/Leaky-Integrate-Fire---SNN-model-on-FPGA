@@ -1,0 +1,74 @@
+* COMPARATOR VERIFICATION: v6 source-follower level shifting
+* Purpose: Verify comparator polarity, switching, and headroom
+* across the full ECG voltage range (0.3V to 0.8V common mode).
+*
+* Test 1 (0-10ms): DC sweep — ramp ecg_in from 0.3V to 0.8V
+*   with peak_hold fixed at 0.55V. Verify track_level polarity.
+*
+* Test 2 (10-30ms): Tracking test at HIGH common mode.
+*   peak_hold fixed at 0.59V (ECG baseline). ECG triangle:
+*   0.59V → 0.74V → 0.59V. Verify comparator switches correctly
+*   at the real ECG operating point.
+*
+* Test 3 (30-50ms): Source follower linearity check.
+*   Ramp ecg_in 0.2V → 0.85V. Measure sf_ecg vs ecg_in.
+
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.003 gmin=1e-15 itl4=200
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
+
+* --- Test 1: DC polarity sweep (0-10ms) ---
+* ECG ramps from 0.3V to 0.8V; peak_hold held at 0.55V
+* --- Test 2: High-CM triangle (10-30ms) ---
+* ECG triangle 0.59→0.74→0.59; peak_hold at 0.59V
+* --- Test 3: SF linearity (30-50ms) ---
+* ECG ramps 0.2→0.85V; peak_hold at 0.55V
+
+Vecg ecg_in 0 PWL(
++ 0m    0.300
++ 10m   0.800
++ 10.1m 0.590
++ 15m   0.590
++ 20m   0.740
++ 25m   0.590
++ 30m   0.590
++ 30.1m 0.200
++ 50m   0.850
++ )
+
+* ARM always HIGH so charge_en depends only on track_level
+Varm arm_signal 0 0.9
+
+Xtpd ecg_in arm_signal peak_detected vdd vss vbias true_peak_detector
+
+* Fix peak_hold at 0.55V for tests 1 and 3 via strong voltage source
+* (overrides the internal cap and charge pump)
+Vph_force xtpd.peak_hold 0 PWL(
++ 0m    0.550
++ 10m   0.550
++ 10.1m 0.590
++ 30m   0.590
++ 30.1m 0.550
++ 50m   0.550
++ )
+
+.tran 1u 50m UIC
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/true_peak_detector.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+
+.control
+run
+
+* Save all key signals
+wrdata _tb_comp_sweep.txt V(ecg_in) V(xtpd.peak_hold) V(xtpd.sf_ecg) V(xtpd.sf_ph) V(xtpd.track_level) V(xtpd.detect_raw) V(xtpd.stg1_track) V(xtpd.tn1) V(xtpd.tt1) V(xtpd.charge_en) V(peak_detected)
+quit
+.endc
+
+.end

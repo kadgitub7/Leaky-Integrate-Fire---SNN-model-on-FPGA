@@ -1,0 +1,63 @@
+* DIAGNOSTIC: true_peak_detector v6 — single beat with waveform capture
+* Purpose: Verify v6 source follower fix on diagnostic triangle waveform
+* Baseline 0.35V, peak 0.74V at 10ms, ARM 7-15ms
+* Save key internal signals including source follower outputs
+
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.003 gmin=1e-15 itl4=200
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
+
+* Simplified ECG: triangle QRS like real Record 100
+* Baseline 0.35V, peak 0.74V at 10ms, QRS width ~3ms
+Vecg ecg_in 0 PWL(
++ 0m     0.350
++ 7m     0.350
++ 7.5m   0.400
++ 8.5m   0.550
++ 9.5m   0.700
++ 10m    0.740
++ 10.5m  0.700
++ 11.5m  0.550
++ 12.5m  0.400
++ 13m    0.350
++ 20m    0.350
++ )
+
+* ARM HIGH from 7ms (3ms before peak at 10ms) to 15ms
+Varm arm_signal 0 PWL(
++ 0m     0
++ 6.9m   0
++ 7.0m   0.9
++ 15m    0.9
++ 15.1m  0
++ 20m    0
++ )
+
+Xtpd ecg_in arm_signal peak_detected vdd vss vbias true_peak_detector
+.ic V(xtpd.peak_hold)=0.35
+
+.meas tran t_detect WHEN V(peak_detected)=0.45 RISE=1
+.meas tran v_hold_at_detect FIND V(xtpd.peak_hold) WHEN V(peak_detected)=0.45 RISE=1
+.meas tran v_ecg_at_detect FIND V(ecg_in) WHEN V(peak_detected)=0.45 RISE=1
+.meas tran detect_lat PARAM='t_detect - 10m'
+
+.tran 1u 20m UIC
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/true_peak_detector.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+
+.control
+run
+print t_detect v_hold_at_detect v_ecg_at_detect detect_lat
+
+* Save waveforms for analysis
+wrdata _tb_tpd_diag.txt V(ecg_in) V(xtpd.peak_hold) V(peak_detected) V(xtpd.track_level) V(xtpd.charge_en) V(xtpd.detect_raw) V(arm_signal) V(xtpd.sf_ecg) V(xtpd.sf_ph) V(xtpd.tn1) V(xtpd.tt1)
+quit
+.endc
+
+.end

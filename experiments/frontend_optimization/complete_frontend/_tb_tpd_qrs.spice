@@ -1,0 +1,100 @@
+* ============================================================
+* TESTBENCH: true_peak_detector with realistic QRS waveform
+* ============================================================
+* Purpose: Test with ECG-like QRS morphology (fast upslope, sharp peak).
+* Stimulus:
+*   Beat 1: Baseline 0.35V, QRS upslope 100mV/ms, peak 0.50V,
+*            downslope -50mV/ms, back to baseline.
+*   Beat 2: Same but different amplitude (0.48V peak).
+*   Beat 3: Same at 0.52V peak.
+* ARM signal: HIGH from upslope start to 50ms after peak.
+* Expected: peak_detected fires within 5ms of each true peak.
+* ============================================================
+
+.lib "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice" tt
+.option scale=1.0u method=gear reltol=0.003 gmin=1e-15 itl4=200
+
+Vdd vdd 0 0.9
+Vss vss 0 0
+
+Xbias vbias vref vdd vss bias_gen
+.ic V(xbias.iref)=0.3
+
+* === QRS-like waveform: 3 beats ===
+* Beat 1: peak at 11.5ms (upslope 1.5ms @ 100mV/ms, downslope 3ms @ -50mV/ms)
+* Beat 2: peak at 811.5ms (RR=800ms)
+* Beat 3: peak at 1511.5ms (RR=700ms)
+Vecg ecg_in 0 PWL(
++ 0m      0.350
++ 10m     0.350
++ 11.5m   0.500
++ 14.5m   0.350
++ 100m    0.350
++ 810m    0.350
++ 811.5m  0.480
++ 814.5m  0.350
++ 900m    0.350
++ 1510m   0.350
++ 1511.5m 0.520
++ 1514.5m 0.350
++ 1600m   0.350
++ )
+
+* === ARM SIGNAL: HIGH during each QRS window ===
+* ARM goes HIGH ~3ms before peak (simulating rpeak_level_held behavior)
+Varm arm_signal 0 PWL(
++ 0m      0
++ 8.0m    0
++ 8.1m    0.9
++ 60m     0.9
++ 60.1m   0
++ 808m    0
++ 808.1m  0.9
++ 860m    0.9
++ 860.1m  0
++ 1508m   0
++ 1508.1m 0.9
++ 1560m   0.9
++ 1560.1m 0
++ 1600m   0
++ )
+
+Xtpd ecg_in arm_signal peak_detected vdd vss vbias true_peak_detector
+.ic V(xtpd.peak_hold)=0.35
+
+* === MEASUREMENTS ===
+* Beat 1 (peak at 11.5ms)
+.meas tran t_det_1 WHEN V(peak_detected)=0.45 RISE=1
+.meas tran lat_1 PARAM='t_det_1 - 11.5m'
+.meas tran v_hold_peak_1 FIND V(xtpd.peak_hold) AT=11.5m
+
+* Beat 2 (peak at 811.5ms)
+.meas tran t_det_2 WHEN V(peak_detected)=0.45 RISE=2
+.meas tran lat_2 PARAM='t_det_2 - 811.5m'
+.meas tran v_hold_peak_2 FIND V(xtpd.peak_hold) AT=811.5m
+
+* Beat 3 (peak at 1511.5ms)
+.meas tran t_det_3 WHEN V(peak_detected)=0.45 RISE=3
+.meas tran lat_3 PARAM='t_det_3 - 1511.5m'
+.meas tran v_hold_peak_3 FIND V(xtpd.peak_hold) AT=1511.5m
+
+* Jitter between beats (latency variation)
+.meas tran jitter_12 PARAM='lat_2 - lat_1'
+.meas tran jitter_23 PARAM='lat_3 - lat_2'
+
+.tran 50u 1600m UIC
+
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/true_peak_detector.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/bias_gen.spice"
+.include "C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend/inverter.spice"
+
+.control
+run
+print t_det_1 lat_1 v_hold_peak_1
+print t_det_2 lat_2 v_hold_peak_2
+print t_det_3 lat_3 v_hold_peak_3
+print jitter_12 jitter_23
+quit
+.endc
+
+.end
