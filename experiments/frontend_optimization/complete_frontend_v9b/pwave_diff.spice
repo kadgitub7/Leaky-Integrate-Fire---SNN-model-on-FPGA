@@ -1,17 +1,23 @@
-* FEATURE 5: P-wave Signed Difference — v8 (hybrid loads ~3x)
+* FEATURE 5: P-wave Signed Difference — v10 (CMOS TG + hybrid loads ~3x)
 *
-* Proxy: ECG_L0@R-131ms - ECG_L0@R-206ms (signed, no abs)
+* Proxy: ECG_L0@R+0.80*RR - ECG_L0@R+0.75*RR (post-R, signed)
 * Hybrid load = mirror W=4 + diode W=1.5 → gain ≈ 3x
-* Expands 80mV → ~256mV
+* v8→v10: CMOS TG for full-range S&H at baseline ECG (~0.45V)
 *
-* Triggers: sample_base_trig (R-206ms), sample_peak_trig (R-131ms)
+* Triggers: sample_base_trig (R+0.75*RR), sample_peak_trig (R+0.80*RR)
 
 .subckt pwave_diff ecg_in sample_base_trig sample_peak_trig pw_out vdd vss vbias
 
-XMsb ecg_in sample_base_trig shb vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* CMOS TG for base sample (full conductance at mid-rail ~0.45V)
+Xinv_base sample_base_trig base_trig_bar vdd vss inverter_sub
+XMsb_n ecg_in sample_base_trig shb vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMsb_p ecg_in base_trig_bar shb vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCsb shb vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
-XMsp ecg_in sample_peak_trig shp vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* CMOS TG for peak sample (full conductance at mid-rail ~0.45V)
+Xinv_peak sample_peak_trig peak_trig_bar vdd vss inverter_sub
+XMsp_n ecg_in sample_peak_trig shp vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMsp_p ecg_in peak_trig_bar shp vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCsp shp vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
 XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1

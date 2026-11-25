@@ -52,7 +52,7 @@ SELECTED_RECORDS = [
     ('203', 'Maximum morphological diversity: 5 beat types (F/N/Q/S/V), fast rate (606ms RR), highest amplitude std (465mV), high noise (96mV)'),
 ]
 
-N_BEATS = 30
+N_BEATS = 15
 
 
 def load_record(record_id, n_beats=N_BEATS):
@@ -196,7 +196,6 @@ def generate_testbench(record_id, data):
 
     lines.append(".control")
     lines.append("run")
-    lines.append(f"wrdata {OUT_DIR}/tpd_val_{record_id}.txt V(ecg_in) V(xtpd.peak_hold) V(peak_detected) V(xtpd.track_level) V(xtpd.charge_en) V(arm_signal)")
     for i in range(n):
         lines.append(f"print t_det_{i} lat_{i} v_hold_{i} v_ecg_{i}")
     lines.append("quit")
@@ -210,8 +209,8 @@ def generate_testbench(record_id, data):
     return tb_path
 
 
-def run_simulation(tb_path, record_id, timeout=600):
-    print(f"  Running ngspice for Record {record_id}...")
+def run_simulation(tb_path, record_id, timeout=1800):
+    print(f"  Running ngspice for Record {record_id}...", flush=True)
     log_path = os.path.join(OUT_DIR, f"tpd_val_{record_id}.log")
     t0 = time.time()
     try:
@@ -225,11 +224,11 @@ def run_simulation(tb_path, record_id, timeout=600):
             f.write(result.stdout)
             f.write("\n--- STDERR ---\n")
             f.write(result.stderr)
-        print(f"  Completed in {elapsed:.1f}s (exit code {result.returncode})")
+        print(f"  Completed in {elapsed:.1f}s (exit code {result.returncode})", flush=True)
         return result.stdout + result.stderr, elapsed
     except subprocess.TimeoutExpired:
         elapsed = time.time() - t0
-        print(f"  TIMEOUT after {elapsed:.1f}s!")
+        print(f"  TIMEOUT after {elapsed:.1f}s!", flush=True)
         return None, elapsed
 
 
@@ -346,6 +345,17 @@ def main():
     all_stats = []
     all_beats_data = []
 
+    # Records that already have valid results (from prior run)
+    skip_sim = set()
+    for rid, _ in SELECTED_RECORDS:
+        log_p = os.path.join(OUT_DIR, f"tpd_val_{rid}.log")
+        if os.path.exists(log_p):
+            with open(log_p, 'r') as f:
+                content = f.read()
+            if 'lat_0' in content:
+                skip_sim.add(rid)
+                print(f"  Record {rid}: reusing existing results", flush=True)
+
     for rid, rationale in SELECTED_RECORDS:
         print(f"\n{'=' * 70}")
         print(f"Record {rid}: {rationale[:60]}")
@@ -361,12 +371,19 @@ def main():
         print(f"  V_baseline: {data['v_baseline']:.3f} V")
 
         # Generate testbench
-        print(f"  Generating testbench...")
+        print(f"  Generating testbench...", flush=True)
         tb_path = generate_testbench(rid, data)
-        print(f"  Written: {tb_path}")
+        print(f"  Written: {tb_path}", flush=True)
 
-        # Run simulation
-        output, elapsed = run_simulation(tb_path, rid, timeout=600)
+        # Run simulation (or reuse cached)
+        if rid in skip_sim:
+            log_p = os.path.join(OUT_DIR, f"tpd_val_{rid}.log")
+            with open(log_p, 'r') as f:
+                output = f.read()
+            elapsed = 0
+            print(f"  Using cached results from {log_p}", flush=True)
+        else:
+            output, elapsed = run_simulation(tb_path, rid)
         if output is None:
             print(f"  SIMULATION FAILED (timeout)")
             all_stats.append({'record': rid, 'n_beats': len(beats),

@@ -1,10 +1,10 @@
 * ============================================================
-* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v9 (diode loads)
+* FEATURES 3 & 4: Beat-to-beat Amplitude Instability — v10 (true prev copy)
 *
-* Captures ECG at R-peak, compares with previous via charge-share.
-* Diode-connected loads, gain ~1. With EWMA IC fix, span ~370mV
-* (26 levels) — sufficient without amplification.
-* v8→v9: reverted from hybrid (1.7x, 6% clip) to diode (1x, 0% clip)
+* Captures ECG at R-peak, copies to prev via charge-share.
+* v9→v10: Cesamp 150→350 for alpha 0.9→0.98 (true consecutive diff,
+*   matches MLP training definition: beat[R] - prev_beat[R])
+*   CMOS TG for copy switch (full conductance at mid-rail ~0.45V)
 *
 * Triggers: capture_trig (at R-peak), copy_trig (R+300ms)
 * One instance per lead (L0 and L1).
@@ -14,16 +14,25 @@
 
 .subckt beat_instability ecg_in capture_trig copy_trig instab_out vdd vss vbias
 
-* === CURRENT PEAK CAPTURE ===
-XMcurr ecg_in capture_trig curr_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* === COMPLEMENTARY CLOCKS FOR CMOS TGs ===
+Xinv_cap capture_trig capture_trig_bar vdd vss inverter_sub
+
+* === CURRENT PEAK CAPTURE (CMOS TG for full-range at R-peak ~0.45V) ===
+XMcurr_n ecg_in capture_trig curr_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMcurr_p ecg_in capture_trig_bar curr_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCcurr curr_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
-* === EWMA SAMPLE (for prev update) ===
-XMesamp ecg_in capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
-XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=150 L=150
+* === SAMPLE FOR PREV UPDATE (CMOS TG) ===
+* Cesamp=350×350 → alpha = Cesamp/(Cesamp+Cprev) ≈ 0.98
+* Residual from older beats: ~2% (vs 10% with 150×150)
+XMesamp_n ecg_in capture_trig esamp_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMesamp_p ecg_in capture_trig_bar esamp_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
+XCesamp esamp_node vss sky130_fd_pr__cap_mim_m3_1 W=350 L=350
 
-* === PREV UPDATE at copy_trig ===
-XMcopy esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* === PREV UPDATE at copy_trig (CMOS TG for full-range) ===
+Xinv_copy copy_trig copy_trig_bar vdd vss inverter_sub
+XMcopy_n esamp_node copy_trig prev_node vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMcopy_p esamp_node copy_trig_bar prev_node vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCprev prev_node vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
 
 * === DIFF PAIR: instability output (diode loads, gain ~1) ===

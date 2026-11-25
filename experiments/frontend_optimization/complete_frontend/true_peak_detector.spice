@@ -85,14 +85,28 @@ XMd7 detect_raw stg1_det vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 * === TRACK-LEVEL INVERSION (for detect blanking) ===
 Xinv_tl track_level track_level_bar vdd vss inverter_sub
 
-* === 3-INPUT AND: detect_raw AND arm_signal AND track_level_bar -> peak_detected ===
+* === 3-INPUT AND: detect_raw AND arm_signal AND track_level_bar -> det_pulse ===
 XMa_p1 nand_det detect_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_p2 nand_det arm_signal vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_p3 nand_det track_level_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_n1 nand_det detect_raw nand_mid2 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMa_n2 nand_mid2 arm_signal nand_mid3 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMa_n3 nand_mid3 track_level_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-XMa_i1 peak_detected nand_det vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMa_i2 peak_detected nand_det vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMa_i1 det_pulse nand_det vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMa_i2 det_pulse nand_det vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+
+* === SR LATCH: set by det_pulse, reset by arm_bar ===
+* Prevents duplicate triggers within one ARM window.
+* Once peak_detected goes HIGH, it stays latched until ARM drops.
+* NOR1: latch_qb = NOR(det_pulse, peak_detected)
+XMl1_pa l1_mid det_pulse vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl1_pb latch_qb peak_detected l1_mid vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl1_na latch_qb det_pulse vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMl1_nb latch_qb peak_detected vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+* NOR2: peak_detected = NOR(arm_bar, latch_qb)
+XMl2_pa l2_mid arm_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl2_pb peak_detected latch_qb l2_mid vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl2_na peak_detected arm_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMl2_nb peak_detected latch_qb vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 
 .ends true_peak_detector

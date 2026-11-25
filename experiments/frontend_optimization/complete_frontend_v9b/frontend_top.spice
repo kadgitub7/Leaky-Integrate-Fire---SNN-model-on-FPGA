@@ -4,16 +4,17 @@
 *
 * SKY130 130nm CMOS, VDD=0.9V, subthreshold operation
 *
-* This is the COMPLETE frontend as it would be fabricated.
-* Signal chain: Electrodes → IA → R-peak Detect → Trigger Gen
-*              → Feature Extraction → 8 Analog Outputs
+* Signal chain: Electrodes → IA → R-peak Detect → True Peak Det
+*              → Trigger Gen → Feature Extraction → 8 Analog Outputs
 *
 * === BLOCK DIAGRAM ===
 *
-*  Electrode L0 ──→ [IA_L0] ──→ ecg_amp_l0 ──┬→ [R-peak Det] → rpeak_pulse
+*  Electrode L0 ──→ [IA_L0] ──→ ecg_amp_l0 ──┬→ [R-peak Det] → rpeak_level
 *  Electrode L1 ──→ [IA_L1] ──→ ecg_amp_l1 ─┐│                     │
-*                                             ││    ┌────────────────┘
-*  [Bias Gen] → vbias, vref                  ││    ↓
+*                                             ││  [R-peak Hold] → rpeak_level_held (ARM)
+*  [Bias Gen] → vbias, vref                  ││                     │
+*                                             ││  [True Peak Det] → true_rpeak_pulse
+*                                             ││                     │
 *                                             ││  [Delay Timer] → post-R triggers
 *                                             ││  [P-wave Pred] → pre-R triggers
 *                                             ││    │
@@ -28,7 +29,9 @@
 *
 *  1. Bias Generator          — 1× (vbias + vref generation)
 *  2. Instrumentation Amps    — 2× (one per ECG lead)
-*  3. R-peak Detector         — 1× (comparator on IA_L0 output)
+*  3. R-peak Detector         — 1× (threshold comparator on IA_L0)
+*  3b. R-peak Hold            — 1× (debounce + hold ~300ms ARM window)
+*  3c. True Peak Detector     — 1× (tracks actual R-peak apex, SR latch output)
 *  4. Post-R Delay Timer      — 1× (5 comparators + timer cap)
 *  5. P-wave Predictor        — 1× (2 source followers + 2 comparators)
 *  6. RR Timing (F1,F2)       — 1× (cap timer + EWMA + 2 diff pairs)
@@ -39,12 +42,14 @@
 * 11. QRS Slope (F7)          — 1× (2 S&H + diff pair, Lead 0)
 * 12. QRS Symmetry (F8)       — 1× (passive S&H, Lead 0)
 *
-* Total: ~95 MOSFETs, ~25 MIM caps
+* Total: ~115 MOSFETs, ~27 MIM caps
 * ============================================================
 
 .include "bias_gen.spice"
 .include "ia.spice"
 .include "rpeak_detector.spice"
+.include "rpeak_hold.spice"
+.include "true_peak_detector.spice"
 .include "delay_timer.spice"
 .include "pwave_predictor.spice"
 .include "pulse_gen.spice"
@@ -97,17 +102,21 @@ Xbias_gen vbias vref vdd vss bias_gen
 Xia_l0 elec_l0_p elec_l0_n ecg_amp_l0 vdd vss vbias vref ia
 Xia_l1 elec_l1_p elec_l1_n ecg_amp_l1 vdd vss vbias vref ia
 
-* === 3. R-PEAK DETECTOR ===
-* Comparator output is a level (HIGH during QRS); pulse_gen converts to brief pulse
+* === 3. R-PEAK DETECTION CHAIN ===
+* Step 1: Threshold comparator fires on QRS upslope
 Xrpeak ecg_amp_l0 rpeak_threshold rpeak_level vdd vss vbias rpeak_detector
-Xpg_rpk rpeak_level rpeak_pulse vdd vss vbias pulse_gen
+* Step 2: Hold circuit extends rpeak_level to ~300ms ARM window
+Xrpk_hold rpeak_level rpeak_level_held vdd vss vbias rpeak_hold
+* Step 3: True peak detector finds actual R-peak apex within ARM window
+* SR latch on output prevents duplicate triggers on complex morphologies
+Xtpd ecg_amp_l0 rpeak_level_held peak_detected vdd vss vbias true_peak_detector
+* Step 4: pulse_gen converts peak_detected level to brief trigger pulse
+Xpg_rpk peak_detected true_rpeak_pulse vdd vss vbias pulse_gen
 
 * === 4. POST-R DELAY TIMER ===
-* Generates: trig_s14, trig_s69, trig_wid, trig_bi_copy, trig_rr_copy
-* Pin order: rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
-*            trig_rpk_delayed sf_out vdd vss vbias_delay
-*            vth_14_fast vth_69 vth_83 vth_300 vth_10 vth_rpk_del
-Xdelay rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
+* Now precharges from true_rpeak_pulse (at true peak, ~5ms after annotation)
+* All thresholds recalibrated for new rpk_drop ≈ 5ms vs old 0.5ms
+Xdelay true_rpeak_pulse trig_s14 trig_s69 trig_wid trig_bi_copy trig_rr_copy
 + trig_rpk_delayed sf_delay_out
 + vdd vss vbias vth_14 vth_69 vth_83 vth_300 vth_10 vth_rpk_del delay_timer
 
@@ -126,10 +135,10 @@ Xpg_bi  bi_sharp pulse_bi vdd vss vbias pulse_gen
 Xpg_rr  rr_sharp pulse_rr_copy vdd vss vbias pulse_gen
 
 * === 6. FEATURE EXTRACTION — F1 & F2: RR Timing ===
-* trig_rr_cap comes from P-wave predictor (pulsed via pulse_gen)
-* rpeak_pulse serves as timer precharge (already a natural pulse)
+* pulse_rr_cap comes from rr_cap comparator via edge_buffer (level, not pulsed)
+* true_rpeak_pulse serves as timer precharge (peak-to-peak interval)
 * pulse_rr_copy from delay timer (R+10ms, EWMA charge-sharing)
-Xrr ecg_amp_l0 pulse_rr_cap rpeak_pulse pulse_rr_copy
+Xrr ecg_amp_l0 pulse_rr_cap true_rpeak_pulse pulse_rr_copy
 +   f1_rr_ratio f2_rr_asym rr_timer_node rr_ewma_node vdd vss vbias rr_timing
 
 * === 7. P-WAVE PREDICTOR ===
@@ -142,15 +151,17 @@ Xpw_pred rr_timer_node rr_ewma_node trig_pw_base trig_pw_peak trig_rr_cap
 * Pulse generators for pwave predictor outputs
 Xpg_pwb trig_pw_base pulse_pw_base vdd vss vbias pulse_gen
 Xpg_pwp trig_pw_peak pulse_pw_peak vdd vss vbias pulse_gen
-Xpg_rrc trig_rr_cap pulse_rr_cap vdd vss vbias pulse_gen
+* rr_cap: edge_buffer only (no pulse_gen) — rr_cap needs ~55ms window for SF S&H settling
+* trig_rr_cap stays HIGH from threshold crossing (~R-55ms) until timer reset at next R-peak
+Xeb_rrc_lvl trig_rr_cap pulse_rr_cap vdd vss edge_buffer
 
 * === 8. REMAINING FEATURE EXTRACTION CIRCUITS ===
 
-* F3: Beat Instability — Lead 0
-Xbi_l0 ecg_amp_l0 rpeak_pulse pulse_bi f3_bi_l0 vdd vss vbias beat_instability
+* F3: Beat Instability — Lead 0 (captures at true peak, slope≈0)
+Xbi_l0 ecg_amp_l0 true_rpeak_pulse pulse_bi f3_bi_l0 vdd vss vbias beat_instability
 
-* F4: Beat Instability — Lead 1
-Xbi_l1 ecg_amp_l1 rpeak_pulse pulse_bi f4_bi_l1 vdd vss vbias beat_instability
+* F4: Beat Instability — Lead 1 (captures at true peak, slope≈0)
+Xbi_l1 ecg_amp_l1 true_rpeak_pulse pulse_bi f4_bi_l1 vdd vss vbias beat_instability
 
 * F5: P-wave Signed Difference (Lead 0)
 Xpwave ecg_amp_l0 pulse_pw_base pulse_pw_peak f5_pwave vdd vss vbias pwave_diff
@@ -161,7 +172,7 @@ Xwidth ecg_amp_l0 pulse_wid f6_width vdd vss qrs_width
 * F7: QRS Slope (Lead 0)
 Xslope ecg_amp_l0 pulse_s14 pulse_s69 f7_slope vdd vss vbias qrs_slope
 
-* F8: QRS Symmetry (Lead 0)
-Xsym ecg_amp_l0 rpeak_pulse f8_symmetry vdd vss qrs_symmetry
+* F8: QRS Symmetry (Lead 0, captures at true peak)
+Xsym ecg_amp_l0 true_rpeak_pulse f8_symmetry vdd vss qrs_symmetry
 
 .ends asic_frontend

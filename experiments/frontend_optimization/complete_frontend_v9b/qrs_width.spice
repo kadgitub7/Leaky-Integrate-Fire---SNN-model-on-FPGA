@@ -1,13 +1,16 @@
-* FEATURE 6: QRS Width — Tail Sample
+* FEATURE 6: QRS Width — Tail Sample — v10 (CMOS TG)
 *
-* Proxy: ECG at R+83ms. Narrow QRS → baseline, Wide QRS → elevated/depressed.
-* Single NFET S&H captures ECG after QRS complex.
+* Proxy: ECG at R+28ms. Narrow QRS → baseline, Wide QRS → elevated/depressed.
+* v9→v10: CMOS TG for full-range S&H
 *
-* Trigger: sample_trig (R+83ms)
+* Trigger: sample_trig (R+28ms)
 
 .subckt qrs_width ecg_in sample_trig width_out vdd vss
 
-XMsh ecg_in sample_trig width_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* CMOS TG for full-range capture
+Xinv_wid sample_trig wid_trig_bar vdd vss inverter_sub
+XMsh_n ecg_in sample_trig width_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMsh_p ecg_in wid_trig_bar width_out vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCsh width_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
 .ends qrs_width

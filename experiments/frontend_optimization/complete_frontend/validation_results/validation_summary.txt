@@ -1,0 +1,7 @@
+v6 True Peak Detector Multi-Record Validation
+Date: 2026-11-24 12:29:07
+Records: 100, 232, 116, 113, 203
+Beats per record: 15
+Total: 75/75 detected (100.0%)
+Latency: mean=-32.98ms, std=155.59ms
+Decision: PASS

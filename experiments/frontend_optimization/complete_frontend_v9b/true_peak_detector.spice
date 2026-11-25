@@ -1,18 +1,23 @@
 * ============================================================
-* TRUE PEAK DETECTOR v4 — Direct pass-gate tracking
+* TRUE PEAK DETECTOR v6 — Source follower input level shifting
 * ============================================================
 *
-* v3d FAILURE (measured 2026-11-23):
-*   Charge pump at 16.5mV/ms could not track QRS (100mV/ms).
-*   peak_hold lagged 390mV behind ECG. Latency: 12ms (need <3ms).
+* v5d FAILURE on real ECG (0/8 beats detected):
+*   NFET diff pair comparators collapse when inputs exceed ~0.65V.
+*   Real ECG crossover at ~0.74V (baseline 0.59V, peak 0.74V) causes
+*   diff pair NFET Vds < Vdsat (tn1-tt1 = 0.55-0.39 = 0.16V at 0.74V
+*   CM; drops to 0.09V at 0.80V CM → triode). Tracking comparator
+*   locks HIGH, pump runs peak_hold to VDD rail.
+*   Diagnostic test passed only because baseline=0.35V put crossover
+*   at 0.52V where NFET diff pair has 0.40V Vds headroom.
 *
-* v4: Replace charge pump with NFET pass gate (source-follower).
-*   peak_hold tracks ecg_in directly through the pass device.
-*   Tracking speed: RC limited, not current-limited.
-*   2pF hold cap: charges 400mV in ~1us through pass device.
-*   After peak: pass gate OFF, peak_hold holds (droop ~1mV/ms).
-*   Detect comparator fires when ECG drops 4mV below peak_hold.
-*   Expected latency: <1ms. Expected jitter: <0.5ms p2p.
+* v6 FIX: NFET source followers before both comparators.
+*   Each follower: drain=VDD, gate=input, source=output, with matched
+*   vbias-controlled current source (L=2 W=4, same as diff pair tail).
+*   Output ≈ input - Vgs ≈ input - 0.38V (subthreshold at ~660pA).
+*   At ecg=0.74V: sf_ecg ≈ 0.36V → diff pair Vds ≈ 0.40V (safe).
+*   Matched followers preserve differential signal; Vgs offset cancels.
+*   Adds 4 transistors (2 followers + 2 bias NFETs).
 *
 * Pin: ecg_in arm_signal peak_detected vdd vss vbias
 * ============================================================
@@ -22,10 +27,20 @@
 * === PEAK HOLD CAP (2pF, 32x32 MIM) ===
 XChold peak_hold vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
+* === SOURCE FOLLOWERS for comparator input level shifting ===
+* Shift both inputs down by ~Vgs (~0.38V), keeping diff signal intact.
+* Prevents NFET diff pair collapse when inputs approach VDD.
+* Both followers use L=2 W=4 (matched to each other and diff pair).
+XMsf_e vdd ecg_in sf_ecg vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMsf_eb sf_ecg vbias vss vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMsf_p vdd peak_hold sf_ph vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMsf_pb sf_ph vbias vss vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+
 * === TRACKING COMPARATOR (tail ~660pA, L=2 W=4) ===
-* Fires HIGH when ecg_in > peak_hold + ~2.6mV
-XMt1 tn1 peak_hold tt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4.3 nf=1
-XMt2 stg1_track ecg_in tt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+* Fires HIGH when sf_ecg > sf_ph + ~2.6mV (offset from W mismatch)
+* Inputs level-shifted: sf_ph ≈ peak_hold - 0.38V, sf_ecg ≈ ecg_in - 0.38V
+XMt1 tn1 sf_ph tt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4.3 nf=1
+XMt2 stg1_track sf_ecg tt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
 XMt3 tn1 tn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XMt4 stg1_track tn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XMt5 tt1 vbias vss vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
@@ -40,26 +55,27 @@ XMg_n2 nand_mid1 arm_signal vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMg_i1 charge_en nand_trk vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMg_i2 charge_en nand_trk vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 
-* === PASS GATE: PMOS for rail-to-rail tracking ===
-* PMOS: drain=peak_hold, gate=charge_en_bar, source=ecg_in, bulk=vdd
-* When charge_en=HIGH → charge_en_bar=LOW → |Vgs|=ecg_in → ON
-* peak_hold tracks ecg_in upward (charge flows drain→source→cap)
-* When charge_en=LOW → charge_en_bar=VDD → |Vgs|≈ecg_in-VDD<Vtp → OFF
-* Bulk tied to VDD: keeps N-well at highest potential, both junctions
-* reverse-biased. Body effect increases |Vtp| slightly but PMOS
-* still has Vsg=0.3-0.75V >> |Vtp|≈0.35V → strong conduction.
+* === CHARGE PUMP: unidirectional ~80pA into peak_hold ===
+* v5d: L=20 output PMOS for correct current scaling.
+* Target 80pA / 2pF = 40mV/ms << 100mV/ms QRS upslope.
+XMcp_nb cp_bias vbias vss vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMcp_pd cp_bias cp_bias vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMcp_po cp_node cp_bias vdd vdd sky130_fd_pr__pfet_01v8 L=20 W=0.5 nf=1
+* PMOS switch: ON when charge_en HIGH (charge_en_bar LOW)
 Xinv_ce charge_en charge_en_bar vdd vss inverter_sub
-XMpass peak_hold charge_en_bar ecg_in vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMcp_sw cp_node charge_en_bar peak_hold vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
 
-* === GATED DISCHARGE ===
-* When arm_signal=LOW: discharge peak_hold toward vbias (~0.3V)
+* === ECG PRECHARGE (replaces vbias discharge) ===
+* When arm_signal=LOW: peak_hold tracks ecg_in through NFET.
+* When arm_signal=HIGH: NFET OFF, cap holds.
 Xinv_arm arm_signal arm_bar vdd vss inverter_sub
-XMdis peak_hold arm_bar vbias vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMdis peak_hold arm_bar ecg_in vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 
-* === PEAK-DETECT COMPARATOR (tail ~660pA, ~3.8mV threshold) ===
-* Fires HIGH when peak_hold > ecg_in + 3.8mV
-XMd1 dn1 ecg_in dt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4.44 nf=1
-XMd2 stg1_det peak_hold dt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+* === PEAK-DETECT COMPARATOR (tail ~660pA, ~15mV threshold) ===
+* Fires HIGH when sf_ph > sf_ecg + ~15mV (i.e. peak_hold > ecg_in + ~15mV)
+* Uses same level-shifted inputs as tracking comparator.
+XMd1 dn1 sf_ecg dt1 vss sky130_fd_pr__nfet_01v8 L=2 W=6 nf=1
+XMd2 stg1_det sf_ph dt1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
 XMd3 dn1 dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XMd4 stg1_det dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
 XMd5 dt1 vbias vss vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
@@ -67,20 +83,30 @@ XMd6 detect_raw stg1_det vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XMd7 detect_raw stg1_det vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
 
 * === TRACK-LEVEL INVERSION (for detect blanking) ===
-* Suppress detection while tracking is active (track_level HIGH).
-* After ECG drops below peak_hold, track_level goes LOW, enabling detect.
 Xinv_tl track_level track_level_bar vdd vss inverter_sub
 
-* === 3-INPUT AND: detect_raw AND arm_signal AND track_level_bar -> peak_detected ===
-* Detect is blanked during active tracking to prevent false triggers from
-* the residual tracking lag (~0.7mV) fooling the low-bandwidth comparator.
+* === 3-INPUT AND: detect_raw AND arm_signal AND track_level_bar -> det_pulse ===
 XMa_p1 nand_det detect_raw vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_p2 nand_det arm_signal vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_p3 nand_det track_level_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
 XMa_n1 nand_det detect_raw nand_mid2 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMa_n2 nand_mid2 arm_signal nand_mid3 vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 XMa_n3 nand_mid3 track_level_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
-XMa_i1 peak_detected nand_det vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
-XMa_i2 peak_detected nand_det vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMa_i1 det_pulse nand_det vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=2 nf=1
+XMa_i2 det_pulse nand_det vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+
+* === SR LATCH: set by det_pulse, reset by arm_bar ===
+* Prevents duplicate triggers within one ARM window.
+* Once peak_detected goes HIGH, it stays latched until ARM drops.
+* NOR1: latch_qb = NOR(det_pulse, peak_detected)
+XMl1_pa l1_mid det_pulse vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl1_pb latch_qb peak_detected l1_mid vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl1_na latch_qb det_pulse vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMl1_nb latch_qb peak_detected vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+* NOR2: peak_detected = NOR(arm_bar, latch_qb)
+XMl2_pa l2_mid arm_bar vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl2_pb peak_detected latch_qb l2_mid vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMl2_na peak_detected arm_bar vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
+XMl2_nb peak_detected latch_qb vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=1 nf=1
 
 .ends true_peak_detector

@@ -1,17 +1,22 @@
-* FEATURE 7: QRS Slope — v9 (diode loads)
+* FEATURE 7: QRS Slope — v10 (CMOS TG + diode loads)
 *
 * Proxy: ECG@R+14ms - ECG@R+69ms (signed). Captures post-R slope asymmetry.
-* Diode-connected loads, gain ~1. v8 hybrid (2x) caused 55.8% clipping.
-* v8→v9: reverted to diode loads for 0% clipping.
+* v9→v10: CMOS TG for full-range S&H at post-QRS ECG (~0.4-0.45V)
 *
 * Triggers: sample14_trig (R+14ms), sample69_trig (R+69ms)
 
 .subckt qrs_slope ecg_in sample14_trig sample69_trig slope_out vdd vss vbias
 
-XMs14 ecg_in sample14_trig sh14 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* CMOS TG for R+14ms sample (full conductance at mid-rail)
+Xinv_s14 sample14_trig s14_trig_bar vdd vss inverter_sub
+XMs14_n ecg_in sample14_trig sh14 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMs14_p ecg_in s14_trig_bar sh14 vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCs14 sh14 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
-XMs69 ecg_in sample69_trig sh69 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+* CMOS TG for R+69ms sample (full conductance at mid-rail)
+Xinv_s69 sample69_trig s69_trig_bar vdd vss inverter_sub
+XMs69_n ecg_in sample69_trig sh69 vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMs69_p ecg_in s69_trig_bar sh69 vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
 XCs69 sh69 vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
 
 XMd_tail dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
