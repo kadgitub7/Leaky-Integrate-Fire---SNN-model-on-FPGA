@@ -5,7 +5,7 @@ Compares all 8 features across three computation paths.
 Changes from final_e2e_test.py:
   - EWMA_ALPHA = 0.015 (matches SPICE rr_timing Cewma=330pF)
   - F5 (pwave): post-R definition: ECG[rpk + 0.80*avg_rr] - ECG[rpk + 0.75*avg_rr]
-  - rpk_drop = 5.0ms (true peak detector mean latency)
+  - rpk_drop = -3.0ms (v7g measured: fires ~3ms before annotation)
   - Analog chain: rpeak_detector -> rpeak_hold -> true_peak_detector -> pulse_gen
   - Pwave thresholds: post-R: 0.75*EWMA_RR and 0.80*EWMA_RR
   - trig_rpk_delayed removed (true peak replaces it)
@@ -250,7 +250,7 @@ def compute_thresholds(cal):
     ft_t = [t for t, v in zip(cal['ft_times_ms'], cal['ft_sf']) if v is not None]
     ft_v = [v for v in cal['ft_sf'] if v is not None]
 
-    rpk_drop = 5.0    # ms: true peak detector mean latency
+    rpk_drop = -3.0   # ms: v7g measured mean (fires ~3ms BEFORE annotation)
     pipe_main = 3.5   # ms: edge_buffer -> pulse_gen pipeline
     pipe_fast = 1.0   # ms: fast timer, fast resolve
 
@@ -925,7 +925,7 @@ def main():
     print("=" * 70)
     print(f"  EWMA_ALPHA = {EWMA_ALPHA} (matches SPICE rr_timing)")
     print(f"  F5 = post-R pwave: ECG[R+0.80*EWMA_RR] - ECG[R+0.75*EWMA_RR]")
-    print(f"  rpk_drop = 5.0ms (true peak detector)")
+    print(f"  rpk_drop = -3.0ms (v7g measured)")
     print(f"  Records: {', '.join(records)}")
     print(f"  Modes: {'Ideal' if run_ideal else ''} {'Analog' if run_analog else ''}")
     print()
