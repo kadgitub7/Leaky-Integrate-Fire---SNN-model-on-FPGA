@@ -1,0 +1,56 @@
+* Quick test of ac_diff stage in isolation
+* Synthetic ECG: triangle pulse 100mV above 0.300V baseline
+
+.lib C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice tt
+
+.include C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rpeak_detector_v2.spice
+
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+
+Vdd vdd 0 0.9
+Vss vss 0 0.0
+Vbias vbias 0 0.300
+
+* Synthetic ECG: baseline 0.300V, triangle pulse at t=0.5s
+* Pulse: 20ms ramp up to 0.400V, 20ms ramp down
+Vecg ecg_in 0 PWL(
++ 0.0 0.300 0.48 0.300
++ 0.49 0.350 0.50 0.400
++ 0.51 0.350 0.52 0.300
++ 1.0 0.300
++ 1.28 0.300 1.29 0.350 1.30 0.400 1.31 0.350 1.32 0.300
++ 2.0 0.300
++ )
+
+* DUT: ac_diff only (no envelope detector load)
+Xac ecg_in diff_out vdd vss vbias ac_diff
+
+* Also test with a 100pF load cap (simulating hold cap)
+* CL diff_loaded vss 100p
+* Xac2 ecg_in diff_loaded vdd vss vbias ac_diff
+
+.ic v(diff_out)=0.300
+
+.tran 10u 2.0 0 10u
+
+.meas tran diff_pk1 max v(diff_out) from=0.45 to=0.6
+.meas tran diff_pk2 max v(diff_out) from=1.25 to=1.4
+.meas tran diff_base find v(diff_out) at=0.40
+.meas tran diff_at_0_7 find v(diff_out) at=0.70
+
+.save v(ecg_in) v(diff_out) v(xac.bn1)
+
+.control
+set filetype=ascii
+run
+
+echo ""
+echo "=== AC_DIFF ISOLATION TEST ==="
+
+wrdata acdiff_test.txt v(ecg_in) v(diff_out)
+
+echo "=== Done ==="
+quit
+.endc
+
+.end

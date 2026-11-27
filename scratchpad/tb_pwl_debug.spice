@@ -1,0 +1,14 @@
+* Quick test of PWL file reading — try different syntax
+V1 n1 0 PWL file = test_pwl_small.txt
+R1 n1 0 1Meg
+
+.tran 10m 1
+
+.control
+run
+meas tran vat05 find v(n1) at=0.5
+print vat05
+quit
+.endc
+
+.end
