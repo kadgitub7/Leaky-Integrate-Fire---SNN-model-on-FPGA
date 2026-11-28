@@ -1,0 +1,387 @@
+* ============================================================================
+* R-PEAK DETECTOR V4 — Pan-Tompkins-Inspired at 0.9V (SKY130)
+* ============================================================================
+* Architecture: ECG → HPF → LPF → d/dt → half-wave rect → MWI → detect
+*
+* All blocks: SKY130, VDD=0.9V, subthreshold, proven OTA topologies.
+* VCM = vbias = 0.40V
+*
+* Design methodology: each stage uses our validated 5T OTA cores
+* at 0.9V, NOT pseudo-resistors (non-functional at 0.9V).
+* ============================================================================
+
+
+* ============================================================
+* STAGE 1: High-Pass Filter (~5Hz)
+* ============================================================
+* AC coupling: series MIM cap passes signal, OTA slowly restores
+* DC to vbias. HPF corner = gm_restore / (2π × C_ac)
+*
+* C_ac = 50pF (158×158 MIM)
+* Tail L=10 W=0.42 → ~80pA → gm ≈ 1.2nS
+* f_HP = 1.2nS / (2π × 50pF) ≈ 3.8Hz
+*
+* C_load = 5pF stabilizes output.
+* ============================================================
+
+.subckt hpf_5hz vin vout vdd vss vbias
+
+XCac vin vout sky130_fd_pr__cap_mim_m3_1 W=158 L=158
+
+* DC restore OTA: pulls vout toward vbias
+* vbias on diode side → output follows vbias at DC
+XMh1 hn1 vbias htail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMh2 vout vout htail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMh3 hn1 hn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMh4 vout hn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMh5 htail vbias vss vss sky130_fd_pr__nfet_01v8 L=10 W=0.42 nf=1
+
+XChload vout vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+.ends hpf_5hz
+
+
+* ============================================================
+* STAGE 2: Low-Pass Filter (~25Hz)
+* ============================================================
+* OTA follower: input on diode side, output on mirror side.
+* f_LP = gm / (2π × C_out)
+*
+* Tail L=4 W=0.84 → ~1nA → gm ≈ 15nS
+* C_out = 100pF → f_LP = 15n/(2π×100p) ≈ 24Hz
+* ============================================================
+
+.subckt lpf_15hz vin vout vdd vss vbias
+
+XMl1 ln1 vin ltail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMl2 vout vout ltail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMl3 ln1 ln1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMl4 vout ln1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMl5 ltail vbias vss vss sky130_fd_pr__nfet_01v8 L=4 W=0.84 nf=1
+
+XClout vout vss sky130_fd_pr__cap_mim_m3_1 W=224 L=224
+
+.ends lpf_15hz
+
+
+* ============================================================
+* STAGE 3: Capacitive Differentiator
+* ============================================================
+* Series cap converts dV/dt to charge injection on diff_node.
+* OTA bias restore holds diff_node at vbias at DC.
+*
+* C_diff = 50pF (158×158 MIM)
+* C_load = 2pF (32×32 MIM)
+* Cap divider gain: 50/(50+2) = 0.96
+*
+* Bias restore OTA: very slow to not attenuate QRS
+* Tail L=20 W=0.42 → ~50pA → gm ≈ 740pS
+* f_low = 740p/(2π×52p) ≈ 2.3Hz
+* ============================================================
+
+.subckt differentiator vin diff_out vdd vss vbias
+
+XCdiff vin diff_out sky130_fd_pr__cap_mim_m3_1 W=158 L=158
+
+* Bias restore OTA
+XMd1 dn1 vbias dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd2 diff_out diff_out dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd3 dn1 dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd4 diff_out dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd5 dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+
+XCdload diff_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends differentiator
+
+
+* ============================================================
+* STAGE 4: Half-Wave Rectifier (Leaky Peak Detector)
+* ============================================================
+* Tracks positive peaks of the differentiator output.
+*
+* Comparator: diff_in on DIODE side (W=2.0), rect_out on MIRROR (W=2.5)
+*   offset = nVt × ln(W_mirror/W_diode) = 34 × ln(2.1/2.0) = 1.6mV
+*   When diff_in > rect_out + 1.6mV: rcomp RISES → NFET pass gate ON
+*
+* Key: NFET pass gate driven DIRECTLY by rcomp — no inverter.
+*   rcomp load: ~13fF (OTA drains 3fF + NFET gate 10fF)
+*   Switching time: 13fF × 0.9V / 100pA ≈ 117μs
+*
+* Discharge: OTA pulls rect_out back to vbias between beats.
+*   Tail L=40 W=0.42 → ~25pA, C_rect = 20pF → tau ≈ 54ms
+* ============================================================
+
+.subckt half_rect diff_in rect_out vdd vss vbias
+
+* Comparator: diff_in (diode, W=2.0) vs rect_out (mirror, W=2.5)
+* When diff_in > rect_out + 1.6mV: diode side dominates → rcomp RISES
+* When diff_in < rect_out + 1.6mV: mirror dominates → rcomp FALLS
+XMr1 rn1 diff_in rtail vss sky130_fd_pr__nfet_01v8 L=4 W=2.0 nf=1
+XMr2 rcomp rect_out rtail vss sky130_fd_pr__nfet_01v8 L=4 W=2.1 nf=1
+XMr3 rn1 rn1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMr4 rcomp rn1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMr5 rtail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+* NFET pass gate: driven directly by rcomp (no inverter)
+* rcomp HIGH (~0.8V) → Vgs ≈ 0.4V → subthreshold ~100nA → charges rect_out
+* rcomp LOW (~0.1V) → Vgs ≈ -0.3V → OFF
+XMpass diff_in rcomp rect_out vss sky130_fd_pr__nfet_01v8 L=0.5 W=4 nf=1
+
+* Hold cap: 10pF (71x71 MIM) — smaller for faster peak capture
+XCrect rect_out vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* Discharge OTA: pulls rect_out back toward vbias
+* Tail L=60 W=0.42 → ~15pA, C=10pF → tau ≈ 45ms
+XMrd1 rdn1 vbias rdtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMrd2 rect_out rect_out rdtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMrd3 rdn1 rdn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMrd4 rect_out rdn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMrd5 rdtail vbias vss vss sky130_fd_pr__nfet_01v8 L=60 W=0.42 nf=1
+
+.ends half_rect
+
+
+* ============================================================
+* STAGE 5: Moving-Window Integrator (~30ms)
+* ============================================================
+* OTA follower: captures QRS energy envelope.
+*
+* tau = C/gm. C=22pF, gm≈740pS → tau≈30ms
+* Matches Python 30ms smoothing window.
+* ============================================================
+
+.subckt mwi_150ms vin vout vdd vss vbias
+
+XMm1 mn1 vin mtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMm2 vout vout mtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMm3 mn1 mn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMm4 vout mn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMm5 mtail vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+
+XCmwi vout vss sky130_fd_pr__cap_mim_m3_1 W=105 L=105
+
+.ends mwi_150ms
+
+
+* ============================================================
+* STAGE 6: Noise Gate (env > avg + offset)
+* ============================================================
+* Comparator with additive offset detects when the MWI output
+* exceeds the slow average by a significant margin.
+*
+* offset = nVt × ln(W_avg/W_mwi) = 34 × ln(2.1/2.0) = 1.6mV
+* ============================================================
+
+.subckt noise_gate_v4 mwi_out slow_avg gate_out vdd vss vbias
+
+XMng1 ng_n1 slow_avg ng_tail vss sky130_fd_pr__nfet_01v8 L=4 W=2.1 nf=1
+XMng2 ng_out mwi_out ng_tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMng3 ng_n1 ng_n1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMng4 ng_out ng_n1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMng5 ng_tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+XMng6 gate_out ng_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
+XMng7 gate_out ng_out vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.ends noise_gate_v4
+
+
+* ============================================================
+* STAGE 7: Slow Average (tau = 1.5s)
+* ============================================================
+* OTA follower tracking the rectified signal with ultra-low gm.
+* Provides baseline estimate for noise gating.
+*
+* tau = C/gm = 100pF / (I_tail/(2nVt))
+* For tau=1.5s: gm = 67pS → I_tail = 4.5pA
+* Tail: L=100 W=0.42
+* ============================================================
+
+.subckt slow_avg_v4 vin vout vdd vss vbias
+
+XMa1 an1 vin atail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa2 vout vout atail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa3 an1 an1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa4 vout an1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa5 atail vbias vss vss sky130_fd_pr__nfet_01v8 L=100 W=0.42 nf=1
+
+XCavg vout vss sky130_fd_pr__cap_mim_m3_1 W=224 L=224
+
+.ends slow_avg_v4
+
+
+* ============================================================
+* STAGE 8: Peak Level Tracker
+* ============================================================
+* Tracks recent QRS envelope peaks with ~1.4s decay toward vbias.
+*
+* Comparator: mwi_in (diode, W=4) vs peak_level (mirror, W=4)
+*   When mwi_in > peak_level: pk_comp RISES → pass gate ON
+*
+* Discharge: OTA bias restore toward vbias (NOT simple NFET to VSS).
+*   Tail L=100 W=0.42 → ~5pA, C=100pF → tau ≈ 1.4s
+*   This prevents peak_level from draining below mwi_out DC,
+*   which would keep the pass gate permanently open.
+* ============================================================
+
+.subckt peak_tracker_v4 mwi_in peak_level vdd vss vbias
+
+XMpc1 pcn1 mwi_in pctail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMpc2 pk_comp peak_level pctail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMpc3 pcn1 pcn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMpc4 pk_comp pcn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMpc5 pctail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+XMpkpass mwi_in pk_comp peak_level vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XCpkhold peak_level vss sky130_fd_pr__cap_mim_m3_1 W=105 L=105
+
+* Discharge OTA: pulls peak_level toward vbias
+* Tail L=100 W=0.42 → ~5pA, C=22pF → tau ≈ 300ms
+XMpd1 pdn1 vbias pdtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMpd2 peak_level peak_level pdtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMpd3 pdn1 pdn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMpd4 peak_level pdn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMpd5 pdtail vbias vss vss sky130_fd_pr__nfet_01v8 L=100 W=0.42 nf=1
+
+.ends peak_tracker_v4
+
+
+* ============================================================
+* STAGE 9: Adaptive Threshold (0.40*avg + 0.60*peak)
+* ============================================================
+* Weighted OTA summer. OTA_A tail W=0.42 (1x weight for slow_avg),
+* OTA_B tail W=0.63 (1.5x weight for peak_level).
+* Ratio: 1.0/(1.0+1.5) = 40% from slow_avg, 60% from peak_level.
+* Higher peak_level weight → threshold tracks recent QRS energy
+* → better rejection of noise spikes and T-waves.
+* ============================================================
+
+.subckt adaptive_thr_v4 slow_avg peak_level thr_out vdd vss vbias
+
+XMa1 an1_a slow_avg atail_a vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa2 thr_out thr_out atail_a vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa3 an1_a an1_a vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa4 thr_out an1_a vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa5 atail_a vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+XMb1 bn1_b peak_level btail_b vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMb2 thr_out thr_out btail_b vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMb3 bn1_b bn1_b vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMb4 thr_out bn1_b vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMb5 btail_b vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.63 nf=1
+
+XCthr thr_out vss sky130_fd_pr__cap_mim_m3_1 W=158 L=158
+
+.ends adaptive_thr_v4
+
+
+* ============================================================
+* STAGE 10: Threshold Comparator + Digital Buffer
+* ============================================================
+
+.subckt thr_comp_v4 mwi_out threshold thr_out vdd vss vbias
+
+XM1 net1 threshold tail1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XM2 stg1_out mwi_out tail1 vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XM3 net1 net1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XM4 stg1_out net1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XM5 tail1 vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+XM6 thr_out stg1_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
+XM7 thr_out stg1_out vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.ends thr_comp_v4
+
+
+* ============================================================
+* AND2 GATE (NAND + INV)
+* ============================================================
+
+.subckt and2_gate_v4 in_a in_b out vdd vss
+
+XMp1 nand_out in_a vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMp2 nand_out in_b vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn1 nand_out in_a nand_mid vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+XMn2 nand_mid in_b vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+XMp3 out nand_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn3 out nand_out vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+
+.ends and2_gate_v4
+
+
+* ============================================================
+* STAGE 11: Refractory Hold (~350ms)
+* ============================================================
+
+.subckt refractory_hold input output vdd vss vbias
+
+XMp_inv inv_out input vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_inv inv_out input vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+
+XMpre hold_cap inv_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMdis hold_cap vbias vss vss sky130_fd_pr__nfet_01v8 L=60 W=0.42 nf=1
+XChold hold_cap vss sky130_fd_pr__cap_mim_m3_1 W=63 L=63
+
+XMp_b1 buf_mid hold_cap vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_b1 buf_mid hold_cap vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMp_b2 output buf_mid vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_b2 output buf_mid vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+
+.ends refractory_hold
+
+
+* ============================================================
+* TOP-LEVEL: rpeak_detector_v4
+* ============================================================
+* Full signal chain:
+*   ECG → HPF(5Hz) → LPF(15Hz) → d/dt → half-rect → MWI
+*   MWI → noise gate + threshold comp → AND → refractory hold
+*
+* Probe nodes: v_hpf, v_bpf, diff_out, rect_out, mwi_out,
+*              slow_avg, peak_level, adapt_thr,
+*              noise_gate_out, thr_gate_out
+* ============================================================
+
+.subckt rpeak_detector_v4 ecg_in rpeak_out vdd vss vbias
++ v_hpf v_bpf diff_out rect_out mwi_out
++ slow_avg peak_level adapt_thr noise_gate_out thr_gate_out
+
+* Stage 1: HPF at ~5Hz
+Xhpf ecg_in v_hpf vdd vss vbias hpf_5hz
+
+* Stage 2: LPF at ~15Hz
+Xlpf v_hpf v_bpf vdd vss vbias lpf_15hz
+
+* Stage 3: Differentiator
+Xdiff v_bpf diff_out vdd vss vbias differentiator
+
+* Stage 4: Half-wave rectifier (leaky peak detector)
+Xrect diff_out rect_out vdd vss vbias half_rect
+
+* Stage 5: Moving-window integrator (150ms)
+Xmwi rect_out mwi_out vdd vss vbias mwi_150ms
+
+* Stage 6: Slow average (1.5s) — tracks MWI baseline for accurate noise gating
+Xsavg mwi_out slow_avg vdd vss vbias slow_avg_v4
+
+* Stage 7: Noise gate
+Xngate mwi_out slow_avg noise_gate_out vdd vss vbias noise_gate_v4
+
+* Stage 8: Peak level tracker
+Xpktrk mwi_out peak_level vdd vss vbias peak_tracker_v4
+
+* Stage 9: Adaptive threshold
+Xadthr slow_avg peak_level adapt_thr vdd vss vbias adaptive_thr_v4
+
+* Stage 10: Threshold comparator
+Xtcomp mwi_out adapt_thr thr_gate_out vdd vss vbias thr_comp_v4
+
+* Stage 11: AND gate
+Xand noise_gate_out thr_gate_out rpeak_raw vdd vss and2_gate_v4
+
+* Stage 12: Refractory hold (200ms)
+Xhold rpeak_raw rpeak_out vdd vss vbias refractory_hold
+
+.ends rpeak_detector_v4

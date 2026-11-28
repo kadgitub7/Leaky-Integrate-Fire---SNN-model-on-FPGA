@@ -1,0 +1,63 @@
+* Debug: Test OTA core + pseudo-resistor behavior at 0.9V
+* Test 1: OTA as unity-gain buffer
+* Test 2: Pseudo-resistor IV curve
+
+.lib C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice tt
+.include C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rpeak_detector_v4.spice
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+
+Vdd vdd 0 0.9
+Vss vss 0 0.0
+Vbias vbias 0 0.40
+
+* === Test 1: OTA as follower ===
+* Input: 0.3V → ramp to 0.5V → back to 0.3V
+Vin ota_in 0 pwl(0 0.3 0.1 0.3 0.3 0.5 0.5 0.5 0.7 0.3 1.0 0.3)
+Xota1 ota_in ota_out ota_out vbias vdd vss ota_core
+Cout ota_out 0 10p
+
+* === Test 2: Pseudo-resistor at 0.9V ===
+* Measure current vs voltage across pseudo-res
+* Sweep Va from 0.3 to 0.5, Vb fixed at 0.4
+Vpr_a pr_a 0 pwl(0 0.3 0.5 0.5 1.0 0.3)
+Vpr_b pr_b 0 0.4
+Xpr1 pr_a pr_b vdd pseudo_res
+
+* === Test 3: Standard PFET pseudo-res (non-HVT) ===
+Vpr2_a pr2_a 0 pwl(0 0.3 0.5 0.5 1.0 0.3)
+XM_S1 pr2_a pr2_b pr2_b vdd sky130_fd_pr__pfet_01v8 L=4 W=0.5 nf=1
+XM_S2 pr2_b pr2_a pr2_a vdd sky130_fd_pr__pfet_01v8 L=4 W=0.5 nf=1
+Vpr2_b pr2_b 0 0.4
+
+* === Test 4: Capacitive-feedback LNA with OTA DC restore ===
+* Instead of pseudo-res, use weak OTA for DC feedback
+Vlna_in lna_in 0 pwl(0 0.3 0.1 0.3 0.3 0.5 0.5 0.5 0.7 0.3 1.0 0.3)
+XC_IN2 lna_in n_inv2 sky130_fd_pr__cap_mim_m3_1 W=122 L=122
+XC_FB2 n_inv2 lna_out2 sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+* DC bias OTA: holds n_inv2 at vbias
+XMdc1 dcn1 vbias dctail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMdc2 n_inv2 n_inv2 dctail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMdc3 dcn1 dcn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMdc4 n_inv2 dcn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMdc5 dctail vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+* Gain OTA
+Xota_lna vbias n_inv2 lna_out2 vbias vdd vss ota_core
+* LPF cap
+XC_LP2 lna_out2 vss sky130_fd_pr__cap_mim_m3_1 W=316 L=316
+
+.ic v(ota_out)=0.3
+.ic v(n_inv2)=0.4
+.ic v(lna_out2)=0.4
+
+.save v(ota_in) v(ota_out) v(lna_in) v(lna_out2) v(n_inv2)
++ i(Vpr_a) i(Vpr2_a)
+
+.tran 0.05m 1.0 uic
+
+.control
+run
+wrdata scratchpad/_v4_debug_data.txt v(ota_in) v(ota_out) v(lna_in) v(lna_out2) v(n_inv2) i(Vpr_a) i(Vpr2_a)
+quit
+.endc
+
+.end

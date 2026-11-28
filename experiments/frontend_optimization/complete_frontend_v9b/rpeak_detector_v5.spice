@@ -1,0 +1,246 @@
+* ============================================================================
+* R-PEAK DETECTOR V5 — Hybrid Pan-Tompkins with Gilbert Cell Squarer (SKY130)
+* ============================================================================
+* Architecture: ECG → HPF → LPF → d/dt → Gilbert_Sq+MWI → Noise_Gate → Refract → Out
+*
+* Key improvement over v4: Gilbert cell voltage squarer replaces
+* linear half-wave rectifier + separate MWI.
+*   - Full-wave: responds to both + and - derivatives
+*   - Quadratic SNR: I_out ∝ V_diff² for small signals (tanh² for large)
+*   - Projected 40:1 SNR vs v4's ~4:1 → solves record 108 noise FPs
+*
+* Removed from v4 (non-functional): peak_tracker, adaptive_thr,
+* thr_comparator, AND gate.  Paper proves fixed threshold + refractory
+* is sufficient for >99.5% performance.
+*
+* All blocks: SKY130, VDD=0.9V, subthreshold, proven topologies.
+* VCM = vbias = 0.40V
+* ============================================================================
+
+
+* ============================================================
+* STAGE 1: High-Pass Filter (~5Hz)
+* ============================================================
+* AC coupling: series MIM cap passes signal, OTA slowly restores
+* DC to vbias. HPF corner = gm_restore / (2pi * C_ac)
+*
+* C_ac = 50pF (158x158 MIM)
+* Tail L=10 W=0.42 → ~80pA → gm ≈ 1.2nS
+* f_HP = 1.2nS / (2pi * 50pF) ≈ 3.8Hz
+* ============================================================
+
+.subckt hpf_5hz vin vout vdd vss vbias
+
+XCac vin vout sky130_fd_pr__cap_mim_m3_1 W=158 L=158
+
+XMh1 hn1 vbias htail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMh2 vout vout htail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMh3 hn1 hn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMh4 vout hn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMh5 htail vbias vss vss sky130_fd_pr__nfet_01v8 L=10 W=0.42 nf=1
+
+XChload vout vss sky130_fd_pr__cap_mim_m3_1 W=50 L=50
+
+.ends hpf_5hz
+
+
+* ============================================================
+* STAGE 2: Low-Pass Filter (~25Hz)
+* ============================================================
+
+.subckt lpf_15hz vin vout vdd vss vbias
+
+XMl1 ln1 vin ltail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMl2 vout vout ltail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMl3 ln1 ln1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMl4 vout ln1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMl5 ltail vbias vss vss sky130_fd_pr__nfet_01v8 L=4 W=0.84 nf=1
+
+XClout vout vss sky130_fd_pr__cap_mim_m3_1 W=224 L=224
+
+.ends lpf_15hz
+
+
+* ============================================================
+* STAGE 3: Capacitive Differentiator
+* ============================================================
+
+.subckt differentiator vin diff_out vdd vss vbias
+
+XCdiff vin diff_out sky130_fd_pr__cap_mim_m3_1 W=158 L=158
+
+XMd1 dn1 vbias dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd2 diff_out diff_out dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd3 dn1 dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd4 diff_out dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd5 dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+
+XCdload diff_out vss sky130_fd_pr__cap_mim_m3_1 W=32 L=32
+
+.ends differentiator
+
+
+* ============================================================
+* STAGE 4: Gilbert Cell Voltage Squarer + MWI Integrator
+* ============================================================
+* Core innovation from 1.2nW Pan-Tompkins paper, adapted to
+* voltage domain for compatibility with our BPF chain.
+*
+* Gilbert cell configured as self-multiplier (same input to
+* both upper and lower diff pairs). Output current:
+*   I_net = I_tail * tanh²( (diff_in - vbias) / (2*n*Vt) )
+*
+* For small signals: I_net ≈ I_tail * (V_diff / (2*n*Vt))²
+*   → TRUE QUADRATIC squaring, full-wave
+*
+* The net current charges a 10pF MWI cap at the output.
+* A discharge OTA provides leaky integration (tau ≈ 135ms).
+*
+* Projected performance:
+*   QRS (20mV diff peak): I_sq ≈ 35pA → 69mV MWI peak
+*   Noise (2mV diff peak): I_sq ≈ 0.35pA → 1.75mV MWI peak
+*   SNR ≈ 40:1 (vs v4's 4:1)
+* ============================================================
+
+.subckt gilbert_sq_mwi diff_in mwi_out vdd vss vbias
+
+* --- Lower differential pair ---
+* Splits tail current based on (diff_in - vbias)
+XMt1 lp1 diff_in ltail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMt2 lp2 vbias ltail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMt_tail ltail vbias vss vss sky130_fd_pr__nfet_01v8 L=20 W=0.42 nf=1
+
+* --- Upper pair 1 (sources at lp1 = left branch) ---
+* U1 drain→sq_n, U2 drain→mwi_out
+XMu1 sq_n diff_in lp1 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMu2 mwi_out vbias lp1 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* --- Upper pair 2 (sources at lp2 = right branch) ---
+* U3 drain→mwi_out (cross), U4 drain→sq_n (cross)
+XMu3 mwi_out diff_in lp2 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMu4 sq_n vbias lp2 vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+
+* --- PFET current mirror load ---
+* Diode at sq_n, mirror at mwi_out
+* Net current at mwi_out = I_mirror - I_direct = I_tail * tanh²(...)
+XMp1 sq_n sq_n vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMp2 mwi_out sq_n vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+
+* --- MWI integration capacitor (10pF) ---
+XCmwi mwi_out vss sky130_fd_pr__cap_mim_m3_1 W=71 L=71
+
+* --- Discharge OTA: leaky integration toward vbias ---
+* Tail L=100 W=0.42 → ~5pA → gm ≈ 74pS
+* tau = C/gm = 10pF / 74pS ≈ 135ms
+XMd1 dn1 vbias dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd2 mwi_out mwi_out dtail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMd3 dn1 dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd4 mwi_out dn1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMd5 dtail vbias vss vss sky130_fd_pr__nfet_01v8 L=100 W=0.42 nf=1
+
+.ends gilbert_sq_mwi
+
+
+* ============================================================
+* STAGE 5: Slow Average (tau = 1.5s)
+* ============================================================
+* Tracks MWI baseline for noise gating.
+
+.subckt slow_avg_v5 vin vout vdd vss vbias
+
+XMa1 an1 vin atail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa2 vout vout atail vss sky130_fd_pr__nfet_01v8 L=2 W=4 nf=1
+XMa3 an1 an1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa4 vout an1 vdd vdd sky130_fd_pr__pfet_01v8 L=2 W=4 nf=1
+XMa5 atail vbias vss vss sky130_fd_pr__nfet_01v8 L=100 W=0.42 nf=1
+
+XCavg vout vss sky130_fd_pr__cap_mim_m3_1 W=224 L=224
+
+.ends slow_avg_v5
+
+
+* ============================================================
+* STAGE 6: Noise Gate (mwi > slow_avg + offset)
+* ============================================================
+* Comparator with W-mismatch offset.
+* offset = nVt * ln(W_diode/W_mirror) = 34 * ln(2.3/2.0) = 4.7mV
+*
+* With Gilbert squarer (I_tail=50pA):
+*   QRS MWI peaks: 6-36mV above baseline
+*   Noise peaks:   3-4mV above baseline
+*   4.7mV offset separates signal from noise with margin.
+
+.subckt noise_gate_v5 mwi_out slow_avg gate_out vdd vss vbias
+
+XMng1 ng_n1 slow_avg ng_tail vss sky130_fd_pr__nfet_01v8 L=4 W=2.3 nf=1
+XMng2 ng_out mwi_out ng_tail vss sky130_fd_pr__nfet_01v8 L=4 W=2 nf=1
+XMng3 ng_n1 ng_n1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMng4 ng_out ng_n1 vdd vdd sky130_fd_pr__pfet_01v8 L=4 W=4 nf=1
+XMng5 ng_tail vbias vss vss sky130_fd_pr__nfet_01v8 L=8 W=0.42 nf=1
+
+XMng6 gate_out ng_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=4 nf=1
+XMng7 gate_out ng_out vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=2 nf=1
+
+.ends noise_gate_v5
+
+
+* ============================================================
+* STAGE 7: Refractory Hold (~350ms)
+* ============================================================
+* Prevents double-detection of T-waves.
+* L=60 discharge → ~15pA, 8pF cap → tau ≈ 533ms, effective hold ~350ms
+
+.subckt refractory_hold input output vdd vss vbias
+
+XMp_inv inv_out input vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_inv inv_out input vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+
+XMpre hold_cap inv_out vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4 nf=1
+XMdis hold_cap vbias vss vss sky130_fd_pr__nfet_01v8 L=60 W=0.42 nf=1
+XChold hold_cap vss sky130_fd_pr__cap_mim_m3_1 W=63 L=63
+
+XMp_b1 buf_mid hold_cap vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_b1 buf_mid hold_cap vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+XMp_b2 output buf_mid vdd vdd sky130_fd_pr__pfet_01v8 L=0.5 W=2 nf=1
+XMn_b2 output buf_mid vss vss sky130_fd_pr__nfet_01v8 L=0.5 W=1 nf=1
+
+.ends refractory_hold
+
+
+* ============================================================
+* TOP-LEVEL: rpeak_detector_v5
+* ============================================================
+* Signal chain (8 stages, down from v4's 12):
+*   ECG → HPF(5Hz) → LPF(15Hz) → d/dt → Gilbert_Sq+MWI
+*   → Noise_Gate ← Slow_Avg
+*   → Refractory_Hold → Output
+*
+* Probe nodes: v_hpf, v_bpf, diff_out, mwi_out, slow_avg,
+*              noise_gate_out
+* ============================================================
+
+.subckt rpeak_detector_v5 ecg_in rpeak_out vdd vss vbias
++ v_hpf v_bpf diff_out mwi_out slow_avg noise_gate_out
+
+* Stage 1: HPF at ~5Hz
+Xhpf ecg_in v_hpf vdd vss vbias hpf_5hz
+
+* Stage 2: LPF at ~15Hz
+Xlpf v_hpf v_bpf vdd vss vbias lpf_15hz
+
+* Stage 3: Differentiator
+Xdiff v_bpf diff_out vdd vss vbias differentiator
+
+* Stage 4: Gilbert cell squarer + MWI
+Xsqmwi diff_out mwi_out vdd vss vbias gilbert_sq_mwi
+
+* Stage 5: Slow average (1.5s) — tracks MWI baseline
+Xsavg mwi_out slow_avg vdd vss vbias slow_avg_v5
+
+* Stage 6: Noise gate — fires when mwi > slow_avg + offset
+Xngate mwi_out slow_avg noise_gate_out vdd vss vbias noise_gate_v5
+
+* Stage 7: Refractory hold (350ms)
+Xhold noise_gate_out rpeak_out vdd vss vbias refractory_hold
+
+.ends rpeak_detector_v5

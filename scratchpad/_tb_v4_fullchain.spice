@@ -1,0 +1,52 @@
+* V4 Full Detection Chain Test
+* Tests complete rpeak_detector_v4 with synthetic ECG (3 beats)
+* Checks: does rpeak_out produce 3 pulses at the correct times?
+
+.lib C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice tt
+.include C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rpeak_detector_v4.spice
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+
+Vdd vdd 0 0.9
+Vss vss 0 0.0
+Vbias vbias 0 0.40
+
+* Synthetic ECG: 3 triangular QRS at 0.5s, 1.0s, 1.5s
+* Baseline 0.30V, QRS peak 0.50V, 15ms up / 20ms down
+Vecg ecg_in 0 pwl(
++ 0.0000 0.300 0.4849 0.300
++ 0.4850 0.300 0.5000 0.500 0.5200 0.300
++ 0.5201 0.300 0.9849 0.300
++ 0.9850 0.300 1.0000 0.500 1.0200 0.300
++ 1.0201 0.300 1.4849 0.300
++ 1.4850 0.300 1.5000 0.500 1.5200 0.300
++ 1.5201 0.300 2.500 0.300
++ )
+
+* Instantiate full v4 detector
+Xdet ecg_in rpeak_out vdd vss vbias
++ v_hpf v_bpf diff_out rect_out mwi_out
++ slow_avg peak_level adapt_thr noise_gate_out thr_gate_out
++ rpeak_detector_v4
+
+* Initial conditions
+.ic v(v_hpf)=0.30
+.ic v(v_bpf)=0.30
+.ic v(diff_out)=0.40
+.ic v(rect_out)=0.40
+.ic v(mwi_out)=0.40
+.ic v(slow_avg)=0.40
+.ic v(peak_level)=0.40
+.ic v(adapt_thr)=0.40
+
+.save v(ecg_in) v(v_hpf) v(v_bpf) v(diff_out) v(rect_out) v(mwi_out)
++ v(slow_avg) v(peak_level) v(adapt_thr) v(noise_gate_out) v(thr_gate_out) v(rpeak_out)
+
+.tran 0.1m 2.5 uic
+
+.control
+run
+wrdata C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/scratchpad/_v4_fullchain_data.txt v(ecg_in) v(v_hpf) v(v_bpf) v(diff_out) v(rect_out) v(mwi_out) v(slow_avg) v(peak_level) v(adapt_thr) v(noise_gate_out) v(thr_gate_out) v(rpeak_out)
+quit
+.endc
+
+.end

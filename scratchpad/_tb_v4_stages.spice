@@ -1,0 +1,56 @@
+* V4 Stage-by-Stage Test: HPF → LPF → Differentiator → Half-Rect → MWI
+* Synthetic ECG: 3 triangular QRS at 0.5s, 1.0s, 1.5s
+* QRS: 200mV peak on 0.30V baseline, 15ms up / 20ms down
+
+.lib C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice tt
+.include C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rpeak_detector_v4.spice
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+
+Vdd vdd 0 0.9
+Vss vss 0 0.0
+Vbias vbias 0 0.40
+
+* Synthetic ECG
+Vecg ecg_in 0 pwl(
++ 0.0000 0.300 0.4849 0.300
++ 0.4850 0.300 0.5000 0.500 0.5200 0.300
++ 0.5201 0.300 0.9849 0.300
++ 0.9850 0.300 1.0000 0.500 1.0200 0.300
++ 1.0201 0.300 1.4849 0.300
++ 1.4850 0.300 1.5000 0.500 1.5200 0.300
++ 1.5201 0.300 2.500 0.300
++ )
+
+* Stage 1: HPF
+Xhpf ecg_in v_hpf vdd vss vbias hpf_5hz
+
+* Stage 2: LPF
+Xlpf v_hpf v_bpf vdd vss vbias lpf_15hz
+
+* Stage 3: Differentiator
+Xdiff v_bpf diff_out vdd vss vbias differentiator
+
+* Stage 4: Half-wave rectifier
+Xrect diff_out rect_out vdd vss vbias half_rect
+
+* Stage 5: MWI
+Xmwi rect_out mwi_out vdd vss vbias mwi_150ms
+
+.ic v(v_hpf)=0.30
+.ic v(v_bpf)=0.30
+.ic v(diff_out)=0.40
+.ic v(rect_out)=0.40
+.ic v(mwi_out)=0.40
+
+.save v(ecg_in) v(v_hpf) v(v_bpf) v(diff_out) v(rect_out) v(mwi_out)
++ v(xrect.rcomp) v(xrect.rn1)
+
+.tran 0.1m 2.5 uic
+
+.control
+run
+wrdata C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/scratchpad/_v4_stages_data.txt v(ecg_in) v(v_hpf) v(v_bpf) v(diff_out) v(rect_out) v(mwi_out) v(xrect.rcomp) v(xrect.rn1)
+quit
+.endc
+
+.end

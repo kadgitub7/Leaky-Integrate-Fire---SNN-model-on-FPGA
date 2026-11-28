@@ -1,0 +1,46 @@
+* V4 Pan-Tompkins Detector — Synthetic ECG Test
+* 3 triangular QRS beats at 0.5s, 1.0s, 1.5s
+* QRS: 200mV peak, 15ms upslope, 20ms downslope
+
+.lib C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/ngspice_frontend/sky130_minimal.lib.spice tt
+.include C:/Users/kadhi/OneDrive/Desktop/amux/verilogLearning/Leaky-Integrate-Fire---SNN-model-on-FPGA/experiments/frontend_optimization/complete_frontend_v9b/rpeak_detector_v4.spice
+.option scale=1.0u method=gear reltol=0.01 gmin=1e-15
+
+Vdd vdd 0 0.9
+Vss vss 0 0.0
+Vbias vbias 0 0.40
+
+* Synthetic ECG: flat 0.30V baseline + 3 QRS beats (200mV peak)
+Vecg ecg_in 0 pwl(
++ 0.0000 0.300 0.4849 0.300
++ 0.4850 0.300 0.5000 0.500 0.5200 0.300
++ 0.5201 0.300 0.9849 0.300
++ 0.9850 0.300 1.0000 0.500 1.0200 0.300
++ 1.0201 0.300 1.4849 0.300
++ 1.4850 0.300 1.5000 0.500 1.5200 0.300
++ 1.5201 0.300 2.000 0.300
++ )
+
+* Instantiate v4 detector
+Xdet ecg_in rpeak_out vdd vss vbias
++ bpf_diff_out sq_out mwi_out vthresh
++ rpeak_detector_v4
+
+* ICs: start all analog nodes at VCM=0.4V
+.ic v(bpf_diff_out)=0.4000
+.ic v(sq_out)=0.4000
+.ic v(mwi_out)=0.4000
+.ic v(vthresh)=0.4000
+
+* Save key signals through the chain
+.save v(ecg_in) v(bpf_diff_out) v(sq_out) v(mwi_out) v(vthresh) v(rpeak_out)
+
+.tran 0.1m 2.0 uic
+
+.control
+run
+wrdata scratchpad/_v4_pt_data.txt v(ecg_in) v(bpf_diff_out) v(sq_out) v(mwi_out) v(vthresh) v(rpeak_out)
+quit
+.endc
+
+.end
